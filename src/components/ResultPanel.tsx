@@ -28,9 +28,11 @@ interface ResultPanelProps {
   region: RegionStats;
   trailHref: string;
   onNext?: () => void;
+  /** Район пройден — показать победную сцену */
+  onFinale?: () => void;
 }
 
-export function ResultPanel({ outcome, level, code, spell, region, trailHref, onNext }: ResultPanelProps) {
+export function ResultPanel({ outcome, level, code, spell, region, trailHref, onNext, onFinale }: ResultPanelProps) {
   if (outcome.kind === 'success') {
     return (
       <section className="result result--success px-panel" aria-live="polite">
@@ -71,9 +73,16 @@ export function ResultPanel({ outcome, level, code, spell, region, trailHref, on
                 ? `Район «${region.title}» пройден! Звёзд собрано: ${region.stars} из ${region.maxStars}.`
                 : `Это последний уровень района. Пройдено уровней: ${region.completed} из ${region.total} — вернись к пропущенным.`}
             </p>
-            <a className="button button--cast" href={trailHref}>
-              ← К тропе
-            </a>
+            <div className="result__buttons">
+              <a className="button button--cast" href={trailHref}>
+                ← К тропе
+              </a>
+              {onFinale && (
+                <button type="button" className="button button--ghost" onClick={onFinale}>
+                  Смотреть финал
+                </button>
+              )}
+            </div>
           </>
         )}
       </section>

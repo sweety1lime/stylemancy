@@ -9,12 +9,15 @@ import { rankFor, totalXp } from '../game/ranks';
 import { learnedSpells, pickQuestion, reviewIsDue, skipReview, type ReviewQuestion } from '../game/review';
 import { SPELLS } from '../game/spells';
 import { stats } from '../game/stats';
+import { isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
+import { findLevel } from '../levels';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { ResultPanel, type Outcome, type RegionStats } from './ResultPanel';
 import { Portrait } from './Portrait';
 import { ReviewCard } from './ReviewCard';
 import { RichText } from './RichText';
 import { Scene, type SceneHandle } from './Scene';
+import { StoryScene } from './StoryScene';
 
 interface LevelScreenProps {
   level: Level;
@@ -31,6 +34,10 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   const [statuses, setStatuses] = useState<ItemStatus[]>([]);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [review, setReview] = useState<{ question: ReviewQuestion; seed: number } | null>(null);
+  const [story, setStory] = useState<OpenStory | null>(null);
+  const place = useMemo(() => findLevel(level.id), [level.id]);
+  // Район пройден целиком — можно посмотреть победную сцену
+  const outro = place && region.completed === region.total ? storyOf(place.region, 'outro') : null;
   const codeRef = useRef(code);
   const editorRef = useRef<CodeEditorHandle>(null);
   const sceneRef = useRef<SceneHandle>(null);
@@ -69,6 +76,9 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
       const xpBefore = xp();
       progress.complete(level.id, score.stars);
       found.push(...recordSuccess({ level, code: current, hintsUsed, firstTime }));
+      // Последний уровень района пройден — победная сцена (один раз сама, потом по кнопке)
+      const finale = place && place.region.levels.every((item) => progress.get(item.id).completed) ? storyOf(place.region, 'outro') : null;
+      if (finale && !isSeen(finale.key)) setStory(finale);
       // Раз в два новых уровня — вопрос по заклинанию, которое дольше всех не вспоминали
       if (firstTime && reviewIsDue()) {
         const question = pickQuestion(learnedSpells(progress.snapshot()), level.learns);
@@ -213,6 +223,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
             region={region}
             trailHref={trailHref}
             onNext={onNext}
+            onFinale={outro ? () => setStory(outro) : undefined}
           />
         )}
 
@@ -225,6 +236,18 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
             onSkip={() => {
               skipReview();
               setReview(null);
+            }}
+          />
+        )}
+
+        {story && (
+          <StoryScene
+            title={story.title}
+            frames={story.frames}
+            finishLabel={story.finishLabel}
+            onClose={() => {
+              markSeen(story.key);
+              setStory(null);
             }}
           />
         )}

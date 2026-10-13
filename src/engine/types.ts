@@ -46,6 +46,15 @@ export interface Npc {
   portrait: string;
 }
 
+/** Кадр сценки: готовая пиксельная картинка и подпись. */
+export interface StoryFrame {
+  art: 'kingdom' | 'villain' | 'fallen' | 'mentor' | 'crown';
+  /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
+  speaker?: string;
+  name?: string;
+  text: string;
+}
+
 export interface RegionDef {
   id: string;
   title: string;
@@ -57,6 +66,8 @@ export interface RegionDef {
   allow?: string[];
   /** Начало сообщения о неразрешённом свойстве */
   allowMessage?: string;
+  /** Сценки: пролог при первом входе и победная сцена после испытания */
+  story?: { intro: StoryFrame[]; outro: StoryFrame[] };
   levels: LevelDef[];
 }
 

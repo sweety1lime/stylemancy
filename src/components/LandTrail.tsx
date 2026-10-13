@@ -1,15 +1,32 @@
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useProgress } from '../game/progress';
 import { hrefFor } from '../game/router';
+import { isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
 import type { Land } from '../levels';
 import { EMBLEMS } from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
 import { Stars } from './Stars';
+import { StoryScene } from './StoryScene';
+
+/** Пролог первого района, который ещё не смотрели. */
+function firstUnseenIntro(land: Land): OpenStory | null {
+  for (const region of land.regions) {
+    const intro = storyOf(region, 'intro');
+    if (intro && !isSeen(intro.key)) return intro;
+  }
+  return null;
+}
 
 /** Тропа земли: районы и их уровни извилистой дорожкой. */
 export function LandTrail({ land }: { land: Land }) {
   const progress = useProgress();
+  const [story, setStory] = useState<OpenStory | null>(() => firstUnseenIntro(land));
+
+  function closeStory() {
+    if (story) markSeen(story.key);
+    setStory(null);
+  }
 
   return (
     <main className="trail">
@@ -25,6 +42,8 @@ export function LandTrail({ land }: { land: Land }) {
 
       {land.regions.map((region) => {
         const firstUnsolved = region.levels.findIndex((level) => !progress[level.id]?.completed);
+        const intro = storyOf(region, 'intro');
+        const outro = firstUnsolved === -1 ? storyOf(region, 'outro') : null;
         const stars = region.levels.reduce((sum, level) => sum + (progress[level.id]?.stars ?? 0), 0);
         return (
           <section key={region.id} className="district px-panel">
@@ -35,6 +54,18 @@ export function LandTrail({ land }: { land: Land }) {
                 <p className="district__meta">
                   {region.topic} · {region.npc.name} · ★ {stars} из {region.levels.length * 3}
                 </p>
+              </div>
+              <div className="district__story">
+                {intro && (
+                  <button type="button" className="text-button" onClick={() => setStory(intro)}>
+                    Пролог
+                  </button>
+                )}
+                {outro && (
+                  <button type="button" className="text-button" onClick={() => setStory(outro)}>
+                    Эпилог
+                  </button>
+                )}
               </div>
             </div>
             <ol className="path">
@@ -80,6 +111,10 @@ export function LandTrail({ land }: { land: Land }) {
           <p className="district__meta">В тумане — откроется позже</p>
         </section>
       ))}
+
+      {story && (
+        <StoryScene title={story.title} frames={story.frames} finishLabel={story.finishLabel} onClose={closeStory} />
+      )}
     </main>
   );
 }

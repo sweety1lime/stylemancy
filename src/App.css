@@ -387,6 +387,12 @@ a.land:hover .land__art {
   gap: 14px;
 }
 
+.district__story {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
 .district__meta {
   margin-top: 4px;
   color: var(--muted);
@@ -906,6 +912,12 @@ a.land:hover .land__art {
   justify-self: start;
 }
 
+.result__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
 .spell {
   display: grid;
   gap: 4px;
@@ -990,10 +1002,11 @@ a.land:hover .land__art {
 
 /* ——— Достижения ——— */
 
+/* Сверху справа: так уведомления не закрывают кнопки внизу экрана и в сценках */
 .toasts {
   position: fixed;
+  top: 16px;
   right: 16px;
-  bottom: 16px;
   z-index: 50;
   display: grid;
   gap: 10px;
@@ -1350,6 +1363,231 @@ a.land:hover .land__art {
 
 .review__skip {
   justify-self: start;
+}
+
+/* ——— Сценки ——— */
+
+.story {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(7, 4, 15, 0.82);
+}
+
+/* Ширина зависит и от высоты экрана: кадр 16:9 плюс подпись должны поместиться целиком */
+.story__window {
+  display: grid;
+  gap: 14px;
+  width: min(760px, 100%, calc((100vh - 290px) * 1.78 + 40px));
+  min-width: min(320px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 16px 18px;
+  animation: rise 0.25s steps(3, end);
+}
+
+.story__title {
+  color: var(--violet);
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.story__caption {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 96px;
+}
+
+.story__name {
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: 18px;
+}
+
+.story__text {
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.story__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+/* Кадр сценки: размеры в долях ширины кадра (cqw), поэтому он масштабируется целиком */
+.story-art {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  container-type: inline-size;
+  background-color: #120b2e;
+  background-image:
+    var(--sky-tile, none),
+    linear-gradient(180deg, #0d0821 0 25%, #140c33 25% 50%, #1c1145 50% 75%, #26175a 75%);
+  background-size:
+    160px 120px,
+    100% 100%;
+  box-shadow: inset 0 0 0 3px var(--frame);
+}
+
+.story-art img {
+  position: absolute;
+  height: auto;
+}
+
+.sa-rock {
+  left: 22%;
+  bottom: 8%;
+  width: 56cqw;
+}
+
+.sa-rock--tilted {
+  transform: rotate(-7deg);
+  filter: grayscale(0.8) brightness(0.65);
+}
+
+.sa-moon {
+  top: 10%;
+  right: 8%;
+  width: 8cqw;
+}
+
+.sa-row,
+.sa-crown {
+  position: absolute;
+  right: 0;
+  bottom: 30%;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3cqw;
+}
+
+.sa-row img,
+.sa-crown img,
+.sa-stack img {
+  position: static;
+  width: 9cqw;
+}
+
+.sa-gem {
+  animation: bob 1.6s steps(1, end) infinite;
+}
+
+.sa-gem:nth-child(2n) {
+  animation-delay: -0.5s;
+}
+
+.sa-gem:nth-child(3n) {
+  animation-delay: -1.1s;
+}
+
+.sa-crown img {
+  filter: drop-shadow(0 0 1cqw rgba(246, 196, 83, 0.6));
+}
+
+.sa-crown img:nth-child(3) {
+  margin-bottom: 9cqw;
+  filter: drop-shadow(0 0 2cqw #60a5fa);
+}
+
+.sa-stack {
+  position: absolute;
+  bottom: 20%;
+  left: 36%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: rotate(12deg);
+  filter: grayscale(0.85) brightness(0.7);
+}
+
+.sa-portrait {
+  top: 50%;
+  left: 50%;
+  width: 32cqw;
+  transform: translate(-50%, -50%);
+}
+
+.story-art--villain {
+  background-image: linear-gradient(180deg, #1c1c24 0 25%, #23232c 25% 50%, #2a2a34 50% 75%, #32323d 75%);
+}
+
+.sa-default-text {
+  position: absolute;
+  color: #2563eb;
+  font: 3.4cqw/1 "Times New Roman", Times, serif;
+  text-decoration: underline;
+  opacity: 0.75;
+}
+
+.sa-default-text--1 {
+  top: 12%;
+  left: 5%;
+  transform: rotate(-8deg);
+}
+
+.sa-default-text--2 {
+  right: 6%;
+  bottom: 14%;
+  transform: rotate(6deg);
+}
+
+.sa-default-text--3 {
+  bottom: 24%;
+  left: 7%;
+  color: #8b8b99;
+  text-decoration: none;
+  transform: rotate(4deg);
+}
+
+.sa-spark {
+  width: 5cqw;
+  animation: twinkle 1.2s steps(1, end) infinite;
+}
+
+.sa-spark--1 {
+  top: 18%;
+  left: 18%;
+}
+
+.sa-spark--2 {
+  top: 26%;
+  right: 20%;
+  animation-delay: -0.4s;
+}
+
+.sa-spark--3 {
+  bottom: 22%;
+  left: 26%;
+  animation-delay: -0.8s;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sa-gem,
+  .sa-spark,
+  .story__window {
+    animation: none;
+  }
 }
 
 /* ——— Шпаргалка для печати: только текст и код ——— */

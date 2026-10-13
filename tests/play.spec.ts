@@ -33,6 +33,10 @@ test('путь от карты до первого уровня и победа'
 
   await page.getByRole('link', { name: /Парящие земли/ }).click();
   await expect(page.getByRole('heading', { name: 'Парящие острова' })).toBeVisible();
+  // При первом входе на тропу — пролог
+  await expect(page.getByRole('dialog', { name: 'Пролог: Парящие острова' })).toBeVisible();
+  await page.getByRole('button', { name: 'Пропустить' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.screenshot({ path: `${SCREENS}/00-trail.png`, fullPage: true });
 
   await page.getByRole('link', { name: 'Уровень 1: Пробуждение' }).click();
@@ -224,5 +228,67 @@ test.describe('гримуар', () => {
     await expect(page.getByText(/Верно! \+5 XP/)).toBeVisible();
     await expect(page.locator('.rank__xp')).toHaveText('55 XP');
     await page.screenshot({ path: `${SCREENS}/08-review.png`, fullPage: true });
+  });
+});
+
+test.describe('сценки', () => {
+  test('пролог: один раз сам, потом по кнопке', async ({ page }) => {
+    await page.goto('/#/land/floating-lands');
+    const dialog = page.getByRole('dialog', { name: 'Пролог: Парящие острова' });
+    await expect(dialog).toBeVisible();
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SCREENS}/09-intro-1.png` });
+    for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(dialog).toContainText('Магистр Флекс');
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${SCREENS}/09-intro-4.png` });
+    await page.getByRole('button', { name: 'В путь!' }).click();
+    await expect(dialog).toHaveCount(0);
+
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Парящие острова' })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Пролог' }).click();
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
+  });
+
+  test('победная сцена после последнего уровня района', async ({ page }) => {
+    // Первые 12 уровней уже пройдены
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const progress: Record<string, object> = {};
+      for (let i = 1; i <= 12; i++) {
+        progress[`flex-${String(i).padStart(2, '0')}`] = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      }
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify(progress));
+    });
+    await openLevel(page, 13);
+    await typeCode(
+      page,
+      `.island {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.sapphire {
+  align-self: flex-start;
+}
+`,
+    );
+    await cast(page);
+    const finale = page.getByRole('dialog', { name: 'Эпилог: Парящие острова' });
+    await expect(finale).toBeVisible();
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${SCREENS}/10-outro.png` });
+    await page.keyboard.press('Escape');
+    await expect(finale).toHaveCount(0);
+    await expect(page.getByText(/Район «Парящие острова» пройден!/)).toBeVisible();
+    await expect(page.locator('.result__achievements')).toContainText('Сияние: Парящие острова');
+    await page.getByRole('button', { name: 'Смотреть финал' }).click();
+    await expect(finale).toBeVisible();
   });
 });
