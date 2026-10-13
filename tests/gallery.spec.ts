@@ -17,8 +17,8 @@ test('галерея уровней', async ({ page }) => {
   const levels = await page.evaluate<LevelInfo[]>(
     "import('/src/levels/index.ts').then((m) => m.allLevels.map((l) => ({ id: l.id, title: l.title, solutionCss: l.solutionCss })))",
   );
-  for (const [i, level] of levels.entries()) {
-    await page.getByRole('button', { name: new RegExp(`^Уровень ${i + 1}:`) }).click();
+  for (const level of levels) {
+    await page.goto(`/#/level/${level.id}`);
     await page.getByRole('heading', { name: level.title }).waitFor();
     await page.locator('.stage__status').waitFor();
     await page.locator('.stage').screenshot({ path: `test-results/gallery/${level.id}-start.png` });

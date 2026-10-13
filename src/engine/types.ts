@@ -30,6 +30,8 @@ export interface LevelDef {
   hints: string[];
   /** Заклинание, которое открывает уровень (ключ в SPELLS) */
   learns?: string;
+  /** Испытание в конце района — на тропе отмечается особо */
+  trial?: boolean;
   /** Свойства, запрещённые именно в этом уровне */
   forbid?: string[];
   /** Дополнительное оформление сцены только для этого уровня */
@@ -40,6 +42,8 @@ export interface LevelDef {
 export interface Npc {
   name: string;
   title: string;
+  /** Ключ пиксельного портрета в PORTRAITS */
+  portrait: string;
 }
 
 export interface RegionDef {

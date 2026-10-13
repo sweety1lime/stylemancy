@@ -1,33 +1,35 @@
 :root {
-  --bg: #0c0919;
-  --bg-glow: #1d1442;
-  --panel: #161029;
-  --panel-2: #1e1638;
-  --panel-3: #281e4b;
-  --line: rgba(196, 181, 253, 0.14);
-  --line-strong: rgba(196, 181, 253, 0.3);
-  --text: #efeaff;
-  --muted: #b5abd9;
-  --muted-2: #7e75a6;
-  --gold: #f4c76b;
-  --gold-strong: #ffd98a;
-  --gold-soft: rgba(244, 199, 107, 0.12);
+  /* Ночная магия в пикселях */
+  --bg: #0b0718;
+  --panel: #191033;
+  --panel-2: #22174a;
+  --panel-3: #2c1f5c;
+  --ink: #07040f;
+  --frame: #3b2a78;
+  --line: rgba(196, 181, 253, 0.16);
+  --line-strong: rgba(196, 181, 253, 0.32);
+  --text: #f1ecff;
+  --muted: #b6abde;
+  --muted-2: #7e74ad;
+  --gold: #f6c453;
+  --gold-strong: #ffe08a;
+  --gold-soft: rgba(246, 196, 83, 0.12);
   --violet: #a78bfa;
   --violet-soft: rgba(167, 139, 250, 0.14);
   --danger: #ff9b9b;
   --danger-soft: rgba(255, 120, 120, 0.1);
-  --radius: 16px;
   --font-ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: Georgia, "Palatino Linotype", "Book Antiqua", serif;
+  --font-pixel: "Tiny5", var(--font-ui);
   --font-mono: "Cascadia Code", "JetBrains Mono", Consolas, "Courier New", monospace;
 
   color-scheme: dark;
+  /* У пиксельного шрифта одно начертание: поддельный жирный размазал бы пиксели */
+  font-synthesis: none;
   font-family: var(--font-ui);
   font-size: 16px;
   line-height: 1.5;
   color: var(--text);
   background: var(--bg);
-  -webkit-font-smoothing: antialiased;
 }
 
 *,
@@ -39,10 +41,10 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(900px 500px at 75% -10%, var(--bg-glow), transparent 70%),
-    radial-gradient(700px 400px at 0% 100%, rgba(91, 63, 196, 0.16), transparent 70%),
-    var(--bg);
+  /* Тёмное небо с редкими пиксельными звёздами: плитка задаётся в main.tsx */
+  background-color: var(--bg);
+  background-image: var(--sky-tile, none);
+  background-size: 160px 120px;
 }
 
 h1,
@@ -56,6 +58,10 @@ button {
   color: inherit;
 }
 
+a {
+  color: inherit;
+}
+
 code,
 kbd,
 pre {
@@ -63,6 +69,20 @@ pre {
 }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 3px solid var(--gold);
   outline-offset: 2px;
+}
+
+.pixel-art {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

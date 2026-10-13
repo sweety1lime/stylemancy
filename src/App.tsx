@@ -1,88 +1,69 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { LandTrail } from './components/LandTrail';
 import { LevelScreen } from './components/LevelScreen';
 import type { RegionStats } from './components/ResultPanel';
-import { Stars } from './components/Stars';
-import { currentLevel, progress, useProgress } from './game/progress';
-import { regions } from './levels';
+import { TopBar } from './components/TopBar';
+import { WorldMap } from './components/WorldMap';
+import { useProgress } from './game/progress';
+import { hrefFor, navigate, parseHash, useHash } from './game/router';
+import { findLand, findLevel } from './levels';
 import './App.css';
 
-// Пока один район; карта мира появится на этапе 2
-const region = regions[0];
-
-function initialIndex(): number {
-  const saved = region.levels.findIndex((level) => level.id === currentLevel.get());
-  if (saved !== -1) return saved;
-  const firstUnsolved = region.levels.findIndex((level) => !progress.get(level.id).completed);
-  return firstUnsolved === -1 ? 0 : firstUnsolved;
-}
-
 export default function App() {
-  const progressMap = useProgress();
-  const [index, setIndex] = useState(initialIndex);
-  const level = region.levels[index];
-  const hasNext = index + 1 < region.levels.length;
+  const hash = useHash();
+  const route = parseHash(hash);
+  const progress = useProgress();
 
-  const stats: RegionStats = {
-    title: region.title,
-    completed: region.levels.filter((item) => progressMap[item.id]?.completed).length,
-    total: region.levels.length,
-    stars: region.levels.reduce((sum, item) => sum + (progressMap[item.id]?.stars ?? 0), 0),
-    maxStars: region.levels.length * 3,
-  };
-
-  // Текущий уровень всегда виден в полосе уровней, даже если она прокручивается
+  // Каждый экран открывается с начала страницы
   useEffect(() => {
-    document.querySelector('.level-dot--current')?.scrollIntoView({ block: 'nearest', inline: 'center' });
-  }, [index]);
+    window.scrollTo(0, 0);
+  }, [hash]);
 
-  function open(i: number) {
-    setIndex(i);
-    currentLevel.set(region.levels[i].id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (route.name === 'level') {
+    const place = findLevel(route.id);
+    if (place) {
+      const { level, region, land, index } = place;
+      const next = region.levels[index + 1];
+      const stats: RegionStats = {
+        title: region.title,
+        completed: region.levels.filter((item) => progress[item.id]?.completed).length,
+        total: region.levels.length,
+        stars: region.levels.reduce((sum, item) => sum + (progress[item.id]?.stars ?? 0), 0),
+        maxStars: region.levels.length * 3,
+      };
+      const trailHref = hrefFor({ name: 'land', id: land.id });
+      return (
+        <div className="app">
+          <TopBar back={{ href: trailHref, label: land.title }} />
+          <LevelScreen
+            key={level.id}
+            level={level}
+            number={index + 1}
+            region={stats}
+            trailHref={trailHref}
+            onNext={next ? () => navigate({ name: 'level', id: next.id }) : undefined}
+          />
+        </div>
+      );
+    }
+  }
+
+  if (route.name === 'land') {
+    const land = findLand(route.id);
+    if (land && land.regions.length > 0) {
+      return (
+        <div className="app">
+          <TopBar back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }} />
+          <LandTrail land={land} />
+        </div>
+      );
+    }
   }
 
   return (
     <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <span className="brand__mark" aria-hidden="true">
-            ✦
-          </span>
-          Каскадия
-        </div>
-        <nav className="levels" aria-label={`Район «${region.title}»`}>
-          <span className="levels__region">
-            {region.title} · ★ {stats.stars}/{stats.maxStars}
-          </span>
-          <ol className="levels__list">
-            {region.levels.map((item, i) => {
-              const done = progressMap[item.id]?.completed;
-              const classes = ['level-dot', i === index && 'level-dot--current', done && 'level-dot--done'];
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className={classes.filter(Boolean).join(' ')}
-                    aria-label={`Уровень ${i + 1}: ${item.title}`}
-                    aria-current={i === index ? 'step' : undefined}
-                    onClick={() => open(i)}
-                  >
-                    <span className="level-dot__num">{i + 1}</span>
-                    {done && <Stars count={progressMap[item.id].stars} />}
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
-      </header>
-      <LevelScreen
-        key={level.id}
-        level={level}
-        number={index + 1}
-        region={stats}
-        onNext={hasNext ? () => open(index + 1) : undefined}
-      />
+      <TopBar />
+      <WorldMap />
     </div>
   );
 }

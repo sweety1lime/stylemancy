@@ -3,6 +3,7 @@ import { defineLevel } from '../../engine/define';
 export default defineLevel({
   id: 'flex-13',
   title: 'Испытание: Звёздная корона',
+  trial: true,
   dialog: [
     'Последнее испытание Парящих островов! Собери Звёздную корону.',
     'Пригодится всё, что ты уже знаешь о Flexbox.',

@@ -1,0 +1,39 @@
+import { useSyncExternalStore } from 'react';
+
+/**
+ * Экраны игры. Адрес хранится после «#» — так ссылки работают на любом
+ * статическом хостинге (GitHub Pages) без настройки сервера.
+ */
+export type Route = { name: 'map' } | { name: 'land'; id: string } | { name: 'level'; id: string };
+
+export function parseHash(hash: string): Route {
+  const [kind, id] = hash.replace(/^#\/?/, '').split('/');
+  if (kind === 'land' && id) return { name: 'land', id: decodeURIComponent(id) };
+  if (kind === 'level' && id) return { name: 'level', id: decodeURIComponent(id) };
+  return { name: 'map' };
+}
+
+export function hrefFor(route: Route): string {
+  switch (route.name) {
+    case 'map':
+      return '#/';
+    case 'land':
+      return `#/land/${encodeURIComponent(route.id)}`;
+    case 'level':
+      return `#/level/${encodeURIComponent(route.id)}`;
+  }
+}
+
+export function navigate(route: Route): void {
+  window.location.hash = hrefFor(route).slice(1);
+}
+
+function subscribe(onChange: () => void) {
+  window.addEventListener('hashchange', onChange);
+  return () => window.removeEventListener('hashchange', onChange);
+}
+
+/** Текущий адрес после «#»; компонент перерисуется при переходе. */
+export function useHash(): string {
+  return useSyncExternalStore(subscribe, () => window.location.hash);
+}

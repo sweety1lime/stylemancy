@@ -13,6 +13,7 @@ import flex11 from './flex-11';
 import flex12 from './flex-12';
 import flex13 from './flex-13';
 import sceneCss from './scene.css?raw';
+import { spriteCss } from './sceneSprites';
 
 /** Свойства Flexbox — единственная магия, которая действует на островах. */
 export const FLEX_PROPERTIES = [
@@ -39,8 +40,8 @@ export const floatingIslands = defineRegion({
   id: 'floating-islands',
   title: 'Парящие острова',
   topic: 'Flexbox',
-  npc: { name: 'Магистр Флекс', title: 'хранитель Парящих островов' },
-  sceneCss,
+  npc: { name: 'Магистр Флекс', title: 'хранитель Парящих островов', portrait: 'flex' },
+  sceneCss: sceneCss + spriteCss,
   allow: FLEX_PROPERTIES,
   allowMessage: 'На Парящих островах действует только магия Flexbox',
   levels: [

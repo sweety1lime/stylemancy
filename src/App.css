@@ -1,96 +1,475 @@
+/* ——— Пиксельные основы ——— */
+
+/* Панель: чёрный контур 4px, внутренняя кайма и жёсткая тень без размытия */
+.px-panel {
+  border: 4px solid var(--ink);
+  background: var(--panel);
+  box-shadow:
+    inset 0 0 0 3px var(--frame),
+    6px 6px 0 0 rgba(0, 0, 0, 0.45);
+}
+
+.pixel-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(28px, 3.6vw, 40px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.pixel-subtitle {
+  font-family: var(--font-pixel);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--gold-strong);
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.portrait {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  padding: 4px;
+  border: 4px solid var(--ink);
+  background: #120b2e;
+  box-shadow: inset 0 0 0 3px var(--frame);
+}
+
+.inline-code {
+  padding: 1px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--gold-strong);
+  font-size: 0.92em;
+}
+
+/* ——— Кнопки ——— */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 20px;
+  border: 4px solid var(--ink);
+  border-radius: 0;
+  font-family: var(--font-pixel);
+  font-size: 18px;
+  font-weight: 400;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    inset -4px -4px 0 rgba(0, 0, 0, 0.28),
+    inset 4px 4px 0 rgba(255, 255, 255, 0.3),
+    4px 4px 0 0 var(--ink);
+}
+
+.button:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow:
+    inset -4px -4px 0 rgba(0, 0, 0, 0.28),
+    inset 4px 4px 0 rgba(255, 255, 255, 0.3);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.button--cast {
+  background: var(--gold);
+  color: #2a1a05;
+}
+
+.button--cast:hover {
+  background: var(--gold-strong);
+}
+
+.button--ghost {
+  background: var(--panel-3);
+  color: var(--text);
+}
+
+.button--ghost:not(:disabled):hover {
+  background: #3a2a73;
+}
+
+.button kbd {
+  padding: 2px 6px;
+  background: rgba(42, 26, 5, 0.14);
+  color: rgba(42, 26, 5, 0.8);
+  font-size: 11px;
+}
+
+.text-button {
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.text-button:hover {
+  color: var(--gold);
+}
+
 /* ——— Верхняя панель ——— */
 
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px 24px;
-  padding: 14px 24px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(12, 9, 25, 0.6);
+  gap: 10px 24px;
+  padding: 10px 24px;
+  border-bottom: 4px solid var(--ink);
+  background: var(--panel);
+  box-shadow: inset 0 -3px 0 var(--frame);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--font-display);
-  font-size: 22px;
-  letter-spacing: 0.02em;
+  gap: 10px;
+  font-family: var(--font-pixel);
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--gold);
+  text-decoration: none;
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.topbar__back {
+  font-family: var(--font-pixel);
+  font-size: 18px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.topbar__back:hover {
   color: var(--gold);
 }
 
-.brand__mark {
-  text-shadow: 0 0 12px rgba(244, 199, 107, 0.7);
-}
-
-.levels {
+.rank {
   display: flex;
   align-items: center;
-  gap: 14px;
-  min-width: 0;
-  max-width: 100%;
+  gap: 10px;
+  margin-left: auto;
+  font-family: var(--font-pixel);
 }
 
-.levels__region {
-  flex: none;
+.rank__title {
+  font-size: 18px;
+  color: var(--violet);
+}
+
+.rank__bar {
+  width: 120px;
+  height: 16px;
+  padding: 2px;
+  border: 3px solid var(--ink);
+  background: #120b2e;
+}
+
+.rank__fill {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, var(--gold) 0 6px, #c98f2c 6px 8px);
+}
+
+.rank__xp {
+  font-size: 16px;
+  color: var(--gold-strong);
+}
+
+/* ——— Карта королевства ——— */
+
+.world {
+  display: grid;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 24px 48px;
+}
+
+.world__intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 18px 20px;
+}
+
+.world__intro p {
+  max-width: 70ch;
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.world__resume {
+  margin-top: 14px;
+}
+
+.world-map {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "l1 . l2"
+    ". l3 ."
+    ". . l4";
+  gap: 8px 24px;
+  padding: 24px;
+  border: 4px solid var(--ink);
+  background-color: #100a28;
+  background-image: repeating-conic-gradient(rgba(124, 77, 255, 0.07) 0 25%, transparent 0 50%);
+  background-size: 16px 16px;
+  box-shadow:
+    inset 0 0 0 3px var(--frame),
+    6px 6px 0 0 rgba(0, 0, 0, 0.45);
+}
+
+.world-map__path {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.world-map__path polyline {
+  fill: none;
+  stroke: rgba(246, 196, 83, 0.45);
+  stroke-width: 4;
+  stroke-dasharray: 1.2 1.6;
+  vector-effect: non-scaling-stroke;
+}
+
+.land {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 12px 8px 16px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.land--1 {
+  grid-area: l1;
+}
+
+.land--2 {
+  grid-area: l2;
+}
+
+.land--3 {
+  grid-area: l3;
+}
+
+.land--4 {
+  grid-area: l4;
+}
+
+.land__art {
+  display: grid;
+  justify-items: center;
+  margin-bottom: 6px;
+}
+
+.land__emblem {
+  margin-bottom: -2px;
+}
+
+a.land .land__emblem {
+  animation: bob 1.6s steps(1, end) infinite;
+}
+
+.land__title {
+  font-family: var(--font-pixel);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--gold-strong);
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.land__topic {
   color: var(--muted);
   font-size: 14px;
 }
 
-/* Уровней много — полоса прокручивается, а не растягивает страницу */
-.levels__list {
+.land__status {
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  color: var(--violet);
+}
+
+a.land:hover .land__title {
+  color: #fff;
+}
+
+a.land:hover .land__art {
+  transform: translateY(-4px);
+}
+
+.land--fog {
+  opacity: 0.45;
+  filter: grayscale(0.7);
+}
+
+@media (max-width: 760px) {
+  .world-map {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "l1" "l2" "l3" "l4";
+  }
+
+  .world-map__path {
+    display: none;
+  }
+
+  .world__intro {
+    flex-direction: column;
+  }
+}
+
+/* ——— Тропа земли ——— */
+
+.trail {
+  display: grid;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 24px 48px;
+}
+
+.trail__head {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 18px;
+}
+
+.trail__blurb {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.district {
+  display: grid;
+  gap: 18px;
+  padding: 18px 20px 26px;
+}
+
+.district__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.district__meta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.district--fog {
+  opacity: 0.5;
+}
+
+.path {
+  --amp: 1;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
   margin: 0;
-  padding: 4px;
-  overflow-x: auto;
+  padding: 8px 0;
   list-style: none;
-  scrollbar-width: thin;
 }
 
-.levels__list li {
-  flex: none;
+/* Каждый шаг тропы смещён по синусоиде (--offset задаётся в разметке) */
+.path__step {
+  display: grid;
+  grid-template-columns: 64px 230px;
+  align-items: center;
+  gap: 14px;
+  transform: translateX(calc(var(--offset) * var(--amp)));
 }
 
-.level-dot {
+.path__node {
   display: grid;
   place-items: center;
-  align-content: center;
-  gap: 1px;
-  min-width: 46px;
-  height: 46px;
-  padding: 0 8px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: var(--panel-2);
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
+  width: 64px;
+  height: 64px;
+  border: 4px solid var(--ink);
+  background: var(--panel-3);
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: 26px;
+  font-weight: 400;
+  text-decoration: none;
+  box-shadow:
+    inset -4px -4px 0 rgba(0, 0, 0, 0.3),
+    inset 4px 4px 0 rgba(255, 255, 255, 0.12),
+    4px 4px 0 0 var(--ink);
 }
 
-.level-dot:hover {
-  border-color: var(--gold);
-  transform: translateY(-1px);
+.path__node:hover {
+  transform: translate(-2px, -2px);
+  box-shadow:
+    inset -4px -4px 0 rgba(0, 0, 0, 0.3),
+    inset 4px 4px 0 rgba(255, 255, 255, 0.12),
+    6px 6px 0 0 var(--ink);
 }
 
-.level-dot--current {
-  border-color: var(--gold);
-  background: var(--gold-soft);
-  box-shadow: 0 0 16px rgba(244, 199, 107, 0.25);
+.path__node--done {
+  background: var(--gold);
+  color: #2a1a05;
 }
 
-.level-dot__num {
-  font-weight: 600;
-  line-height: 1;
+.path__node--current {
+  background: var(--violet);
+  color: #fff;
+  animation: pulse 1.2s steps(1, end) infinite;
 }
 
-.level-dot--done .level-dot__num {
-  color: var(--gold);
+.path__node--trial {
+  font-size: 30px;
 }
 
-.level-dot .stars {
-  font-size: 9px;
+.path__label {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+.path__title {
+  font-family: var(--font-pixel);
+  font-size: 18px;
+}
+
+.path__here {
+  color: var(--violet);
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .path {
+    --amp: 0.3;
+  }
+
+  .path__step {
+    grid-template-columns: 56px minmax(0, 190px);
+  }
+
+  .path__node {
+    width: 56px;
+    height: 56px;
+  }
 }
 
 /* ——— Экран уровня ——— */
@@ -102,7 +481,7 @@
   grid-template-areas:
     "brief stage"
     "work stage";
-  gap: 20px 28px;
+  gap: 22px 28px;
   max-width: 1360px;
   margin: 0 auto;
   padding: 24px 24px 48px;
@@ -119,7 +498,7 @@
 .brief {
   grid-area: brief;
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .stage {
@@ -128,14 +507,14 @@
   top: 16px;
   align-self: start;
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .workbench {
   grid-area: work;
   display: grid;
   align-content: start;
-  gap: 14px;
+  gap: 16px;
 }
 
 @media (max-width: 1080px) {
@@ -155,42 +534,45 @@
 
 @media (max-width: 640px) {
   .topbar {
-    padding: 12px 16px;
+    padding: 10px 16px;
+  }
+
+  .rank__bar {
+    width: 72px;
+  }
+
+  .level,
+  .world,
+  .trail {
+    padding: 16px 16px 40px;
   }
 
   .level {
-    gap: 16px;
-    padding: 16px 16px 40px;
+    gap: 18px;
   }
 }
 
 .brief__eyebrow {
   color: var(--muted);
-  font-size: 13px;
-  letter-spacing: 0.08em;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .brief__title {
-  font-family: var(--font-display);
-  font-size: clamp(26px, 3vw, 34px);
-  font-weight: 600;
+  font-family: var(--font-pixel);
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 400;
+  line-height: 1.1;
+  text-shadow: 3px 3px 0 var(--ink);
 }
 
 .dialog {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 16px;
   padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--panel);
-}
-
-.npc-avatar {
-  flex: none;
-  width: 56px;
-  height: 56px;
 }
 
 .dialog__body {
@@ -200,27 +582,31 @@
 
 .dialog__name {
   color: var(--gold);
-  font-weight: 600;
+  font-family: var(--font-pixel);
+  font-size: 18px;
+  font-weight: 400;
 }
 
 .dialog__name span {
   color: var(--muted);
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .task {
   display: grid;
   gap: 4px;
   padding: 14px 16px;
-  border: 1px solid rgba(244, 199, 107, 0.35);
-  border-radius: var(--radius);
-  background: var(--gold-soft);
+  background: #261d3a;
+  box-shadow:
+    inset 0 0 0 3px #8a6a2a,
+    6px 6px 0 0 rgba(0, 0, 0, 0.45);
 }
 
 .task__label {
   color: var(--gold);
-  font-size: 12px;
-  font-weight: 700;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -229,30 +615,23 @@
   font-size: 17px;
 }
 
-.inline-code {
-  padding: 1px 6px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--gold-strong);
-  font-size: 0.92em;
-}
-
 /* ——— Сцена ——— */
 
 .scene {
   width: 100%;
 }
 
+/* Рамка из теней: она не меняет размеры, поэтому сцена остаётся ровно 600×360 */
 .scene__viewport {
   position: relative;
   margin: 0 auto;
   overflow: hidden;
-  border-radius: 18px;
-  background: #120c2a;
+  background: #120b2e;
   box-shadow:
-    0 0 0 1px var(--line-strong),
-    0 24px 60px rgba(0, 0, 0, 0.5),
-    0 0 80px rgba(139, 92, 246, 0.16);
+    0 0 0 4px var(--ink),
+    0 0 0 7px var(--frame),
+    0 0 0 11px var(--ink),
+    10px 10px 0 11px rgba(0, 0, 0, 0.45);
 }
 
 .scene__stage {
@@ -275,18 +654,14 @@
 
 .ghost {
   position: absolute;
-  border: 2px dashed var(--ghost);
-  border-radius: 14px;
-  opacity: 0.65;
-  transition: opacity 0.25s, box-shadow 0.25s;
+  border: 4px dashed var(--ghost);
+  opacity: 0.6;
 }
 
 .ghost--in-place {
   border-style: solid;
   opacity: 1;
-  box-shadow:
-    0 0 14px var(--ghost),
-    inset 0 0 12px var(--ghost);
+  box-shadow: 0 0 12px var(--ghost);
 }
 
 .scene__reference {
@@ -299,21 +674,16 @@
 }
 
 .scene--celebrate .scene__viewport {
-  animation: celebrate 1.4s ease-out;
+  animation: celebrate 0.9s steps(3, end);
 }
 
 @keyframes celebrate {
-  0% {
-    box-shadow: 0 0 0 1px var(--gold), 0 0 0 rgba(244, 199, 107, 0);
-  }
-  30% {
-    box-shadow: 0 0 0 2px var(--gold), 0 0 80px rgba(244, 199, 107, 0.55);
-  }
+  0%,
   100% {
-    box-shadow:
-      0 0 0 1px var(--line-strong),
-      0 24px 60px rgba(0, 0, 0, 0.5),
-      0 0 80px rgba(139, 92, 246, 0.16);
+    filter: none;
+  }
+  50% {
+    filter: brightness(1.35) saturate(1.2);
   }
 }
 
@@ -322,8 +692,10 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  margin-top: 10px;
   color: var(--muted);
-  font-size: 14px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
 }
 
 .stage__dots {
@@ -332,24 +704,19 @@
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--dot);
-  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--dot);
 }
 
 .dot--on {
   background: var(--dot);
-  box-shadow: 0 0 8px var(--dot);
 }
 
 /* ——— Редактор ——— */
 
 .editor-card {
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--panel);
 }
 
 .editor-card__head {
@@ -357,7 +724,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 10px 6px 16px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 3px solid var(--frame);
   background: var(--panel-2);
 }
 
@@ -367,32 +734,19 @@
   font-size: 13px;
 }
 
-.text-button {
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--muted);
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.text-button:hover {
-  color: var(--gold);
-}
-
 .code-editor .cm-editor {
   min-height: 170px;
 }
 
 .markup {
-  border-top: 1px solid var(--line);
+  border-top: 3px solid var(--frame);
 }
 
 .markup summary {
   padding: 10px 16px;
   color: var(--muted);
-  font-size: 14px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
   cursor: pointer;
 }
 
@@ -404,63 +758,13 @@
   font-size: 13px;
 }
 
-/* ——— Кнопки и подсказки ——— */
+/* ——— Кнопки действий и подсказки ——— */
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 12px;
-}
-
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 46px;
-  padding: 0 20px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, color 0.15s;
-}
-
-.button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.button--ghost {
-  border-color: var(--line-strong);
-  background: var(--panel-2);
-  color: var(--muted);
-}
-
-.button--ghost:not(:disabled):hover {
-  border-color: var(--violet);
-  color: var(--text);
-}
-
-.button--cast {
-  background: linear-gradient(180deg, #ffe2a1, #f4c76b 55%, #d9a443);
-  color: #2a1a05;
-  box-shadow: 0 6px 24px rgba(244, 199, 107, 0.28);
-}
-
-.button--cast:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 30px rgba(244, 199, 107, 0.4);
-}
-
-.button kbd {
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: rgba(42, 26, 5, 0.12);
-  color: rgba(42, 26, 5, 0.75);
-  font-size: 11px;
-  font-weight: 600;
+  gap: 14px;
 }
 
 @media (max-width: 640px) {
@@ -475,7 +779,7 @@
 
 .hints {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -483,18 +787,17 @@
 
 .hint {
   padding: 12px 14px;
-  border: 1px solid rgba(167, 139, 250, 0.3);
-  border-radius: 12px;
-  background: var(--violet-soft);
+  background: #221a45;
 }
 
 .hint__label {
   display: block;
   margin-bottom: 2px;
   color: var(--violet);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -504,18 +807,21 @@
   display: grid;
   gap: 10px;
   padding: 16px 18px;
-  border-radius: var(--radius);
-  animation: rise 0.3s ease-out;
+  animation: rise 0.25s steps(3, end);
 }
 
 .result--success {
-  border: 1px solid rgba(244, 199, 107, 0.5);
-  background: linear-gradient(180deg, rgba(244, 199, 107, 0.16), rgba(244, 199, 107, 0.05));
+  background: #2a2140;
+  box-shadow:
+    inset 0 0 0 3px var(--gold),
+    6px 6px 0 0 rgba(0, 0, 0, 0.45);
 }
 
 .result--fail {
-  border: 1px solid rgba(255, 155, 155, 0.35);
-  background: var(--danger-soft);
+  background: #2a1426;
+  box-shadow:
+    inset 0 0 0 3px #b4373f,
+    6px 6px 0 0 rgba(0, 0, 0, 0.45);
 }
 
 .result__head {
@@ -526,8 +832,10 @@
 }
 
 .result__title {
-  font-family: var(--font-display);
-  font-size: 22px;
+  font-family: var(--font-pixel);
+  font-size: 26px;
+  font-weight: 400;
+  text-shadow: 3px 3px 0 var(--ink);
 }
 
 .result--success .result__title {
@@ -536,7 +844,21 @@
 
 .result--fail .result__title {
   color: var(--danger);
-  font-size: 19px;
+  font-size: 22px;
+}
+
+.result__xp {
+  color: var(--gold-strong);
+  font-family: var(--font-pixel);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.result__rank {
+  color: var(--violet);
+  font-family: var(--font-pixel);
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .result__notes,
@@ -556,7 +878,6 @@
   display: inline-block;
   margin-right: 4px;
   padding: 1px 6px;
-  border-radius: 6px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted);
   font-size: 12px;
@@ -570,16 +891,16 @@
   display: grid;
   gap: 4px;
   padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(12, 9, 25, 0.45);
+  border: 3px solid var(--frame);
+  background: rgba(7, 4, 15, 0.45);
 }
 
 .spell__label {
   color: var(--violet);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -595,24 +916,43 @@
 
 .stars {
   display: inline-flex;
-  gap: 2px;
-  font-size: 22px;
-  line-height: 1;
+  align-items: center;
+  gap: 4px;
 }
 
-.star {
-  color: rgba(255, 255, 255, 0.18);
+/* ——— Анимации в несколько кадров, как в старых играх ——— */
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
-.star--on {
-  color: var(--gold);
-  text-shadow: 0 0 10px rgba(244, 199, 107, 0.6);
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset -4px -4px 0 rgba(0, 0, 0, 0.3),
+      inset 4px 4px 0 rgba(255, 255, 255, 0.12),
+      4px 4px 0 0 var(--ink);
+  }
+  50% {
+    box-shadow:
+      inset -4px -4px 0 rgba(0, 0, 0, 0.3),
+      inset 4px 4px 0 rgba(255, 255, 255, 0.12),
+      4px 4px 0 0 var(--ink),
+      0 0 0 6px rgba(167, 139, 250, 0.45);
+  }
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -622,7 +962,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .result,
-  .scene--celebrate .scene__viewport {
+  .scene--celebrate .scene__viewport,
+  a.land .land__emblem,
+  .path__node--current {
     animation: none;
   }
 }

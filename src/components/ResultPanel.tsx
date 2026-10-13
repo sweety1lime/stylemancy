@@ -5,7 +5,9 @@ import type { Spell } from '../game/spells';
 import { RichText } from './RichText';
 import { Stars } from './Stars';
 
-export type Outcome = { kind: 'success'; score: Score } | { kind: 'fail'; evaluation: Evaluation };
+export type Outcome =
+  | { kind: 'success'; score: Score; xpGain: number; newRank?: string }
+  | { kind: 'fail'; evaluation: Evaluation };
 
 /** Итоги района — показываем после последнего уровня. */
 export interface RegionStats {
@@ -22,17 +24,20 @@ interface ResultPanelProps {
   code: string;
   spell?: Spell;
   region: RegionStats;
+  trailHref: string;
   onNext?: () => void;
 }
 
-export function ResultPanel({ outcome, level, code, spell, region, onNext }: ResultPanelProps) {
+export function ResultPanel({ outcome, level, code, spell, region, trailHref, onNext }: ResultPanelProps) {
   if (outcome.kind === 'success') {
     return (
-      <section className="result result--success" aria-live="polite">
+      <section className="result result--success px-panel" aria-live="polite">
         <div className="result__head">
           <h2 className="result__title">Заклинание сработало!</h2>
-          <Stars count={outcome.score.stars} />
+          <Stars count={outcome.score.stars} scale={4} />
         </div>
+        {outcome.xpGain > 0 && <p className="result__xp">+{outcome.xpGain} XP</p>}
+        {outcome.newRank && <p className="result__rank">Новый ранг: {outcome.newRank}!</p>}
         {outcome.score.notes.length > 0 && <p className="result__notes">{outcome.score.notes.join(' · ')}</p>}
         {spell && (
           <div className="spell">
@@ -47,16 +52,17 @@ export function ResultPanel({ outcome, level, code, spell, region, onNext }: Res
           <button type="button" className="button button--cast" onClick={onNext}>
             Дальше →
           </button>
-        ) : region.completed === region.total ? (
-          <p className="result__final">
-            Район «{region.title}» пройден! Звёзд собрано: {region.stars} из {region.maxStars}. Скоро откроются новые
-            земли.
-          </p>
         ) : (
-          <p className="result__final">
-            Это последний уровень района. Пройдено уровней: {region.completed} из {region.total} — вернись к
-            пропущенным.
-          </p>
+          <>
+            <p className="result__final">
+              {region.completed === region.total
+                ? `Район «${region.title}» пройден! Звёзд собрано: ${region.stars} из ${region.maxStars}.`
+                : `Это последний уровень района. Пройдено уровней: ${region.completed} из ${region.total} — вернись к пропущенным.`}
+            </p>
+            <a className="button button--cast" href={trailHref}>
+              ← К тропе
+            </a>
+          </>
         )}
       </section>
     );
@@ -65,7 +71,7 @@ export function ResultPanel({ outcome, level, code, spell, region, onNext }: Res
   const { errors, items } = outcome.evaluation;
   const misses = summarizeMisses(items, level.check.groupName, level.check.tolerance);
   return (
-    <section className="result result--fail" aria-live="polite">
+    <section className="result result--fail px-panel" aria-live="polite">
       <h2 className="result__title">Заклинание не сработало</h2>
       {errors.length > 0 ? (
         <>

@@ -3,11 +3,12 @@ import { evaluate, lintOptionsFor, scoreSolution, solutionDeclCount } from '../e
 import { lintCss } from '../engine/lint';
 import type { ItemStatus } from '../engine/scene';
 import type { Level } from '../engine/types';
-import { drafts, progress } from '../game/progress';
+import { currentLevel, drafts, progress } from '../game/progress';
+import { rankFor, totalXp } from '../game/ranks';
 import { SPELLS } from '../game/spells';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
-import { NpcAvatar } from './NpcAvatar';
 import { ResultPanel, type Outcome, type RegionStats } from './ResultPanel';
+import { Portrait } from './Portrait';
 import { RichText } from './RichText';
 import { Scene, type SceneHandle } from './Scene';
 
@@ -15,10 +16,12 @@ interface LevelScreenProps {
   level: Level;
   number: number;
   region: RegionStats;
+  /** Ссылка на тропу района — после последнего уровня */
+  trailHref: string;
   onNext?: () => void;
 }
 
-export function LevelScreen({ level, number, region, onNext }: LevelScreenProps) {
+export function LevelScreen({ level, number, region, trailHref, onNext }: LevelScreenProps) {
   const [code, setCode] = useState(() => drafts.get(level.id) ?? level.starterCss);
   const [hintsUsed, setHintsUsed] = useState(() => progress.get(level.id).hintsUsed);
   const [statuses, setStatuses] = useState<ItemStatus[]>([]);
@@ -28,6 +31,11 @@ export function LevelScreen({ level, number, region, onNext }: LevelScreenProps)
   const sceneRef = useRef<SceneHandle>(null);
   const lintOptions = useMemo(() => lintOptionsFor(level), [level]);
   const lintCode = useCallback((text: string) => lintCss(text, lintOptions).problems, [lintOptions]);
+
+  // На карте появится кнопка «Продолжить» с этим уровнем
+  useEffect(() => {
+    currentLevel.set(level.id);
+  }, [level.id]);
 
   // Черновик сохраняется, пока студент печатает
   useEffect(() => {
@@ -49,8 +57,17 @@ export function LevelScreen({ level, number, region, onNext }: LevelScreenProps)
     progress.addAttempt(level.id);
     if (evaluation.passed) {
       const score = scoreSolution(hintsUsed, evaluation.declCount, solutionDeclCount(level));
+      const xpBefore = totalXp(progress.snapshot());
       progress.complete(level.id, score.stars);
-      setOutcome({ kind: 'success', score });
+      const xpAfter = totalXp(progress.snapshot());
+      const rankBefore = rankFor(xpBefore).rank;
+      const rankAfter = rankFor(xpAfter).rank;
+      setOutcome({
+        kind: 'success',
+        score,
+        xpGain: xpAfter - xpBefore,
+        newRank: rankAfter !== rankBefore ? rankAfter.title : undefined,
+      });
     } else {
       setOutcome({ kind: 'fail', evaluation });
     }
@@ -77,8 +94,8 @@ export function LevelScreen({ level, number, region, onNext }: LevelScreenProps)
           {level.regionTitle} · уровень {number}
         </p>
         <h1 className="brief__title">{level.title}</h1>
-        <div className="dialog">
-          <NpcAvatar />
+        <div className="dialog px-panel">
+          <Portrait id={level.npc.portrait} />
           <div className="dialog__body">
             <p className="dialog__name">
               {level.npc.name}
@@ -91,7 +108,7 @@ export function LevelScreen({ level, number, region, onNext }: LevelScreenProps)
             ))}
           </div>
         </div>
-        <div className="task">
+        <div className="task px-panel">
           <span className="task__label">Задача</span>
           <p className="task__text">
             <RichText text={level.task} />
@@ -127,7 +144,7 @@ export function LevelScreen({ level, number, region, onNext }: LevelScreenProps)
       </section>
 
       <section className="workbench" aria-label="Код">
-        <div className="editor-card">
+        <div className="editor-card px-panel">
           <div className="editor-card__head">
             <span className="editor-card__file">style.css</span>
             <button type="button" className="text-button" onClick={() => editorRef.current?.setValue(level.starterCss)}>
@@ -163,7 +180,7 @@ export function LevelScreen({ level, number, region, onNext }: LevelScreenProps)
         {hintsUsed > 0 && (
           <ol className="hints">
             {level.hints.slice(0, hintsUsed).map((hint, i) => (
-              <li key={hint} className="hint">
+              <li key={hint} className="hint px-panel">
                 <span className="hint__label">Подсказка {i + 1}</span>
                 <RichText text={hint} />
               </li>
@@ -172,7 +189,15 @@ export function LevelScreen({ level, number, region, onNext }: LevelScreenProps)
         )}
 
         {outcome && (
-          <ResultPanel outcome={outcome} level={level} code={code} spell={spell} region={region} onNext={onNext} />
+          <ResultPanel
+            outcome={outcome}
+            level={level}
+            code={code}
+            spell={spell}
+            region={region}
+            trailHref={trailHref}
+            onNext={onNext}
+          />
         )}
       </section>
     </main>
