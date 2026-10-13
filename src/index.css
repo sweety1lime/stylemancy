@@ -1,0 +1,68 @@
+:root {
+  --bg: #0c0919;
+  --bg-glow: #1d1442;
+  --panel: #161029;
+  --panel-2: #1e1638;
+  --panel-3: #281e4b;
+  --line: rgba(196, 181, 253, 0.14);
+  --line-strong: rgba(196, 181, 253, 0.3);
+  --text: #efeaff;
+  --muted: #b5abd9;
+  --muted-2: #7e75a6;
+  --gold: #f4c76b;
+  --gold-strong: #ffd98a;
+  --gold-soft: rgba(244, 199, 107, 0.12);
+  --violet: #a78bfa;
+  --violet-soft: rgba(167, 139, 250, 0.14);
+  --danger: #ff9b9b;
+  --danger-soft: rgba(255, 120, 120, 0.1);
+  --radius: 16px;
+  --font-ui: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: Georgia, "Palatino Linotype", "Book Antiqua", serif;
+  --font-mono: "Cascadia Code", "JetBrains Mono", Consolas, "Courier New", monospace;
+
+  color-scheme: dark;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 500px at 75% -10%, var(--bg-glow), transparent 70%),
+    radial-gradient(700px 400px at 0% 100%, rgba(91, 63, 196, 0.16), transparent 70%),
+    var(--bg);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--font-mono);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}

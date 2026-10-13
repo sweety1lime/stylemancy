@@ -1,0 +1,116 @@
+/*
+  Парящие острова — оформление сцен района Flexbox.
+  Студент этот код не видит: его правила применяются поверх.
+  Цвет предмета задаётся в --item-color — по нему же рисуется светящийся контур цели.
+*/
+
+body {
+  background-color: #1a1240;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.85) 0 1px, transparent 2px),
+    radial-gradient(circle at 27% 72%, rgba(255, 255, 255, 0.55) 0 1px, transparent 2px),
+    radial-gradient(circle at 44% 9%, rgba(255, 255, 255, 0.75) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 63% 24%, rgba(255, 255, 255, 0.6) 0 1px, transparent 2px),
+    radial-gradient(circle at 81% 64%, rgba(255, 255, 255, 0.7) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 91% 13%, rgba(255, 255, 255, 0.8) 0 1px, transparent 2px),
+    radial-gradient(circle at 6% 86%, rgba(255, 255, 255, 0.5) 0 1px, transparent 2px),
+    radial-gradient(ellipse 80% 55% at 50% 115%, rgba(139, 92, 246, 0.5), transparent 70%),
+    linear-gradient(180deg, #0f0a26 0%, #1e1448 55%, #34205f 100%);
+}
+
+/* Магическое поле острова — это и есть флекс-контейнер */
+.island {
+  position: relative;
+  width: 456px;
+  height: 168px;
+  padding: 12px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(196, 181, 253, 0.12), rgba(196, 181, 253, 0.03));
+  box-shadow:
+    inset 0 0 0 1px rgba(244, 199, 107, 0.35),
+    inset 0 -30px 40px -30px rgba(167, 139, 250, 0.45),
+    0 0 50px rgba(139, 92, 246, 0.22);
+}
+
+/* Скала под полем */
+.island::after {
+  content: "";
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: 100%;
+  height: 62px;
+  margin-top: 10px;
+  background:
+    linear-gradient(180deg, #6ee7a8 0 7px, #2f8f5b 7px 13px, transparent 13px),
+    linear-gradient(180deg, #7a5638 13px, #4a3324 70%, #2d1f17);
+  clip-path: polygon(0 0, 100% 0, 94% 28%, 82% 62%, 63% 100%, 45% 86%, 27% 70%, 9% 34%);
+}
+
+.crystal {
+  position: relative;
+  width: 64px;
+  height: 84px;
+  filter: drop-shadow(0 0 10px var(--item-glow));
+}
+
+/* Сам кристалл покачивается, а коробка элемента стоит на месте — проверке это не мешает */
+.crystal::before {
+  content: "";
+  position: absolute;
+  inset: 4px 10px 14px;
+  clip-path: polygon(50% 0, 100% 30%, 78% 100%, 22% 100%, 0 30%);
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.7) 0 22%, transparent 23%),
+    linear-gradient(180deg, var(--item-light), var(--item-color) 48%, var(--item-dark));
+  animation: crystal-float 3.4s ease-in-out infinite;
+}
+
+.crystal::after {
+  content: "";
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 2px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--item-glow);
+  filter: blur(3px);
+  opacity: 0.6;
+  animation: crystal-shadow 3.4s ease-in-out infinite;
+}
+
+.crystal:nth-child(2)::before,
+.crystal:nth-child(2)::after {
+  animation-delay: -1.1s;
+}
+
+.crystal:nth-child(3)::before,
+.crystal:nth-child(3)::after {
+  animation-delay: -2.2s;
+}
+
+.crystal[data-in-place] {
+  filter: drop-shadow(0 0 16px var(--item-glow)) brightness(1.15);
+}
+
+.amethyst { --item-color: #a78bfa; --item-light: #f1eaff; --item-dark: #5b3fc4; --item-glow: rgba(167, 139, 250, 0.75); }
+.emerald  { --item-color: #34d399; --item-light: #dcfce7; --item-dark: #047857; --item-glow: rgba(52, 211, 153, 0.7); }
+.ruby     { --item-color: #fb7185; --item-light: #ffe4e6; --item-dark: #be123c; --item-glow: rgba(251, 113, 133, 0.7); }
+
+@keyframes crystal-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes crystal-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 0.6; }
+  50% { transform: scaleX(0.8); opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crystal::before,
+  .crystal::after {
+    animation: none;
+  }
+}
