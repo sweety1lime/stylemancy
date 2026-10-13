@@ -4,12 +4,19 @@ import { useSyncExternalStore } from 'react';
  * Экраны игры. Адрес хранится после «#» — так ссылки работают на любом
  * статическом хостинге (GitHub Pages) без настройки сервера.
  */
-export type Route = { name: 'map' } | { name: 'land'; id: string } | { name: 'level'; id: string };
+export type Route =
+  | { name: 'map' }
+  | { name: 'land'; id: string }
+  | { name: 'level'; id: string }
+  | { name: 'grimoire' }
+  | { name: 'achievements' };
 
 export function parseHash(hash: string): Route {
   const [kind, id] = hash.replace(/^#\/?/, '').split('/');
   if (kind === 'land' && id) return { name: 'land', id: decodeURIComponent(id) };
   if (kind === 'level' && id) return { name: 'level', id: decodeURIComponent(id) };
+  if (kind === 'grimoire') return { name: 'grimoire' };
+  if (kind === 'achievements') return { name: 'achievements' };
   return { name: 'map' };
 }
 
@@ -21,6 +28,10 @@ export function hrefFor(route: Route): string {
       return `#/land/${encodeURIComponent(route.id)}`;
     case 'level':
       return `#/level/${encodeURIComponent(route.id)}`;
+    case 'grimoire':
+      return '#/grimoire';
+    case 'achievements':
+      return '#/achievements';
   }
 }
 

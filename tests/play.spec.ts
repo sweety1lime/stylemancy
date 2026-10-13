@@ -146,3 +146,29 @@ test.describe('на телефоне', () => {
     await page.screenshot({ path: `${SCREENS}/04-phone-level.png`, fullPage: true });
   });
 });
+
+test.describe('достижения', () => {
+  test('своё решение и первое заклинание', async ({ page }) => {
+    await openLevel(page, 2);
+    // flex-end у наставника, а end — другой верный путь
+    await typeCode(page, '.island {\n  display: flex;\n  justify-content: end;\n}\n');
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    await expect(page.locator('.result__achievements')).toContainText('Свой путь');
+    await expect(page.locator('.result__achievements')).toContainText('Первое заклинание');
+  });
+
+  test('секрет Лорда Дефолта и страница достижений', async ({ page }) => {
+    await openLevel(page, 1);
+    await typeCode(page, '.island {\n  display: flex;\n  font-family: "Times New Roman";\n}\n');
+    await cast(page);
+    await expect(page.locator('.toast')).toContainText('Заклинание Лорда Дефолта');
+
+    await page.goto('/#/achievements');
+    await expect(page.getByRole('heading', { name: 'Достижения' })).toBeVisible();
+    await expect(page.getByText(/Получено 1 из \d+/)).toBeVisible();
+    // Остальные секретные скрыты
+    await expect(page.getByText('???').first()).toBeVisible();
+    await page.screenshot({ path: `${SCREENS}/05-achievements.png`, fullPage: true });
+  });
+});

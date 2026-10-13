@@ -161,6 +161,49 @@ export const STAR_ON: Sprite = {
 
 export const STAR_OFF = recolor(STAR_ON, { y: '#3b2f66' });
 
+/* ——— Медали достижений: одна форма, цвет по категории ——— */
+
+const MEDAL_ROWS = [
+  '..rr....rr..',
+  '..rRr..rRr..',
+  '...rRrrRr...',
+  '....rRRr....',
+  '...kkkkkk...',
+  '..kmmmmmmk..',
+  '.kmMMmmmmmk.',
+  '.kmMmmmmmmk.',
+  '.kmmmmmmmdk.',
+  '.kmmmmmmddk.',
+  '..kmmmmddk..',
+  '...kkkkkk...',
+];
+
+function medal(main: string, light: string, dark: string, ribbon: string, ribbonLight: string): Sprite {
+  return { rows: MEDAL_ROWS, palette: { k: INK, m: main, M: light, d: dark, r: ribbon, R: ribbonLight } };
+}
+
+export const MEDALS = {
+  clean: medal('#f6c453', '#ffe9a8', '#c98f2c', '#6d3fe0', '#a78bfa'),
+  persistence: medal('#fb7185', '#ffd1d8', '#be123c', '#c98f2c', '#f6c453'),
+  explore: medal('#34d399', '#b7f5d8', '#059669', '#1d4ed8', '#60a5fa'),
+  secret: medal('#a78bfa', '#ddd0ff', '#6d4fd8', '#3b2f66', '#7e74ad'),
+  locked: medal('#3b3f56', '#555a75', '#2a2d40', '#2a2d40', '#3b3f56'),
+};
+
+export const BOOK: Sprite = {
+  rows: [
+    '.kkkk..kkkk.',
+    'kppppkkppppk',
+    'kpllpkkpllpk',
+    'kppppkkppppk',
+    'kpllpkkpllpk',
+    'kppppkkppppk',
+    'kkkkkkkkkkkk',
+    '.....kk.....',
+  ],
+  palette: { k: '#6d3fe0', p: '#e9e4ff', l: '#7e74ad' },
+};
+
 /* ——— Портреты ——— */
 
 export const PORTRAITS: Record<string, Sprite> = {

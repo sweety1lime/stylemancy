@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { read, write } from './storage';
 
 export interface LevelProgress {
   completed: boolean;
@@ -15,23 +16,6 @@ const PROGRESS_KEY = 'cascadia.progress.v1';
 const DRAFTS_KEY = 'cascadia.drafts.v1';
 const CURRENT_KEY = 'cascadia.current-level';
 const EMPTY: LevelProgress = { completed: false, stars: 0, attempts: 0, hintsUsed: 0 };
-
-function read<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function write(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Хранилище недоступно (например, приватный режим) — прогресс доживёт до перезагрузки
-  }
-}
 
 let state = read<ProgressMap>(PROGRESS_KEY, {});
 const listeners = new Set<() => void>();

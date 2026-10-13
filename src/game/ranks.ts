@@ -19,8 +19,9 @@ export function levelXp(progress: LevelProgress | undefined): number {
   return progress?.completed ? 10 + 5 * progress.stars : 0;
 }
 
-export function totalXp(progress: Record<string, LevelProgress>): number {
-  return Object.values(progress).reduce((sum, item) => sum + levelXp(item), 0);
+/** Весь опыт: уровни плюс бонус (например, за вопросы на повторение). */
+export function totalXp(progress: Record<string, LevelProgress>, bonus = 0): number {
+  return Object.values(progress).reduce((sum, item) => sum + levelXp(item), bonus);
 }
 
 export interface RankState {

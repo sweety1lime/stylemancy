@@ -3,9 +3,11 @@ import { evaluate, lintOptionsFor, scoreSolution, solutionDeclCount } from '../e
 import { lintCss } from '../engine/lint';
 import type { ItemStatus } from '../engine/scene';
 import type { Level } from '../engine/types';
+import { recordCast, recordSuccess } from '../game/achievements';
 import { currentLevel, drafts, progress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { SPELLS } from '../game/spells';
+import { stats } from '../game/stats';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { ResultPanel, type Outcome, type RegionStats } from './ResultPanel';
 import { Portrait } from './Portrait';
@@ -50,16 +52,21 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
     sceneRef.current?.apply(next);
   }
 
-  function cast() {
+  /** viaKeyboard — сотворили через Ctrl+Enter (для секретного достижения) */
+  function cast(viaKeyboard = false) {
     const current = codeRef.current;
     const items = sceneRef.current?.apply(current) ?? [];
     const evaluation = evaluate(lintCss(current, lintOptions), items);
+    const found = recordCast(current, viaKeyboard);
     progress.addAttempt(level.id);
     if (evaluation.passed) {
       const score = scoreSolution(hintsUsed, evaluation.declCount, solutionDeclCount(level));
-      const xpBefore = totalXp(progress.snapshot());
+      const firstTime = !progress.get(level.id).completed;
+      const xp = () => totalXp(progress.snapshot(), stats.get().reviewXp);
+      const xpBefore = xp();
       progress.complete(level.id, score.stars);
-      const xpAfter = totalXp(progress.snapshot());
+      found.push(...recordSuccess({ level, code: current, hintsUsed, firstTime }));
+      const xpAfter = xp();
       const rankBefore = rankFor(xpBefore).rank;
       const rankAfter = rankFor(xpAfter).rank;
       setOutcome({
@@ -67,6 +74,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
         score,
         xpGain: xpAfter - xpBefore,
         newRank: rankAfter !== rankBefore ? rankAfter.title : undefined,
+        achievements: found,
       });
     } else {
       setOutcome({ kind: 'fail', evaluation });
@@ -156,7 +164,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
             initialValue={code}
             onChange={handleChange}
             lint={lintCode}
-            onSubmit={cast}
+            onSubmit={() => cast(true)}
             label="Редактор CSS"
             autoFocus
           />
@@ -172,7 +180,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
           <button type="button" className="button button--ghost" onClick={takeHint} disabled={hintsLeft <= 0}>
             {hintLabel}
           </button>
-          <button type="button" className="button button--cast" onClick={cast}>
+          <button type="button" className="button button--cast" onClick={() => cast()}>
             ✦ Сотворить <kbd>Ctrl+Enter</kbd>
           </button>
         </div>

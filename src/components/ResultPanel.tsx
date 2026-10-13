@@ -1,12 +1,14 @@
 import type { Evaluation, Score } from '../engine/evaluate';
+import type { Achievement } from '../game/achievements';
 import { summarizeMisses } from '../engine/scene';
 import type { Level } from '../engine/types';
 import type { Spell } from '../game/spells';
+import { Medal } from './Medal';
 import { RichText } from './RichText';
 import { Stars } from './Stars';
 
 export type Outcome =
-  | { kind: 'success'; score: Score; xpGain: number; newRank?: string }
+  | { kind: 'success'; score: Score; xpGain: number; newRank?: string; achievements: Achievement[] }
   | { kind: 'fail'; evaluation: Evaluation };
 
 /** Итоги района — показываем после последнего уровня. */
@@ -39,6 +41,16 @@ export function ResultPanel({ outcome, level, code, spell, region, trailHref, on
         {outcome.xpGain > 0 && <p className="result__xp">+{outcome.xpGain} XP</p>}
         {outcome.newRank && <p className="result__rank">Новый ранг: {outcome.newRank}!</p>}
         {outcome.score.notes.length > 0 && <p className="result__notes">{outcome.score.notes.join(' · ')}</p>}
+        {outcome.achievements.length > 0 && (
+          <ul className="result__achievements">
+            {outcome.achievements.map((item) => (
+              <li key={item.id}>
+                <Medal category={item.category} scale={2} />
+                Достижение: {item.title}
+              </li>
+            ))}
+          </ul>
+        )}
         {spell && (
           <div className="spell">
             <span className="spell__label">Новое заклинание</span>
