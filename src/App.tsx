@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { AchievementsScreen } from './components/AchievementsScreen';
+import { GrimoireScreen } from './components/GrimoireScreen';
 import { LandTrail } from './components/LandTrail';
 import { LevelScreen } from './components/LevelScreen';
 import type { RegionStats } from './components/ResultPanel';
@@ -69,6 +70,14 @@ export default function App() {
         </Screen>
       );
     }
+  }
+
+  if (route.name === 'grimoire') {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+        <GrimoireScreen />
+      </Screen>
+    );
   }
 
   if (route.name === 'achievements') {

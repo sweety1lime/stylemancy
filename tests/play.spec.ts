@@ -172,3 +172,57 @@ test.describe('достижения', () => {
     await page.screenshot({ path: `${SCREENS}/05-achievements.png`, fullPage: true });
   });
 });
+
+test.describe('гримуар', () => {
+  test('запись, живой пример, заметка и шпаргалка для печати', async ({ page }) => {
+    await openLevel(page, 1);
+    await typeCode(page, '.island {\n  display: flex;\n}\n');
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+
+    await page.goto('/#/grimoire');
+    await expect(page.getByRole('heading', { name: 'Гримуар' })).toBeVisible();
+    await expect(page.getByText(/Изучено 1 из \d+ заклинаний/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: '???' }).first()).toBeVisible();
+
+    // Живой пример: кнопка значения меняет мини-сцену и код
+    await page.getByRole('button', { name: 'block', exact: true }).click();
+    await expect(page.locator('.example__code').first()).toContainText('display: block;');
+    // При display: block блоки встают друг под другом — проверяем саму мини-сцену
+    const stacked = await page
+      .locator('.example__preview')
+      .first()
+      .evaluate((frame: HTMLIFrameElement) => {
+        const items = frame.contentDocument?.querySelectorAll('.item') ?? [];
+        return items.length > 1 && items[1].getBoundingClientRect().top > items[0].getBoundingClientRect().top;
+      });
+    expect(stacked).toBe(true);
+
+    await page.getByRole('textbox').first().fill('Флекс выстраивает детей в ряд');
+    await page.reload();
+    await expect(page.getByRole('textbox').first()).toHaveValue('Флекс выстраивает детей в ряд');
+    await page.screenshot({ path: `${SCREENS}/06-grimoire.png`, fullPage: true });
+
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.locator('.example__chips').first()).toBeHidden();
+    await expect(page.getByText('Мои заметки: Флекс выстраивает детей в ряд')).toBeVisible();
+    await page.screenshot({ path: `${SCREENS}/07-grimoire-print.png`, fullPage: true });
+  });
+
+  test('вопрос на повторение после второго нового уровня', async ({ page }) => {
+    await openLevel(page, 1);
+    await typeCode(page, '.island {\n  display: flex;\n}\n');
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    await expect(page.getByText('Вопрос на повторение', { exact: false })).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Дальше →' }).click();
+    await typeCode(page, '.island {\n  display: flex;\n  justify-content: flex-end;\n}\n');
+    await cast(page);
+    await expect(page.getByText(/Вопрос на повторение/)).toBeVisible();
+    await page.getByRole('button', { name: 'Выстраивает их вдоль главной оси — по умолчанию в ряд' }).click();
+    await expect(page.getByText(/Верно! \+5 XP/)).toBeVisible();
+    await expect(page.locator('.rank__xp')).toHaveText('55 XP');
+    await page.screenshot({ path: `${SCREENS}/08-review.png`, fullPage: true });
+  });
+});

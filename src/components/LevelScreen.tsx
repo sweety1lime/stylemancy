@@ -6,11 +6,13 @@ import type { Level } from '../engine/types';
 import { recordCast, recordSuccess } from '../game/achievements';
 import { currentLevel, drafts, progress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
+import { learnedSpells, pickQuestion, reviewIsDue, skipReview, type ReviewQuestion } from '../game/review';
 import { SPELLS } from '../game/spells';
 import { stats } from '../game/stats';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { ResultPanel, type Outcome, type RegionStats } from './ResultPanel';
 import { Portrait } from './Portrait';
+import { ReviewCard } from './ReviewCard';
 import { RichText } from './RichText';
 import { Scene, type SceneHandle } from './Scene';
 
@@ -28,6 +30,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   const [hintsUsed, setHintsUsed] = useState(() => progress.get(level.id).hintsUsed);
   const [statuses, setStatuses] = useState<ItemStatus[]>([]);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const [review, setReview] = useState<{ question: ReviewQuestion; seed: number } | null>(null);
   const codeRef = useRef(code);
   const editorRef = useRef<CodeEditorHandle>(null);
   const sceneRef = useRef<SceneHandle>(null);
@@ -66,6 +69,11 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
       const xpBefore = xp();
       progress.complete(level.id, score.stars);
       found.push(...recordSuccess({ level, code: current, hintsUsed, firstTime }));
+      // Раз в два новых уровня — вопрос по заклинанию, которое дольше всех не вспоминали
+      if (firstTime && reviewIsDue()) {
+        const question = pickQuestion(learnedSpells(progress.snapshot()), level.learns);
+        if (question) setReview({ question, seed: stats.get().completions });
+      }
       const xpAfter = xp();
       const rankBefore = rankFor(xpBefore).rank;
       const rankAfter = rankFor(xpAfter).rank;
@@ -205,6 +213,19 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
             region={region}
             trailHref={trailHref}
             onNext={onNext}
+          />
+        )}
+
+        {review && (
+          <ReviewCard
+            question={review.question}
+            seed={review.seed}
+            heading="Вопрос на повторение"
+            onDone={() => setReview(null)}
+            onSkip={() => {
+              skipReview();
+              setReview(null);
+            }}
           />
         )}
       </section>
