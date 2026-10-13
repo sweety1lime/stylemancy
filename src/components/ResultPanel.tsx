@@ -1,18 +1,31 @@
 import type { Evaluation, Score } from '../engine/evaluate';
+import { summarizeMisses } from '../engine/scene';
+import type { Level } from '../engine/types';
 import type { Spell } from '../game/spells';
 import { RichText } from './RichText';
 import { Stars } from './Stars';
 
 export type Outcome = { kind: 'success'; score: Score } | { kind: 'fail'; evaluation: Evaluation };
 
+/** Итоги района — показываем после последнего уровня. */
+export interface RegionStats {
+  title: string;
+  completed: number;
+  total: number;
+  stars: number;
+  maxStars: number;
+}
+
 interface ResultPanelProps {
   outcome: Outcome;
+  level: Level;
   code: string;
   spell?: Spell;
+  region: RegionStats;
   onNext?: () => void;
 }
 
-export function ResultPanel({ outcome, code, spell, onNext }: ResultPanelProps) {
+export function ResultPanel({ outcome, level, code, spell, region, onNext }: ResultPanelProps) {
   if (outcome.kind === 'success') {
     return (
       <section className="result result--success" aria-live="polite">
@@ -34,15 +47,23 @@ export function ResultPanel({ outcome, code, spell, onNext }: ResultPanelProps) 
           <button type="button" className="button button--cast" onClick={onNext}>
             Дальше →
           </button>
+        ) : region.completed === region.total ? (
+          <p className="result__final">
+            Район «{region.title}» пройден! Звёзд собрано: {region.stars} из {region.maxStars}. Скоро откроются новые
+            земли.
+          </p>
         ) : (
-          <p className="result__final">Это последний готовый уровень. Скоро откроются новые земли!</p>
+          <p className="result__final">
+            Это последний уровень района. Пройдено уровней: {region.completed} из {region.total} — вернись к
+            пропущенным.
+          </p>
         )}
       </section>
     );
   }
 
   const { errors, items } = outcome.evaluation;
-  const misses = items.filter((item) => !item.inPlace);
+  const misses = summarizeMisses(items, level.check.groupName, level.check.tolerance);
   return (
     <section className="result result--fail" aria-live="polite">
       <h2 className="result__title">Заклинание не сработало</h2>
@@ -59,8 +80,8 @@ export function ResultPanel({ outcome, code, spell, onNext }: ResultPanelProps) 
         </>
       ) : misses.length > 0 ? (
         <ul className="result__list">
-          {misses.map((item) => (
-            <li key={item.name}>{item.message}</li>
+          {misses.map((line) => (
+            <li key={line}>{line}</li>
           ))}
         </ul>
       ) : (

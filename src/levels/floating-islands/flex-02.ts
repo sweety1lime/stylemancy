@@ -22,7 +22,7 @@ export default defineLevel({
   justify-content: flex-end;
 }
 `,
-  check: { items: '.crystal' },
+  check: { items: '.crystal', groupName: 'кристаллы' },
   hints: [
     'Кристаллы стоят вдоль главной оси — в ряду это горизонталь. Нужно свойство, которое распределяет элементы вдоль неё.',
     'Это свойство называется `justify-content`.',

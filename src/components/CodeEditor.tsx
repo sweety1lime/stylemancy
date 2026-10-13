@@ -29,6 +29,8 @@ interface CodeEditorProps {
   /** Ctrl+Enter */
   onSubmit?: () => void;
   label: string;
+  /** Сразу поставить курсор туда, где студент начнёт писать (кроме сенсорных экранов) */
+  autoFocus?: boolean;
   ref?: Ref<CodeEditorHandle>;
 }
 
@@ -73,11 +75,24 @@ function toDiagnostics(problems: Problem[], length: number): Diagnostic[] {
   });
 }
 
+/**
+ * Где начать писать: заготовку-комментарий выделяем целиком (её заменят),
+ * иначе курсор — в конец последней строки перед первой «}».
+ */
+function startSelection(text: string): { anchor: number; head?: number } {
+  const comment = /\/\*[\s\S]*?\*\//.exec(text);
+  if (comment) return { anchor: comment.index, head: comment.index + comment[0].length };
+  const close = text.indexOf('}');
+  if (close === -1) return { anchor: text.length };
+  const lineEnd = text.lastIndexOf('\n', close);
+  return { anchor: lineEnd === -1 ? close : lineEnd };
+}
+
 /** Редактор CSS на CodeMirror 6: подсветка, автодополнение и наши подсказки об ошибках. */
-export function CodeEditor({ initialValue, onChange, lint, onSubmit, label, ref }: CodeEditorProps) {
+export function CodeEditor({ initialValue, onChange, lint, onSubmit, label, autoFocus, ref }: CodeEditorProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
-  const setup = useRef({ initialValue, label });
+  const setup = useRef({ initialValue, label, autoFocus });
   const callbacks = useRef({ onChange, lint, onSubmit });
 
   useEffect(() => {
@@ -130,6 +145,10 @@ export function CodeEditor({ initialValue, onChange, lint, onSubmit, label, ref 
       }),
     });
     viewRef.current = view;
+    if (setup.current.autoFocus && window.matchMedia('(pointer: fine)').matches) {
+      view.dispatch({ selection: startSelection(view.state.doc.toString()) });
+      view.contentDOM.focus({ preventScroll: true });
+    }
     return () => {
       view.destroy();
       viewRef.current = null;

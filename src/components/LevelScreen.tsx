@@ -7,17 +7,18 @@ import { drafts, progress } from '../game/progress';
 import { SPELLS } from '../game/spells';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { NpcAvatar } from './NpcAvatar';
-import { ResultPanel, type Outcome } from './ResultPanel';
+import { ResultPanel, type Outcome, type RegionStats } from './ResultPanel';
 import { RichText } from './RichText';
 import { Scene, type SceneHandle } from './Scene';
 
 interface LevelScreenProps {
   level: Level;
   number: number;
+  region: RegionStats;
   onNext?: () => void;
 }
 
-export function LevelScreen({ level, number, onNext }: LevelScreenProps) {
+export function LevelScreen({ level, number, region, onNext }: LevelScreenProps) {
   const [code, setCode] = useState(() => drafts.get(level.id) ?? level.starterCss);
   const [hintsUsed, setHintsUsed] = useState(() => progress.get(level.id).hintsUsed);
   const [statuses, setStatuses] = useState<ItemStatus[]>([]);
@@ -140,6 +141,7 @@ export function LevelScreen({ level, number, onNext }: LevelScreenProps) {
             lint={lintCode}
             onSubmit={cast}
             label="Редактор CSS"
+            autoFocus
           />
           <details className="markup">
             <summary>HTML сцены</summary>
@@ -169,7 +171,9 @@ export function LevelScreen({ level, number, onNext }: LevelScreenProps) {
           </ol>
         )}
 
-        {outcome && <ResultPanel outcome={outcome} code={code} spell={spell} onNext={onNext} />}
+        {outcome && (
+          <ResultPanel outcome={outcome} level={level} code={code} spell={spell} region={region} onNext={onNext} />
+        )}
       </section>
     </main>
   );

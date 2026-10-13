@@ -39,7 +39,7 @@ body {
   left: 36px;
   right: 36px;
   top: 100%;
-  height: 62px;
+  height: 52px;
   margin-top: 10px;
   background:
     linear-gradient(180deg, #6ee7a8 0 7px, #2f8f5b 7px 13px, transparent 13px),
@@ -80,13 +80,13 @@ body {
   animation: crystal-shadow 3.4s ease-in-out infinite;
 }
 
-.crystal:nth-child(2)::before,
-.crystal:nth-child(2)::after {
+.crystal:nth-child(3n + 2)::before,
+.crystal:nth-child(3n + 2)::after {
   animation-delay: -1.1s;
 }
 
-.crystal:nth-child(3)::before,
-.crystal:nth-child(3)::after {
+.crystal:nth-child(3n + 3)::before,
+.crystal:nth-child(3n + 3)::after {
   animation-delay: -2.2s;
 }
 
@@ -97,6 +97,37 @@ body {
 .amethyst { --item-color: #a78bfa; --item-light: #f1eaff; --item-dark: #5b3fc4; --item-glow: rgba(167, 139, 250, 0.75); }
 .emerald  { --item-color: #34d399; --item-light: #dcfce7; --item-dark: #047857; --item-glow: rgba(52, 211, 153, 0.7); }
 .ruby     { --item-color: #fb7185; --item-light: #ffe4e6; --item-dark: #be123c; --item-glow: rgba(251, 113, 133, 0.7); }
+.sapphire { --item-color: #60a5fa; --item-light: #dbeafe; --item-dark: #1d4ed8; --item-glow: rgba(96, 165, 250, 0.7); }
+.topaz    { --item-color: #fbbf24; --item-light: #fef3c7; --item-dark: #b45309; --item-glow: rgba(251, 191, 36, 0.65); }
+
+/* Камни моста */
+.stone {
+  --item-color: #c4b5fd;
+  position: relative;
+  width: 80px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #a5a9c4 0%, #70758f 45%, #4a4e66 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.25),
+    0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Средний камень — рунический: растягиваясь, он показывает больше рун */
+.stone.middle {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(221, 214, 254, 0.6) 18px 20px, transparent 20px 38px),
+    linear-gradient(180deg, #8f86c9 0%, #5c5296 45%, #3b3466 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.25),
+    0 0 18px rgba(167, 139, 250, 0.45);
+}
+
+.stone[data-in-place] {
+  filter: brightness(1.15) drop-shadow(0 0 10px rgba(196, 181, 253, 0.6));
+}
 
 @keyframes crystal-float {
   0%, 100% { transform: translateY(0); }

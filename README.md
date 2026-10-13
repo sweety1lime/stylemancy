@@ -12,6 +12,12 @@ npm run build    # сборка сайта в папку dist/
 npm run lint
 ```
 
+Скриншоты сцен всех уровней (до и после решения) для проверки глазами — в `test-results/gallery/`:
+
+```powershell
+$env:GALLERY=1; npx playwright test gallery   # PowerShell
+```
+
 ## Как добавить уровень
 
 1. Скопировать соседний файл в `src/levels/<район>/`, например `flex-03.ts` → `flex-04.ts`, и поменять `id`, реплики, задачу, стартовый код, эталон и подсказки.

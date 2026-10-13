@@ -21,6 +21,8 @@ export interface LevelDef {
     items: string;
     /** Подпись предмета, если у элемента нет data-name */
     itemLabel?: string;
+    /** Как назвать все предметы сразу: «Все кристаллы смещены одинаково…» */
+    groupName?: string;
     /** Допуск в пикселях */
     tolerance?: number;
   };

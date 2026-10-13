@@ -2,8 +2,16 @@ import { expect, test, type Page } from '@playwright/test';
 
 const SCREENS = 'test-results/screens';
 
+async function openLevel(page: Page, n: number) {
+  await page.getByRole('button', { name: new RegExp(`^Уровень ${n}:`) }).click();
+}
+
 async function typeCode(page: Page, code: string) {
   await page.locator('.cm-content').fill(code);
+}
+
+async function cast(page: Page) {
+  await page.getByRole('button', { name: /Сотворить/ }).click();
 }
 
 test('ученик проходит первый уровень', async ({ page }) => {
@@ -13,9 +21,10 @@ test('ученик проходит первый уровень', async ({ page 
   await expect(page.getByText('На месте: 1 из 3')).toBeVisible();
   await page.screenshot({ path: `${SCREENS}/01-start.png`, fullPage: true });
 
-  await typeCode(page, '.island {\n  display: flex;\n}\n');
+  // Курсор уже в редакторе, а заготовка-комментарий выделена — можно сразу печатать
+  await page.keyboard.type('display: flex;');
   await expect(page.getByText('На месте: 3 из 3')).toBeVisible();
-  await page.getByRole('button', { name: /Сотворить/ }).click();
+  await cast(page);
   await expect(page.getByText('Заклинание сработало!')).toBeVisible();
   await expect(page.getByRole('img', { name: '3 из 3 звёзд' }).last()).toBeVisible();
   await page.screenshot({ path: `${SCREENS}/02-success.png`, fullPage: true });
@@ -26,40 +35,76 @@ test('ученик проходит первый уровень', async ({ page 
 
 test('опечатка в значении объясняется по-человечески', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Уровень 2/ }).click();
+  await openLevel(page, 2);
   await typeCode(page, '.island {\n  display: flex;\n  justify-content: centre;\n}\n');
-  await page.getByRole('button', { name: /Сотворить/ }).click();
+  await cast(page);
   await expect(page.getByText(/Может, center\?/)).toBeVisible();
   await page.screenshot({ path: `${SCREENS}/03-typo.png`, fullPage: true });
 });
 
-test('промах: подсказываем, куда сдвинуть кристалл', async ({ page }) => {
+test('промах: одинаковый сдвиг всех кристаллов — одной фразой', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Уровень 2/ }).click();
+  await openLevel(page, 2);
   await typeCode(page, '.island {\n  display: flex;\n  justify-content: center;\n}\n');
-  await page.getByRole('button', { name: /Сотворить/ }).click();
-  await expect(page.getByText('Аметист: нужно на 132px правее.')).toBeVisible();
+  await cast(page);
+  await expect(page.getByText('Все кристаллы смещены одинаково — нужно на 132px правее.')).toBeVisible();
 });
 
 test('чужая магия запрещена, подсказки снимают звёзды', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /Уровень 3/ }).click();
+  await openLevel(page, 3);
   await typeCode(page, '.island {\n  display: flex;\n  padding-left: 100px;\n}\n');
-  await page.getByRole('button', { name: /Сотворить/ }).click();
+  await cast(page);
   await expect(page.getByText(/только магия Flexbox: padding-left не подойдёт/)).toBeVisible();
 
   await page.getByRole('button', { name: /Подсказка 1 из 3/ }).click();
   await expect(page.getByText('Снова распределяем кристаллы', { exact: false })).toBeVisible();
   await typeCode(page, '.island {\n  display: flex;\n  justify-content: space-between;\n}\n');
-  await page.getByRole('button', { name: /Сотворить/ }).click();
+  await cast(page);
   await expect(page.getByText('Заклинание сработало!')).toBeVisible();
   await expect(page.getByText('1 подсказка: −1 ★')).toBeVisible();
+});
+
+test('порядок в строю: нужен order, разворот ряда запрещён', async ({ page }) => {
+  await page.goto('/');
+  await openLevel(page, 10);
+  // Разворот ряда даёт ту же картинку, но уровень учит order
+  await typeCode(page, '.island {\n  display: flex;\n  flex-direction: row-reverse;\n  justify-content: center;\n  align-items: center;\n}\n');
+  await expect(page.getByText('На месте: 3 из 3')).toBeVisible();
+  await cast(page);
+  await expect(page.getByText('В этом испытании нельзя использовать flex-direction.')).toBeVisible();
+
+  await typeCode(
+    page,
+    '.island {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n.ruby {\n  order: -1;\n}\n\n.amethyst {\n  order: 1;\n}\n',
+  );
+  await cast(page);
+  await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+});
+
+test('сжатые кристаллы: одна понятная фраза вместо девяти', async ({ page }) => {
+  await page.goto('/');
+  await openLevel(page, 9);
+  await cast(page);
+  await expect(page.getByText('Все кристаллы не того размера — каждому нужно шире на 13px.')).toBeVisible();
+});
+
+test('после последнего уровня — итог района', async ({ page }) => {
+  await page.goto('/');
+  await openLevel(page, 13);
+  await typeCode(
+    page,
+    '.island {\n  display: flex;\n  justify-content: center;\n  align-items: flex-end;\n  gap: 16px;\n}\n\n.sapphire {\n  align-self: flex-start;\n}\n',
+  );
+  await cast(page);
+  await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  await expect(page.getByText(/Пройдено уровней: 1 из 13/)).toBeVisible();
 });
 
 test.describe('на телефоне', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('сцена и редактор помещаются по ширине', async ({ page }) => {
+  test('сцена, редактор и полоса уровней помещаются по ширине', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('На месте: 1 из 3')).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

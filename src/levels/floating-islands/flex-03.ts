@@ -22,7 +22,7 @@ export default defineLevel({
   justify-content: space-between;
 }
 `,
-  check: { items: '.crystal' },
+  check: { items: '.crystal', groupName: 'кристаллы' },
   hints: [
     'Снова распределяем кристаллы вдоль главной оси — свойство тебе уже знакомо.',
     'У `justify-content` есть значения, которые делят свободное место между элементами. Их названия начинаются на `space-`.',

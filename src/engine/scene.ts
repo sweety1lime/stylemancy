@@ -49,11 +49,22 @@ export function measureItems(doc: Document, level: Level): ItemBox[] {
   });
 }
 
+/** На сколько сдвинуть и изменить предмет, чтобы он совпал с целью. */
+export interface Delta {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 export interface ItemStatus {
   name: string;
   color: string;
   target: ItemBox;
   inPlace: boolean;
+  /** Размер совпадает с целью */
+  sizeOk: boolean;
+  delta: Delta;
   /** Что не так — если предмет не на месте */
   message?: string;
 }
@@ -64,23 +75,57 @@ export function compareItems(actual: ItemBox[], targets: ItemBox[], tolerance = 
   return targets.map((target, i) => {
     const base = { name: target.name, color: target.color, target };
     const item = actual[i];
-    if (!item) return { ...base, inPlace: false, message: `${target.name}: пропал со сцены.` };
-    const dx = Math.round(target.x - item.x);
-    const dy = Math.round(target.y - item.y);
-    const dw = Math.round(target.w - item.w);
-    const dh = Math.round(target.h - item.h);
-    if (near(dx) && near(dy) && near(dw) && near(dh)) return { ...base, inPlace: true };
-
-    const parts: string[] = [];
-    if (!near(dw) || !near(dh)) {
-      if (!near(dw)) parts.push(dw > 0 ? `шире на ${dw}px` : `уже на ${-dw}px`);
-      if (!near(dh)) parts.push(dh > 0 ? `выше ростом на ${dh}px` : `ниже ростом на ${-dh}px`);
-    } else {
-      if (!near(dx)) parts.push(dx > 0 ? `на ${dx}px правее` : `на ${-dx}px левее`);
-      if (!near(dy)) parts.push(dy > 0 ? `на ${dy}px ниже` : `на ${-dy}px выше`);
+    if (!item) {
+      const delta = { x: 0, y: 0, w: 0, h: 0 };
+      return { ...base, inPlace: false, sizeOk: false, delta, message: `${target.name}: пропал со сцены.` };
     }
-    return { ...base, inPlace: false, message: `${target.name}: нужно ${parts.join(' и ')}.` };
+    const delta = {
+      x: Math.round(target.x - item.x),
+      y: Math.round(target.y - item.y),
+      w: Math.round(target.w - item.w),
+      h: Math.round(target.h - item.h),
+    };
+    const sizeOk = near(delta.w) && near(delta.h);
+    if (sizeOk && near(delta.x) && near(delta.y)) return { ...base, inPlace: true, sizeOk, delta };
+    const message = `${target.name}: нужно ${describeDelta(delta, sizeOk, tolerance)}.`;
+    return { ...base, inPlace: false, sizeOk, delta, message };
   });
+}
+
+/** «на 40px правее и на 12px ниже» или «шире на 13px». Если размер не тот, говорим сначала о нём. */
+function describeDelta(delta: Delta, sizeOk: boolean, tolerance: number): string {
+  const near = (d: number) => Math.abs(d) <= tolerance;
+  const parts: string[] = [];
+  if (!sizeOk) {
+    if (!near(delta.w)) parts.push(delta.w > 0 ? `шире на ${delta.w}px` : `уже на ${-delta.w}px`);
+    if (!near(delta.h)) parts.push(delta.h > 0 ? `выше ростом на ${delta.h}px` : `ниже ростом на ${-delta.h}px`);
+  } else {
+    if (!near(delta.x)) parts.push(delta.x > 0 ? `на ${delta.x}px правее` : `на ${-delta.x}px левее`);
+    if (!near(delta.y)) parts.push(delta.y > 0 ? `на ${delta.y}px ниже` : `на ${-delta.y}px выше`);
+  }
+  return parts.join(' и ');
+}
+
+/**
+ * Что сказать студенту о промахах. Если все предметы сдвинуты или сжаты одинаково —
+ * одна фраза вместо списка; длинный список обрезается.
+ */
+export function summarizeMisses(statuses: ItemStatus[], groupName = 'предметы', tolerance = 2, limit = 4): string[] {
+  const misses = statuses.filter((s) => !s.inPlace);
+  if (!misses.length) return [];
+  const [first] = misses;
+  const alike = (a: number, b: number) => Math.abs(a - b) <= 1;
+
+  if (misses.length > 1 && misses.length === statuses.length) {
+    const sameShift = misses.every((s) => s.sizeOk && alike(s.delta.x, first.delta.x) && alike(s.delta.y, first.delta.y));
+    if (sameShift) return [`Все ${groupName} смещены одинаково — нужно ${describeDelta(first.delta, true, tolerance)}.`];
+    const sameSize = misses.every((s) => !s.sizeOk && alike(s.delta.w, first.delta.w) && alike(s.delta.h, first.delta.h));
+    if (sameSize) return [`Все ${groupName} не того размера — каждому нужно ${describeDelta(first.delta, false, tolerance)}.`];
+  }
+
+  const lines = misses.slice(0, limit).map((s) => s.message ?? s.name);
+  if (misses.length > limit) lines.push(`…и ещё ${misses.length - limit} не на месте.`);
+  return lines;
 }
 
 /** Подсвечивает в сцене предметы, которые уже стоят на своих местах. */

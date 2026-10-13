@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LevelScreen } from './components/LevelScreen';
+import type { RegionStats } from './components/ResultPanel';
 import { Stars } from './components/Stars';
 import { currentLevel, progress, useProgress } from './game/progress';
 import { regions } from './levels';
@@ -21,6 +22,19 @@ export default function App() {
   const level = region.levels[index];
   const hasNext = index + 1 < region.levels.length;
 
+  const stats: RegionStats = {
+    title: region.title,
+    completed: region.levels.filter((item) => progressMap[item.id]?.completed).length,
+    total: region.levels.length,
+    stars: region.levels.reduce((sum, item) => sum + (progressMap[item.id]?.stars ?? 0), 0),
+    maxStars: region.levels.length * 3,
+  };
+
+  // Текущий уровень всегда виден в полосе уровней, даже если она прокручивается
+  useEffect(() => {
+    document.querySelector('.level-dot--current')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [index]);
+
   function open(i: number) {
     setIndex(i);
     currentLevel.set(region.levels[i].id);
@@ -37,7 +51,9 @@ export default function App() {
           Каскадия
         </div>
         <nav className="levels" aria-label={`Район «${region.title}»`}>
-          <span className="levels__region">{region.title}</span>
+          <span className="levels__region">
+            {region.title} · ★ {stats.stars}/{stats.maxStars}
+          </span>
           <ol className="levels__list">
             {region.levels.map((item, i) => {
               const done = progressMap[item.id]?.completed;
@@ -64,6 +80,7 @@ export default function App() {
         key={level.id}
         level={level}
         number={index + 1}
+        region={stats}
         onNext={hasNext ? () => open(index + 1) : undefined}
       />
     </div>

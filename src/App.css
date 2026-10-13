@@ -29,19 +29,29 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .levels__region {
+  flex: none;
   color: var(--muted);
   font-size: 14px;
 }
 
+/* Уровней много — полоса прокручивается, а не растягивает страницу */
 .levels__list {
   display: flex;
   gap: 8px;
   margin: 0;
-  padding: 0;
+  padding: 4px;
+  overflow-x: auto;
   list-style: none;
+  scrollbar-width: thin;
+}
+
+.levels__list li {
+  flex: none;
 }
 
 .level-dot {
