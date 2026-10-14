@@ -4,6 +4,7 @@ import { lintCss } from '../engine/lint';
 import { viewportsOf, type ItemStatus } from '../engine/scene';
 import type { Level } from '../engine/types';
 import { recordCast, recordSuccess } from '../game/achievements';
+import { useAuth } from '../game/auth';
 import { currentLevel, drafts, progress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { learnedSpells, pickQuestion, reviewIsDue, skipReview, type ReviewQuestion } from '../game/review';
@@ -12,6 +13,7 @@ import { stats } from '../game/stats';
 import { isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
 import { findLevel } from '../levels';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
+import { FeedbackDialog } from './FeedbackDialog';
 import { ResultPanel, type Outcome, type RegionStats } from './ResultPanel';
 import { Portrait } from './Portrait';
 import { ReviewCard } from './ReviewCard';
@@ -35,6 +37,8 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [review, setReview] = useState<{ question: ReviewQuestion; seed: number } | null>(null);
   const [story, setStory] = useState<OpenStory | null>(null);
+  const [reporting, setReporting] = useState(false);
+  const { account } = useAuth();
   const place = useMemo(() => findLevel(level.id), [level.id]);
   // Район пройден целиком — можно посмотреть победную сцену
   const outro = place && region.completed === region.total ? storyOf(place.region, 'outro') : null;
@@ -180,9 +184,16 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
         <div className="editor-card px-panel">
           <div className="editor-card__head">
             <span className="editor-card__file">style.css</span>
-            <button type="button" className="text-button" onClick={() => editorRef.current?.setValue(level.starterCss)}>
-              Начать заново
-            </button>
+            <span className="editor-card__tools">
+              {account?.role === 'student' && (
+                <button type="button" className="text-button" onClick={() => setReporting(true)}>
+                  Сообщить о проблеме
+                </button>
+              )}
+              <button type="button" className="text-button" onClick={() => editorRef.current?.setValue(level.starterCss)}>
+                Начать заново
+              </button>
+            </span>
           </div>
           <CodeEditor
             ref={editorRef}
@@ -244,6 +255,16 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
               skipReview();
               setReview(null);
             }}
+          />
+        )}
+
+        {reporting && account && (
+          <FeedbackDialog
+            studentId={account.id}
+            levelId={level.id}
+            levelTitle={level.title}
+            code={code}
+            onClose={() => setReporting(false)}
           />
         )}
 

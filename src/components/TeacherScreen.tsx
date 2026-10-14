@@ -4,17 +4,23 @@ import { useAuth } from '../game/auth';
 import { levelXp } from '../game/ranks';
 import {
   createClass,
+  deleteFeedback,
   listClasses,
   loadRoster,
   removeStudent,
   resetStudentPassword,
+  setFeedbackResolved,
   setOpenLands,
   type ClassRow,
+  type FeedbackRow,
   type ProgressRow,
   type Roster,
   type StudentRow,
 } from '../game/teacher';
 import { allLevels, lands, regions } from '../levels';
+import { ClassCard } from './ClassCard';
+import { FeedbackList } from './FeedbackList';
+import { Modal } from './Modal';
 
 const REFRESH_MS = 30_000;
 
@@ -231,6 +237,8 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
   const [reload, setReload] = useState(0);
   const [detail, setDetail] = useState<{ student: StudentRow; level: Level; row: ProgressRow } | null>(null);
   const [resetFor, setResetFor] = useState<StudentRow | null>(null);
+  const [feedbackCode, setFeedbackCode] = useState<FeedbackRow | null>(null);
+  const [showCard, setShowCard] = useState(false);
   const joinLink = `${window.location.origin}${window.location.pathname}`;
 
   useEffect(() => {
@@ -271,6 +279,25 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
     }
   }
 
+  async function toggleResolved(item: FeedbackRow) {
+    try {
+      await setFeedbackResolved(item.id, !item.resolved);
+      setReload((n) => n + 1);
+    } catch (failure) {
+      setError((failure as Error).message);
+    }
+  }
+
+  async function removeFeedback(item: FeedbackRow) {
+    if (!window.confirm('Удалить сообщение?')) return;
+    try {
+      await deleteFeedback(item.id);
+      setReload((n) => n + 1);
+    } catch (failure) {
+      setError((failure as Error).message);
+    }
+  }
+
   const stats = roster ? levelStats(roster) : [];
   const hot = stats.filter((item) => item.hot);
   const byStudent = roster ? groupProgress(roster.progress) : {};
@@ -284,14 +311,19 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
             Студенты открывают <a href={joinLink}>{joinLink}</a> → «Войти» → «Создать аккаунт» и вводят код:
           </p>
         </div>
-        <button
-          type="button"
-          className="class-code"
-          title="Скопировать код"
-          onClick={() => void navigator.clipboard?.writeText(klass.code)}
-        >
-          {klass.code}
-        </button>
+        <div className="class-view__code">
+          <button
+            type="button"
+            className="class-code"
+            title="Скопировать код"
+            onClick={() => void navigator.clipboard?.writeText(klass.code)}
+          >
+            {klass.code}
+          </button>
+          <button type="button" className="text-button" onClick={() => setShowCard(true)}>
+            Карточка для урока
+          </button>
+        </div>
       </div>
 
       <div className="class-view__lands px-panel">
@@ -338,6 +370,16 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
         </section>
       ) : (
         <>
+          {roster.feedback.length > 0 && (
+            <FeedbackList
+              feedback={roster.feedback}
+              students={roster.students}
+              onShowCode={setFeedbackCode}
+              onToggle={(item) => void toggleResolved(item)}
+              onRemove={(item) => void removeFeedback(item)}
+            />
+          )}
+
           {hot.length > 0 && (
             <p className="class-view__hot px-panel">
               Группа застревает: {hot.map((item) => `«${item.level.title}»`).join(', ')}. Возможно, тему стоит разобрать на уроке.
@@ -443,6 +485,16 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
         </>
       )}
 
+      {feedbackCode && (
+        <Modal title="Код студента в момент сообщения" onClose={() => setFeedbackCode(null)}>
+          <pre className="example__code">
+            <code>{feedbackCode.code}</code>
+          </pre>
+        </Modal>
+      )}
+
+      {showCard && <ClassCard klass={klass} joinLink={joinLink} onClose={() => setShowCard(false)} />}
+
       {detail && (
         <Modal title={`${detail.student.nickname} · ${detail.level.title}`} onClose={() => setDetail(null)}>
           <p>
@@ -506,24 +558,3 @@ function ResetPassword({ student, onClose }: { student: StudentRow; onClose: () 
   );
 }
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  return (
-    <div className="story" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="modal px-panel">
-        <div className="modal__head">
-          <h2 className="pixel-subtitle">{title}</h2>
-          <button type="button" className="text-button" onClick={onClose} aria-label="Закрыть">
-            ✕
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}

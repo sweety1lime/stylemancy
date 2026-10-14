@@ -403,6 +403,25 @@ a.land:hover .land__art {
   opacity: 0.5;
 }
 
+/* Закрытый район: видно, что впереди, но войти пока нельзя */
+.district--locked .district__head,
+.district--locked .path {
+  opacity: 0.45;
+  filter: grayscale(0.7);
+}
+
+.district__lock {
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: 15px;
+}
+
+.path__node--locked,
+.path__node--locked:hover {
+  transform: none;
+  cursor: not-allowed;
+}
+
 .path {
   --amp: 1;
   display: grid;
@@ -801,6 +820,26 @@ a.land:hover .land__art {
   font-size: 13px;
 }
 
+.editor-card__tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 12px;
+}
+
+.feedback__kinds {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.feedback__kinds legend {
+  margin-bottom: 6px;
+  color: var(--muted);
+}
+
 .code-editor .cm-editor {
   min-height: 170px;
 }
@@ -932,6 +971,12 @@ a.land:hover .land__art {
 .result__final {
   color: var(--muted);
   font-size: 14px;
+}
+
+.result__unlock {
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: 16px;
 }
 
 .result__list {
@@ -2153,12 +2198,155 @@ a.land:hover .land__art {
   box-shadow: inset 0 0 0 3px var(--gold);
 }
 
+.class-view__code {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
 .class-view__lands {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 22px;
   padding: 12px 18px;
+}
+
+/* ——— Сообщения студентов ——— */
+
+.feedback-list {
+  display: grid;
+  gap: 10px;
+  padding: 14px 18px;
+}
+
+.feedback-list ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feedback-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  background: var(--panel-2);
+  box-shadow: inset 4px 0 0 var(--gold);
+}
+
+.feedback-item--resolved {
+  opacity: 0.6;
+  box-shadow: inset 4px 0 0 var(--frame);
+}
+
+.feedback-item__head {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.feedback-item__head strong {
+  color: var(--text);
+}
+
+.feedback-item__kind {
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: 15px;
+}
+
+.feedback-item__text {
+  white-space: pre-wrap;
+}
+
+.feedback-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.feedback-list__resolved summary {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.feedback-list__resolved[open] summary {
+  margin-bottom: 10px;
+}
+
+/* ——— Карточка для урока: крупно — для проектора, а на печать уходит только она ——— */
+
+.class-card-modal {
+  width: min(760px, 100%);
+}
+
+.class-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px 20px;
+  background: #120b2e;
+  box-shadow: inset 0 0 0 3px var(--frame);
+}
+
+.class-card__title {
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: 24px;
+}
+
+.class-card__steps {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 26px;
+  font-size: 20px;
+}
+
+.class-card__link {
+  color: var(--gold-strong);
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+
+.class-card__code {
+  color: var(--gold-strong);
+  font-family: var(--font-pixel);
+  font-size: 40px;
+  letter-spacing: 0.12em;
+}
+
+.class-card__note {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+@media print {
+  body.print-card * {
+    visibility: hidden;
+  }
+
+  body.print-card .class-card,
+  body.print-card .class-card * {
+    visibility: visible;
+  }
+
+  body.print-card .class-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    color: #000;
+    box-shadow: none;
+  }
+
+  body.print-card .class-card__title,
+  body.print-card .class-card__link,
+  body.print-card .class-card__code,
+  body.print-card .class-card__note {
+    color: #000;
+  }
 }
 
 .class-view__toolbar {

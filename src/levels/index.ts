@@ -67,13 +67,15 @@ export interface LevelPlace {
   land: Land;
   /** Номер уровня в районе, с нуля */
   index: number;
+  /** Номер района в земле, с нуля */
+  regionIndex: number;
 }
 
 export function findLevel(id: string): LevelPlace | undefined {
   for (const land of lands) {
-    for (const region of land.regions) {
+    for (const [regionIndex, region] of land.regions.entries()) {
       const index = region.levels.findIndex((level) => level.id === id);
-      if (index !== -1) return { level: region.levels[index], region, land, index };
+      if (index !== -1) return { level: region.levels[index], region, land, index, regionIndex };
     }
   }
   return undefined;

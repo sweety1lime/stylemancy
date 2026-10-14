@@ -11,6 +11,7 @@ import { TopBar } from './components/TopBar';
 import { WorldMap } from './components/WorldMap';
 import { isLandOpen, useAuth } from './game/auth';
 import { useProgress } from './game/progress';
+import { isRegionOpen } from './game/unlock';
 import { hrefFor, navigate, parseHash, useHash } from './game/router';
 import { findLand, findLevel } from './levels';
 import './App.css';
@@ -40,14 +41,24 @@ export default function App() {
   if (route.name === 'level') {
     const place = findLevel(route.id);
     if (place && isLandOpen(account, place.land.id)) {
-      const { level, region, land, index } = place;
+      const { level, region, land, index, regionIndex } = place;
+      // Район ещё закрыт — показываем тропу: там видно, какое испытание его откроет
+      if (!isRegionOpen(account, land, regionIndex, progress)) {
+        return (
+          <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+            <LandTrail land={land} />
+          </Screen>
+        );
+      }
       const next = region.levels[index + 1];
+      const nextRegion = index === region.levels.length - 1 ? land.regions[regionIndex + 1] : undefined;
       const stats: RegionStats = {
         title: region.title,
         completed: region.levels.filter((item) => progress[item.id]?.completed).length,
         total: region.levels.length,
         stars: region.levels.reduce((sum, item) => sum + (progress[item.id]?.stars ?? 0), 0),
         maxStars: region.levels.length * 3,
+        unlocks: nextRegion?.title,
       };
       const trailHref = hrefFor({ name: 'land', id: land.id });
       return (

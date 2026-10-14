@@ -18,6 +18,8 @@ export interface RegionStats {
   total: number;
   stars: number;
   maxStars: number;
+  /** Этот уровень открывает следующий район — его название */
+  unlocks?: string;
 }
 
 interface ResultPanelProps {
@@ -73,6 +75,7 @@ export function ResultPanel({ outcome, level, code, spell, region, trailHref, on
                 ? `Район «${region.title}» пройден! Звёзд собрано: ${region.stars} из ${region.maxStars}.`
                 : `Это последний уровень района. Пройдено уровней: ${region.completed} из ${region.total} — вернись к пропущенным.`}
             </p>
+            {region.unlocks && <p className="result__unlock">Открыт новый район: «{region.unlocks}» — он ждёт на тропе.</p>}
             <div className="result__buttons">
               <a className="button button--cast" href={trailHref}>
                 ← К тропе

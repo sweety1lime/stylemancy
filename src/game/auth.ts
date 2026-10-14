@@ -168,7 +168,11 @@ function explain(error: AuthError | Error, who: 'student' | 'teacher'): Error {
     return new Error('Слишком много попыток из этой сети. Подождите пару минут и попробуйте снова.');
   }
   if (code === 'email_address_invalid') return new Error('Проверьте адрес почты.');
-  if (/fetch|network/i.test(message)) return new Error('Нет связи с сервером. Проверьте интернет.');
+  if (/fetch|network/i.test(message)) {
+    return new Error(
+      'Нет связи с сервером. Если интернет работает, возможно, школьная сеть закрывает адрес supabase.co — его должен открыть администратор. А пока можно играть как гость: прогресс сохранится в этом браузере.',
+    );
+  }
   return new Error(`Не получилось: ${message}`);
 }
 

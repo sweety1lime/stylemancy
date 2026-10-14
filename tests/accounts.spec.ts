@@ -67,6 +67,16 @@ test.describe('аккаунты на живой базе Supabase', () => {
       await student.getByRole('button', { name: /Сотворить/ }).click();
       await expect(student.getByText('Заклинание сработало!')).toBeVisible();
 
+      // Студент сообщает учителю о проблеме прямо из уровня
+      await student.getByRole('button', { name: 'Сообщить о проблеме' }).click();
+      await student.getByRole('button', { name: 'Отправить учителю' }).click();
+      await expect(student.getByText('Выбери, что случилось.')).toBeVisible();
+      await student.getByLabel('Непонятно, что делать').check();
+      await student.getByLabel(/Подробности/).fill('Тестовое сообщение: задание непонятное');
+      await student.getByRole('button', { name: 'Отправить учителю' }).click();
+      await expect(student.getByText('Сообщение ушло учителю.', { exact: false })).toBeVisible();
+      await student.getByRole('button', { name: 'Вернуться к уровню' }).click();
+
       // Учитель видит его звёзды
       await expect
         .poll(
@@ -84,6 +94,17 @@ test.describe('аккаунты на живой базе Supabase', () => {
       await teacher.getByRole('button', { name: `${nickname}, Пробуждение` }).click();
       await expect(teacher.getByRole('dialog')).toContainText('display: flex');
       await teacher.keyboard.press('Escape');
+
+      // Сообщение студента — в панели, вместе с кодом; учитель отмечает его решённым
+      const messages = teacher.getByRole('region', { name: 'Сообщения студентов' });
+      await expect(messages).toContainText('Сообщения студентов · новых: 1');
+      await expect(messages).toContainText('Тестовое сообщение: задание непонятное');
+      await expect(messages).toContainText('Непонятно, что делать');
+      await messages.getByRole('button', { name: 'Код' }).click();
+      await expect(teacher.getByRole('dialog')).toContainText('display: flex');
+      await teacher.keyboard.press('Escape');
+      await messages.getByRole('button', { name: 'Решено' }).click();
+      await expect(messages).toContainText('Новых сообщений нет.');
 
       // Учитель сбрасывает пароль, студент входит с новым — прогресс на месте
       await teacher.getByRole('row', { name: new RegExp(nickname) }).getByRole('button', { name: 'Сбросить пароль' }).click();

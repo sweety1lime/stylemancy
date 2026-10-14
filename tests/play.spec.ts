@@ -13,6 +13,15 @@ async function typeCode(page: Page, code: string) {
   await page.keyboard.insertText(code);
 }
 
+/** Пройдены испытания районов — открыты все районы Парящих земель (для гостя они открываются по порядку). */
+async function unlockDistricts(page: Page) {
+  await page.addInitScript(() => {
+    if (localStorage.getItem('cascadia.progress.v1')) return;
+    const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done }));
+  });
+}
+
 async function cast(page: Page) {
   await page.getByRole('button', { name: /Сотворить/ }).click();
 }
@@ -154,6 +163,7 @@ test.describe('на телефоне', () => {
   });
 
   test('зеркала адаптивного уровня встают друг под другом и помещаются', async ({ page }) => {
+    await unlockDistricts(page);
     await page.goto('/#/level/mq-01');
     await expect(page.getByText('На месте: 4 из 6')).toBeVisible();
     await expect(page.locator('.mirrors--column')).toBeVisible();
@@ -330,7 +340,32 @@ test.describe('сценки', () => {
   });
 });
 
+test('районы открываются по порядку: следующий — после испытания предыдущего', async ({ page }) => {
+  // Гость сразу в Витражной обители — его встречает тропа с замком
+  await page.goto('/#/level/grid-01');
+  await expect(page.getByRole('heading', { name: 'Парящие земли' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByText('Откроется после испытания «Звёздная корона» в районе «Парящие острова».')).toBeVisible();
+  await expect(page.getByText('Откроется после уровня «Бесконечная галерея» в районе «Зеркальная башня».')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Уровень 1: Первые створки' })).toHaveCount(0);
+
+  // Испытание пройдено — район открыт, о нём говорят сразу после победы
+  await openLevel(page, 13);
+  await typeCode(
+    page,
+    '.island {\n  display: flex;\n  justify-content: center;\n  align-items: flex-end;\n  gap: 16px;\n}\n\n.sapphire {\n  align-self: flex-start;\n}\n',
+  );
+  await cast(page);
+  await expect(page.getByText('Открыт новый район: «Витражная обитель» — он ждёт на тропе.')).toBeVisible();
+  await page.goto('/#/level/grid-01');
+  await expect(page.getByRole('heading', { name: 'Первые створки' })).toBeVisible();
+});
+
 test.describe('Grid и адаптив', () => {
+  test.beforeEach(async ({ page }) => {
+    await unlockDistricts(page);
+  });
+
   test('уровень про fr не засчитывается в пикселях, даже если стёкла на месте', async ({ page }) => {
     await page.goto('/#/level/grid-02');
     await typeCode(page, '.window {\n  display: grid;\n  grid-template-columns: 120px 240px 120px;\n}\n');
@@ -375,8 +410,9 @@ test.describe('Grid и адаптив', () => {
 
   test('живой пример с медиазапросом переключает ширину экрана', async ({ page }) => {
     await page.addInitScript(() => {
-      if (localStorage.getItem('cascadia.progress.v1')) return;
-      localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'mq-01': { completed: true, stars: 3, attempts: 1, hintsUsed: 0 } }));
+      const progress = JSON.parse(localStorage.getItem('cascadia.progress.v1') ?? '{}');
+      progress['mq-01'] = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify(progress));
     });
     await page.goto('/#/grimoire');
     const card = page.locator('.spell-card', { has: page.getByRole('heading', { name: '@media (min-width: …)' }) });
