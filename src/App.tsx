@@ -1,5 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { AchievementsScreen } from './components/AchievementsScreen';
+import { CertificateScreen } from './components/CertificateScreen';
+import { ChronicleScreen } from './components/ChronicleScreen';
 import { GrimoireScreen } from './components/GrimoireScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { LandTrail } from './components/LandTrail';
@@ -112,6 +114,22 @@ export default function App() {
     return (
       <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
         <TeacherScreen />
+      </Screen>
+    );
+  }
+
+  if (route.name === 'chronicle') {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+        <ChronicleScreen />
+      </Screen>
+    );
+  }
+
+  if (route.name === 'certificate') {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'chronicle' }), label: 'Летопись' }}>
+        <CertificateScreen key={route.id} id={route.id} />
       </Screen>
     );
   }

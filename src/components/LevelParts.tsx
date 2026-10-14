@@ -164,7 +164,13 @@ export function Workbench({ flow, level, region, trailHref, onNext, onCast, edit
       )}
 
       {flow.story && (
-        <StoryScene title={flow.story.title} frames={flow.story.frames} finishLabel={flow.story.finishLabel} onClose={flow.closeStory} />
+        <StoryScene
+          key={flow.story.key}
+          title={flow.story.title}
+          frames={flow.story.frames}
+          finishLabel={flow.story.finishLabel}
+          onClose={flow.closeStory}
+        />
       )}
     </section>
   );

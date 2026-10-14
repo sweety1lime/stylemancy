@@ -57,6 +57,10 @@ test.describe('аккаунты на живой базе Supabase', () => {
       studentSignedUp = true;
       await expect(student.getByText(`Класс «${className}»`)).toBeVisible();
       await expect(student.locator('.account__name')).toHaveText(nickname);
+      // Пролог всей игры встречает на карте — с ником героя
+      const prologue = student.getByRole('dialog', { name: 'Пролог: Великий Сброс' });
+      await expect(prologue).toBeVisible();
+      await prologue.getByRole('button', { name: 'Пропустить' }).click();
 
       // Студент проходит первый уровень
       await student.goto('/#/level/flex-01');

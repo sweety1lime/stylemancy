@@ -41,6 +41,8 @@ async function expectNoHorizontalScroll(page: Page) {
 test('путь от карты до первого уровня и победа', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
+  // Сначала — пролог всей игры
+  await page.getByRole('dialog', { name: 'Пролог: Великий Сброс' }).getByRole('button', { name: 'Пропустить' }).click();
   await page.screenshot({ path: `${SCREENS}/00-map.png`, fullPage: true });
 
   await page.getByRole('link', { name: /Парящие земли/ }).click();
@@ -148,6 +150,7 @@ test.describe('на телефоне', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
     await expectNoHorizontalScroll(page);
+    await page.getByRole('button', { name: 'Пропустить' }).click();
     await page.screenshot({ path: `${SCREENS}/04-phone-map.png`, fullPage: true });
 
     await page.goto('/#/land/floating-lands');
@@ -532,5 +535,67 @@ test.describe('Долина Тегов', () => {
       await frame.getByRole('button', { name: 'Отправить' }).click();
       await expect(page.locator('.browser__status')).toHaveText('Форма отправила бы: hero=Ариэль');
     });
+  });
+});
+
+test.describe('общий сюжет', () => {
+  test('пролог игры на карте: один раз и с обращением к герою', async ({ page }) => {
+    await page.goto('/');
+    const dialog = page.getByRole('dialog', { name: 'Пролог: Великий Сброс' });
+    await expect(dialog).toBeVisible();
+    for (let i = 0; i < 3; i++) await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(dialog).toContainText('Это ты, странник!');
+    await dialog.getByRole('button', { name: 'К карте' }).click();
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
+  test('Лорд Дефолт помнит героя из другой земли', async ({ page }) => {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'citadel-02': done }));
+    });
+    await page.goto('/#/land/tags-valley');
+    const dialog = page.getByRole('dialog', { name: 'Пролог: Деревня Тегов' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(dialog).toContainText('Опять ты, странник! Парящие земли у меня уже отняли');
+    await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(dialog).toContainText('Слава о тебе дошла и до нас, странник!');
+  });
+
+  test('финал цитадели: злодей сбегает туда, где проклятие держится, грамота — в летописи', async ({ page }) => {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      const ids = ['flex-13', 'grid-09', 'mq-04', 'citadel-01'];
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(ids.map((id) => [id, done]))));
+    });
+    await page.goto('/#/level/citadel-02');
+    const solution = await page.evaluate<string>("import('/src/levels/default-citadel/citadel-02.ts').then((m) => m.default.solutionCss)");
+    await typeCode(page, solution);
+    await expect(page.getByText(/На месте: (\d+) из \1$/)).toBeVisible();
+    await cast(page);
+
+    const outro = page.getByRole('dialog', { name: 'Эпилог: Цитадель Лорда Дефолта' });
+    await expect(outro).toBeVisible();
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('Держи Руну Раскладки, странник');
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('моё проклятие держится в Долине Тегов, в Лесу Селекторов и в Крепости Блоков');
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('Следующая остановка — Долина Тегов');
+    await outro.getByRole('button', { name: 'Закрыть' }).click();
+
+    await page.goto('/#/chronicle');
+    await expect(page.getByRole('heading', { name: 'Летопись героя' })).toBeVisible();
+    await expect(page.locator('.chronicle__chapter', { hasText: 'Глава 4. Парящие земли' })).toContainText('спасена');
+    await page.getByRole('link', { name: 'Грамота: Парящие земли' }).click();
+    await expect(page.locator('.certificate')).toContainText('за спасение земли «Парящие земли»');
+    await page.getByLabel('Имя на грамоте').fill('Ариэль');
+    await expect(page.locator('.certificate__name')).toHaveText('Ариэль');
+    await page.screenshot({ path: `${SCREENS}/14-certificate.png`, fullPage: true });
   });
 });

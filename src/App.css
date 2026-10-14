@@ -227,7 +227,10 @@
   color: var(--muted);
 }
 
-.world__resume {
+.world__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 14px;
 }
 
@@ -2090,6 +2093,82 @@ a.land:hover .land__art {
   background: rgba(251, 191, 36, 0.8);
 }
 
+/* Академия Каскада: светлая башня, уцелевшая после Великого Сброса */
+.sa-house--academy {
+  background: #e2e8f0;
+  box-shadow:
+    inset 0 0 0 0.6cqw #64748b,
+    0 0 4cqw rgba(246, 196, 83, 0.5);
+}
+
+.sa-house--academy::before {
+  background: #6d28d9;
+}
+
+/* Хаос Скриптов: в темноте мерцает чужая магия — задел на главы по JavaScript */
+.story-art--chaos {
+  background-image: repeating-linear-gradient(180deg, #020617 0 6px, #04170d 6px 8px);
+  background-size: auto;
+}
+
+.sa-code {
+  position: absolute;
+  color: #4ade80;
+  font: 4cqw/1 var(--font-mono);
+  text-shadow: 0 0 1.5cqw #22c55e;
+  animation: glitch 0.8s steps(2, end) infinite;
+}
+
+.sa-code--1 {
+  top: 16%;
+  left: 12%;
+}
+
+.sa-code--2 {
+  top: 30%;
+  right: 16%;
+  font-size: 6cqw;
+  animation-delay: -0.3s;
+}
+
+.sa-code--3 {
+  bottom: 26%;
+  left: 24%;
+  font-size: 6cqw;
+  animation-delay: -0.5s;
+}
+
+.sa-code--4 {
+  bottom: 14%;
+  right: 22%;
+  animation-delay: -0.2s;
+}
+
+.sa-code--5 {
+  top: 52%;
+  left: 46%;
+  font-size: 5cqw;
+  animation-delay: -0.6s;
+}
+
+.sa-code--6 {
+  top: 12%;
+  right: 38%;
+  animation-delay: -0.1s;
+}
+
+@keyframes glitch {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(0.6cqw, -0.4cqw);
+    opacity: 0.55;
+  }
+}
+
 /* Цитадель Лорда Дефолта: серые стены без единого стиля */
 .story-art--citadel {
   background-image: linear-gradient(180deg, #1c1c24 0 25%, #23232c 25% 50%, #2a2a34 50% 75%, #32323d 75%);
@@ -2138,6 +2217,7 @@ a.land:hover .land__art {
 @media (prefers-reduced-motion: reduce) {
   .sa-gem,
   .sa-spark,
+  .sa-code,
   .story__window {
     animation: none;
   }
@@ -2762,5 +2842,197 @@ button.cell {
 
   .class-code {
     font-size: 30px;
+  }
+}
+
+/* ——— Летопись героя ——— */
+
+.chronicle {
+  display: grid;
+  gap: 18px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 24px 48px;
+}
+
+.chronicle__head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.chronicle__lead {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.chronicle__teacher {
+  margin-top: 6px;
+  color: var(--gold);
+  font-size: 14px;
+}
+
+.chronicle__chapters {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chronicle__chapter {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding: 14px 18px;
+}
+
+.chronicle__chapter--done .pixel-subtitle::after {
+  content: " ✦";
+  color: var(--gold);
+}
+
+.chronicle__status {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.chronicle__stories {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.chronicle__locked {
+  color: var(--muted-2);
+  font-size: 14px;
+}
+
+/* ——— Грамота ——— */
+
+.certificate-page {
+  display: grid;
+  gap: 22px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.certificate {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 34px 28px;
+  background: #f5e6c8;
+  color: #2b2116;
+  text-align: center;
+  box-shadow:
+    0 0 0 6px #8a6a2a,
+    0 0 0 10px #f6c453,
+    0 0 0 14px #2a1a05,
+    12px 12px 0 14px rgba(0, 0, 0, 0.45);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.certificate__academy {
+  color: #7c2d12;
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.certificate__title {
+  color: #7c2d12;
+  font-family: var(--font-pixel);
+  font-size: clamp(30px, 6vw, 44px);
+  font-weight: 400;
+  line-height: 1.1;
+  text-shadow: 3px 3px 0 rgba(180, 83, 9, 0.25);
+}
+
+.certificate__given,
+.certificate__topic,
+.certificate__date {
+  color: #6b5536;
+}
+
+.certificate__given {
+  font-style: italic;
+}
+
+.certificate__name {
+  min-width: 60%;
+  padding-bottom: 4px;
+  border-bottom: 3px solid #8a6a2a;
+  color: #1e3a8a;
+  font-family: var(--font-pixel);
+  font-size: clamp(26px, 5vw, 36px);
+}
+
+.certificate__reason {
+  font-size: 18px;
+}
+
+.certificate__topic,
+.certificate__date {
+  font-size: 15px;
+}
+
+.certificate__mentors {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.certificate__stars {
+  color: #b45309;
+  font-family: var(--font-pixel);
+  font-size: 20px;
+}
+
+.certificate-page__tools {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.certificate-page__buttons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.certificate-page__note {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+}
+
+.certificate-page__note-inline {
+  color: var(--gold);
+}
+
+@media print {
+  body.print-certificate * {
+    visibility: hidden;
+  }
+
+  body.print-certificate .certificate,
+  body.print-certificate .certificate * {
+    visibility: visible;
+  }
+
+  body.print-certificate .certificate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: none;
+    border: 6px double #8a6a2a;
   }
 }

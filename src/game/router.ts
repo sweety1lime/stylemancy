@@ -11,7 +11,9 @@ export type Route =
   | { name: 'grimoire' }
   | { name: 'achievements' }
   | { name: 'login' }
-  | { name: 'teacher' };
+  | { name: 'teacher' }
+  | { name: 'chronicle' }
+  | { name: 'certificate'; id: string };
 
 export function parseHash(hash: string): Route {
   const [kind, id] = hash.replace(/^#\/?/, '').split('/');
@@ -21,6 +23,8 @@ export function parseHash(hash: string): Route {
   if (kind === 'achievements') return { name: 'achievements' };
   if (kind === 'login') return { name: 'login' };
   if (kind === 'teacher') return { name: 'teacher' };
+  if (kind === 'chronicle') return { name: 'chronicle' };
+  if (kind === 'certificate' && id) return { name: 'certificate', id: decodeURIComponent(id) };
   return { name: 'map' };
 }
 
@@ -40,6 +44,10 @@ export function hrefFor(route: Route): string {
       return '#/login';
     case 'teacher':
       return '#/teacher';
+    case 'chronicle':
+      return '#/chronicle';
+    case 'certificate':
+      return `#/certificate/${encodeURIComponent(route.id)}`;
   }
 }
 

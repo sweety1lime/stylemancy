@@ -16,6 +16,8 @@ export interface Land {
   blurb: string;
   /** Ключ эмблемы и скалы в EMBLEMS / LAND_ROCKS */
   emblem: 'tags' | 'forest' | 'fortress' | 'crystal';
+  /** «Где»: для сюжета — «проклятие ещё держится в Лесу Селекторов» */
+  where: string;
   regions: Region[];
   /** Районы, которые ещё в работе: показываются в тумане */
   upcoming: string[];
@@ -27,8 +29,9 @@ export const lands: Land[] = [
     id: 'tags-valley',
     title: 'Долина Тегов',
     topic: 'HTML',
-    blurb: 'Теги, вложенность и семантика страницы',
+    blurb: 'Теги, списки, ссылки, семантика и формы',
     emblem: 'tags',
+    where: 'в Долине Тегов',
     regions: [tagVillage, linkFair, semanticCity, formForge],
     upcoming: [],
   },
@@ -38,6 +41,7 @@ export const lands: Land[] = [
     topic: 'CSS: селекторы',
     blurb: 'Селекторы, каскад и специфичность',
     emblem: 'forest',
+    where: 'в Лесу Селекторов',
     regions: [],
     upcoming: ['Селекторы', 'Каскад и специфичность'],
   },
@@ -47,6 +51,7 @@ export const lands: Land[] = [
     topic: 'CSS: блочная модель',
     blurb: 'margin, padding, border и позиционирование',
     emblem: 'fortress',
+    where: 'в Крепости Блоков',
     regions: [],
     upcoming: ['Блочная модель', 'Позиционирование'],
   },
@@ -56,6 +61,7 @@ export const lands: Land[] = [
     topic: 'Flexbox · Grid · адаптив',
     blurb: 'Раскладки, которые подчиняются магии',
     emblem: 'crystal',
+    where: 'в Парящих землях',
     regions: [floatingIslands, stainedAbbey, mirrorTower, defaultCitadel],
     upcoming: [],
   },

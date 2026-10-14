@@ -92,13 +92,52 @@ export interface Npc {
   portrait: string;
 }
 
-/** Кадр сценки: готовая пиксельная картинка и подпись. */
+/**
+ * Когда показывать кадр: сюжет помнит, какие земли герой уже спас.
+ * Все указанные условия должны выполняться одновременно.
+ */
+export interface StoryCondition {
+  /** Ещё ни одна земля не спасена — первая глава */
+  firstChapter?: boolean;
+  /** Спасена хотя бы одна земля */
+  anyDone?: boolean;
+  /** Эти земли уже спасены */
+  done?: string[];
+  /** Эти земли ещё не спасены */
+  notDone?: string[];
+  /** Спасены все земли королевства (или ещё нет — false) */
+  allDone?: boolean;
+  /** Есть открытая и ещё не спасённая земля, куда можно отправиться дальше (или нет — false) */
+  next?: boolean;
+}
+
+/**
+ * Кадр сценки: готовая пиксельная картинка и подпись.
+ * В тексте можно писать {name} — ник героя, {next} — следующую землю, {cursed} — где ещё держится проклятие.
+ */
 export interface StoryFrame {
-  art: 'kingdom' | 'villain' | 'fallen' | 'mentor' | 'crown' | 'window' | 'shards' | 'mirrors' | 'citadel' | 'village' | 'scroll' | 'fair' | 'city' | 'forge';
+  art:
+    | 'kingdom'
+    | 'villain'
+    | 'fallen'
+    | 'mentor'
+    | 'crown'
+    | 'window'
+    | 'shards'
+    | 'mirrors'
+    | 'citadel'
+    | 'village'
+    | 'scroll'
+    | 'fair'
+    | 'city'
+    | 'forge'
+    | 'academy'
+    | 'chaos';
   /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
   speaker?: string;
   name?: string;
   text: string;
+  when?: StoryCondition;
 }
 
 export interface RegionDef {

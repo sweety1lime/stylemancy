@@ -7,7 +7,7 @@ import { currentLevel, drafts, progress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { learnedSpells, pickQuestion, reviewIsDue, skipReview, type ReviewQuestion } from '../game/review';
 import { stats } from '../game/stats';
-import { isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
+import { allLandsDone, FINALE_KEY, grandFinale, isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
 import { findLevel } from '../levels';
 import type { Outcome, RegionStats } from './ResultPanel';
 
@@ -23,7 +23,8 @@ export function useLevelFlow(level: Level, region: RegionStats, starter: string)
   const [hintsUsed, setHintsUsed] = useState(() => progress.get(level.id).hintsUsed);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [review, setReview] = useState<{ question: ReviewQuestion; seed: number } | null>(null);
-  const [story, setStory] = useState<OpenStory | null>(null);
+  // Сценки по очереди: эпилог района, а если спасено всё королевство — общий финал
+  const [stories, setStories] = useState<OpenStory[]>([]);
   const [reporting, setReporting] = useState(false);
   const codeRef = useRef(code);
   const place = useMemo(() => findLevel(level.id), [level.id]);
@@ -63,8 +64,11 @@ export function useLevelFlow(level: Level, region: RegionStats, starter: string)
     progress.complete(level.id, score.stars, current);
     found.push(...recordSuccess({ level, code: current, hintsUsed, firstTime }));
     // Последний уровень района пройден — победная сцена (один раз сама, потом по кнопке)
+    const queue: OpenStory[] = [];
     const finale = place && place.region.levels.every((item) => progress.get(item.id).completed) ? storyOf(place.region, 'outro') : null;
-    if (finale && !isSeen(finale.key)) setStory(finale);
+    if (finale && !isSeen(finale.key)) queue.push(finale);
+    if (allLandsDone() && !isSeen(FINALE_KEY)) queue.push(grandFinale());
+    if (queue.length) setStories(queue);
     // Раз в два новых уровня — вопрос по заклинанию, которое дольше всех не вспоминали
     if (firstTime && reviewIsDue()) {
       const question = pickQuestion(learnedSpells(progress.snapshot()), level.learns);
@@ -109,11 +113,11 @@ export function useLevelFlow(level: Level, region: RegionStats, starter: string)
       skipReview();
       setReview(null);
     },
-    story,
-    showStory: setStory,
+    story: stories[0] ?? null,
+    showStory: (next: OpenStory | null) => setStories(next ? [next] : []),
     closeStory: () => {
-      if (story) markSeen(story.key);
-      setStory(null);
+      if (stories[0]) markSeen(stories[0].key);
+      setStories(stories.slice(1));
     },
     outro,
     reporting,
