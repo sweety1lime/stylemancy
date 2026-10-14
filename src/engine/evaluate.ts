@@ -10,7 +10,7 @@ import {
   viewportsOf,
   type ItemStatus,
 } from './scene';
-import type { Level } from './types';
+import type { CssLevel } from './types';
 
 export interface Evaluation {
   passed: boolean;
@@ -60,10 +60,10 @@ export function scoreSolution(hintsUsed: number, declCount: number, solutionDecl
   return { stars, notes };
 }
 
-const optionsCache = new WeakMap<Level, LintOptions>();
+const optionsCache = new WeakMap<CssLevel, LintOptions>();
 
 /** Настройки проверки кода для уровня. Разметка сцены разбирается один раз. */
-export function lintOptionsFor(level: Level): LintOptions {
+export function lintOptionsFor(level: CssLevel): LintOptions {
   let options = optionsCache.get(level);
   if (!options) {
     const sceneDoc = new DOMParser().parseFromString(`<!doctype html><html><body>${level.html}</body></html>`, 'text/html');
@@ -73,12 +73,12 @@ export function lintOptionsFor(level: Level): LintOptions {
   return options;
 }
 
-export function solutionDeclCount(level: Level): number {
+export function solutionDeclCount(level: CssLevel): number {
   return lintCss(level.solutionCss, lintOptionsFor(level)).validDecls.length;
 }
 
 /** Сравнение на одной ширине: эталон и код студента в невидимых iframe. */
-async function compareAtWidth(level: Level, css: string, width: number): Promise<ItemStatus[]> {
+async function compareAtWidth(level: CssLevel, css: string, width: number): Promise<ItemStatus[]> {
   const height = level.scene.height;
   const targetFrame = createHiddenFrame(width, height);
   const playerFrame = createHiddenFrame(width, height);
@@ -95,7 +95,7 @@ async function compareAtWidth(level: Level, css: string, width: number): Promise
 }
 
 /** Полная проверка без интерфейса — для автотестов уровней. Адаптив проверяется в каждом зеркале. */
-export async function checkLevelCss(level: Level, css: string): Promise<Evaluation> {
+export async function checkLevelCss(level: CssLevel, css: string): Promise<Evaluation> {
   const widths = viewportsOf(level);
   const items: ItemStatus[] = [];
   for (const width of widths) {

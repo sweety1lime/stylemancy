@@ -2,6 +2,7 @@ import { useEffect, useImperativeHandle, useRef, type Ref } from 'react';
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { css } from '@codemirror/lang-css';
+import { html } from '@codemirror/lang-html';
 import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
 import { linter, lintGutter, type Diagnostic } from '@codemirror/lint';
 import { EditorState } from '@codemirror/state';
@@ -21,7 +22,11 @@ export interface CodeEditorHandle {
   focus(): void;
 }
 
+/** На каком языке пишет студент */
+export type EditorLanguage = 'css' | 'html';
+
 interface CodeEditorProps {
+  language?: EditorLanguage;
   initialValue: string;
   onChange: (value: string) => void;
   /** Проверка кода: ошибки подчёркиваются прямо в редакторе */
@@ -43,6 +48,12 @@ const highlight = HighlightStyle.define([
   { tag: t.blockComment, color: '#7e75a6', fontStyle: 'italic' },
   { tag: [t.definitionKeyword, t.modifier], color: '#f0abfc' },
   { tag: [t.brace, t.separator, t.punctuation], color: '#b8b0dc' },
+  // HTML
+  { tag: t.attributeName, color: '#9cc9ff' },
+  { tag: t.attributeValue, color: '#8ce9bd' },
+  { tag: t.angleBracket, color: '#b8b0dc' },
+  { tag: t.comment, color: '#7e75a6', fontStyle: 'italic' },
+  { tag: t.documentMeta, color: '#f0abfc' },
 ]);
 
 const theme = EditorView.theme(
@@ -79,20 +90,22 @@ function toDiagnostics(problems: Problem[], length: number): Diagnostic[] {
  * Где начать писать: заготовку-комментарий выделяем целиком (её заменят),
  * иначе курсор — в конец последней строки перед первой «}».
  */
-function startSelection(text: string): { anchor: number; head?: number } {
-  const comment = /\/\*[\s\S]*?\*\//.exec(text);
+function startSelection(text: string, language: EditorLanguage): { anchor: number; head?: number } {
+  const comment = (language === 'html' ? /<!--[\s\S]*?-->/ : /\/\*[\s\S]*?\*\//).exec(text);
   if (comment) return { anchor: comment.index, head: comment.index + comment[0].length };
+  // В разметке без заготовки курсор — в начале: чаще всего её нужно чинить
+  if (language === 'html') return { anchor: 0 };
   const close = text.indexOf('}');
   if (close === -1) return { anchor: text.length };
   const lineEnd = text.lastIndexOf('\n', close);
   return { anchor: lineEnd === -1 ? close : lineEnd };
 }
 
-/** Редактор CSS на CodeMirror 6: подсветка, автодополнение и наши подсказки об ошибках. */
-export function CodeEditor({ initialValue, onChange, lint, onSubmit, label, autoFocus, ref }: CodeEditorProps) {
+/** Редактор CSS или HTML на CodeMirror 6: подсветка, автодополнение и наши подсказки об ошибках. */
+export function CodeEditor({ language = 'css', initialValue, onChange, lint, onSubmit, label, autoFocus, ref }: CodeEditorProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
-  const setup = useRef({ initialValue, label, autoFocus });
+  const setup = useRef({ language, initialValue, label, autoFocus });
   const callbacks = useRef({ onChange, lint, onSubmit });
 
   useEffect(() => {
@@ -130,7 +143,8 @@ export function CodeEditor({ initialValue, onChange, lint, onSubmit, label, auto
             ...completionKeymap,
             indentWithTab,
           ]),
-          css(),
+          // Теги студент закрывает сам — этому и учимся
+          setup.current.language === 'html' ? html({ autoCloseTags: false }) : css(),
           syntaxHighlighting(highlight),
           theme,
           lintGutter(),
@@ -146,7 +160,7 @@ export function CodeEditor({ initialValue, onChange, lint, onSubmit, label, auto
     });
     viewRef.current = view;
     if (setup.current.autoFocus && window.matchMedia('(pointer: fine)').matches) {
-      view.dispatch({ selection: startSelection(view.state.doc.toString()) });
+      view.dispatch({ selection: startSelection(view.state.doc.toString(), setup.current.language) });
       view.contentDOM.focus({ preventScroll: true });
     }
     return () => {

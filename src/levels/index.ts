@@ -3,6 +3,7 @@ import { defaultCitadel } from './default-citadel';
 import { floatingIslands } from './floating-islands';
 import { mirrorTower } from './mirror-tower';
 import { stainedAbbey } from './stained-abbey';
+import { tagVillage } from './tag-village';
 
 /** Земля на карте королевства — одна тема курса. Внутри — районы с уровнями. */
 export interface Land {
@@ -25,8 +26,8 @@ export const lands: Land[] = [
     topic: 'HTML',
     blurb: 'Теги, вложенность и семантика страницы',
     emblem: 'tags',
-    regions: [],
-    upcoming: ['Теги и вложенность', 'Семантика', 'Формы'],
+    regions: [tagVillage],
+    upcoming: ['Ярмарка Ссылок · списки, ссылки, картинки, таблицы', 'Город Семантики · каркас страницы', 'Кузница Форм · формы'],
   },
   {
     id: 'selector-forest',

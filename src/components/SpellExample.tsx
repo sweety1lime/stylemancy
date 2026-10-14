@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { recordExperiment } from '../game/achievements';
-import type { SpellExample as Example, ValueExample, WidthExample } from '../game/spells';
+import type { SpellExample as Example, MarkupExample, ValueExample, WidthExample } from '../game/spells';
 
 /** Оформление мини-сцены примера: пиксельный контейнер и цветные пронумерованные блоки. */
 const BASE_CSS = `
@@ -66,7 +66,50 @@ function chipLabel(option: string): string {
 
 /** Живой пример заклинания: нажимаешь на значение или ширину экрана — мини-сцена сразу меняется. */
 export function SpellExample({ spell, example }: { spell: string; example: Example }) {
+  if ('markup' in example) return <MarkupDemo spell={spell} example={example} />;
   return 'widths' in example ? <WidthDemo spell={spell} example={example} /> : <ValueDemo spell={spell} example={example} />;
+}
+
+/** Мини-страница для примеров с разметкой — с оформлением браузера по умолчанию. */
+const MARKUP_PAGE_CSS = `
+html { background: #e8e6df; }
+body { margin: 10px 14px; color: #1c1c24; font: 15px/1.4 "Times New Roman", Times, serif; }
+`;
+
+/** Пример с разметкой: кнопки переключают варианты HTML, мини-страница сразу показывает результат. */
+function MarkupDemo({ spell, example }: { spell: string; example: MarkupExample }) {
+  const [selected, setSelected] = useState(example.initial ?? 0);
+  const variant = example.markup[selected];
+  const srcDoc = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><style>${MARKUP_PAGE_CSS}</style></head><body>${variant.html}</body></html>`;
+
+  function choose(index: number) {
+    setSelected(index);
+    recordExperiment(spell);
+  }
+
+  return (
+    <div className="example">
+      {example.markup.length > 1 && (
+        <div className="example__chips" role="group" aria-label="Варианты разметки">
+          {example.markup.map((option, i) => (
+            <button
+              key={option.label}
+              type="button"
+              className={i === selected ? 'chip chip--on' : 'chip'}
+              aria-pressed={i === selected}
+              onClick={() => choose(i)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <iframe className="example__preview" title={`Живой пример: ${spell}`} sandbox="" srcDoc={srcDoc} />
+      <pre className="example__code">
+        <code>{variant.html}</code>
+      </pre>
+    </div>
+  );
 }
 
 function ValueDemo({ spell, example }: { spell: string; example: ValueExample }) {

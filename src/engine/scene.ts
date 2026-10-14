@@ -1,4 +1,4 @@
-import type { Level } from './types';
+import type { CssLevel } from './types';
 
 /** Базовые стили любой сцены: без отступов браузера, сцена не прокручивается, содержимое по центру. */
 const BASE_SCENE_CSS = `
@@ -10,7 +10,7 @@ body { display: flex; align-items: center; justify-content: center; font-family:
  * Документ сцены для iframe. Код студента вставляется потом в <style id="player">
  * через textContent — так он не может сломать разметку.
  */
-export function sceneDocument(level: Level): string {
+export function sceneDocument(level: CssLevel): string {
   return `<!doctype html><html lang="ru"><head><meta charset="utf-8">
 <style>${BASE_SCENE_CSS}</style>
 <style>${level.sceneCss}</style>
@@ -19,7 +19,7 @@ export function sceneDocument(level: Level): string {
 }
 
 /** Ширины, на которых проверяется уровень: одна сцена или несколько «зеркал». */
-export function viewportsOf(level: Level): number[] {
+export function viewportsOf(level: CssLevel): number[] {
   return level.check.viewports ?? [level.scene.width];
 }
 
@@ -44,7 +44,7 @@ export interface ItemBox {
   h: number;
 }
 
-export function measureItems(doc: Document, level: Level): ItemBox[] {
+export function measureItems(doc: Document, level: CssLevel): ItemBox[] {
   const view = doc.defaultView;
   return Array.from(doc.querySelectorAll<HTMLElement>(level.check.items), (el, i) => {
     const rect = el.getBoundingClientRect();
@@ -165,7 +165,7 @@ export function summarizeMisses(statuses: ItemStatus[], groupName = 'предм�
 }
 
 /** Подсвечивает в сцене предметы, которые уже стоят на своих местах. */
-export function markInPlace(doc: Document, level: Level, statuses: ItemStatus[]): void {
+export function markInPlace(doc: Document, level: CssLevel, statuses: ItemStatus[]): void {
   doc.querySelectorAll(level.check.items).forEach((el, i) => {
     el.toggleAttribute('data-in-place', Boolean(statuses[i]?.inPlace));
   });

@@ -3,7 +3,18 @@ import { COMMON_PROPERTIES, KEYWORDS, SYNONYMS } from './cssVocabulary';
 import { nearest } from './levenshtein';
 
 export type Severity = 'error' | 'warning';
-export type ProblemKind = 'syntax' | 'property' | 'value' | 'not-allowed' | 'selector' | 'duplicate' | 'required';
+export type ProblemKind =
+  | 'syntax'
+  | 'property'
+  | 'value'
+  | 'not-allowed'
+  | 'selector'
+  | 'duplicate'
+  | 'required'
+  // HTML: несуществующий тег, атрибут, неправильная вложенность
+  | 'tag'
+  | 'attribute'
+  | 'nesting';
 
 export interface Problem {
   from: number;

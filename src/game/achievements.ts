@@ -1,6 +1,7 @@
 import { lintOptionsFor } from '../engine/evaluate';
+import { parseMarkup } from '../engine/htmlCheck';
 import { lintCss } from '../engine/lint';
-import type { Level } from '../engine/types';
+import { isHtmlLevel, type CssLevel, type HtmlLevel, type Level } from '../engine/types';
 import { findLevel, regions } from '../levels';
 import { progress } from './progress';
 import { stats } from './stats';
@@ -44,6 +45,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'review-5', category: 'explore', title: 'Ничего не забыто', description: 'Правильно ответить на пять вопросов на повторение.' },
   { id: 'lord-default', category: 'secret', secret: true, title: 'Заклинание Лорда Дефолта', description: 'Написать font-family: Times New Roman — любимый шрифт злодея.' },
   { id: 'reverse', category: 'secret', secret: true, title: 'Задом наперёд', description: 'Попробовать row-reverse или column-reverse.' },
+  { id: 'marquee', category: 'secret', secret: true, title: 'Ретро-магия', description: 'Написать <marquee> — бегущую строку из прошлого века.' },
   { id: 'keyboard', category: 'secret', secret: true, title: 'Магия без мыши', description: 'Сотворить заклинание через Ctrl+Enter десять раз.' },
   { id: 'chronicle', category: 'secret', secret: true, title: 'Летопись', description: 'Пройти уровень, оставив в коде свой комментарий.' },
 ];
@@ -73,6 +75,7 @@ export function recordCast(code: string, viaKeyboard: boolean): Achievement[] {
   const found: Achievement[] = [];
   if (/font-family\s*:[^;{}]*times\s+new\s+roman/i.test(code)) unlock('lord-default', found);
   if (/\b(row|column)-reverse\b/i.test(code)) unlock('reverse', found);
+  if (/<marquee\b/i.test(code)) unlock('marquee', found);
   if (viaKeyboard) {
     stats.update((s) => ({ keyboardCasts: s.keyboardCasts + 1 }));
     if (stats.get().keyboardCasts >= 10) unlock('keyboard', found);
@@ -137,19 +140,29 @@ export function recordReview(spell: string, correct: boolean) {
   if (stats.get().reviewsCorrect >= 5) unlock('review-5', []);
 }
 
-function declSet(level: Level, css: string): Set<string> {
+function declSet(level: CssLevel, css: string): Set<string> {
   const { validDecls } = lintCss(css, lintOptionsFor(level));
   return new Set(validDecls.map((d) => `${d.prop.toLowerCase()}: ${d.value.toLowerCase().replace(/\s+/g, ' ')}`));
 }
 
-/** Своё решение: в нём нет хотя бы одного объявления из решения наставника. */
+/** Теги разметки по порядку — «скелет» без текста и атрибутов. */
+function tagSequence(level: HtmlLevel, code: string): string {
+  return Array.from(parseMarkup(code, level.document).body.querySelectorAll('*'), (el) => el.localName).join(' ');
+}
+
+/**
+ * Своё решение. CSS: нет хотя бы одного объявления из решения наставника.
+ * HTML: другие теги или другой их порядок.
+ */
 function isOwnWay(level: Level, code: string): boolean {
+  if (isHtmlLevel(level)) return tagSequence(level, code) !== tagSequence(level, level.solutionHtml);
   const mine = declSet(level, code);
   return [...declSet(level, level.solutionCss)].some((decl) => !mine.has(decl));
 }
 
 /** Свой комментарий: не заготовка из стартового кода и не пустой. */
 function hasOwnComment(level: Level, code: string): boolean {
-  const starter = new Set(level.starterCss.match(/\/\*[\s\S]*?\*\//g) ?? []);
-  return (code.match(/\/\*[\s\S]*?\*\//g) ?? []).some((c) => !starter.has(c) && c.replace(/[/*\s]/g, '').length > 0);
+  const pattern = isHtmlLevel(level) ? /<!--[\s\S]*?-->/g : /\/\*[\s\S]*?\*\//g;
+  const starter = new Set((isHtmlLevel(level) ? level.starterHtml : level.starterCss).match(pattern) ?? []);
+  return (code.match(pattern) ?? []).some((c) => !starter.has(c) && c.replace(/<!--|-->|[/*\s]/g, '').length > 0);
 }

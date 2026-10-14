@@ -722,6 +722,137 @@ a.land:hover .land__art {
   pointer-events: none;
 }
 
+/* ——— HTML-уровни: страница в рамке «браузера» и цели ——— */
+
+.browser {
+  display: grid;
+  background: #120b2e;
+  box-shadow:
+    0 0 0 4px var(--ink),
+    0 0 0 7px var(--frame),
+    0 0 0 11px var(--ink),
+    10px 10px 0 11px rgba(0, 0, 0, 0.45);
+}
+
+.browser--celebrate {
+  animation: celebrate 0.9s steps(3, end);
+}
+
+.browser__bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 12px 0;
+  background: var(--panel-2);
+}
+
+.browser__dots {
+  display: flex;
+  gap: 6px;
+  padding-bottom: 10px;
+}
+
+.browser__dots i {
+  width: 10px;
+  height: 10px;
+  background: var(--frame);
+}
+
+.browser__dots i:first-child {
+  background: #fb7185;
+}
+
+.browser__dots i:nth-child(2) {
+  background: var(--gold);
+}
+
+.browser__dots i:last-child {
+  background: #34d399;
+}
+
+.browser__tab {
+  min-width: 0;
+  max-width: 70%;
+  overflow: hidden;
+  padding: 6px 14px;
+  background: #e8e6df;
+  color: #1c1c24;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.browser__page {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: #e8e6df;
+}
+
+.browser__status {
+  min-height: 1.6em;
+  padding: 4px 12px;
+  overflow: hidden;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.goals {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 16px;
+}
+
+.goals__head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.goals__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.goal {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 6px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.goal--done {
+  color: var(--text);
+}
+
+.goal__mark {
+  color: var(--muted-2);
+  text-align: center;
+}
+
+.goal--done .goal__mark {
+  color: var(--gold);
+}
+
+.goal__detail {
+  color: var(--muted-2);
+  font-size: 13px;
+}
+
 .scene--celebrate .scene__viewport {
   animation: celebrate 0.9s steps(3, end);
 }
@@ -1081,6 +1212,7 @@ a.land:hover .land__art {
 @media (prefers-reduced-motion: reduce) {
   .result,
   .scene--celebrate .scene__viewport,
+  .browser--celebrate,
   a.land .land__emblem,
   .path__node--current {
     animation: none;
@@ -1796,6 +1928,94 @@ a.land:hover .land__art {
   right: 12%;
   width: 40cqw;
   height: 20cqw;
+}
+
+/* Деревня Тегов: домики с вывесками-тегами */
+.sa-village {
+  position: absolute;
+  right: 0;
+  bottom: 10%;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 5cqw;
+}
+
+.sa-house {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 17cqw;
+  height: 13cqw;
+  background: #c2410c;
+  box-shadow: inset 0 0 0 0.6cqw #7c2d12;
+}
+
+.sa-house--tall {
+  height: 19cqw;
+}
+
+/* Острая крыша домика */
+.sa-house::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: -2cqw;
+  right: -2cqw;
+  height: 7cqw;
+  background: #7c2d12;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.sa-house span {
+  padding: 0.4cqw 1.2cqw;
+  background: #2a1a05;
+  color: var(--gold-strong);
+  font-family: var(--font-pixel);
+  font-size: 2.8cqw;
+  box-shadow: 0 0 0 0.4cqw var(--gold);
+}
+
+/* Свиток с указом: заголовок, строки текста и выделенное важное */
+.sa-scroll {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  gap: 1.4cqw;
+  width: 44cqw;
+  padding: 3cqw 4cqw;
+  background: #efe2c2;
+  box-shadow:
+    0 0 0 0.8cqw #8a6a2a,
+    1.6cqw 1.6cqw 0 0.8cqw rgba(0, 0, 0, 0.35);
+  transform: translate(-50%, -50%) rotate(-2deg);
+}
+
+.sa-scroll b {
+  padding-bottom: 0.6cqw;
+  border-bottom: 0.5cqw solid #b45309;
+  color: #7c2d12;
+  font-family: var(--font-pixel);
+  font-size: 3.6cqw;
+  font-weight: 400;
+}
+
+.sa-scroll i,
+.sa-scroll mark {
+  display: block;
+  height: 1.2cqw;
+  background: rgba(138, 106, 42, 0.5);
+}
+
+.sa-scroll i:nth-of-type(2) {
+  width: 80%;
+}
+
+.sa-scroll mark {
+  width: 46%;
+  background: rgba(251, 191, 36, 0.8);
 }
 
 /* Цитадель Лорда Дефолта: серые стены без единого стиля */

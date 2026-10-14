@@ -21,7 +21,7 @@ import {
   type ItemBox,
   type ItemStatus,
 } from '../engine/scene';
-import type { Level } from '../engine/types';
+import type { CssLevel } from '../engine/types';
 
 export interface SceneHandle {
   /** Применяет код ко всем зеркалам и сразу сообщает, какие предметы на месте. */
@@ -29,7 +29,7 @@ export interface SceneHandle {
 }
 
 interface SceneProps {
-  level: Level;
+  level: CssLevel;
   initialCss: string;
   celebrate?: boolean;
   onStatuses?: (statuses: ItemStatus[]) => void;

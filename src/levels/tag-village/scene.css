@@ -1,0 +1,72 @@
+/*
+  Деревня Тегов — оформление страниц района. Текст без тегов остаётся «проклятым»:
+  Times New Roman по умолчанию. Правильный тег оживает — у каждого своё оформление.
+  Так и устроен настоящий сайт: CSS цепляется к тегам.
+*/
+
+html {
+  background-color: #efe2c2;
+  background-image:
+    linear-gradient(90deg, rgba(138, 106, 42, 0.12) 0 4px, transparent 4px calc(100% - 4px), rgba(138, 106, 42, 0.12) calc(100% - 4px)),
+    repeating-linear-gradient(0deg, rgba(138, 106, 42, 0.05) 0 2px, transparent 2px 8px);
+}
+
+body {
+  margin: 18px 24px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0.4em 0 0.3em;
+  color: #7c2d12;
+  font-family: "Tiny5", system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.15;
+  font-synthesis: none;
+}
+
+h1 {
+  padding-bottom: 6px;
+  border-bottom: 4px solid #b45309;
+  font-size: 34px;
+  text-shadow: 3px 3px 0 rgba(180, 83, 9, 0.25);
+}
+
+h2 {
+  font-size: 24px;
+  color: #9a3412;
+}
+
+h3 {
+  font-size: 19px;
+  color: #a16207;
+}
+
+p {
+  margin: 0.5em 0;
+  color: #2b2116;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+strong {
+  padding: 0 3px;
+  background: rgba(251, 191, 36, 0.35);
+  color: #7c2d12;
+}
+
+em {
+  color: #6d28d9;
+}
+
+hr {
+  height: 8px;
+  margin: 14px 0;
+  border: 0;
+  background: repeating-linear-gradient(90deg, #8a6a2a 0 8px, transparent 8px 16px);
+}

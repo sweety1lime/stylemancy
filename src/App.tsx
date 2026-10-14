@@ -3,12 +3,14 @@ import { AchievementsScreen } from './components/AchievementsScreen';
 import { GrimoireScreen } from './components/GrimoireScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { LandTrail } from './components/LandTrail';
+import { HtmlLevelScreen } from './components/HtmlLevelScreen';
 import { LevelScreen } from './components/LevelScreen';
 import type { RegionStats } from './components/ResultPanel';
 import { TeacherScreen } from './components/TeacherScreen';
 import { Toasts } from './components/Toasts';
 import { TopBar } from './components/TopBar';
 import { WorldMap } from './components/WorldMap';
+import { isHtmlLevel } from './engine/types';
 import { isLandOpen, useAuth } from './game/auth';
 import { useProgress } from './game/progress';
 import { isRegionOpen } from './game/unlock';
@@ -61,16 +63,19 @@ export default function App() {
         unlocks: nextRegion?.title,
       };
       const trailHref = hrefFor({ name: 'land', id: land.id });
+      const screenProps = {
+        number: index + 1,
+        region: stats,
+        trailHref,
+        onNext: next ? () => navigate({ name: 'level', id: next.id }) : undefined,
+      };
       return (
         <Screen back={{ href: trailHref, label: land.title }}>
-          <LevelScreen
-            key={level.id}
-            level={level}
-            number={index + 1}
-            region={stats}
-            trailHref={trailHref}
-            onNext={next ? () => navigate({ name: 'level', id: next.id }) : undefined}
-          />
+          {isHtmlLevel(level) ? (
+            <HtmlLevelScreen key={level.id} level={level} {...screenProps} />
+          ) : (
+            <LevelScreen key={level.id} level={level} {...screenProps} />
+          )}
         </Screen>
       );
     }

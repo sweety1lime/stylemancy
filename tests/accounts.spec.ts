@@ -116,7 +116,7 @@ test.describe('аккаунты на живой базе Supabase', () => {
       await student.goto('/');
       await student.getByRole('button', { name: 'Выйти' }).click();
       await expect(student.getByText('Ты играешь как гость')).toBeVisible();
-      await expect(student.getByText(/Пройдено 0 из \d+/)).toBeVisible();
+      await expect(student.getByRole('link', { name: /Парящие земли/ })).toContainText(/Пройдено 0 из \d+/);
 
       // Вход с другого компьютера (новый браузер без кеша) — прогресс пришёл с сервера
       const otherContext = await browser.newContext();

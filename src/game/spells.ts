@@ -23,7 +23,13 @@ export interface WidthExample {
   initial?: number;
 }
 
-export type SpellExample = ValueExample | WidthExample;
+/** Пример с разметкой: кнопки переключают варианты HTML, мини-страница показывает, что выйдет. */
+export interface MarkupExample {
+  markup: { label: string; html: string }[];
+  initial?: number;
+}
+
+export type SpellExample = ValueExample | WidthExample | MarkupExample;
 
 export interface Spell {
   name: string;
@@ -385,6 +391,84 @@ export const SPELLS: Record<string, Spell> = {
   }
 }`,
       widths: [360, 720],
+    },
+  },
+
+  // ——— Деревня Тегов: HTML ———
+
+  'tag-pair': {
+    name: 'Парный тег',
+    description:
+      'Тег — слово в угловых скобках. Большинство тегов парные: открывающий `<p>` и закрывающий `</p>` с косой чертой, а между ними — содержимое. `<p>` — абзац.',
+    example: {
+      markup: [
+        { label: 'без тегов', html: 'Первый абзац о деревне.\nВторой абзац о рынке.' },
+        { label: 'с <p>', html: '<p>Первый абзац о деревне.</p>\n<p>Второй абзац о рынке.</p>' },
+      ],
+      initial: 1,
+    },
+  },
+  headings: {
+    name: 'Заголовки h1–h6',
+    description:
+      'Шесть уровней заголовков: `<h1>` — самый главный, `<h6>` — самый мелкий. Обычно на странице один `<h1>`, а `<h2>`–`<h6>` делят текст на разделы.',
+    example: {
+      markup: [
+        { label: 'h1', html: '<h1>Деревня Тегов</h1>' },
+        { label: 'h2', html: '<h2>Деревня Тегов</h2>' },
+        { label: 'h3', html: '<h3>Деревня Тегов</h3>' },
+        { label: 'h6', html: '<h6>Деревня Тегов</h6>' },
+      ],
+    },
+  },
+  'strong-em': {
+    name: 'strong и em',
+    description:
+      '`<strong>` отмечает важное — браузер показывает его жирным. `<em>` — смысловое ударение, по умолчанию курсивом. Их ставят внутри абзаца вокруг нужных слов.',
+    example: {
+      markup: [
+        { label: 'strong', html: '<p>Не кормите <strong>дракона</strong> после заката.</p>' },
+        { label: 'em', html: '<p>Он <em>очень</em> капризный.</p>' },
+        { label: 'вместе', html: '<p><strong>Не кормите дракона:</strong> он <em>очень</em> капризный.</p>' },
+      ],
+      initial: 2,
+    },
+  },
+  nesting: {
+    name: 'Вложенность',
+    description:
+      'Теги вкладываются друг в друга, как матрёшки: тег, открытый последним, закрывается первым — `<p><strong>…</strong></p>`. Перепутанные теги браузер чинит по-своему, и страница ломается.',
+    example: {
+      markup: [
+        { label: 'правильно', html: '<p>Хлеб <strong>каждое утро</strong> и пирожки.</p>' },
+        { label: 'перепутано', html: '<p>Хлеб <strong>каждое утро</p></strong> и пирожки.' },
+      ],
+    },
+  },
+  'void-tags': {
+    name: 'Одиночные теги br и hr',
+    description:
+      'У некоторых тегов нет закрывающей пары. `<br>` — перенос строки внутри абзаца, `<hr>` — черта между частями текста. Переносы строк в самом коде браузер не замечает.',
+    example: {
+      markup: [
+        { label: 'без <br>', html: '<p>Открылся тег на заре,\nзакрылся тег на закате.</p>' },
+        { label: 'с <br>', html: '<p>Открылся тег на заре,<br>\nзакрылся тег на закате.</p>' },
+        { label: 'с <hr>', html: '<p>Песнь о теге</p>\n<hr>\n<p>Бард Абзацевич</p>' },
+      ],
+      initial: 1,
+    },
+  },
+  'doc-skeleton': {
+    name: 'Скелет страницы',
+    description:
+      'Документ начинается с `<!doctype html>`. Дальше `<html lang="ru">`, в нём `<head>` — служебная часть с кодировкой `<meta charset="utf-8">` и названием вкладки `<title>`, — и `<body>` — всё, что видно на странице.',
+    example: {
+      markup: [
+        {
+          label: 'документ',
+          html: '<!doctype html>\n<html lang="ru">\n<head>\n  <meta charset="utf-8">\n  <title>Деревня Тегов</title>\n</head>\n<body>\n  <h1>Добро пожаловать!</h1>\n</body>\n</html>',
+        },
+      ],
     },
   },
 };

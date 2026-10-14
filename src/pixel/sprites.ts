@@ -307,6 +307,40 @@ export const PORTRAITS: Record<string, Sprite> = {
       y: '#f6c453',
     },
   },
+  // Писарь Тег: берет, гусиное перо за ухом и свиток в руках
+  scribe: {
+    rows: [
+      '....kkkkkkk....q',
+      '...kbbbbbbbk..qq',
+      '..kbbbbBbbbbk.q.',
+      '..kkkkkkkkkkkq..',
+      '...kffffffffkq..',
+      '...kfeffffefk...',
+      '...kffffffffk...',
+      '...kfffmmfffk...',
+      '....kffffffk....',
+      '...kkrrrrrrkk...',
+      '..krrwrrrrwrrk..',
+      '.krrrwrrrrwrrrk.',
+      '.krrrrpppprrrrk.',
+      '.krrrpPPPPprrrk.',
+      '.krrrpppppprrrk.',
+      'krrrrrrrrrrrrrrk',
+    ],
+    palette: {
+      k: INK,
+      b: '#166534',
+      B: '#22c55e',
+      q: '#f8fafc',
+      f: '#f1c27d',
+      e: INK,
+      m: '#be123c',
+      r: '#9a3412',
+      w: '#fdba74',
+      p: '#f5e6c8',
+      P: '#8a6a2a',
+    },
+  },
   // Провидица Медиа: капюшон, зеркальный камень во лбу и зеркальце-амулет
   media: {
     rows: [

@@ -1,7 +1,6 @@
-import type { Evaluation, Score } from '../engine/evaluate';
+import type { Score } from '../engine/evaluate';
+import type { Problem } from '../engine/lint';
 import type { Achievement } from '../game/achievements';
-import { summarizeMisses } from '../engine/scene';
-import type { Level } from '../engine/types';
 import type { Spell } from '../game/spells';
 import { Medal } from './Medal';
 import { RichText } from './RichText';
@@ -9,7 +8,8 @@ import { Stars } from './Stars';
 
 export type Outcome =
   | { kind: 'success'; score: Score; xpGain: number; newRank?: string; achievements: Achievement[] }
-  | { kind: 'fail'; evaluation: Evaluation };
+  /** errors — ошибки в коде, misses — что ещё не так на сцене или не выполнено */
+  | { kind: 'fail'; errors: Problem[]; misses: string[] };
 
 /** Итоги района — показываем после последнего уровня. */
 export interface RegionStats {
@@ -24,7 +24,6 @@ export interface RegionStats {
 
 interface ResultPanelProps {
   outcome: Outcome;
-  level: Level;
   code: string;
   spell?: Spell;
   region: RegionStats;
@@ -34,7 +33,7 @@ interface ResultPanelProps {
   onFinale?: () => void;
 }
 
-export function ResultPanel({ outcome, level, code, spell, region, trailHref, onNext, onFinale }: ResultPanelProps) {
+export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, onFinale }: ResultPanelProps) {
   if (outcome.kind === 'success') {
     return (
       <section className="result result--success px-panel" aria-live="polite">
@@ -92,8 +91,7 @@ export function ResultPanel({ outcome, level, code, spell, region, trailHref, on
     );
   }
 
-  const { errors, items } = outcome.evaluation;
-  const misses = summarizeMisses(items, level.check.groupName, level.check.tolerance);
+  const { errors, misses } = outcome;
   return (
     <section className="result result--fail px-panel" aria-live="polite">
       <h2 className="result__title">Заклинание не сработало</h2>
@@ -112,7 +110,9 @@ export function ResultPanel({ outcome, level, code, spell, region, trailHref, on
       ) : misses.length > 0 ? (
         <ul className="result__list">
           {misses.map((line) => (
-            <li key={line}>{line}</li>
+            <li key={line}>
+              <RichText text={line} />
+            </li>
           ))}
         </ul>
       ) : (

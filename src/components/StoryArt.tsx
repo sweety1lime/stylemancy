@@ -113,6 +113,38 @@ export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: s
         </>
       )}
 
+      {art === 'village' && (
+        <>
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
+          <div className="sa-village">
+            <span className="sa-house">
+              <span>&lt;p&gt;</span>
+            </span>
+            <span className="sa-house sa-house--tall">
+              <span>&lt;h1&gt;</span>
+            </span>
+            <span className="sa-house">
+              <span>&lt;em&gt;</span>
+            </span>
+          </div>
+        </>
+      )}
+
+      {art === 'scroll' && (
+        <>
+          <PixelArt className="sa-spark sa-spark--2" sprite={SKY_SPARK} />
+          <PixelArt className="sa-spark sa-spark--3" sprite={SKY_SPARK} />
+          <div className="sa-scroll">
+            <b>Указ старосты</b>
+            <i />
+            <i />
+            <mark />
+            <i />
+          </div>
+        </>
+      )}
+
       {art === 'citadel' && (
         <>
           <span className="sa-default-text sa-default-text--1">Times New Roman</span>

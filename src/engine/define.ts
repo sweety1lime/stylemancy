@@ -1,8 +1,13 @@
-import { DEFAULT_SCENE, type LevelDef, type Region, type RegionDef } from './types';
+import { DEFAULT_SCENE, type CssLevelDef, type HtmlLevelDef, type Region, type RegionDef } from './types';
 
-/** Описывает уровень. Обёртка нужна ради подсказок редактора по полям. */
-export function defineLevel(level: LevelDef): LevelDef {
+/** Описывает CSS-уровень. Обёртка нужна ради подсказок редактора по полям. */
+export function defineLevel(level: CssLevelDef): CssLevelDef {
   return level;
+}
+
+/** Описывает HTML-уровень: студент пишет или чинит разметку. */
+export function defineHtmlLevel(level: Omit<HtmlLevelDef, 'kind'>): HtmlLevelDef {
+  return { ...level, kind: 'html' };
 }
 
 /** Собирает район: каждому уровню достаются оформление, персонаж и правила района. */

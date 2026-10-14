@@ -162,6 +162,12 @@ test.describe('на телефоне', () => {
     await page.screenshot({ path: `${SCREENS}/04-phone-level.png`, fullPage: true });
   });
 
+  test('HTML-уровень помещается по ширине', async ({ page }) => {
+    await page.goto('/#/level/tag-02');
+    await expect(page.locator('.goals')).toBeVisible();
+    await expectNoHorizontalScroll(page);
+  });
+
   test('зеркала адаптивного уровня встают друг под другом и помещаются', async ({ page }) => {
     await unlockDistricts(page);
     await page.goto('/#/level/mq-01');
@@ -426,5 +432,38 @@ test.describe('Grid и адаптив', () => {
       return items.length === 3 && items.every((item) => item.getBoundingClientRect().top === items[0].getBoundingClientRect().top);
     });
     expect(inRow).toBe(true);
+  });
+});
+
+test.describe('Долина Тегов', () => {
+  test('первый абзац: цель загорается, страница оживает', async ({ page }) => {
+    await page.goto('/#/level/tag-01');
+    await expect(page.getByRole('heading', { name: 'Первый абзац' })).toBeVisible();
+    await expect(page.locator('.goals__head')).toHaveText(/0 из 1/);
+    await typeCode(page, '<p>Добро пожаловать в Деревню Тегов! Здесь у каждого слова есть свой тег.</p>\n');
+    await expect(page.locator('.goals__head')).toHaveText(/1 из 1/);
+    await expect(page.frameLocator('.browser__page').locator('p')).toContainText('Добро пожаловать');
+    await page.screenshot({ path: `${SCREENS}/13-html-level.png`, fullPage: true });
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    await expect(page.getByText('Новое заклинание')).toBeVisible();
+  });
+
+  test('перепутанные теги: объяснение по-русски', async ({ page }) => {
+    await page.goto('/#/level/tag-04');
+    await expect(page.locator('.goals__head')).toHaveText(/из 3/);
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('Теги перепутаны: сначала закрой </strong>, потом </p>');
+  });
+
+  test('скелет документа: <title> попадает на вкладку браузера', async ({ page }) => {
+    await page.goto('/#/level/tag-06');
+    await expect(page.locator('.browser__tab')).toHaveText('Без названия');
+    await typeCode(
+      page,
+      '<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<title>Деревня Тегов</title>\n</head>\n<body>\n<h1>Привет</h1>\n</body>\n</html>\n',
+    );
+    await expect(page.locator('.browser__tab')).toHaveText('Деревня Тегов');
+    await expect(page.locator('.goals__head')).toHaveText(/5 из 5/);
   });
 });
