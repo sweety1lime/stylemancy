@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { isLandOpen, refreshAccount, useAuth } from '../game/auth';
 import { currentLevel, useProgress } from '../game/progress';
 import { hrefFor } from '../game/router';
 import { findLevel, lands, type Land } from '../levels';
@@ -8,7 +10,13 @@ import { Portrait } from './Portrait';
 /** Карта королевства: земли-темы курса. Земли без уровней пока в тумане. */
 export function WorldMap() {
   const progress = useProgress();
+  const { account, ready } = useAuth();
   const resume = findLevel(currentLevel.get() ?? '');
+
+  // Учитель мог открыть классу новые земли — подтягиваем свежие настройки
+  useEffect(() => {
+    void refreshAccount();
+  }, []);
 
   function landStats(land: Land) {
     const levels = land.regions.flatMap((region) => region.levels);
@@ -29,6 +37,7 @@ export function WorldMap() {
             Лорд Дефолт проклял королевство: он хочет, чтобы всё снова выглядело как страница без стилей — Times New
             Roman и синие ссылки. Каждая земля — тема вёрстки. Освой её магию и сними проклятие.
           </p>
+          {account?.classInfo && <p className="world__class">Класс «{account.classInfo.name}»</p>}
           {resume && (
             <a className="button button--cast world__resume" href={hrefFor({ name: 'level', id: resume.level.id })}>
               Продолжить: {resume.level.title}
@@ -37,13 +46,26 @@ export function WorldMap() {
         </div>
       </section>
 
+      {ready && !account && (
+        <section className="world__guest px-panel">
+          <p>
+            Ты играешь как гость: прогресс хранится только в этом браузере. Войди по коду класса, чтобы учитель видел
+            твои успехи, а прогресс сохранялся на любом компьютере.
+          </p>
+          <a className="button button--ghost" href="#/login">
+            Войти
+          </a>
+        </section>
+      )}
+
       <div className="world-map">
         <svg className="world-map__path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <polyline points="17,9 83,11 50,42 83,74" />
         </svg>
         {lands.map((land, i) => {
           const stats = landStats(land);
-          const open = land.regions.length > 0;
+          const built = land.regions.length > 0;
+          const open = built && isLandOpen(account, land.id);
           const body = (
             <>
               <span className="land__art">
@@ -53,7 +75,11 @@ export function WorldMap() {
               <span className="land__title">{land.title}</span>
               <span className="land__topic">{land.topic}</span>
               <span className="land__status">
-                {open ? `Пройдено ${stats.done} из ${stats.total} · ★ ${stats.stars}` : 'В тумане — скоро'}
+                {open
+                  ? `Пройдено ${stats.done} из ${stats.total} · ★ ${stats.stars}`
+                  : built
+                    ? 'Закрыто учителем'
+                    : 'В тумане — скоро'}
               </span>
             </>
           );

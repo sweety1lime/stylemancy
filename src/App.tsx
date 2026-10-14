@@ -1,12 +1,15 @@
 import { useEffect, type ReactNode } from 'react';
 import { AchievementsScreen } from './components/AchievementsScreen';
 import { GrimoireScreen } from './components/GrimoireScreen';
+import { LoginScreen } from './components/LoginScreen';
 import { LandTrail } from './components/LandTrail';
 import { LevelScreen } from './components/LevelScreen';
 import type { RegionStats } from './components/ResultPanel';
+import { TeacherScreen } from './components/TeacherScreen';
 import { Toasts } from './components/Toasts';
 import { TopBar } from './components/TopBar';
 import { WorldMap } from './components/WorldMap';
+import { isLandOpen, useAuth } from './game/auth';
 import { useProgress } from './game/progress';
 import { hrefFor, navigate, parseHash, useHash } from './game/router';
 import { findLand, findLevel } from './levels';
@@ -27,6 +30,7 @@ export default function App() {
   const hash = useHash();
   const route = parseHash(hash);
   const progress = useProgress();
+  const { account } = useAuth();
 
   // Каждый экран открывается с начала страницы
   useEffect(() => {
@@ -35,7 +39,7 @@ export default function App() {
 
   if (route.name === 'level') {
     const place = findLevel(route.id);
-    if (place) {
+    if (place && isLandOpen(account, place.land.id)) {
       const { level, region, land, index } = place;
       const next = region.levels[index + 1];
       const stats: RegionStats = {
@@ -63,7 +67,7 @@ export default function App() {
 
   if (route.name === 'land') {
     const land = findLand(route.id);
-    if (land && land.regions.length > 0) {
+    if (land && land.regions.length > 0 && isLandOpen(account, land.id)) {
       return (
         <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
           <LandTrail land={land} />
@@ -76,6 +80,22 @@ export default function App() {
     return (
       <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
         <GrimoireScreen />
+      </Screen>
+    );
+  }
+
+  if (route.name === 'login') {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+        <LoginScreen />
+      </Screen>
+    );
+  }
+
+  if (route.name === 'teacher') {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+        <TeacherScreen />
       </Screen>
     );
   }

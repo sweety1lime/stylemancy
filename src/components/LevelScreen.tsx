@@ -74,7 +74,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
       const firstTime = !progress.get(level.id).completed;
       const xp = () => totalXp(progress.snapshot(), stats.get().reviewXp);
       const xpBefore = xp();
-      progress.complete(level.id, score.stars);
+      progress.complete(level.id, score.stars, current);
       found.push(...recordSuccess({ level, code: current, hintsUsed, firstTime }));
       // Последний уровень района пройден — победная сцена (один раз сама, потом по кнопке)
       const finale = place && place.region.levels.every((item) => progress.get(item.id).completed) ? storyOf(place.region, 'outro') : null;

@@ -1,4 +1,5 @@
 import { ACHIEVEMENTS } from '../game/achievements';
+import { signOut, useAuth } from '../game/auth';
 import { useProgress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { useStats } from '../game/stats';
@@ -12,6 +13,7 @@ interface TopBarProps {
 
 export function TopBar({ back }: TopBarProps) {
   const stats = useStats();
+  const { account, ready } = useAuth();
   const xp = totalXp(useProgress(), stats.reviewXp);
   const { rank, next, share } = rankFor(xp);
   const hint = next ? `До ранга «${next.title}» — ${next.xp - xp} XP` : 'Высший ранг';
@@ -45,6 +47,29 @@ export function TopBar({ back }: TopBarProps) {
         </span>
         <span className="rank__xp">{xp} XP</span>
         <span className="visually-hidden">{hint}</span>
+      </div>
+      <div className="account">
+        {account ? (
+          <>
+            {account.role === 'teacher' && (
+              <a className="topbar__link" href="#/teacher">
+                Панель учителя
+              </a>
+            )}
+            <span className="account__name" title={account.classInfo ? `Класс «${account.classInfo.name}»` : account.email}>
+              {account.nickname}
+            </span>
+            <button type="button" className="text-button" onClick={() => void signOut()}>
+              Выйти
+            </button>
+          </>
+        ) : (
+          ready && (
+            <a className="button button--small" href="#/login">
+              Войти
+            </a>
+          )
+        )}
       </div>
     </header>
   );

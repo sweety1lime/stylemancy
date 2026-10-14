@@ -65,6 +65,13 @@ $$;
 
 -- ——— Правила доступа (RLS) ———
 
+-- Права на таблицы: гостям — ничего, вошедшим — то, что дальше разрешат правила
+revoke all on public.classes, public.profiles, public.level_progress, public.student_stats from anon;
+grant select, update, delete on public.classes to authenticated;
+grant select on public.profiles to authenticated;
+grant select, insert, update on public.level_progress to authenticated;
+grant select, insert, update on public.student_stats to authenticated;
+
 alter table public.classes enable row level security;
 alter table public.profiles enable row level security;
 alter table public.level_progress enable row level security;
@@ -186,7 +193,7 @@ begin
       returning * into created;
       return created;
     exception when unique_violation then
-      -- Такой код уже есть — пробуем другой
+      null; -- Такой код уже есть — пробуем другой
     end;
   end loop;
 end;

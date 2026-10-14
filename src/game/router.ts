@@ -9,7 +9,9 @@ export type Route =
   | { name: 'land'; id: string }
   | { name: 'level'; id: string }
   | { name: 'grimoire' }
-  | { name: 'achievements' };
+  | { name: 'achievements' }
+  | { name: 'login' }
+  | { name: 'teacher' };
 
 export function parseHash(hash: string): Route {
   const [kind, id] = hash.replace(/^#\/?/, '').split('/');
@@ -17,6 +19,8 @@ export function parseHash(hash: string): Route {
   if (kind === 'level' && id) return { name: 'level', id: decodeURIComponent(id) };
   if (kind === 'grimoire') return { name: 'grimoire' };
   if (kind === 'achievements') return { name: 'achievements' };
+  if (kind === 'login') return { name: 'login' };
+  if (kind === 'teacher') return { name: 'teacher' };
   return { name: 'map' };
 }
 
@@ -32,6 +36,10 @@ export function hrefFor(route: Route): string {
       return '#/grimoire';
     case 'achievements':
       return '#/achievements';
+    case 'login':
+      return '#/login';
+    case 'teacher':
+      return '#/teacher';
   }
 }
 
