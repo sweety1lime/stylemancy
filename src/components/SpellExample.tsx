@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { recordExperiment } from '../game/achievements';
-import type { SpellExample as Example } from '../game/spells';
+import type { SpellExample as Example, ValueExample, WidthExample } from '../game/spells';
 
 /** Оформление мини-сцены примера: пиксельный контейнер и цветные пронумерованные блоки. */
 const BASE_CSS = `
@@ -26,7 +26,24 @@ body { display: grid; place-items: center; background: #120b2e; }
 .item:nth-child(5n + 5) { background: #fbbf24; }
 `;
 
+/** В примерах с медиазапросами контейнер занимает весь «экран», а блоки крупнее. */
+const SCREEN_CSS = `
+body { place-items: stretch; }
+.box { width: auto; height: auto; margin: 24px; padding: 16px; }
+.item { width: 72px; height: 72px; font-size: 28px; }
+`;
+
+/** Высота «экрана» в примерах с медиазапросами — внутри, до уменьшения */
+const SCREEN_HEIGHT = 360;
+
 const THREE_ITEMS = '<div class="box"><div class="item">1</div><div class="item">2</div><div class="item">3</div></div>';
+
+function exampleDocument(css: string, live: string, html: string | undefined): string {
+  return (
+    `<!doctype html><html><head><meta charset="utf-8"><style>${BASE_CSS}${css}</style>` +
+    `<style id="live">${live}</style></head><body>${html ?? THREE_ITEMS}</body></html>`
+  );
+}
 
 function declarations(option: string): string[] {
   return option
@@ -47,17 +64,18 @@ function chipLabel(option: string): string {
   return decls.length === 1 ? decls[0].slice(decls[0].indexOf(':') + 1).trim() : decls.join('; ');
 }
 
-/** Живой пример заклинания: нажимаешь на значение — мини-сцена сразу меняется. */
+/** Живой пример заклинания: нажимаешь на значение или ширину экрана — мини-сцена сразу меняется. */
 export function SpellExample({ spell, example }: { spell: string; example: Example }) {
+  return 'widths' in example ? <WidthDemo spell={spell} example={example} /> : <ValueDemo spell={spell} example={example} />;
+}
+
+function ValueDemo({ spell, example }: { spell: string; example: ValueExample }) {
   const initial = example.initial ?? 0;
   const [selected, setSelected] = useState(initial);
   const selectedRef = useRef(initial);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const srcDoc = useMemo(
-    () =>
-      `<!doctype html><html><head><meta charset="utf-8"><style>${BASE_CSS}${example.css ?? ''}</style>` +
-      `<style id="live">${ruleText(example.selector, example.options[example.initial ?? 0])}</style></head>` +
-      `<body>${example.html ?? THREE_ITEMS}</body></html>`,
+    () => exampleDocument(example.css ?? '', ruleText(example.selector, example.options[example.initial ?? 0]), example.html),
     [example],
   );
 
@@ -99,6 +117,83 @@ export function SpellExample({ spell, example }: { spell: string; example: Examp
       <pre className="example__code">
         <code>{ruleText(example.selector, example.options[selected])}</code>
       </pre>
+    </div>
+  );
+}
+
+/** Срабатывает ли медиазапрос вида (min-width: 600px) and (max-width: 900px) на такой ширине. */
+function mediaMatches(query: string, width: number): boolean {
+  return Array.from(query.matchAll(/\((min|max)-width:\s*(\d+)px\)/g)).every(([, kind, value]) =>
+    kind === 'min' ? width >= Number(value) : width <= Number(value),
+  );
+}
+
+/** Пример с медиазапросом: код не меняется, а кнопки сужают и расширяют «экран». */
+function WidthDemo({ spell, example }: { spell: string; example: WidthExample }) {
+  const [selected, setSelected] = useState(example.initial ?? 0);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [boxWidth, setBoxWidth] = useState(340);
+  const srcDoc = useMemo(() => exampleDocument(SCREEN_CSS + (example.css ?? ''), example.code, example.html), [example]);
+  const queries = useMemo(() => Array.from(example.code.matchAll(/@media\s*([^{]+?)\s*\{/g), (match) => match[1]), [example]);
+
+  useLayoutEffect(() => {
+    const box = boxRef.current;
+    if (!box) return;
+    setBoxWidth(box.clientWidth);
+    const observer = new ResizeObserver(([entry]) => setBoxWidth(entry.contentRect.width));
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, []);
+
+  // Все ширины в одном масштабе: узкий экран и на странице выглядит узким
+  const scale = Math.min(1, boxWidth / Math.max(...example.widths));
+  const width = example.widths[selected];
+
+  function choose(index: number) {
+    setSelected(index);
+    recordExperiment(spell);
+  }
+
+  return (
+    <div className="example">
+      <div className="example__chips" role="group" aria-label="Ширина экрана">
+        {example.widths.map((option, i) => (
+          <button
+            key={option}
+            type="button"
+            className={i === selected ? 'chip chip--on' : 'chip'}
+            aria-pressed={i === selected}
+            onClick={() => choose(i)}
+          >
+            экран {option}px
+          </button>
+        ))}
+      </div>
+      <div className="example__screens" ref={boxRef} style={{ height: SCREEN_HEIGHT * scale }}>
+        <div className="example__screen" style={{ width: width * scale, height: SCREEN_HEIGHT * scale }}>
+          <iframe
+            title={`Живой пример: ${spell}, экран ${width}px`}
+            sandbox="allow-same-origin"
+            srcDoc={srcDoc}
+            width={width}
+            height={SCREEN_HEIGHT}
+            style={{ transform: `scale(${scale})` }}
+          />
+        </div>
+      </div>
+      <div className="example__side">
+        <pre className="example__code">
+          <code>{example.code}</code>
+        </pre>
+        {queries.map((query) => {
+          const on = mediaMatches(query, width);
+          return (
+            <p key={query} className={on ? 'example__media example__media--on' : 'example__media'}>
+              {on ? '✦' : '·'} @media {query} — {on ? 'срабатывает' : 'не срабатывает'} на {width}px
+            </p>
+          );
+        })}
+      </div>
     </div>
   );
 }

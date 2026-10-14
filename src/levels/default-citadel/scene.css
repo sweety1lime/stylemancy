@@ -1,0 +1,101 @@
+/*
+  Цитадель Лорда Дефолта — финал. Цитадель — это страница без стилей: шапка (header),
+  меню (nav), главная часть (main), боковая колонка (aside) и подвал (footer).
+  Пока блок не на месте, он серый и с шрифтом по умолчанию; встал на место — проклятие спадает.
+*/
+
+html {
+  background: #1c1c24;
+}
+
+.citadel {
+  box-sizing: border-box;
+  width: calc(100% - 32px);
+  padding: 12px;
+  background: rgba(15, 15, 20, 0.6);
+  box-shadow:
+    0 0 0 4px #6b7280,
+    0 0 0 8px #0f0f14;
+}
+
+.banner,
+.hall,
+.tower,
+.gate {
+  box-sizing: border-box;
+  padding: 8px;
+  color: #9ca3af;
+  font: 16px/1.2 "Times New Roman", Times, serif;
+  text-align: center;
+  background: #3a3a44;
+  box-shadow: inset 0 0 0 3px #52525e;
+}
+
+.banner,
+.gate {
+  min-height: 56px;
+}
+
+.hall,
+.tower {
+  min-height: 96px;
+}
+
+.banner {
+  --item-color: #f6c453;
+  --item-glow: rgba(246, 196, 83, 0.6);
+}
+
+.hall {
+  --item-color: #a78bfa;
+  --item-glow: rgba(167, 139, 250, 0.6);
+}
+
+.tower {
+  --item-color: #60a5fa;
+  --item-glow: rgba(96, 165, 250, 0.6);
+}
+
+.gate {
+  --item-color: #34d399;
+  --item-glow: rgba(52, 211, 153, 0.6);
+}
+
+/* Флаги-вымпелы с вырезом снизу */
+.flag {
+  width: 48px;
+  height: 60px;
+  background: #52525e;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 75% 86%, 50% 72%, 25% 86%, 0 100%);
+}
+
+.flag:nth-child(1) {
+  --item-color: #fb7185;
+}
+
+.flag:nth-child(2) {
+  --item-color: #fbbf24;
+}
+
+.flag:nth-child(3) {
+  --item-color: #34d399;
+}
+
+/* Блок на месте — проклятие спадает: свой цвет, пиксельная рамка, свечение */
+.banner[data-in-place],
+.hall[data-in-place],
+.tower[data-in-place],
+.gate[data-in-place] {
+  color: #1a1030;
+  font-family: Consolas, "Courier New", monospace;
+  font-weight: 700;
+  background: var(--item-color);
+  box-shadow:
+    inset -4px -4px 0 rgba(0, 0, 0, 0.25),
+    inset 4px 4px 0 rgba(255, 255, 255, 0.35),
+    0 0 12px var(--item-glow);
+}
+
+.flag[data-in-place] {
+  background: var(--item-color);
+}

@@ -1,5 +1,8 @@
 import type { Level, Region } from '../engine/types';
+import { defaultCitadel } from './default-citadel';
 import { floatingIslands } from './floating-islands';
+import { mirrorTower } from './mirror-tower';
+import { stainedAbbey } from './stained-abbey';
 
 /** Земля на карте королевства — одна тема курса. Внутри — районы с уровнями. */
 export interface Land {
@@ -49,8 +52,8 @@ export const lands: Land[] = [
     topic: 'Flexbox · Grid · адаптив',
     blurb: 'Раскладки, которые подчиняются магии',
     emblem: 'crystal',
-    regions: [floatingIslands],
-    upcoming: ['Рунные сады · Grid', 'Зеркальная башня · адаптив', 'Цитадель Лорда Дефолта · финал'],
+    regions: [floatingIslands, stainedAbbey, mirrorTower, defaultCitadel],
+    upcoming: [],
   },
 ];
 

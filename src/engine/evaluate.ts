@@ -7,6 +7,7 @@ import {
   measureItems,
   sceneDocument,
   setPlayerCss,
+  viewportsOf,
   type ItemStatus,
 } from './scene';
 import type { Level } from './types';
@@ -66,7 +67,7 @@ export function lintOptionsFor(level: Level): LintOptions {
   let options = optionsCache.get(level);
   if (!options) {
     const sceneDoc = new DOMParser().parseFromString(`<!doctype html><html><body>${level.html}</body></html>`, 'text/html');
-    options = { allow: level.allow, allowMessage: level.allowMessage, forbid: level.forbid, sceneDoc };
+    options = { allow: level.allow, allowMessage: level.allowMessage, forbid: level.forbid, require: level.require, sceneDoc };
     optionsCache.set(level, options);
   }
   return options;
@@ -76,9 +77,9 @@ export function solutionDeclCount(level: Level): number {
   return lintCss(level.solutionCss, lintOptionsFor(level)).validDecls.length;
 }
 
-/** Полная проверка без интерфейса — для автотестов уровней. */
-export async function checkLevelCss(level: Level, css: string): Promise<Evaluation> {
-  const { width, height } = level.scene;
+/** Сравнение на одной ширине: эталон и код студента в невидимых iframe. */
+async function compareAtWidth(level: Level, css: string, width: number): Promise<ItemStatus[]> {
+  const height = level.scene.height;
   const targetFrame = createHiddenFrame(width, height);
   const playerFrame = createHiddenFrame(width, height);
   try {
@@ -86,10 +87,20 @@ export async function checkLevelCss(level: Level, css: string): Promise<Evaluati
     const [targetDoc, playerDoc] = await Promise.all([loadFrame(targetFrame, html), loadFrame(playerFrame, html)]);
     setPlayerCss(targetDoc, level.solutionCss);
     setPlayerCss(playerDoc, css);
-    const items = compareItems(measureItems(playerDoc, level), measureItems(targetDoc, level), level.check.tolerance);
-    return evaluate(lintCss(css, lintOptionsFor(level)), items);
+    return compareItems(measureItems(playerDoc, level), measureItems(targetDoc, level), level.check.tolerance);
   } finally {
     targetFrame.remove();
     playerFrame.remove();
   }
+}
+
+/** Полная проверка без интерфейса — для автотестов уровней. Адаптив проверяется в каждом зеркале. */
+export async function checkLevelCss(level: Level, css: string): Promise<Evaluation> {
+  const widths = viewportsOf(level);
+  const items: ItemStatus[] = [];
+  for (const width of widths) {
+    const statuses = await compareAtWidth(level, css, width);
+    items.push(...(widths.length > 1 ? statuses.map((status) => ({ ...status, viewport: width })) : statuses));
+  }
+  return evaluate(lintCss(css, lintOptionsFor(level)), items);
 }

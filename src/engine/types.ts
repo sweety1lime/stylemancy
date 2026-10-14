@@ -25,6 +25,8 @@ export interface LevelDef {
     groupName?: string;
     /** Допуск в пикселях */
     tolerance?: number;
+    /** Ширины «зеркал» для адаптива: сцена проверяется на каждой */
+    viewports?: number[];
   };
   /** Подсказки — от общей идеи к почти готовому ответу */
   hints: string[];
@@ -34,6 +36,8 @@ export interface LevelDef {
   trial?: boolean;
   /** Свойства, запрещённые именно в этом уровне */
   forbid?: string[];
+  /** Приёмы, без которых уровень не засчитывается: регулярное выражение и объяснение */
+  require?: { pattern: string; message: string }[];
   /** Дополнительное оформление сцены только для этого уровня */
   sceneCss?: string;
   scene?: { width: number; height: number };
@@ -48,7 +52,7 @@ export interface Npc {
 
 /** Кадр сценки: готовая пиксельная картинка и подпись. */
 export interface StoryFrame {
-  art: 'kingdom' | 'villain' | 'fallen' | 'mentor' | 'crown';
+  art: 'kingdom' | 'villain' | 'fallen' | 'mentor' | 'crown' | 'window' | 'shards' | 'mirrors' | 'citadel';
   /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
   speaker?: string;
   name?: string;

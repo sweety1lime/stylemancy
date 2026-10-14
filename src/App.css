@@ -512,6 +512,11 @@ a.land:hover .land__art {
   padding: 24px 24px 48px;
 }
 
+/* Адаптив: несколько зеркал рядом — сцене нужно больше места */
+.level--mirrors {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 780px);
+}
+
 /* Иначе широкая сцена и длинные строки кода растягивают колонки сетки шире экрана */
 .brief,
 .stage,
@@ -702,6 +707,36 @@ a.land:hover .land__art {
   animation: celebrate 0.9s steps(3, end);
 }
 
+/* Зеркала разной ширины в одном масштабе — видна настоящая разница экранов */
+.mirrors {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 36px;
+}
+
+.mirrors--column {
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.mirror {
+  display: grid;
+  justify-items: center;
+  margin: 0;
+}
+
+.mirror__label {
+  margin-top: 22px;
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 @keyframes celebrate {
   0%,
   100% {
@@ -714,9 +749,10 @@ a.land:hover .land__art {
 
 .stage__status {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 10px 14px;
   margin-top: 10px;
   color: var(--muted);
   font-family: var(--font-pixel);
@@ -725,7 +761,13 @@ a.land:hover .land__art {
 
 .stage__dots {
   display: inline-flex;
+  align-items: center;
   gap: 6px;
+}
+
+.stage__mirror {
+  margin-right: 2px;
+  font-size: 13px;
 }
 
 .dot {
@@ -1247,7 +1289,8 @@ a.land:hover .land__art {
   box-shadow: 3px 3px 0 0 var(--ink);
 }
 
-.chip:hover {
+/* У выбранной кнопки при наведении остаётся золотой фон, иначе тёмный текст пропадает */
+.chip:not(.chip--on):hover {
   background: #3a2a73;
 }
 
@@ -1277,6 +1320,44 @@ a.land:hover .land__art {
   color: var(--gold-strong);
   font-size: 14px;
   box-shadow: inset 0 0 0 3px var(--frame);
+}
+
+/* Пример с медиазапросом: «экран» сужается и расширяется, масштаб у всех ширин общий */
+.example__screens {
+  grid-area: preview;
+  width: 100%;
+  max-width: 340px;
+}
+
+.example__screen {
+  overflow: hidden;
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 6px var(--frame);
+}
+
+.example__screen iframe {
+  display: block;
+  border: 0;
+  transform-origin: 0 0;
+}
+
+.example__side {
+  grid-area: code;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.example__media {
+  color: var(--muted-2);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.example__media--on {
+  color: var(--gold);
 }
 
 @media (max-width: 720px) {
@@ -1572,6 +1653,141 @@ a.land:hover .land__art {
   animation-delay: -0.8s;
 }
 
+/* Витраж: стёкла стоят в сетке — так же, как в испытании Витражной обители */
+.sa-window {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: 1fr 1fr 0.7fr;
+  gap: 0.8cqw;
+  width: 30cqw;
+  height: 34cqw;
+  padding: 1.2cqw;
+  background: #1a1030;
+  box-shadow:
+    0 0 0 0.8cqw #c98f2c,
+    0 0 0 1.6cqw #1a1030,
+    0 0 0 2.6cqw #4b4f66,
+    0 0 0 3.4cqw #1a1030;
+  transform: translateX(-50%);
+}
+
+.sa-window span {
+  background: var(--pane);
+  box-shadow: inset 0 0 0 0.6cqw rgba(0, 0, 0, 0.25);
+  filter: drop-shadow(0 0 1.2cqw var(--pane));
+}
+
+.sa-window span:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+.sa-window span:nth-child(6) {
+  grid-column: 1 / -1;
+}
+
+.sa-window--empty {
+  background: #0d0821;
+}
+
+/* Выбитые стёкла лежат кучей у подножия окна */
+.sa-shards {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%) rotate(-5deg);
+  filter: grayscale(0.8) brightness(0.7);
+}
+
+.sa-shards span {
+  width: 18cqw;
+  height: 2.6cqw;
+  background: var(--pane);
+  box-shadow: inset 0 0 0 0.5cqw rgba(0, 0, 0, 0.3);
+}
+
+.sa-shards span:nth-child(2n) {
+  margin-left: 4cqw;
+}
+
+.sa-shards span:nth-child(3n) {
+  margin-right: 5cqw;
+}
+
+/* Два зеркала: в узком кристаллы столбиком, в широком — в ряд */
+.sa-mirror {
+  position: absolute;
+  bottom: 16%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6cqw;
+  background-color: rgba(165, 243, 252, 0.08);
+  background-image: linear-gradient(115deg, transparent 0 20%, rgba(255, 255, 255, 0.1) 20% 28%, transparent 28%);
+  box-shadow:
+    0 0 0 0.8cqw #cbd5e1,
+    0 0 0 1.6cqw #1a1030;
+}
+
+.sa-mirror img {
+  position: static;
+  width: 5.5cqw;
+}
+
+.sa-mirror--narrow {
+  left: 16%;
+  flex-direction: column;
+  width: 13cqw;
+  height: 32cqw;
+}
+
+.sa-mirror--wide {
+  right: 12%;
+  width: 40cqw;
+  height: 20cqw;
+}
+
+/* Цитадель Лорда Дефолта: серые стены без единого стиля */
+.story-art--citadel {
+  background-image: linear-gradient(180deg, #1c1c24 0 25%, #23232c 25% 50%, #2a2a34 50% 75%, #32323d 75%);
+}
+
+.sa-citadel {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  display: flex;
+  align-items: flex-end;
+  transform: translateX(-50%);
+}
+
+.sa-citadel span {
+  background-color: #3a3a44;
+  background-image: linear-gradient(90deg, transparent 0 40%, #1c1c24 40% 60%, transparent 60%);
+  background-position: center 30%;
+  background-size: 100% 3cqw;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 0.6cqw #52525e;
+  /* Зубцы стены — ступеньками, как в пиксель-арте */
+  clip-path: polygon(0 0, 20% 0, 20% 6%, 40% 6%, 40% 0, 60% 0, 60% 6%, 80% 6%, 80% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.sa-tower {
+  width: 11cqw;
+  height: 34cqw;
+}
+
+.sa-keep {
+  width: 24cqw;
+  height: 24cqw;
+}
+
 @keyframes twinkle {
   0%,
   100% {
@@ -1603,6 +1819,8 @@ a.land:hover .land__art {
   .grimoire__actions,
   .example__chips,
   .example__preview,
+  .example__screens,
+  .example__media,
   .spell-card--locked,
   .spell-card__notes,
   .spell-card__source,
@@ -1992,6 +2210,17 @@ a.land:hover .land__art {
   font-size: 16px;
   font-weight: 400;
   text-align: left;
+}
+
+.progress-table__region {
+  color: var(--gold);
+  font-size: 13px;
+  border-left: 2px solid var(--frame);
+}
+
+/* Граница между районами — чтобы сразу видеть, где начинается Grid или адаптив */
+.progress-table__start {
+  border-left: 2px solid var(--frame);
 }
 
 .progress-table__level--hot {

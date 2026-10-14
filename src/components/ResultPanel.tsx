@@ -100,7 +100,8 @@ export function ResultPanel({ outcome, level, code, spell, region, trailHref, on
           <ul className="result__list">
             {errors.slice(0, 3).map((error) => (
               <li key={`${error.from}-${error.message}`}>
-                <span className="result__line">строка {lineAt(code, error.from)}</span> {error.message}
+                {error.kind !== 'required' && <span className="result__line">строка {lineAt(code, error.from)}</span>}{' '}
+                {error.message}
               </li>
             ))}
           </ul>

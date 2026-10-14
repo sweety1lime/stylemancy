@@ -272,7 +272,124 @@ export const PORTRAITS: Record<string, Sprite> = {
       S: '#4b5563',
     },
   },
+  // Мастерица Грида: высокий убор-витраж из цветных ячеек
+  grid: {
+    rows: [
+      '...kkkkkkkkkk...',
+      '...kRRgBBgGGk...',
+      '...kRRgBBgGGk...',
+      '...kggggggggk...',
+      '...kBBgGGgRRk...',
+      '...kBBgGGgRRk...',
+      '..kkkkkkkkkkkk..',
+      '..khffffffffhk..',
+      '..khfeffffefhk..',
+      '..khffffffffhk..',
+      '..khfffmmfffhk..',
+      '..khhffffffhhk..',
+      '..kttttyyttttk..',
+      '.kttttyyyyttttk.',
+      '.ktTttyyyyttTtk.',
+      'ktTTttttttttTTtk',
+    ],
+    palette: {
+      k: INK,
+      R: '#fb7185',
+      B: '#60a5fa',
+      G: '#34d399',
+      g: '#f6c453',
+      f: '#f1c27d',
+      e: INK,
+      m: '#be123c',
+      h: '#c2410c',
+      t: '#0f766e',
+      T: '#2dd4bf',
+      y: '#f6c453',
+    },
+  },
+  // Провидица Медиа: капюшон, зеркальный камень во лбу и зеркальце-амулет
+  media: {
+    rows: [
+      '.....kkkkkk.....',
+      '...kkppppppkk...',
+      '..kppPppppPppk..',
+      '..kpppkkkkpppk..',
+      '.kpppkfCCfkpppk.',
+      '.kppkffCCffkppk.',
+      '.kppkffffffkppk.',
+      '.kppkfeffefkppk.',
+      '.kppkffffffkppk.',
+      '.kppkffmmffkppk.',
+      '.kpppkffffkpppk.',
+      '.kppppkkkkppppk.',
+      '.kppppsSSsppppk.',
+      'kppppsSwwSsppppk',
+      'kpPppsSwwSsppPpk',
+      'kpPpppsSSspppPpk',
+    ],
+    palette: {
+      k: INK,
+      p: '#3730a3',
+      P: '#6366f1',
+      C: '#a5f3fc',
+      f: '#f1c27d',
+      e: INK,
+      m: '#be123c',
+      s: '#94a3b8',
+      S: '#e2e8f0',
+      w: '#cffafe',
+    },
+  },
 };
+
+/* ——— Витражи: цветное стекло с белым узором ——— */
+
+const MOTIF_PALETTE = { w: 'rgba(255, 255, 255, 0.85)' };
+
+function motif(rows: string[]): Sprite {
+  return { rows, palette: MOTIF_PALETTE };
+}
+
+const MOTIFS = {
+  sun: motif(['....w....', '.w.....w.', '...www...', '..wwwww..', 'w.wwwww.w', '..wwwww..', '...www...', '.w.....w.', '....w....']),
+  moon: motif(['...wwww..', '..www....', '.www.....', '.www.....', '.www.....', '.www.....', '..www....', '...wwww..', '.........']),
+  star: motif(['....w....', '....w....', '...www...', 'wwwwwwwww', '.wwwwwww.', '..wwwww..', '..ww.ww..', '.ww...ww.', '.w.....w.']),
+  tree: motif(['....w....', '...www...', '..wwwww..', '...www...', '..wwwww..', '.wwwwwww.', '....w....', '....w....', '...www...']),
+  rose: motif(['...www...', '.ww.w.ww.', '.w..w..w.', 'w.w.w.w.w', 'wwwwwwwww', 'w.w.w.w.w', '.w..w..w.', '.ww.w.ww.', '...www...']),
+  leaf: motif(['......ww.', '....wwww.', '...wwwww.', '..wwwwww.', '..wwwww..', '.wwwww...', '.www.....', 'w........', '.........']),
+  crown: motif(['.........', '.........', 'w...w...w', 'ww.www.ww', 'wwwwwwwww', 'wwwwwwwww', 'wwwwwwwww', '.........', '.........']),
+  drop: motif(['....w....', '....w....', '...www...', '..wwwww..', '.wwwwwww.', '.wwwwwww.', '.wwwwwww.', '..wwwww..', '...www...']),
+};
+
+/** Стёкла витражей: узор, цвет стекла и цвет свечения, когда стекло на месте. */
+export const GLASS: Record<keyof typeof MOTIFS, { motif: Sprite; color: string; glow: string }> = {
+  sun: { motif: MOTIFS.sun, color: '#fbbf24', glow: 'rgba(251, 191, 36, 0.65)' },
+  moon: { motif: MOTIFS.moon, color: '#60a5fa', glow: 'rgba(96, 165, 250, 0.7)' },
+  star: { motif: MOTIFS.star, color: '#a78bfa', glow: 'rgba(167, 139, 250, 0.75)' },
+  tree: { motif: MOTIFS.tree, color: '#34d399', glow: 'rgba(52, 211, 153, 0.7)' },
+  rose: { motif: MOTIFS.rose, color: '#fb7185', glow: 'rgba(251, 113, 133, 0.7)' },
+  leaf: { motif: MOTIFS.leaf, color: '#a3e635', glow: 'rgba(163, 230, 53, 0.6)' },
+  crown: { motif: MOTIFS.crown, color: '#fb923c', glow: 'rgba(251, 146, 60, 0.65)' },
+  drop: { motif: MOTIFS.drop, color: '#22d3ee', glow: 'rgba(34, 211, 238, 0.65)' },
+};
+
+/** Кладка стены: два ряда кирпичей со сдвигом — плитка повторяется без швов. */
+export const BRICKS: Sprite = {
+  rows: [
+    'kkkkkkkkkkkkkkkk',
+    'bbbbbbbkbbbbbbbb',
+    'bbbBbbbkbbbbbBbb',
+    'bbbbbbbkbbbbbbbb',
+    'kkkkkkkkkkkkkkkk',
+    'bbbbbbbbbbbbbbbk',
+    'bBbbbbbbbbbBbbbk',
+    'bbbbbbbbbbbbbbbk',
+  ],
+  palette: { k: '#120c22', b: '#221a3d', B: '#2b2150' },
+};
+
+/** Серая кладка цитадели Лорда Дефолта */
+export const GRAY_BRICKS = recolor(BRICKS, { k: '#141419', b: '#272730', B: '#30303a' });
 
 /* ——— Эмблемы земель на карте ——— */
 

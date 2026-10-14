@@ -18,6 +18,17 @@ export function sceneDocument(level: Level): string {
 </head><body>${level.html}</body></html>`;
 }
 
+/** Ширины, на которых проверяется уровень: одна сцена или несколько «зеркал». */
+export function viewportsOf(level: Level): number[] {
+  return level.check.viewports ?? [level.scene.width];
+}
+
+/** Подпись зеркала: самое узкое, самое широкое или среднее. */
+export function mirrorLabel(widths: number[], index: number): string {
+  const kind = index === 0 ? 'Узкое зеркало' : index === widths.length - 1 ? 'Широкое зеркало' : 'Среднее зеркало';
+  return `${kind} · ${widths[index]}px`;
+}
+
 export function setPlayerCss(doc: Document, css: string): void {
   const style = doc.getElementById('player');
   if (style) style.textContent = css;
@@ -67,6 +78,10 @@ export interface ItemStatus {
   delta: Delta;
   /** Что не так — если предмет не на месте */
   message?: string;
+  /** Ширина зеркала, если уровень проверяется на нескольких */
+  viewport?: number;
+  /** Предмет нужно спрятать или, наоборот, показать (display: none) */
+  visibility?: 'hide' | 'show';
 }
 
 /** Сравнивает предметы студента с эталонными целями (по порядку в разметке). */
@@ -85,6 +100,14 @@ export function compareItems(actual: ItemBox[], targets: ItemBox[], tolerance = 
       w: Math.round(target.w - item.w),
       h: Math.round(target.h - item.h),
     };
+    // Спрятанный элемент (display: none) — особые слова, а не «шире на 64px»
+    const hidden = (box: ItemBox) => box.w === 0 && box.h === 0;
+    if (hidden(target) !== hidden(item)) {
+      const visibility = hidden(target) ? 'hide' : 'show';
+      const message = visibility === 'hide' ? `${target.name}: здесь нужно спрятать.` : `${target.name}: здесь нужно показать.`;
+      return { ...base, inPlace: false, sizeOk: false, delta, message, visibility };
+    }
+    if (hidden(target)) return { ...base, inPlace: true, sizeOk: true, delta };
     const sizeOk = near(delta.w) && near(delta.h);
     if (sizeOk && near(delta.x) && near(delta.y)) return { ...base, inPlace: true, sizeOk, delta };
     const message = `${target.name}: нужно ${describeDelta(delta, sizeOk, tolerance)}.`;
@@ -111,7 +134,20 @@ function describeDelta(delta: Delta, sizeOk: boolean, tolerance: number): string
  * одна фраза вместо списка; длинный список обрезается.
  */
 export function summarizeMisses(statuses: ItemStatus[], groupName = 'предметы', tolerance = 2, limit = 4): string[] {
-  const misses = statuses.filter((s) => !s.inPlace);
+  // Несколько зеркал — промахи по каждому отдельно, с подписью ширины
+  const viewports = [...new Set(statuses.map((s) => s.viewport).filter((width): width is number => width !== undefined))];
+  if (viewports.length) {
+    return viewports.flatMap((width) =>
+      summarizeMisses(
+        statuses.filter((s) => s.viewport === width).map((s) => ({ ...s, viewport: undefined })),
+        groupName,
+        tolerance,
+        3,
+      ).map((line) => `Зеркало ${width}px: ${line}`),
+    );
+  }
+  // «Спрячь» и «покажи» важнее сдвигов: из-за спрятанного предмета съезжают соседи
+  const misses = statuses.filter((s) => !s.inPlace).sort((a, b) => Number(Boolean(b.visibility)) - Number(Boolean(a.visibility)));
   if (!misses.length) return [];
   const [first] = misses;
   const alike = (a: number, b: number) => Math.abs(a - b) <= 1;

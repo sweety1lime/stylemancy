@@ -1,0 +1,67 @@
+/*
+  Витражная обитель — оформление сцен района. Окно — сеточный контейнер,
+  стёкла — предметы сцены (их вид — в ../shared/glass.css).
+  Студент этот код не видит: его правила применяются поверх.
+*/
+
+html {
+  background: #1b1430;
+}
+
+/* Рама окна постоянного размера: стёкла без своего размера заполняют ячейки сетки целиком */
+.window {
+  position: relative;
+  width: 480px;
+  height: 216px;
+  padding: 12px;
+  background-color: #0d0821;
+  background-image: linear-gradient(160deg, rgba(167, 139, 250, 0.14), rgba(13, 8, 33, 0) 60%);
+  box-shadow:
+    0 0 0 4px #c98f2c,
+    0 0 0 8px #1a1030,
+    0 0 0 14px #4b4f66,
+    0 0 0 18px #1a1030;
+}
+
+/* Стрельчатая арка над окном — ступеньками, как в пиксель-арте. Рамка не сетка: position: absolute */
+.window::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  right: -18px;
+  bottom: calc(100% + 18px);
+  height: 36px;
+  background: #4b4f66;
+  clip-path: polygon(
+    0 100%,
+    0 66%,
+    8% 66%,
+    8% 44%,
+    20% 44%,
+    20% 22%,
+    36% 22%,
+    36% 0,
+    64% 0,
+    64% 22%,
+    80% 22%,
+    80% 44%,
+    92% 44%,
+    92% 66%,
+    100% 66%,
+    100% 100%
+  );
+}
+
+/* Каменный подоконник */
+.window::after {
+  content: "";
+  position: absolute;
+  left: -30px;
+  right: -30px;
+  top: calc(100% + 18px);
+  height: 14px;
+  background: #4b4f66;
+  box-shadow:
+    inset 0 4px 0 #7d8299,
+    inset 0 -4px 0 #1a1030;
+}

@@ -14,9 +14,14 @@ import {
   type Roster,
   type StudentRow,
 } from '../game/teacher';
-import { allLevels, lands } from '../levels';
+import { allLevels, lands, regions } from '../levels';
 
 const REFRESH_MS = 30_000;
+
+/** Номер уровня внутри района — как на тропе */
+const NUMBER_IN_REGION = new Map(regions.flatMap((region) => region.levels.map((level, i) => [level.id, i + 1] as const)));
+/** Первые уровни районов: перед ними в таблице граница */
+const REGION_STARTS = new Set(regions.map((region) => region.levels[0]?.id));
 
 export function TeacherScreen() {
   const { account, ready } = useAuth();
@@ -172,7 +177,13 @@ function starsText(stars: number): string {
 
 function downloadCsv(klass: ClassRow, roster: Roster) {
   const byStudent = groupProgress(roster.progress);
-  const header = ['Ник', 'Пройдено', 'Звёзды', 'XP', ...allLevels.map((level, i) => `${i + 1}. ${level.title}`)];
+  const header = [
+    'Ник',
+    'Пройдено',
+    'Звёзды',
+    'XP',
+    ...allLevels.map((level) => `${level.regionTitle} ${NUMBER_IN_REGION.get(level.id)}. ${level.title}`),
+  ];
   const lines = roster.students.map((student) => {
     const rows = byStudent[student.id] ?? {};
     const summary = studentSummary(rows, roster.reviewXp[student.id] ?? 0);
@@ -327,7 +338,6 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
         </section>
       ) : (
         <>
-
           {hot.length > 0 && (
             <p className="class-view__hot px-panel">
               Группа застревает: {hot.map((item) => `«${item.level.title}»`).join(', ')}. Возможно, тему стоит разобрать на уроке.
@@ -338,21 +348,42 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
             <table className="progress-table">
               <thead>
                 <tr>
-                  <th scope="col">Студент</th>
-                  {stats.map((item, i) => (
+                  <th scope="col" rowSpan={2}>
+                    Студент
+                  </th>
+                  {regions.map((region) => (
+                    <th key={region.id} scope="colgroup" colSpan={region.levels.length} className="progress-table__region">
+                      {region.title}
+                    </th>
+                  ))}
+                  <th scope="col" rowSpan={2}>
+                    Пройдено
+                  </th>
+                  <th scope="col" rowSpan={2}>
+                    ★
+                  </th>
+                  <th scope="col" rowSpan={2}>
+                    XP
+                  </th>
+                  <th scope="col" rowSpan={2} aria-label="Действия" />
+                </tr>
+                <tr>
+                  {stats.map((item) => (
                     <th
                       key={item.level.id}
                       scope="col"
-                      className={item.hot ? 'progress-table__level progress-table__level--hot' : 'progress-table__level'}
+                      className={[
+                        'progress-table__level',
+                        item.hot && 'progress-table__level--hot',
+                        REGION_STARTS.has(item.level.id) && 'progress-table__start',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                       title={`${item.level.title}: прошли ${item.completed} из ${item.attempted} начавших, попыток в среднем ${item.avgAttempts.toFixed(1)}, подсказок ${item.avgHints.toFixed(1)}`}
                     >
-                      {item.level.trial ? '♛' : i + 1}
+                      {item.level.trial ? '♛' : NUMBER_IN_REGION.get(item.level.id)}
                     </th>
                   ))}
-                  <th scope="col">Пройдено</th>
-                  <th scope="col">★</th>
-                  <th scope="col">XP</th>
-                  <th scope="col" aria-label="Действия" />
                 </tr>
               </thead>
               <tbody>
@@ -374,7 +405,7 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
                           className = 'cell cell--stuck';
                         }
                         return (
-                          <td key={level.id}>
+                          <td key={level.id} className={REGION_STARTS.has(level.id) ? 'progress-table__start' : undefined}>
                             {row ? (
                               <button
                                 type="button"

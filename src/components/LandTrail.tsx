@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react';
-import { useProgress } from '../game/progress';
+import { useProgress, type LevelProgress } from '../game/progress';
 import { hrefFor } from '../game/router';
 import { isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
 import type { Land } from '../levels';
@@ -9,11 +9,19 @@ import { Portrait } from './Portrait';
 import { Stars } from './Stars';
 import { StoryScene } from './StoryScene';
 
-/** Пролог первого района, который ещё не смотрели. */
-function firstUnseenIntro(land: Land): OpenStory | null {
-  for (const region of land.regions) {
+/**
+ * Пролог района, до которого студент уже дошёл, но ещё не видел. Дошёл — значит, прошёл предыдущий
+ * район или уже начал уровни этого: чужие прологи раньше времени не открываются.
+ */
+function firstUnseenIntro(land: Land, progress: Record<string, LevelProgress>): OpenStory | null {
+  for (const [i, region] of land.regions.entries()) {
+    const previous = land.regions[i - 1];
+    const reached =
+      !previous ||
+      previous.levels.every((level) => progress[level.id]?.completed) ||
+      region.levels.some((level) => progress[level.id]?.attempts);
     const intro = storyOf(region, 'intro');
-    if (intro && !isSeen(intro.key)) return intro;
+    if (reached && intro && !isSeen(intro.key)) return intro;
   }
   return null;
 }
@@ -21,7 +29,7 @@ function firstUnseenIntro(land: Land): OpenStory | null {
 /** Тропа земли: районы и их уровни извилистой дорожкой. */
 export function LandTrail({ land }: { land: Land }) {
   const progress = useProgress();
-  const [story, setStory] = useState<OpenStory | null>(() => firstUnseenIntro(land));
+  const [story, setStory] = useState<OpenStory | null>(() => firstUnseenIntro(land, progress));
 
   function closeStory() {
     if (story) markSeen(story.key);

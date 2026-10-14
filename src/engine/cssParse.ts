@@ -112,9 +112,11 @@ export function parseCss(source: string): ParsedCss {
           errors.push({
             from,
             to,
-            message: LOOKS_LIKE_DECLARATION.test(prelude)
-              ? 'Свойства пишутся внутри фигурных скобок: селектор { свойство: значение; }'
-              : 'После селектора не хватает фигурных скобок { … }.',
+            message: !LOOKS_LIKE_DECLARATION.test(prelude)
+              ? 'После селектора не хватает фигурных скобок { … }.'
+              : atRules.length
+                ? 'Внутри @media свойства тоже пишутся в правиле с селектором: @media (…) { .hall { flex-direction: row; } }'
+                : 'Свойства пишутся внутри фигурных скобок: селектор { свойство: значение; }',
           });
         }
         pos = text[stop] === ';' ? stop + 1 : stop;
@@ -202,6 +204,11 @@ export function parseCss(source: string): ParsedCss {
       valueTo,
     });
   }
+}
+
+/** Код без комментариев: они заменены пробелами, поэтому позиции символов не сдвигаются. */
+export function stripComments(source: string): string {
+  return blankComments(source, []);
 }
 
 /** Заменяет комментарии пробелами, чтобы позиции в тексте не сдвинулись. */

@@ -1,4 +1,7 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect as baseExpect, test, type Page } from '@playwright/test';
+
+// Сеть и параллельные тесты замедляют ответы базы: пяти секунд на шаг бывает мало
+const expect = baseExpect.configure({ timeout: 15_000 });
 
 const SCREENS = 'test-results/screens';
 
@@ -11,6 +14,7 @@ async function deleteAccount(page: Page) {
 
 test.describe('аккаунты на живой базе Supabase', () => {
   test.skip(Boolean(process.env.OFFLINE), 'Нужен интернет: OFFLINE=1 пропускает этот тест');
+  test.use({ actionTimeout: 15_000 });
 
   test('учитель создаёт класс, студент учится, учитель видит прогресс и сбрасывает пароль', async ({ browser }) => {
     test.setTimeout(150_000);
@@ -56,7 +60,10 @@ test.describe('аккаунты на живой базе Supabase', () => {
 
       // Студент проходит первый уровень
       await student.goto('/#/level/flex-01');
-      await student.locator('.cm-content').fill('.island {\n  display: flex;\n}\n');
+      // fill() у CodeMirror иногда вставляет текст, не выделив старый
+      await student.locator('.cm-content').click();
+      await student.keyboard.press('ControlOrMeta+A');
+      await student.keyboard.insertText('.island {\n  display: flex;\n}\n');
       await student.getByRole('button', { name: /Сотворить/ }).click();
       await expect(student.getByText('Заклинание сработало!')).toBeVisible();
 
@@ -70,7 +77,7 @@ test.describe('аккаунты на живой базе Supabase', () => {
           { timeout: 30_000, intervals: [1000, 2000, 3000] },
         )
         .toContain('★★★');
-      await expect(teacher.getByRole('row', { name: new RegExp(nickname) })).toContainText('1/13');
+      await expect(teacher.getByRole('row', { name: new RegExp(nickname) })).toContainText(/\b1\/\d+/);
       await teacher.screenshot({ path: `${SCREENS}/11-teacher.png`, fullPage: true });
 
       // Учитель открывает код решения
@@ -88,7 +95,7 @@ test.describe('аккаунты на живой базе Supabase', () => {
       await student.goto('/');
       await student.getByRole('button', { name: 'Выйти' }).click();
       await expect(student.getByText('Ты играешь как гость')).toBeVisible();
-      await expect(student.getByText('Пройдено 0 из 13')).toBeVisible();
+      await expect(student.getByText(/Пройдено 0 из \d+/)).toBeVisible();
 
       // Вход с другого компьютера (новый браузер без кеша) — прогресс пришёл с сервера
       const otherContext = await browser.newContext();

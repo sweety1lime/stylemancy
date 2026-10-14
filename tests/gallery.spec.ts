@@ -22,7 +22,10 @@ test('галерея уровней', async ({ page }) => {
     await page.getByRole('heading', { name: level.title }).waitFor();
     await page.locator('.stage__status').waitFor();
     await page.locator('.stage').screenshot({ path: `test-results/gallery/${level.id}-start.png` });
-    await page.locator('.cm-content').fill(level.solutionCss);
+    // fill() у CodeMirror иногда вставляет текст, не выделив старый
+    await page.locator('.cm-content').click();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.insertText(level.solutionCss);
     await page.getByText(/На месте: (\d+) из \1$/).waitFor();
     await page.locator('.stage').screenshot({ path: `test-results/gallery/${level.id}-solved.png` });
   }

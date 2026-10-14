@@ -1,4 +1,5 @@
 import { defineRegion } from '../../engine/define';
+import { FLEX_PROPERTIES } from '../shared/properties';
 import flex01 from './flex-01';
 import flex02 from './flex-02';
 import flex03 from './flex-03';
@@ -14,27 +15,6 @@ import flex12 from './flex-12';
 import flex13 from './flex-13';
 import sceneCss from './scene.css?raw';
 import { spriteCss } from './sceneSprites';
-
-/** Свойства Flexbox — единственная магия, которая действует на островах. */
-export const FLEX_PROPERTIES = [
-  'display',
-  'flex-direction',
-  'flex-wrap',
-  'flex-flow',
-  'justify-content',
-  'align-items',
-  'align-content',
-  'align-self',
-  'place-content',
-  'order',
-  'gap',
-  'row-gap',
-  'column-gap',
-  'flex',
-  'flex-grow',
-  'flex-shrink',
-  'flex-basis',
-];
 
 export const floatingIslands = defineRegion({
   id: 'floating-islands',
@@ -76,13 +56,13 @@ export const floatingIslands = defineRegion({
         art: 'villain',
         speaker: 'default',
         name: 'Лорд Дефолт',
-        text: '«Это ещё не конец! В Рунных садах мои проклятия посильнее. Посмотрим, что ты сделаешь с сеткой!»',
+        text: '«Это ещё не конец! В Витражной обители мои проклятия посильнее. Посмотрим, что ты сделаешь с сеткой!»',
       },
       {
         art: 'mentor',
         speaker: 'flex',
         name: 'Магистр Флекс',
-        text: '«Магия Flexbox теперь с тобой. Загляни в гримуар, отдохни — и в путь, к Рунным садам.»',
+        text: '«Магия Flexbox теперь с тобой. Загляни в гримуар, отдохни — и в путь, к Витражной обители.»',
       },
     ],
   },

@@ -1,12 +1,22 @@
+import type { CSSProperties } from 'react';
 import type { StoryFrame } from '../engine/types';
-import { GEMS, ISLAND_ROCK, MOON, PORTRAITS, SKY_SPARK } from '../pixel/sprites';
+import { GEMS, GLASS, ISLAND_ROCK, MOON, PORTRAITS, SKY_SPARK } from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 
 const ROW = [GEMS.amethyst, GEMS.emerald, GEMS.ruby];
 const CROWN = [GEMS.amethyst, GEMS.emerald, GEMS.sapphire, GEMS.ruby, GEMS.topaz];
+/** Стёкла витража в кадре: так же стоят в испытании Витражной обители */
+const PANES = [GLASS.star, GLASS.rose, GLASS.moon, GLASS.tree, GLASS.leaf, GLASS.crown].map((glass) => glass.color);
 
-/** Пиксельная картинка кадра сценки. Размеры — в долях ширины кадра, поэтому кадр масштабируется целиком. */
-export function StoryArt({ art }: { art: StoryFrame['art'] }) {
+function Pane({ color }: { color: string }) {
+  return <span style={{ '--pane': color } as CSSProperties} />;
+}
+
+/**
+ * Пиксельная картинка кадра сценки. Размеры — в долях ширины кадра, поэтому кадр масштабируется целиком.
+ * speaker — чей портрет показать в кадре наставника.
+ */
+export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: string }) {
   return (
     <div className={`story-art story-art--${art}`} aria-hidden="true">
       {art === 'kingdom' && (
@@ -46,7 +56,7 @@ export function StoryArt({ art }: { art: StoryFrame['art'] }) {
           <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
           <PixelArt className="sa-spark sa-spark--2" sprite={SKY_SPARK} />
           <PixelArt className="sa-spark sa-spark--3" sprite={SKY_SPARK} />
-          <PixelArt className="sa-portrait" sprite={PORTRAITS.flex} />
+          <PixelArt className="sa-portrait" sprite={PORTRAITS[speaker ?? 'flex'] ?? PORTRAITS.flex} />
         </>
       )}
 
@@ -60,6 +70,58 @@ export function StoryArt({ art }: { art: StoryFrame['art'] }) {
             ))}
           </div>
           <PixelArt className="sa-rock" sprite={ISLAND_ROCK} />
+        </>
+      )}
+
+      {art === 'window' && (
+        <>
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
+          <PixelArt className="sa-spark sa-spark--2" sprite={SKY_SPARK} />
+          <div className="sa-window">
+            {PANES.map((color, i) => (
+              <Pane key={i} color={color} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {art === 'shards' && (
+        <>
+          <div className="sa-window sa-window--empty" />
+          <div className="sa-shards">
+            {PANES.map((color, i) => (
+              <Pane key={i} color={color} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {art === 'mirrors' && (
+        <>
+          <PixelArt className="sa-spark sa-spark--2" sprite={SKY_SPARK} />
+          <div className="sa-mirror sa-mirror--narrow">
+            {ROW.map((gem, i) => (
+              <PixelArt key={i} className="sa-gem" sprite={gem.sprite} />
+            ))}
+          </div>
+          <div className="sa-mirror sa-mirror--wide">
+            {ROW.map((gem, i) => (
+              <PixelArt key={i} className="sa-gem" sprite={gem.sprite} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {art === 'citadel' && (
+        <>
+          <span className="sa-default-text sa-default-text--1">Times New Roman</span>
+          <span className="sa-default-text sa-default-text--2">синяя ссылка</span>
+          <div className="sa-citadel">
+            <span className="sa-tower" />
+            <span className="sa-keep" />
+            <span className="sa-tower" />
+          </div>
         </>
       )}
     </div>

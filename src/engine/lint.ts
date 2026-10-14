@@ -1,9 +1,9 @@
-import { parseCss, type CssDecl, type CssRule, type ParsedCss } from './cssParse';
+import { parseCss, stripComments, type CssDecl, type CssRule, type ParsedCss } from './cssParse';
 import { COMMON_PROPERTIES, KEYWORDS, SYNONYMS } from './cssVocabulary';
 import { nearest } from './levenshtein';
 
 export type Severity = 'error' | 'warning';
-export type ProblemKind = 'syntax' | 'property' | 'value' | 'not-allowed' | 'selector' | 'duplicate';
+export type ProblemKind = 'syntax' | 'property' | 'value' | 'not-allowed' | 'selector' | 'duplicate' | 'required';
 
 export interface Problem {
   from: number;
@@ -22,6 +22,8 @@ export interface LintOptions {
   forbid?: string[];
   /** Сцена уровня — чтобы предупредить о селекторах, которые ничего не находят */
   sceneDoc?: Document;
+  /** Приёмы, без которых решение не засчитывается */
+  require?: { pattern: string; message: string }[];
 }
 
 export interface LintResult {
@@ -62,7 +64,16 @@ export function lintCss(css: string, options: LintOptions = {}): LintResult {
     }
   }
 
+  const code = stripComments(css);
+  checkMediaQueries(code, problems);
   problems.sort((a, b) => a.from - b.from);
+
+  // Обязательные приёмы ищем в коде без комментариев. Они — в конце списка: сначала чинят сам код
+  for (const rule of options.require ?? []) {
+    if (!new RegExp(rule.pattern, 'i').test(code)) {
+      problems.push({ from: 0, to: 0, severity: 'error', kind: 'required', message: rule.message });
+    }
+  }
   return { parsed, problems, validDecls };
 }
 
@@ -104,6 +115,10 @@ function explainValue(prop: string, decl: CssDecl): string {
   const word = value.toLowerCase();
   const head = `Значение «${value}» не подходит для ${decl.prop}.`;
 
+  if (prop === 'grid-template-areas') {
+    return 'Карта не читается: каждая строка — в кавычках, в строках одинаковое число слов, а одинаковые слова складываются в прямоугольник.';
+  }
+
   if (/^[a-z-]+$/.test(word)) {
     const synonym = SYNONYMS[word];
     if (synonym && CSS.supports(prop, synonym)) return `${head} Может, ${synonym}?`;
@@ -141,6 +156,45 @@ function hasTopLevelColon(value: string): boolean {
     }
   }
   return false;
+}
+
+const MEDIA_FEATURES = ['min-width', 'max-width', 'width', 'min-height', 'max-height', 'height', 'orientation', 'hover', 'prefers-color-scheme'];
+
+/** Медиазапрос с ошибкой браузер молча не применяет никогда — поэтому объясняем сами. */
+function checkMediaQueries(code: string, problems: Problem[]) {
+  for (const match of code.matchAll(/@media\b([^{};]*)/gi)) {
+    const message = mediaQueryProblem(match[1].trim());
+    if (message) {
+      problems.push({ from: match.index, to: match.index + match[0].trimEnd().length, severity: 'error', kind: 'syntax', message });
+    }
+  }
+}
+
+/**
+ * Понимает ли браузер медиазапрос. Сломанное условие он не выбрасывает, а считает «неизвестным» —
+ * тогда не срабатывает ни сам запрос, ни его отрицание. У понятного запроса срабатывает ровно один из двух.
+ */
+function isKnownMedia(query: string): boolean {
+  let negation: string;
+  if (/^not\s/i.test(query)) negation = query.replace(/^not\s+/i, '');
+  else if (query.startsWith('(')) negation = `not (${query})`;
+  else negation = `not ${query.replace(/^only\s+/i, '')}`;
+  return window.matchMedia(query).matches || window.matchMedia(negation).matches;
+}
+
+function mediaQueryProblem(query: string): string | undefined {
+  if (!query) return 'После @media нужно условие в скобках, например @media (min-width: 600px).';
+  if (isKnownMedia(query)) return undefined;
+  const head = `Браузер не понимает медиазапрос «${query}».`;
+  if (!query.includes('(')) return `${head} Условие пишется в круглых скобках: (min-width: 600px).`;
+  const feature = /\(\s*([a-z-]+)/i.exec(query)?.[1].toLowerCase();
+  if (feature && !MEDIA_FEATURES.includes(feature)) {
+    const guess = nearest(feature, MEDIA_FEATURES);
+    if (guess) return `${head} Может, ${guess}?`;
+  }
+  if (/\(\s*[a-z-]+\s+\d/i.test(query)) return `${head} Внутри скобок не хватает двоеточия: (min-width: 600px).`;
+  if (/:\s*\d+\s*\)/.test(query)) return `${head} Не хватает единиц измерения — например, 600px.`;
+  return `${head} Пример правильного: @media (min-width: 600px).`;
 }
 
 let browserProperties: string[] | undefined;

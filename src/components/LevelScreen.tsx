@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { evaluate, lintOptionsFor, scoreSolution, solutionDeclCount } from '../engine/evaluate';
 import { lintCss } from '../engine/lint';
-import type { ItemStatus } from '../engine/scene';
+import { viewportsOf, type ItemStatus } from '../engine/scene';
 import type { Level } from '../engine/types';
 import { recordCast, recordSuccess } from '../game/achievements';
 import { currentLevel, drafts, progress } from '../game/progress';
@@ -42,7 +42,11 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   const editorRef = useRef<CodeEditorHandle>(null);
   const sceneRef = useRef<SceneHandle>(null);
   const lintOptions = useMemo(() => lintOptionsFor(level), [level]);
-  const lintCode = useCallback((text: string) => lintCss(text, lintOptions).problems, [lintOptions]);
+  // Обязательный приём проверяется только по «Сотворить»: пока код пишется, его ещё и не должно быть
+  const lintCode = useCallback(
+    (text: string) => lintCss(text, lintOptions).problems.filter((problem) => problem.kind !== 'required'),
+    [lintOptions],
+  );
 
   // На карте появится кнопка «Продолжить» с этим уровнем
   useEffect(() => {
@@ -114,7 +118,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   const spell = level.learns ? SPELLS[level.learns] : undefined;
 
   return (
-    <main className="level">
+    <main className={viewportsOf(level).length > 1 ? 'level level--mirrors' : 'level'}>
       <section className="brief">
         <p className="brief__eyebrow">
           {level.regionTitle} · уровень {number}
@@ -155,16 +159,19 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
             <span>
               На месте: {placed} из {statuses.length}
             </span>
-            <span className="stage__dots">
-              {statuses.map((s) => (
-                <span
-                  key={s.name}
-                  className={s.inPlace ? 'dot dot--on' : 'dot'}
-                  style={{ '--dot': s.color } as CSSProperties}
-                  title={s.name}
-                />
-              ))}
-            </span>
+            {groupByMirror(statuses).map(({ width, items }) => (
+              <span key={width ?? 'scene'} className="stage__dots">
+                {width !== undefined && <span className="stage__mirror">{width}px</span>}
+                {items.map((s, i) => (
+                  <span
+                    key={`${s.name}-${i}`}
+                    className={s.inPlace ? 'dot dot--on' : 'dot'}
+                    style={{ '--dot': s.color } as CSSProperties}
+                    title={s.name}
+                  />
+                ))}
+              </span>
+            ))}
           </div>
         )}
       </section>
@@ -254,4 +261,11 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
       </section>
     </main>
   );
+}
+
+/** Точки «на месте» по зеркалам: 360px ●●● 720px ●●● */
+function groupByMirror(statuses: ItemStatus[]): { width?: number; items: ItemStatus[] }[] {
+  const groups = new Map<number | undefined, ItemStatus[]>();
+  for (const status of statuses) groups.set(status.viewport, [...(groups.get(status.viewport) ?? []), status]);
+  return Array.from(groups, ([width, items]) => ({ width, items }));
 }
