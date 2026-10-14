@@ -94,7 +94,7 @@ export interface Npc {
 
 /** Кадр сценки: готовая пиксельная картинка и подпись. */
 export interface StoryFrame {
-  art: 'kingdom' | 'villain' | 'fallen' | 'mentor' | 'crown' | 'window' | 'shards' | 'mirrors' | 'citadel' | 'village' | 'scroll' | 'fair';
+  art: 'kingdom' | 'villain' | 'fallen' | 'mentor' | 'crown' | 'window' | 'shards' | 'mirrors' | 'citadel' | 'village' | 'scroll' | 'fair' | 'city' | 'forge';
   /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
   speaker?: string;
   name?: string;

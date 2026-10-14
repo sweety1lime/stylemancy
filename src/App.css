@@ -1968,6 +1968,32 @@ a.land:hover .land__art {
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
+/* Город Семантики: каменные дома, у каждого своё назначение */
+.sa-house--stone {
+  background: #475569;
+  box-shadow: inset 0 0 0 0.6cqw #1e293b;
+}
+
+.sa-house--stone::before {
+  background: #1e3a8a;
+}
+
+.sa-house--wide {
+  width: 24cqw;
+}
+
+/* Кузница Форм: тёмное железо в отсветах горна */
+.sa-house--forge {
+  background: #3f3f46;
+  box-shadow:
+    inset 0 0 0 0.6cqw #18181b,
+    0 0 3cqw rgba(249, 115, 22, 0.45);
+}
+
+.sa-house--forge::before {
+  background: #18181b;
+}
+
 .sa-house span {
   padding: 0.4cqw 1.2cqw;
   background: #2a1a05;

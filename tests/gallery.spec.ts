@@ -18,7 +18,7 @@ test('галерея уровней', async ({ page }) => {
   await page.addInitScript(() => {
     if (localStorage.getItem('cascadia.progress.v1')) return;
     const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
-    const gates = ['flex-13', 'grid-09', 'mq-04', 'tag-07'];
+    const gates = ['flex-13', 'grid-09', 'mq-04', 'tag-07', 'fair-08', 'sem-07'];
     localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(gates.map((id) => [id, done]))));
   });
   await page.goto('/');

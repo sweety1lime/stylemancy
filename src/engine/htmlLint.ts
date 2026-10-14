@@ -67,6 +67,8 @@ export function lintHtml(source: string, options: HtmlLintOptions = {}): Problem
   const problems: Problem[] = [];
   const stack: OpenTag[] = [];
   const ids = new Set<string>();
+  /** Подписи <label for> — проверим в конце, что такие поля на странице есть */
+  const labelTargets: { id: string; from: number; to: number }[] = [];
   const lower = source.toLowerCase();
   const len = source.length;
   let pos = 0;
@@ -102,6 +104,11 @@ export function lintHtml(source: string, options: HtmlLintOptions = {}): Problem
     }
   }
 
+  for (const target of labelTargets) {
+    if (!ids.has(target.id)) {
+      report('warning', target.from, target.to, `Подпись ищет поле с id="${target.id}", а такого поля на странице нет.`, 'attribute');
+    }
+  }
   for (const open of stack) {
     report('error', open.from, open.to, `Тег <${open.name}> не закрыт — не хватает </${open.name}>.`, 'nesting');
   }
@@ -335,6 +342,11 @@ export function lintHtml(source: string, options: HtmlLintOptions = {}): Problem
     });
 
     const value = (attr: string) => seen.get(attr)?.value?.trim();
+    const forId = value('for');
+    if (name === 'label' && forId) {
+      const attr = seen.get('for')!;
+      labelTargets.push({ id: forId, from: attr.from, to: attr.to });
+    }
     const id = value('id');
     if (id) {
       if (ids.has(id)) {

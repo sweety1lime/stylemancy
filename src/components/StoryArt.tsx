@@ -163,6 +163,42 @@ export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: s
         </>
       )}
 
+      {art === 'city' && (
+        <>
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <div className="sa-village">
+            <span className="sa-house sa-house--stone sa-house--tall">
+              <span>&lt;header&gt;</span>
+            </span>
+            <span className="sa-house sa-house--stone sa-house--wide">
+              <span>&lt;main&gt;</span>
+            </span>
+            <span className="sa-house sa-house--stone">
+              <span>&lt;aside&gt;</span>
+            </span>
+          </div>
+        </>
+      )}
+
+      {art === 'forge' && (
+        <>
+          <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
+          <PixelArt className="sa-spark sa-spark--2" sprite={SKY_SPARK} />
+          <PixelArt className="sa-spark sa-spark--3" sprite={SKY_SPARK} />
+          <div className="sa-village">
+            <span className="sa-house sa-house--forge">
+              <span>&lt;label&gt;</span>
+            </span>
+            <span className="sa-house sa-house--forge sa-house--tall">
+              <span>&lt;form&gt;</span>
+            </span>
+            <span className="sa-house sa-house--forge">
+              <span>&lt;button&gt;</span>
+            </span>
+          </div>
+        </>
+      )}
+
       {art === 'citadel' && (
         <>
           <span className="sa-default-text sa-default-text--1">Times New Roman</span>

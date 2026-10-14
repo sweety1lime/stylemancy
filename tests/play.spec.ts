@@ -18,7 +18,7 @@ async function unlockDistricts(page: Page) {
   await page.addInitScript(() => {
     if (localStorage.getItem('cascadia.progress.v1')) return;
     const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
-    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done, 'tag-07': done }));
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done, 'tag-07': done, 'fair-08': done, 'sem-07': done }));
   });
 }
 
@@ -500,6 +500,37 @@ test.describe('Долина Тегов', () => {
       await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
       await typeCode(page, '<h2>Лавка</h2>\n<img src="potion-oops.png" alt="Красное зелье">\n');
       await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(0);
+    });
+  });
+
+  test.describe('Кузница Форм', () => {
+    test.beforeEach(async ({ page }) => {
+      await unlockDistricts(page);
+    });
+
+    test('подпись ставит курсор в своё поле', async ({ page }) => {
+      await page.goto('/#/level/form-01');
+      await typeCode(page, '<form>\n  <label for="hero">Имя героя</label>\n  <input id="hero" name="hero">\n</form>\n');
+      await expect(page.locator('.goals__head')).toHaveText(/3 из 3/);
+      const frame = page.frameLocator('.browser__page');
+      await frame.getByText('Имя героя').click();
+      await expect(frame.locator('#hero')).toBeFocused();
+    });
+
+    test('обязательное поле: пустую форму браузер не отправит', async ({ page }) => {
+      await page.goto('/#/level/form-05');
+      await typeCode(
+        page,
+        '<form>\n  <label for="hero">Имя героя</label>\n  <input id="hero" name="hero" required>\n  <button type="submit">Отправить</button>\n</form>\n',
+      );
+      await expect(page.locator('.goals__head')).toHaveText(/3 из 3/);
+      const frame = page.frameLocator('.browser__page');
+      await frame.getByRole('button', { name: 'Отправить' }).click();
+      await expect(frame.locator('#hero')).toBeFocused();
+      await expect(page.locator('.browser__status')).not.toContainText('Форма отправила бы');
+      await frame.getByLabel('Имя героя').fill('Ариэль');
+      await frame.getByRole('button', { name: 'Отправить' }).click();
+      await expect(page.locator('.browser__status')).toHaveText('Форма отправила бы: hero=Ариэль');
     });
   });
 });

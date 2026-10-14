@@ -1,8 +1,10 @@
 import type { Level, Region } from '../engine/types';
 import { defaultCitadel } from './default-citadel';
 import { floatingIslands } from './floating-islands';
+import { formForge } from './form-forge';
 import { linkFair } from './link-fair';
 import { mirrorTower } from './mirror-tower';
+import { semanticCity } from './semantic-city';
 import { stainedAbbey } from './stained-abbey';
 import { tagVillage } from './tag-village';
 
@@ -27,8 +29,8 @@ export const lands: Land[] = [
     topic: 'HTML',
     blurb: 'Теги, вложенность и семантика страницы',
     emblem: 'tags',
-    regions: [tagVillage, linkFair],
-    upcoming: ['Город Семантики · каркас страницы', 'Кузница Форм · формы'],
+    regions: [tagVillage, linkFair, semanticCity, formForge],
+    upcoming: [],
   },
   {
     id: 'selector-forest',

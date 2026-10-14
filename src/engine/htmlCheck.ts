@@ -64,7 +64,14 @@ export function checkGoals(code: string, doc: Document, goals: HtmlGoal[], isDoc
       goal.count !== undefined ? n === goal.count : n >= (goal.min ?? 1) && (goal.max === undefined || n <= goal.max);
     if (done) return { ...base, done };
     const wanted = goal.count ?? goal.min;
-    const detail = n === 0 ? 'пока не найдено' : wanted !== undefined ? `найдено ${n} из ${wanted}` : `найдено ${n} — это слишком много`;
+    const detail =
+      goal.count === 0
+        ? `осталось: ${n}`
+        : n === 0
+          ? 'пока не найдено'
+          : wanted !== undefined
+            ? `найдено ${n} из ${wanted}`
+            : `найдено ${n} — это слишком много`;
     return { ...base, done, detail };
   });
 }

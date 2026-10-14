@@ -559,4 +559,144 @@ export const SPELLS: Record<string, Spell> = {
       ],
     },
   },
+
+  // ——— Город Семантики: каркас страницы ———
+
+  'header-footer': {
+    name: 'header и footer',
+    description:
+      '`<header>` — шапка страницы или раздела: заголовок, логотип, меню. `<footer>` — подвал: контакты, копирайт. В отличие от безликого `<div>`, они говорят браузеру и экранному диктору, что это за блок.',
+    example: {
+      markup: [
+        { label: 'коробки', html: '<div>\n  <h1>Город Семантики</h1>\n</div>\n<div>\n  <p>Ратуша, 1024 год</p>\n</div>' },
+        { label: 'со смыслом', html: '<header>\n  <h1>Город Семантики</h1>\n</header>\n<footer>\n  <p>Ратуша, 1024 год</p>\n</footer>' },
+      ],
+      initial: 1,
+    },
+  },
+  nav: {
+    name: 'Меню nav',
+    description: '`<nav>` — главное меню: ссылки по разделам сайта. Обычно стоит в шапке. Не каждая группа ссылок — меню, только главные пути по сайту.',
+    example: {
+      markup: [
+        {
+          label: 'nav',
+          html: '<nav>\n  <a href="#square">Площадь</a>\n  <a href="#market">Рынок</a>\n  <a href="#tower">Башня</a>\n</nav>',
+        },
+      ],
+    },
+  },
+  'main-section': {
+    name: 'main и section',
+    description:
+      '`<main>` — главная часть страницы, она одна. Внутри — разделы `<section>`, у каждого раздела свой заголовок.',
+    example: {
+      markup: [
+        {
+          label: 'main + section',
+          html: '<main>\n  <section>\n    <h2>Рынок</h2>\n    <p>Торгуют всем, что можно разметить.</p>\n  </section>\n  <section>\n    <h2>Ратуша</h2>\n    <p>Решают, какой тег куда ставить.</p>\n  </section>\n</main>',
+        },
+      ],
+    },
+  },
+  article: {
+    name: 'Запись article',
+    description:
+      '`<article>` — самостоятельный кусок, понятный сам по себе: новость, пост, карточка товара. Его можно перенести на другую страницу, и он не потеряет смысл.',
+    example: {
+      markup: [
+        { label: 'article', html: '<article>\n  <h3>Открыт новый мост</h3>\n  <p>Мост соединил Рынок и Башню.</p>\n</article>' },
+      ],
+    },
+  },
+  aside: {
+    name: 'Дополнение aside',
+    description: '`<aside>` — полезное, но не главное: советы, объявления, ссылки «читайте также». Стоит рядом с главной частью, а не внутри неё.',
+    example: {
+      markup: [
+        { label: 'aside', html: '<aside>\n  <h3>Совет зодчего</h3>\n  <p>Div — для оформления, а не для смысла.</p>\n</aside>' },
+      ],
+    },
+  },
+  figure: {
+    name: 'figure и figcaption',
+    description:
+      '`<figure>` объединяет картинку и её подпись `<figcaption>`. Подпись видна всем — это не замена `alt`: `alt` описывает картинку тем, кто её не видит.',
+    example: {
+      markup: [
+        { label: 'без figure', html: '<img src="map.png" alt="Карта города">\n<p>Красный крестик — ратуша</p>' },
+        {
+          label: 'figure',
+          html: '<figure>\n  <img src="map.png" alt="Карта города">\n  <figcaption>Красный крестик — ратуша</figcaption>\n</figure>',
+        },
+      ],
+      initial: 1,
+    },
+  },
+
+  // ——— Кузница Форм ———
+
+  'label-input': {
+    name: 'form, label и input',
+    description:
+      'Форма — `<form>`. Поле ввода — одиночный `<input>`, подпись к нему — `<label>`. Связь: `for` у подписи равен `id` у поля — тогда клик по подписи ставит курсор в поле. `name` — имя, под которым форма отправит значение.',
+    example: {
+      markup: [
+        { label: 'без подписи', html: '<form>\n  <input id="hero" name="hero">\n</form>' },
+        { label: 'с подписью', html: '<form>\n  <label for="hero">Имя героя</label>\n  <input id="hero" name="hero">\n</form>' },
+      ],
+      initial: 1,
+    },
+  },
+  'input-types': {
+    name: 'Типы полей и placeholder',
+    description:
+      'Атрибут `type` меняет поле: `email` — почта, `password` — пароль за точками, `number` — число, `date` — дата. `placeholder` — бледная подсказка внутри пустого поля.',
+    example: {
+      markup: [
+        { label: 'text', html: '<input type="text" placeholder="Что угодно">' },
+        { label: 'password', html: '<input type="password" value="тайна">' },
+        { label: 'number', html: '<input type="number" value="7">' },
+        { label: 'date', html: '<input type="date">' },
+      ],
+      initial: 1,
+    },
+  },
+  'checkbox-radio': {
+    name: 'radio и checkbox',
+    description:
+      '`type="radio"` — переключатель: из группы с одинаковым `name` выбрать можно только один. `type="checkbox"` — галочка: «да» или «нет», и галочек можно отметить сколько угодно.',
+    example: {
+      markup: [
+        {
+          label: 'radio',
+          html: '<label><input type="radio" name="path" checked> Маг</label>\n<label><input type="radio" name="path"> Воин</label>',
+        },
+        { label: 'checkbox', html: '<label><input type="checkbox" checked> Принимаю устав</label>' },
+      ],
+    },
+  },
+  'select-textarea': {
+    name: 'select и textarea',
+    description: '`<select>` — выбор из списка, варианты в нём — `<option>`. `<textarea>` — многострочное поле для длинного текста. Оба тега парные.',
+    example: {
+      markup: [
+        { label: 'select', html: '<select>\n  <option>Меч</option>\n  <option>Посох</option>\n  <option>Лютня</option>\n</select>' },
+        { label: 'textarea', html: '<textarea rows="3">Пожелание кузнецу…</textarea>' },
+      ],
+    },
+  },
+  'button-required': {
+    name: 'button и required',
+    description:
+      '`<button type="submit">` отправляет форму. Атрибут `required` делает поле обязательным: с пустым полем браузер форму не отправит и сам попросит его заполнить.',
+    example: {
+      markup: [
+        {
+          label: 'форма',
+          html: '<form>\n  <label for="hero">Имя героя</label>\n  <input id="hero" name="hero" required>\n  <button type="submit">Отправить</button>\n</form>',
+        },
+      ],
+    },
+  },
 };

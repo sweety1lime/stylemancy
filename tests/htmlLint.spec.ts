@@ -36,6 +36,9 @@ const CASES: Case[] = [
     expect: ['Тег <tr> не закрыт: поставь </tr> перед следующим <tr>.'],
   },
   { code: '<table><td>Карта</td></table>', expect: ['<td> — ячейка: она стоит внутри строки <tr>.'] },
+  { code: '<label for="name">Имя</label><input id="hero">', expect: ['Подпись ищет поле с id="name", а такого поля на странице нет.'] },
+  { code: '<label for="hero">Имя</label><input id="hero" name="hero">', expect: [] },
+  { code: '<select><p>Меч</p></select>', expect: ['Внутри <select> — только варианты <option>.'] },
   {
     code: '<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<title>Деревня</title>\n</head>\n<body>\n<h1>Привет</h1>\n</body>\n</html>',
     document: true,

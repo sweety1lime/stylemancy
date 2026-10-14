@@ -1,0 +1,107 @@
+/*
+  Кузница Форм — оформление страниц района: форма — кованая плита,
+  поля — вставки из светлого металла, кнопка — раскалённая заготовка.
+*/
+
+html {
+  background: #1c1917;
+}
+
+body {
+  margin: 18px 22px;
+  color: #e7e5e4;
+}
+
+h2,
+h3 {
+  margin: 0.2em 0 0.4em;
+  color: #fb923c;
+  font-family: "Tiny5", system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.15;
+  font-synthesis: none;
+}
+
+p {
+  margin: 0.5em 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 15px;
+}
+
+form {
+  display: block;
+  padding: 14px 16px;
+  background: #3f3f46;
+  box-shadow:
+    inset 0 0 0 3px #52525b,
+    0 0 0 3px #18181b,
+    6px 6px 0 3px rgba(0, 0, 0, 0.45);
+}
+
+label {
+  display: block;
+  margin: 8px 0 4px;
+  color: #fde68a;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Галочки и переключатели — в одну строку с подписью */
+label:has(input[type="checkbox"], input[type="radio"]) {
+  display: inline-block;
+  margin-right: 14px;
+}
+
+input,
+select,
+textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  background: #e7e5e4;
+  color: #1c1917;
+  font: 15px "Segoe UI", system-ui, sans-serif;
+  box-shadow: inset 0 0 0 2px #a8a29e;
+}
+
+input:not([type="checkbox"], [type="radio"]),
+select,
+textarea {
+  width: 260px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 3px solid #fb923c;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #f97316;
+  width: 18px;
+  height: 18px;
+  vertical-align: -3px;
+}
+
+textarea {
+  display: block;
+  resize: vertical;
+}
+
+button {
+  display: block;
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: 0;
+  background: #f97316;
+  color: #1c1917;
+  font: 16px "Tiny5", system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow:
+    inset -3px -3px 0 rgba(0, 0, 0, 0.3),
+    0 0 12px rgba(249, 115, 22, 0.6);
+}
