@@ -82,6 +82,13 @@ export function evaluateHtml(level: HtmlLevel, code: string): HtmlEvaluation {
   };
 }
 
+/** Разметка с картинками из библиотеки — для живых примеров гримуара. */
+export function withImages(markup: string, images: Record<string, string>): string {
+  const doc = parseMarkup(markup);
+  resolveImages(doc, images);
+  return doc.body.innerHTML;
+}
+
 /** Картинки по именам из библиотеки уровня: студент пишет src="potion.png", сцена показывает спрайт. */
 function resolveImages(doc: Document, images: Record<string, string>) {
   doc.querySelectorAll<HTMLImageElement>('img[src]').forEach((img) => {

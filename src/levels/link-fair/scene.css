@@ -1,0 +1,116 @@
+/*
+  Ярмарка Ссылок — оформление страниц района: полосатый навес, списки товаров,
+  ссылки-указатели, вывески с картинками и доска цен. Текст без тегов остаётся «проклятым».
+*/
+
+html {
+  background-color: #f6ecd6;
+  background-image: repeating-linear-gradient(90deg, #dc2626 0 24px, #fef2f2 24px 48px);
+  background-size: 100% 14px;
+  background-repeat: no-repeat;
+}
+
+body {
+  margin: 30px 24px 18px;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0.4em 0 0.3em;
+  color: #991b1b;
+  font-family: "Tiny5", system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.15;
+  font-synthesis: none;
+}
+
+h1 {
+  font-size: 32px;
+}
+
+h2 {
+  font-size: 24px;
+}
+
+h3 {
+  font-size: 19px;
+}
+
+p,
+li,
+td,
+th {
+  color: #2b2116;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+p {
+  margin: 0.5em 0;
+}
+
+ul,
+ol {
+  margin: 0.4em 0;
+  padding-left: 28px;
+}
+
+ul {
+  list-style: square;
+}
+
+li {
+  margin: 3px 0;
+}
+
+li::marker {
+  color: #b45309;
+}
+
+ol > li::marker {
+  font-family: "Tiny5", system-ui, sans-serif;
+}
+
+a {
+  color: #4f46e5;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  text-decoration: underline dotted 2px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  background: rgba(124, 58, 237, 0.12);
+  color: #7c3aed;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  margin: 8px 0;
+  padding: 6px;
+  background: #fff7ed;
+  box-shadow: 0 0 0 3px #92400e;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 8px 0;
+  background: #fffbeb;
+  box-shadow: 0 0 0 3px #92400e;
+}
+
+th,
+td {
+  padding: 6px 14px;
+  border: 2px solid #d6b98c;
+  text-align: left;
+}
+
+th {
+  background: #fbbf24;
+  color: #451a03;
+  font-family: "Tiny5", system-ui, sans-serif;
+  font-weight: 400;
+}

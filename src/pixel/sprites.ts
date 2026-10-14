@@ -341,6 +341,37 @@ export const PORTRAITS: Record<string, Sprite> = {
       P: '#8a6a2a',
     },
   },
+  // Торговка Линка: платок в горошек, серьги и звено цепочки на фартуке — ссылка
+  merchant: {
+    rows: [
+      '.....kkkkkk.....',
+      '...kkRRRRRRkk...',
+      '..kRRwRRRRwRRk..',
+      '..kRRRRRRRRRRk..',
+      '..kRkffffffkRk..',
+      '..kRkfeffefkRk..',
+      '..kkkffffffkkk..',
+      '...ykffmmffky...',
+      '....kffffffk....',
+      '...kkggggggkk...',
+      '..kgggwwwwgggk..',
+      '.kggggwyywggggk.',
+      '.kggggywwyggggk.',
+      '.kggggwyywggggk.',
+      '.kggggwwwwggggk.',
+      'kggggggggggggggk',
+    ],
+    palette: {
+      k: INK,
+      R: '#dc2626',
+      w: '#f8fafc',
+      f: '#f1c27d',
+      e: INK,
+      m: '#be123c',
+      y: '#f6c453',
+      g: '#15803d',
+    },
+  },
   // Провидица Медиа: капюшон, зеркальный камень во лбу и зеркальце-амулет
   media: {
     rows: [
@@ -420,6 +451,48 @@ export const BRICKS: Sprite = {
     'bbbbbbbbbbbbbbbk',
   ],
   palette: { k: '#120c22', b: '#221a3d', B: '#2b2150' },
+};
+
+/* ——— Товары Ярмарки Ссылок: картинки для HTML-уровней ——— */
+
+export const POTION: Sprite = {
+  rows: [
+    '....kkkk....',
+    '....kddk....',
+    '....kkkk....',
+    '....kwgk....',
+    '....kggk....',
+    '...kkggkk...',
+    '..kggwgggk..',
+    '.kgwggggggk.',
+    '.kgrrrrrrgk.',
+    'kgrrRrrrrrgk',
+    'kgrRrrrrrrgk',
+    'kgrrrrrrrrgk',
+    'kgrrrrrrrrgk',
+    '.kgrrrrrrgk.',
+    '..kggggggk..',
+    '...kkkkkk...',
+  ],
+  palette: { k: INK, d: '#92400e', g: '#cbd5e1', w: '#ffffff', r: '#e11d48', R: '#fb7185' },
+};
+
+export const MAP: Sprite = {
+  rows: [
+    '.kkkkkkkkkkkkkk.',
+    'kppppppppppppppk',
+    'kppppppppprprppk',
+    'kpppppppppprpppk',
+    'kppppppppprprppk',
+    'kpppppppprpppppk',
+    'kppppppprppppppk',
+    'kppppprppppppppk',
+    'kpppprpppppppppk',
+    'kppprppppppppppk',
+    'kppppppppppppppk',
+    '.kkkkkkkkkkkkkk.',
+  ],
+  palette: { k: '#8a6a2a', p: '#f5e6c8', r: '#be123c' },
 };
 
 /** Серая кладка цитадели Лорда Дефолта */

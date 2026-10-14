@@ -24,29 +24,34 @@ export function HtmlScene({ level, code, images, celebrate }: HtmlSceneProps) {
   const page = useMemo(() => htmlPage(level, code, images), [level, code, images]);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const pageRef = useRef(page);
-  const codeRef = useRef(code);
   // Документ для первой загрузки; дальше содержимое страницы меняется на месте
   const [initialHtml] = useState(page.html);
-  // Строка состояния относится к тому коду, при котором её показали
-  const [status, setStatus] = useState({ code, text: '' });
+  // Строка состояния: hover — подсказка от наведения на ссылку. Новый код — строка пустеет
+  const [status, setStatus] = useState({ text: '', hover: false });
+  const [statusCode, setStatusCode] = useState(code);
+  if (statusCode !== code) {
+    setStatusCode(code);
+    setStatus({ text: '', hover: false });
+  }
 
   useEffect(() => {
     pageRef.current = page;
-    codeRef.current = code;
     if (!level.document) showBody(frameRef.current, page.body);
-  }, [page, code, level.document]);
+  }, [page, level.document]);
 
   function handleLoad() {
     const frame = frameRef.current;
     const doc = frame?.contentDocument;
     if (!doc) return;
     if (!level.document) showBody(frame, pageRef.current.body);
-    const say = (text: string) => setStatus({ code: codeRef.current, text });
+    const say = (text: string, hover = false) => setStatus({ text, hover });
     const linkOf = (target: EventTarget | null) => (target instanceof doc.defaultView!.Element ? target.closest('a') : null);
 
     doc.addEventListener('mouseover', (event) => {
       const link = linkOf(event.target);
-      say(link ? `Ссылка → ${link.getAttribute('href') || 'никуда: у неё нет href'}` : '');
+      if (link) say(`Ссылка → ${link.getAttribute('href') || 'никуда: у неё нет href'}`, true);
+      // Ушли со ссылки — гасим только подсказку от наведения: сообщения о клике и форме остаются
+      else setStatus((current) => (current.hover ? { ...current, text: '' } : current));
     });
     doc.addEventListener('click', (event) => {
       const link = linkOf(event.target);
@@ -91,7 +96,7 @@ export function HtmlScene({ level, code, images, celebrate }: HtmlSceneProps) {
         style={{ height: level.scene.height }}
       />
       <p className="browser__status" aria-live="polite">
-        {(status.code === code && status.text) || ' '}
+        {status.text || ' '}
       </p>
     </div>
   );

@@ -1977,6 +1977,52 @@ a.land:hover .land__art {
   box-shadow: 0 0 0 0.4cqw var(--gold);
 }
 
+/* Ярмарка Ссылок: прилавки под полосатыми навесами */
+.sa-fair {
+  position: absolute;
+  right: 0;
+  bottom: 10%;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6cqw;
+}
+
+.sa-stall {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 17cqw;
+  height: 12cqw;
+  background: #92400e;
+  box-shadow: inset 0 0 0 0.6cqw #451a03;
+}
+
+.sa-stall::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: -1.5cqw;
+  right: -1.5cqw;
+  height: 4cqw;
+  background: repeating-linear-gradient(90deg, #dc2626 0 2.5cqw, #fef2f2 2.5cqw 5cqw);
+  box-shadow: 0 0.5cqw 0 rgba(0, 0, 0, 0.3);
+}
+
+.sa-stall--blue::before {
+  background: repeating-linear-gradient(90deg, #2563eb 0 2.5cqw, #eff6ff 2.5cqw 5cqw);
+}
+
+.sa-stall span {
+  padding: 0.4cqw 1.2cqw;
+  background: #2a1a05;
+  color: var(--gold-strong);
+  font-family: var(--font-pixel);
+  font-size: 2.8cqw;
+  box-shadow: 0 0 0 0.4cqw var(--gold);
+}
+
 /* Свиток с указом: заголовок, строки текста и выделенное важное */
 .sa-scroll {
   position: absolute;

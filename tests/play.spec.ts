@@ -18,7 +18,7 @@ async function unlockDistricts(page: Page) {
   await page.addInitScript(() => {
     if (localStorage.getItem('cascadia.progress.v1')) return;
     const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
-    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done }));
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done, 'tag-07': done }));
   });
 }
 
@@ -465,5 +465,41 @@ test.describe('Долина Тегов', () => {
     );
     await expect(page.locator('.browser__tab')).toHaveText('Деревня Тегов');
     await expect(page.locator('.goals__head')).toHaveText(/5 из 5/);
+  });
+
+  test.describe('Ярмарка Ссылок', () => {
+    test.beforeEach(async ({ page }) => {
+      await unlockDistricts(page);
+    });
+
+    test('ссылка: строка состояния показывает адрес, переход отключён', async ({ page }) => {
+      await page.goto('/#/level/fair-04');
+      await typeCode(page, '<h2>Соседи</h2>\n<p>Загляни к соседям: <a href="https://kaskadia.example">Деревня Тегов</a>.</p>\n');
+      await expect(page.locator('.goals__head')).toHaveText(/2 из 2/);
+      const link = page.frameLocator('.browser__page').getByRole('link', { name: 'Деревня Тегов' });
+      await link.hover();
+      await expect(page.locator('.browser__status')).toHaveText('Ссылка → https://kaskadia.example');
+      await link.click();
+      await expect(page.locator('.browser__status')).toContainText('в тренажёре переходы отключены');
+      await expect(page.locator('.browser__page')).toBeVisible();
+    });
+
+    test('якорь прокручивает страницу к метке', async ({ page }) => {
+      await page.goto('/#/level/fair-05');
+      const level = await page.evaluate<string>("import('/src/levels/link-fair/fair-05.ts').then((m) => m.default.solutionHtml)");
+      await typeCode(page, level);
+      await expect(page.locator('.goals__head')).toHaveText(/2 из 2/);
+      await page.frameLocator('.browser__page').getByRole('link', { name: 'К площади' }).click();
+      await expect(page.locator('.browser__status')).toContainText('Якорь #square');
+    });
+
+    test('картинка из библиотеки загружается, а с ошибкой в имени — показывает alt', async ({ page }) => {
+      await page.goto('/#/level/fair-06');
+      await typeCode(page, '<h2>Лавка</h2>\n<img src="potion.png" alt="Красное зелье">\n');
+      const image = page.frameLocator('.browser__page').getByRole('img', { name: 'Красное зелье' });
+      await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+      await typeCode(page, '<h2>Лавка</h2>\n<img src="potion-oops.png" alt="Красное зелье">\n');
+      await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(0);
+    });
   });
 });

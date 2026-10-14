@@ -30,6 +30,12 @@ const CASES: Case[] = [
   { code: '<div/>текст', expect: ['<div /> так не закрывается'] },
   { code: '<!-- заметка', expect: ['Комментарий не закрыт'] },
   { code: '<center>центр</center>', expect: ['Тег <center> устарел'] },
+  { code: '<p><a src="#prices">Цены</a></p>', expect: ['У <a> нет атрибута «src»', 'У ссылки нет href'] },
+  {
+    code: '<table><tr><td>Карта</td><td>10</td>\n<tr><td>Компас</td><td>7</td></tr></table>',
+    expect: ['Тег <tr> не закрыт: поставь </tr> перед следующим <tr>.'],
+  },
+  { code: '<table><td>Карта</td></table>', expect: ['<td> — ячейка: она стоит внутри строки <tr>.'] },
   {
     code: '<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<title>Деревня</title>\n</head>\n<body>\n<h1>Привет</h1>\n</body>\n</html>',
     document: true,

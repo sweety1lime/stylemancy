@@ -145,6 +145,24 @@ export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: s
         </>
       )}
 
+      {art === 'fair' && (
+        <>
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <PixelArt className="sa-spark sa-spark--2" sprite={SKY_SPARK} />
+          <div className="sa-fair">
+            <span className="sa-stall">
+              <span>&lt;ul&gt;</span>
+            </span>
+            <span className="sa-stall sa-stall--blue">
+              <span>&lt;a&gt;</span>
+            </span>
+            <span className="sa-stall">
+              <span>&lt;img&gt;</span>
+            </span>
+          </div>
+        </>
+      )}
+
       {art === 'citadel' && (
         <>
           <span className="sa-default-text sa-default-text--1">Times New Roman</span>

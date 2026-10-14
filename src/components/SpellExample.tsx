@@ -1,6 +1,8 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { withImages } from '../engine/htmlCheck';
 import { recordExperiment } from '../game/achievements';
 import type { SpellExample as Example, MarkupExample, ValueExample, WidthExample } from '../game/spells';
+import { IMAGE_LIBRARY } from '../levels/shared/images';
 
 /** Оформление мини-сцены примера: пиксельный контейнер и цветные пронумерованные блоки. */
 const BASE_CSS = `
@@ -74,13 +76,15 @@ export function SpellExample({ spell, example }: { spell: string; example: Examp
 const MARKUP_PAGE_CSS = `
 html { background: #e8e6df; }
 body { margin: 10px 14px; color: #1c1c24; font: 15px/1.4 "Times New Roman", Times, serif; }
+table { border-collapse: collapse; }
+th, td { padding: 2px 8px; border: 1px solid #8a8a8a; }
 `;
 
 /** Пример с разметкой: кнопки переключают варианты HTML, мини-страница сразу показывает результат. */
 function MarkupDemo({ spell, example }: { spell: string; example: MarkupExample }) {
   const [selected, setSelected] = useState(example.initial ?? 0);
   const variant = example.markup[selected];
-  const srcDoc = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><style>${MARKUP_PAGE_CSS}</style></head><body>${variant.html}</body></html>`;
+  const srcDoc = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><style>${MARKUP_PAGE_CSS}</style></head><body>${withImages(variant.html, IMAGE_LIBRARY)}</body></html>`;
 
   function choose(index: number) {
     setSelected(index);
