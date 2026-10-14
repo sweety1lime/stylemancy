@@ -43,14 +43,14 @@ export const QUESTIONS: ReviewQuestion[] = [
     explain: 'Свободное место делится только между элементами, поэтому крайние стоят вплотную к краям.',
   },
   {
-    id: 'ai-1',
+    id: 'align-1',
     spell: 'align-items',
     prompt: 'В ряду (`flex-direction: row`) `align-items` двигает элементы…',
     options: ['по вертикали', 'по горизонтали', 'по диагонали', 'никуда — только меняет размер'],
     explain: 'В ряду поперечная ось вертикальная, а `align-items` работает именно поперёк главной оси.',
   },
   {
-    id: 'ai-2',
+    id: 'align-2',
     spell: 'align-items',
     prompt: 'Какое значение `align-items` растягивает элементы на всю высоту контейнера?',
     options: ['stretch', 'center', 'flex-end', 'baseline'],
