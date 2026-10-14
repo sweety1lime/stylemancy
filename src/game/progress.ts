@@ -12,6 +12,7 @@ export interface LevelProgress {
 
 type ProgressMap = Record<string, LevelProgress>;
 
+// Ключи хранят рабочее название проекта: не переименовывать — у всех сбросится прогресс
 const PROGRESS_KEY = 'cascadia.progress.v1';
 const DRAFTS_KEY = 'cascadia.drafts.v1';
 const CURRENT_KEY = 'cascadia.current-level';

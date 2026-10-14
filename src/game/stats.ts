@@ -23,6 +23,7 @@ export interface Stats {
   seen: Record<string, boolean>;
 }
 
+// Ключи хранят рабочее название проекта: не переименовывать — у всех сбросится прогресс
 const KEY = 'cascadia.stats.v1';
 const INITIAL: Stats = {
   achievements: {},

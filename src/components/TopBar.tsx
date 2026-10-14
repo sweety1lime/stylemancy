@@ -21,7 +21,7 @@ export function TopBar({ back }: TopBarProps) {
     <header className="topbar">
       <a className="brand" href="#/">
         <PixelArt sprite={GEMS.amethyst.sprite} scale={2} />
-        Каскадия
+        Стилемантия
       </a>
       {back && (
         <a className="topbar__back" href={back.href}>

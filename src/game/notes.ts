@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { read, write } from './storage';
 
+// Ключи хранят рабочее название проекта: не переименовывать — у всех сбросится прогресс
 const KEY = 'cascadia.notes.v1';
 
 let notes = read<Record<string, string>>(KEY, {});
