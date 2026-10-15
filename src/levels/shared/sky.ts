@@ -36,3 +36,52 @@ export function skyBackground(bands = NIGHT_BANDS, moon = true): string {
   const layers = moon ? [...starLayers, `${spriteCssUrl(MOON)} 90% 9% / 40px 40px no-repeat`] : starLayers;
   return [...layers, bands].join(',\n    ');
 }
+
+/** Звёзды, которые мерцают поверх неба: две группы гаснут и загораются по очереди. */
+const TWINKLES: [number, number][][] = [
+  [
+    [14, 24],
+    [52, 12],
+    [86, 66],
+  ],
+  [
+    [32, 58],
+    [70, 36],
+    [22, 84],
+  ],
+];
+
+const twinkleLayer = (stars: [number, number][]) =>
+  stars.map(([x, y]) => `${spriteCssUrl(SKY_SPARK)} ${x}% ${y}% / 14px 14px no-repeat`).join(', ');
+
+/** Живое небо: звёзды мерцают. Слой позади предметов, мышь и проверку не задевает. */
+export const twinkleCss = `
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  animation: twinkle 2.8s steps(1, end) infinite;
+}
+
+body::before {
+  background: ${twinkleLayer(TWINKLES[0])};
+}
+
+body::after {
+  background: ${twinkleLayer(TWINKLES[1])};
+  animation-delay: -1.4s;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.95;
+  }
+
+  50% {
+    opacity: 0.1;
+  }
+}
+`;

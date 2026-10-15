@@ -16,3 +16,31 @@ export const fortressCss = `${fortressRules}
   --sprite: ${spriteCssUrl(SPY)};
 }
 `;
+
+/** Пылинки в лучах света: медленно плывут вверх. Для Казарм и Плаца — там нет неба. */
+export const dustCss = `
+body::after {
+  content: "";
+  position: fixed;
+  inset: -40px;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(254, 243, 199, 0.55) 0 1px, transparent 2px),
+    radial-gradient(circle, rgba(254, 243, 199, 0.35) 0 1.5px, transparent 2.5px);
+  background-size: 170px 130px, 240px 260px;
+  background-position: 30px 40px, 120px 70px;
+  animation: dust 30s linear infinite;
+}
+
+/* Сдвиг на высоту плитки узора — круг замыкается без рывка */
+@keyframes dust {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-260px);
+  }
+}
+`;

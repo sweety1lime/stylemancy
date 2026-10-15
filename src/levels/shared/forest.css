@@ -11,6 +11,51 @@ body {
   font-family: system-ui, sans-serif;
 }
 
+/* Светлячки в лесной темноте: два слоя плывут в разные стороны и мерцают. Позади предметов */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: -40px;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(253, 224, 71, 0.9) 0 1.5px, rgba(253, 224, 71, 0.25) 2.5px, transparent 4px),
+    radial-gradient(circle, rgba(190, 242, 100, 0.8) 0 1.5px, rgba(190, 242, 100, 0.2) 2.5px, transparent 4px);
+  background-size: 180px 140px, 230px 170px;
+  background-position: 20px 30px, 120px 90px;
+  animation:
+    fireflies 16s ease-in-out infinite alternate,
+    flicker 1.8s steps(1, end) infinite;
+}
+
+body::after {
+  background-size: 210px 160px, 150px 190px;
+  background-position: 90px 10px, 40px 120px;
+  animation-duration: 22s, 2.4s;
+  animation-direction: alternate-reverse, normal;
+}
+
+@keyframes fireflies {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(34px, -26px);
+  }
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
 /* Ссылки и списки без оформления браузера: их цвет — тоже лесной. По ссылкам сцены не переходят */
 a {
   color: inherit;

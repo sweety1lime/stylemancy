@@ -48,6 +48,35 @@ export function recolor(sprite: Sprite, palette: Palette): Sprite {
 }
 
 /**
+ * Магический круг: два кольца и руны-крестики между ними. Рисуется по формуле окружности,
+ * поэтому размер любой: size × size пикселей.
+ */
+export function magicCircle(size: number, palette: Palette): Sprite {
+  const center = (size - 1) / 2;
+  const outer = size / 2 - 0.5;
+  const inner = outer * 0.72;
+  const runes = new Set<string>();
+  // Восемь рун-крестиков на средней окружности
+  for (let i = 0; i < 8; i++) {
+    const angle = (Math.PI * 2 * i) / 8;
+    const r = (outer + inner) / 2;
+    const x = Math.round(center + Math.cos(angle) * r);
+    const y = Math.round(center + Math.sin(angle) * r);
+    for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) runes.add(`${x + dx},${y + dy}`);
+  }
+  const rows = Array.from({ length: size }, (_, y) =>
+    Array.from({ length: size }, (_, x) => {
+      const d = Math.hypot(x - center, y - center);
+      if (runes.has(`${x},${y}`)) return 'r';
+      if (Math.abs(d - outer) < 0.55) return 'o';
+      if (Math.abs(d - inner) < 0.5) return 'i';
+      return '.';
+    }).join(''),
+  );
+  return { rows, palette };
+}
+
+/**
  * Предмет, который красит свойство color: маска заливки (буквы c, h, d, v) и рисунок поверх неё.
  * В CSS заливка — currentColor под маской, а рисунок кладётся сверху.
  */

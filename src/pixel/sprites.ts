@@ -955,6 +955,67 @@ export const SAND_BRICKS = recolor(BRICKS, { k: '#4a3219', b: '#8a6236', B: '#9a
 /** Серая кладка цитадели Лорда Дефолта */
 export const GRAY_BRICKS = recolor(BRICKS, { k: '#141419', b: '#272730', B: '#30303a' });
 
+/* ——— Переключатели: звук и эффекты ——— */
+
+const TOGGLE_PALETTE = { k: '#e9e4ff', w: '#a78bfa' };
+
+export const SPEAKER_ON: Sprite = {
+  rows: ['....k.....', '...kk..k..', 'kkkwk...k.', 'kwwwk.k..k', 'kwwwk.k..k', 'kkkwk...k.', '...kk..k..', '....k.....'],
+  palette: TOGGLE_PALETTE,
+};
+
+export const SPEAKER_OFF: Sprite = {
+  rows: ['....k.....', '...kk.....', 'kkkwk.k..k', 'kwwwk..kk.', 'kwwwk..kk.', 'kkkwk.k..k', '...kk.....', '....k.....'],
+  palette: { k: '#8a84ad', w: '#4c3f7a' },
+};
+
+/** Искра эффектов: яркая — полные, тусклая — лёгкие */
+export const EFFECTS_ON: Sprite = {
+  rows: ['....y....', '....y....', '...yYy...', 'yyyYwYyyy', '...yYy...', '....y....', '....y....'],
+  palette: { y: '#f6c453', Y: '#fde68a', w: '#ffffff' },
+};
+
+export const EFFECTS_OFF = recolor(EFFECTS_ON, { y: '#4c3f7a', Y: '#6b6394', w: '#8a84ad' });
+
+/* ——— Живая карта: облака, туман и герой ——— */
+
+export const CLOUD: Sprite = {
+  rows: ['......wwww......', '...wwwwwwwww....', '..wwwwwwwwwwwww.', 'wwwwwwwwwwwwwwww', '.WWWWWWWWWWWWWW.', '...WWWWWWWWWW...'],
+  palette: { w: 'rgba(233, 228, 255, 0.9)', W: 'rgba(167, 139, 250, 0.6)' },
+};
+
+/** Туман над закрытыми землями — то же облако, только серое */
+export const FOG = recolor(CLOUD, { w: 'rgba(156, 163, 175, 0.85)', W: 'rgba(107, 114, 128, 0.7)' });
+
+/** Ученик Академии: шляпа, плащ и посох со светящимся камнем */
+export const HERO: Sprite = {
+  rows: [
+    '.....kk.....',
+    '....kppk....',
+    '...kpppk....',
+    '...kppppk.kk',
+    '.kkkkkkkkkyk',
+    '..kffffk.kyk',
+    '..kfefek..k.',
+    '..kffffk..k.',
+    '.kcccccck.k.',
+    'kcccccccckk.',
+    'kccyccccck.k',
+    'kcccccccck.k',
+    '.kcccccck.k.',
+    '.kcccccck.k.',
+    '..kbbkbbk.k.',
+    '..kkk.kkk.k.',
+  ],
+  palette: { k: INK, p: '#7c3aed', f: '#f1c27d', e: INK, c: '#4c1d95', y: '#f6c453', b: '#57534e' },
+};
+
+/** Тот же герой на шаге: ноги вместе — вместе с HERO даёт ходьбу в два кадра */
+export const HERO_STEP: Sprite = {
+  ...HERO,
+  rows: [...HERO.rows.slice(0, 14), '...kbbbbk.k.', '...kkkkkk.k.'],
+};
+
 /* ——— Эмблемы земель на карте ——— */
 
 export const EMBLEMS: Record<string, Sprite> = {

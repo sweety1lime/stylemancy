@@ -2,7 +2,7 @@ import { defineRegion } from '../../engine/define';
 import { crystalsCss } from '../shared/crystals';
 import { glassCss } from '../shared/glass';
 import { LAYOUT_PROPERTIES } from '../shared/properties';
-import { skyBackground } from '../shared/sky';
+import { skyBackground, twinkleCss } from '../shared/sky';
 import mq01 from './mq-01';
 import mq02 from './mq-02';
 import mq03 from './mq-03';
@@ -22,7 +22,7 @@ export const mirrorTower = defineRegion({
   title: 'Зеркальная башня',
   topic: 'Адаптив',
   npc: { name: 'Провидица Медиа', title: 'хранительница Зеркальной башни', portrait: 'media' },
-  sceneCss: sceneCss + skyCss + crystalsCss + glassCss,
+  sceneCss: sceneCss + skyCss + twinkleCss + crystalsCss + glassCss,
   allow: LAYOUT_PROPERTIES,
   allowMessage: 'В Зеркальной башне действует магия Flexbox и Grid',
   story: {

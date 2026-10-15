@@ -1,10 +1,11 @@
 import { parseCss } from './cssParse';
 import type { CssLevel } from './types';
 
-/** Базовые стили любой сцены: без отступов браузера, сцена не прокручивается, содержимое по центру. */
+/** Базовые стили любой сцены: без отступов браузера, сцена не прокручивается, содержимое по центру. Лёгкие эффекты — без анимаций. */
 const BASE_SCENE_CSS = `
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
 body { display: flex; align-items: center; justify-content: center; font-family: system-ui, sans-serif; }
+.effects-light *, .effects-light *::before, .effects-light *::after { animation-duration: 0s !important; animation-iteration-count: 1 !important; }
 `;
 
 /**

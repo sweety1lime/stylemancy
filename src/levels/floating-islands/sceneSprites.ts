@@ -1,7 +1,7 @@
 import { spriteCssUrl, type Sprite } from '../../pixel/pixelArt';
 import { ISLAND_ROCK, RUNE_STONE, STONE } from '../../pixel/sprites';
 import { crystalsCss } from '../shared/crystals';
-import { skyBackground } from '../shared/sky';
+import { skyBackground, twinkleCss } from '../shared/sky';
 
 function threeSlice(left: Sprite, middle: Sprite, right: Sprite): string {
   return `background-image: ${spriteCssUrl(left)}, ${spriteCssUrl(right)}, ${spriteCssUrl(middle)};
@@ -22,6 +22,8 @@ body {
 }
 
 ${crystalsCss}
+
+${twinkleCss}
 
 .stone {
   ${threeSlice(STONE.left, STONE.middle, STONE.right)}

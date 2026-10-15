@@ -22,10 +22,15 @@ import {
   type ItemStatus,
 } from '../engine/scene';
 import type { CssLevel } from '../engine/types';
+import { fullEffects, useSettings } from '../game/settings';
+import { sfx } from '../game/sound';
+import { burst, glide, magic, snapshot } from './sceneFx';
 
 export interface SceneHandle {
   /** Применяет код ко всем зеркалам и сразу сообщает, какие предметы на месте. */
   apply(css: string): ItemStatus[];
+  /** Эффект «Сотворить»: магический круг и искры — или заклинание пшикнуло. */
+  cast(passed: boolean): void;
 }
 
 interface SceneProps {
@@ -57,10 +62,20 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
   const [targets, setTargets] = useState<ItemBox[][]>([]);
   const [statuses, setStatuses] = useState<ItemStatus[][]>([]);
   const [boxWidth, setBoxWidth] = useState(Number.POSITIVE_INFINITY);
+  // Эффекты: идущие перелёты предметов, прошлые статусы (кто только что встал на место) и слой для искр
+  const glidesRef = useRef<Animation[][]>([]);
+  const prevRef = useRef<(ItemStatus[] | undefined)[]>([]);
+  const fxRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     onStatusesRef.current = onStatuses;
   });
+
+  // Лёгкие эффекты — и внутри сцены: фон перестаёт двигаться
+  const { effects } = useSettings();
+  useEffect(() => {
+    docsRef.current.forEach((doc) => doc?.documentElement.classList.toggle('effects-light', effects === 'light'));
+  }, [effects]);
 
   // Сцена внутри всегда своего размера, а на узком экране уменьшается целиком
   useLayoutEffect(() => {
@@ -78,12 +93,28 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
       const docs = docsRef.current;
       const goals = goalsRef.current;
       if (views.some((_, i) => !docs[i] || !goals[i])) return [];
+      const effects = fullEffects();
+      let placed = false;
       const perMirror = views.map((view, i) => {
         const doc = docs[i] as Document;
+        const prev = prevRef.current[i];
+        // Где предметы видны сейчас — с них начнётся перелёт. Прошлые перелёты останавливаем: проверка мерит без них
+        const before = effects && prev ? snapshot(doc, level.check.items, level.check.style) : null;
+        glidesRef.current[i]?.forEach((animation) => animation.cancel());
         const result = compareItems(applyToView(doc, level, view, css), goals[i] as ItemBox[], level.check.tolerance);
         markInPlace(doc, level, result);
+        glidesRef.current[i] = before ? glide(doc, level.check.items, before, level.check.style) : [];
+        // Кто только что встал на место — тому искры
+        const newly = prev ? result.filter((status, k) => status.inPlace && prev[k] && !prev[k].inPlace) : [];
+        const layer = fxRef.current[i];
+        if (newly.length) placed = true;
+        if (effects && layer) {
+          newly.forEach(({ target, color }) => burst(layer, target.x + target.w / 2, target.y + target.h / 2, color, { count: 10, spread: 44, delay: 250 }));
+        }
+        prevRef.current[i] = result;
         return multi ? result.map((status) => ({ ...status, view })) : result;
       });
+      if (placed) sfx.placed();
       setStatuses(perMirror);
       const all = perMirror.flat();
       onStatusesRef.current?.(all);
@@ -92,10 +123,42 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
     [level, views, multi],
   );
 
-  useImperativeHandle(ref, () => ({ apply }), [apply]);
+  const cast = useCallback(
+    (passed: boolean) => {
+      if (!fullEffects()) return;
+      views.forEach((view, i) => {
+        const layer = fxRef.current[i];
+        const result = prevRef.current[i];
+        if (!layer || !result) return;
+        const visible = result.filter(({ target }) => target.w > 0 && target.h > 0 && !target.invisible);
+        if (passed) {
+          magic(layer, view.width, level.scene.height);
+          // Предметы вспыхивают по одному
+          visible.forEach(({ target, color }, k) =>
+            burst(layer, target.x + target.w / 2, target.y + target.h / 2, color, { count: 14, spread: 48, delay: 250 + k * 90 }),
+          );
+        } else {
+          // Пшик: серый дымок над теми, кто не на месте
+          visible
+            .filter((status) => !status.inPlace)
+            .forEach(({ target }) => burst(layer, target.x + target.w / 2, target.y + target.h / 2, '#6b7280', { count: 6, spread: 22 }));
+        }
+      });
+      if (!passed) {
+        boxRef.current?.animate(
+          [{ transform: 'none' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }],
+          { duration: 360, easing: 'steps(4, end)' },
+        );
+      }
+    },
+    [views, level],
+  );
+
+  useImperativeHandle(ref, () => ({ apply, cast }), [apply, cast]);
 
   function handlePlayerLoad(index: number, doc: Document) {
     prepareView(doc, level, views[index]);
+    doc.documentElement.classList.toggle('effects-light', !fullEffects());
     docsRef.current[index] = doc;
     apply(cssRef.current);
   }
@@ -128,6 +191,9 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
       label={view.label}
       targets={targets[i] ?? []}
       statuses={statuses[i] ?? []}
+      fxRef={(layer) => {
+        fxRef.current[i] = layer;
+      }}
       onPlayerLoad={(doc) => handlePlayerLoad(i, doc)}
       onTargetLoad={(doc) => handleTargetLoad(i, doc)}
     />
@@ -148,12 +214,14 @@ interface MirrorProps {
   label?: string;
   targets: ItemBox[];
   statuses: ItemStatus[];
+  /** Слой для искр и магического круга — поверх сцены */
+  fxRef: (layer: HTMLDivElement | null) => void;
   onPlayerLoad: (doc: Document) => void;
   onTargetLoad: (doc: Document) => void;
 }
 
 /** Одно зеркало: сцена заданной ширины, контуры целей и скрытый эталон. */
-function Mirror({ width, height, scale, srcDoc, label, targets, statuses, onPlayerLoad, onTargetLoad }: MirrorProps) {
+function Mirror({ width, height, scale, srcDoc, label, targets, statuses, fxRef, onPlayerLoad, onTargetLoad }: MirrorProps) {
   const loaded = (handler: (doc: Document) => void) => (event: SyntheticEvent<HTMLIFrameElement>) => {
     const doc = event.currentTarget.contentDocument;
     if (doc) handler(doc);
@@ -191,6 +259,7 @@ function Mirror({ width, height, scale, srcDoc, label, targets, statuses, onPlay
             ),
           )}
         </div>
+        <div className="scene__fx" ref={fxRef} aria-hidden="true" />
       </div>
     </div>
   );

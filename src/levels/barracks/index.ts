@@ -1,7 +1,7 @@
 import { defineRegion } from '../../engine/define';
 import { spriteCssUrl } from '../../pixel/pixelArt';
 import { PORTRAITS, SHIELD, SWORD } from '../../pixel/sprites';
-import { fortressCss, SAND_WALL } from '../shared/fortress';
+import { dustCss, fortressCss, SAND_WALL } from '../shared/fortress';
 import { BOX_PROPERTIES } from '../shared/properties';
 import box01 from './box-01';
 import box02 from './box-02';
@@ -29,7 +29,7 @@ export const barracks = defineRegion({
   title: 'Казармы',
   topic: 'Блочная модель',
   npc: { name: 'Леди Паддинг', title: 'хранительница Казарм', portrait: 'padding' },
-  sceneCss: sceneCss + spritesCss + fortressCss,
+  sceneCss: sceneCss + spritesCss + fortressCss + dustCss,
   allow: BOX_PROPERTIES,
   allowMessage: 'В Казармах действует магия блочной модели — размеры, отступы и рамки',
   story: {

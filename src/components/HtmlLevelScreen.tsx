@@ -3,6 +3,7 @@ import { scoreSolution } from '../engine/evaluate';
 import { checkGoals, evaluateHtml, parseMarkup } from '../engine/htmlCheck';
 import { lintHtml } from '../engine/htmlLint';
 import type { HtmlLevel } from '../engine/types';
+import { sfx } from '../game/sound';
 import { IMAGE_LIBRARY } from '../levels/shared/images';
 import type { CodeEditorHandle } from './CodeEditor';
 import { GoalList } from './GoalList';
@@ -41,6 +42,9 @@ export function HtmlLevelScreen({ level, number, region, trailHref, onNext }: Ht
     const current = flow.codeRef.current;
     setLiveCode(current);
     const evaluation = evaluateHtml(level, current);
+    sfx.cast();
+    if (evaluation.passed) sfx.success();
+    else sfx.fail();
     if (evaluation.passed) {
       flow.finish({ passed: true, score: scoreSolution(flow.hintsUsed, 0, 0) }, viaKeyboard);
     } else {

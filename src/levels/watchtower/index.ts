@@ -3,7 +3,7 @@ import { spriteCssUrl } from '../../pixel/pixelArt';
 import { FLAG, LANTERN, SAND_BRICKS } from '../../pixel/sprites';
 import { fortressCss } from '../shared/fortress';
 import { POSITION_PROPERTIES } from '../shared/properties';
-import { DUSK_BANDS, skyBackground } from '../shared/sky';
+import { DUSK_BANDS, skyBackground, twinkleCss } from '../shared/sky';
 import pos01 from './pos-01';
 import pos02 from './pos-02';
 import pos03 from './pos-03';
@@ -29,7 +29,7 @@ export const watchtower = defineRegion({
   title: 'Дозорная башня',
   topic: 'Позиционирование',
   npc: { name: 'Капитан Абсолют', title: 'комендант Крепости Блоков', portrait: 'absolute' },
-  sceneCss: sceneCss + spritesCss + fortressCss,
+  sceneCss: sceneCss + spritesCss + twinkleCss + fortressCss,
   allow: POSITION_PROPERTIES,
   allowMessage: 'В Дозорной башне действует магия position, display и блочной модели',
   story: {

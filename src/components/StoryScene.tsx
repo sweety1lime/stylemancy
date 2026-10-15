@@ -1,16 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import type { StoryFrame } from '../engine/types';
+import { sfx } from '../game/sound';
 import { Portrait } from './Portrait';
 import { StoryArt } from './StoryArt';
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** Текст появляется по буквам, как в старых RPG. Клик — показать сразу весь. */
-function Typewriter({ text }: { text: string }) {
+/** Текст появляется по буквам, как в старых RPG. Клик — показать сразу весь. onTyping — печатается ли сейчас. */
+function Typewriter({ text, onTyping }: { text: string; onTyping: (typing: boolean) => void }) {
   const [shown, setShown] = useState(() => (reducedMotion() ? text.length : 0));
+  const typing = shown < text.length;
+
+  useEffect(() => {
+    onTyping(typing);
+  }, [typing, onTyping]);
 
   useEffect(() => {
     if (shown >= text.length) return;
+    // Персонаж «бормочет», пока печатается его реплика
+    if (shown % 6 === 0) sfx.blip();
     const timer = setTimeout(() => setShown((n) => Math.min(text.length, n + 2)), 22);
     return () => clearTimeout(timer);
   }, [shown, text]);
@@ -34,6 +42,8 @@ interface StorySceneProps {
 /** Сценка из нескольких кадров в окне поверх игры. */
 export function StoryScene({ title, frames, finishLabel, onClose }: StorySceneProps) {
   const [index, setIndex] = useState(0);
+  // Пока печатается реплика, персонаж открывает рот
+  const [typing, setTyping] = useState(true);
   const nextRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef(onClose);
   const frame = frames[index];
@@ -61,12 +71,12 @@ export function StoryScene({ title, frames, finishLabel, onClose }: StoryScenePr
         <p className="story__title">
           {title} · {index + 1} из {frames.length}
         </p>
-        <StoryArt art={frame.art} speaker={frame.speaker} />
+        <StoryArt key={index} art={frame.art} speaker={frame.speaker} talking={typing} />
         <div className="story__caption">
-          {frame.speaker && <Portrait id={frame.speaker} scale={3} />}
+          {frame.speaker && <Portrait id={frame.speaker} scale={3} talking={typing} />}
           <div>
             {frame.name && <p className="story__name">{frame.name}</p>}
-            <Typewriter key={index} text={frame.text} />
+            <Typewriter key={index} text={frame.text} onTyping={setTyping} />
           </div>
         </div>
         <div className="story__actions">

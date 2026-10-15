@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { onUnlock, type Achievement } from '../game/achievements';
+import { sfx } from '../game/sound';
 import { Medal } from './Medal';
 
 let nextKey = 0;
@@ -12,6 +13,7 @@ export function Toasts() {
     () =>
       onUnlock((achievement) => {
         const key = ++nextKey;
+        sfx.achievement();
         setItems((list) => [...list, { key, achievement }]);
         setTimeout(() => setItems((list) => list.filter((item) => item.key !== key)), 5000);
       }),

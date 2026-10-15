@@ -3,6 +3,7 @@ import type { StoryFrame } from '../engine/types';
 import { recolor } from '../pixel/pixelArt';
 import { AMANITA, BOLETUS, FIREFLY, FLAG, GEMS, GLASS, ISLAND_ROCK, MOON, OAK, PORTRAITS, SKY_SPARK, SPRUCE } from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
+import { Face } from './Portrait';
 
 const ROW = [GEMS.amethyst, GEMS.emerald, GEMS.ruby];
 const CROWN = [GEMS.amethyst, GEMS.emerald, GEMS.sapphire, GEMS.ruby, GEMS.topaz];
@@ -25,7 +26,7 @@ function Pane({ color }: { color: string }) {
  * Пиксельная картинка кадра сценки. Размеры — в долях ширины кадра, поэтому кадр масштабируется целиком.
  * speaker — чей портрет показать в кадре наставника.
  */
-export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: string }) {
+export function StoryArt({ art, speaker, talking = false }: { art: StoryFrame['art']; speaker?: string; talking?: boolean }) {
   return (
     <div className={`story-art story-art--${art}`} aria-hidden="true">
       {art === 'kingdom' && (
@@ -45,7 +46,8 @@ export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: s
           <span className="sa-default-text sa-default-text--1">Times New Roman</span>
           <span className="sa-default-text sa-default-text--2">синяя ссылка</span>
           <span className="sa-default-text sa-default-text--3">&lt;div&gt;&lt;div&gt;&lt;div&gt;</span>
-          <PixelArt className="sa-portrait" sprite={PORTRAITS.default} />
+          {/* Лорд Дефолт хохочет, когда появляется */}
+          <Face className="sa-portrait sa-portrait--laugh" id="default" talking={talking} />
         </>
       )}
 
@@ -65,7 +67,7 @@ export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: s
           <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
           <PixelArt className="sa-spark sa-spark--2" sprite={SKY_SPARK} />
           <PixelArt className="sa-spark sa-spark--3" sprite={SKY_SPARK} />
-          <PixelArt className="sa-portrait" sprite={PORTRAITS[speaker ?? 'flex'] ?? PORTRAITS.flex} />
+          <Face className="sa-portrait" id={speaker && PORTRAITS[speaker] ? speaker : 'flex'} talking={talking} />
         </>
       )}
 

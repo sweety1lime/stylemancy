@@ -3,6 +3,7 @@ import { evaluate, lintOptionsFor, scoreSolution, solutionDeclCount } from '../e
 import { lintCss } from '../engine/lint';
 import { summarizeMisses, viewsOf, type ItemStatus } from '../engine/scene';
 import type { CssLevel } from '../engine/types';
+import { sfx } from '../game/sound';
 import type { CodeEditorHandle } from './CodeEditor';
 import { EditorCard, LevelBrief, Workbench } from './LevelParts';
 import type { RegionStats } from './ResultPanel';
@@ -39,8 +40,12 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   /** viaKeyboard — сотворили через Ctrl+Enter (для секретного достижения) */
   function cast(viaKeyboard: boolean) {
     const current = flow.codeRef.current;
+    sfx.cast();
     const items = sceneRef.current?.apply(current) ?? [];
     const evaluation = evaluate(lintCss(current, lintOptions), items);
+    sceneRef.current?.cast(evaluation.passed);
+    if (evaluation.passed) sfx.success();
+    else sfx.fail();
     if (evaluation.passed) {
       flow.finish({ passed: true, score: scoreSolution(flow.hintsUsed, evaluation.declCount, solutionDeclCount(level)) }, viaKeyboard);
     } else {

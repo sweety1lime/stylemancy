@@ -1,5 +1,5 @@
 import { defineRegion } from '../../engine/define';
-import { fortressCss, SAND_WALL } from '../shared/fortress';
+import { dustCss, fortressCss, SAND_WALL } from '../shared/fortress';
 import { DISPLAY_PROPERTIES } from '../shared/properties';
 import disp01 from './disp-01';
 import disp02 from './disp-02';
@@ -20,7 +20,7 @@ export const paradeGround = defineRegion({
   title: 'Плац',
   topic: 'display',
   npc: { name: 'Сержант Дисплей', title: 'командир плаца', portrait: 'display' },
-  sceneCss: sceneCss + wallCss + fortressCss,
+  sceneCss: sceneCss + wallCss + fortressCss + dustCss,
   allow: DISPLAY_PROPERTIES,
   allowMessage: 'На плацу действует магия display, visibility и блочной модели',
   story: {

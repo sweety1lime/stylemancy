@@ -663,6 +663,51 @@ test.describe('Лес Селекторов', () => {
   });
 });
 
+test.describe('эффекты и звук', () => {
+  test('переключатели звука и эффектов запоминаются на этом компьютере', async ({ page }) => {
+    await openLevel(page, 1);
+    const sound = page.getByRole('button', { name: 'Звук' });
+    const effects = page.getByRole('button', { name: 'Полные эффекты' });
+    // На уроке тихо: звук по умолчанию выключен
+    await expect(sound).toHaveAttribute('aria-pressed', 'false');
+    await expect(effects).toHaveAttribute('aria-pressed', 'true');
+    await sound.click();
+    await effects.click();
+    await expect(page.locator('html')).toHaveClass(/effects-light/);
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Звук' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'Полные эффекты' })).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('html')).toHaveClass(/effects-light/);
+  });
+
+  test('заклинание сработало: магический круг над сценой, в лёгком режиме — без него', async ({ page }) => {
+    await openLevel(page, 1);
+    await typeCode(page, '.island {\n  display: flex;\n}\n');
+    await expect(page.getByText('На месте: 3 из 3')).toBeVisible();
+    await cast(page);
+    await expect(page.locator('.scene__fx .magic-circle')).toHaveCount(1);
+
+    await page.getByRole('button', { name: 'Полные эффекты' }).click();
+    await openLevel(page, 2);
+    await typeCode(page, '.island {\n  display: flex;\n  justify-content: flex-end;\n}\n');
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    await expect(page.locator('.scene__fx .magic-circle')).toHaveCount(0);
+    await expect(page.locator('.spark')).toHaveCount(0);
+  });
+
+  test('персонаж говорит, пока печатается его реплика', async ({ page }) => {
+    await page.goto('/#/land/floating-lands');
+    const dialog = page.getByRole('dialog', { name: 'Пролог: Парящие острова' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    // Кадр Лорда Дефолта: портрет в подписи шевелится, пока идёт текст, а потом замолкает
+    await expect(dialog.locator('.story__caption .face--talking')).toHaveCount(1);
+    await expect(dialog.locator('.story__caption .face--talking')).toHaveCount(0);
+  });
+});
+
 test.describe('общий сюжет', () => {
   test('пролог игры на карте: один раз и с обращением к герою', async ({ page }) => {
     await page.goto('/');

@@ -2,8 +2,10 @@ import { ACHIEVEMENTS } from '../game/achievements';
 import { signOut, useAuth } from '../game/auth';
 import { useProgress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
+import { settings, useSettings } from '../game/settings';
+import { sfx } from '../game/sound';
 import { useStats } from '../game/stats';
-import { BOOK, GEMS, MEDALS } from '../pixel/sprites';
+import { BOOK, EFFECTS_OFF, EFFECTS_ON, GEMS, MEDALS, SPEAKER_OFF, SPEAKER_ON } from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 
 interface TopBarProps {
@@ -40,6 +42,7 @@ export function TopBar({ back }: TopBarProps) {
           {achievementsGot}/{ACHIEVEMENTS.length}
         </a>
       </nav>
+      <Toggles />
       <div className="rank" title={hint}>
         <span className="rank__title">{rank.title}</span>
         <span className="rank__bar" aria-hidden="true">
@@ -72,5 +75,41 @@ export function TopBar({ back }: TopBarProps) {
         )}
       </div>
     </header>
+  );
+}
+
+/** Звук и эффекты: два значка в верхней панели. Настройки — для этого компьютера. */
+function Toggles() {
+  const { sound, effects } = useSettings();
+  const full = effects === 'full';
+  return (
+    <div className="toggles">
+      <button
+        type="button"
+        className="toggle"
+        aria-pressed={sound}
+        title={sound ? 'Звук включён' : 'Звук выключен'}
+        onClick={() => {
+          settings.update({ sound: !sound });
+          sfx.click();
+        }}
+      >
+        <PixelArt sprite={sound ? SPEAKER_ON : SPEAKER_OFF} scale={2} />
+        <span className="visually-hidden">Звук</span>
+      </button>
+      <button
+        type="button"
+        className="toggle"
+        aria-pressed={full}
+        title={full ? 'Эффекты: полные' : 'Эффекты: лёгкие — для слабых компьютеров'}
+        onClick={() => {
+          settings.update({ effects: full ? 'light' : 'full' });
+          sfx.click();
+        }}
+      >
+        <PixelArt sprite={full ? EFFECTS_ON : EFFECTS_OFF} scale={2} />
+        <span className="visually-hidden">Полные эффекты</span>
+      </button>
+    </div>
   );
 }

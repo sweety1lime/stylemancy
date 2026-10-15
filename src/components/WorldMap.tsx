@@ -1,13 +1,72 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { isLandOpen, refreshAccount, useAuth } from '../game/auth';
 import { currentLevel, useProgress } from '../game/progress';
 import { hrefFor } from '../game/router';
-import { gamePrologue, isSeen, markSeen, PROLOGUE_KEY } from '../game/story';
+import { fullEffects } from '../game/settings';
+import { read, scopedKey, write } from '../game/storage';
+import { gamePrologue, isLandDone, isSeen, markSeen, PROLOGUE_KEY } from '../game/story';
 import { findLevel, lands, type Land } from '../levels';
-import { EMBLEMS, LAND_ROCKS } from '../pixel/sprites';
+import { spriteDataUri } from '../pixel/pixelArt';
+import { CLOUD, EMBLEMS, FOG, HERO, HERO_STEP, LAND_ROCKS, SKY_SPARK } from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
 import { StoryScene } from './StoryScene';
+
+/** Тропа на карте: центры земель по порядку курса, в процентах ширины и высоты карты */
+const PATH_POINTS: [number, number][] = [
+  [17, 9],
+  [83, 11],
+  [50, 42],
+  [83, 74],
+];
+
+/** Где герой стоял в прошлый раз — чтобы пройти к новой земле пешком */
+const HERO_KEY = 'cascadia.hero.v1';
+const HERO_URI = spriteDataUri(HERO);
+const STEP_URI = spriteDataUri(HERO_STEP);
+
+/** Герой идёт от одной земли к другой: шагает в два кадра, а настоящий герой ждёт на месте. onArrive — когда дошёл. */
+function walk(map: HTMLElement, from: Element, hero: HTMLElement, onArrive: () => void): () => void {
+  const start = from.getBoundingClientRect();
+  const end = hero.getBoundingClientRect();
+  const base = map.getBoundingClientRect();
+  const walker = document.createElement('img');
+  walker.className = 'land__walker';
+  walker.src = HERO_URI;
+  walker.alt = '';
+  Object.assign(walker.style, {
+    left: `${end.left - base.left}px`,
+    top: `${end.top - base.top}px`,
+    width: `${end.width}px`,
+    height: `${end.height}px`,
+  });
+  hero.style.visibility = 'hidden';
+  map.append(walker);
+  const step = window.setInterval(() => {
+    walker.src = walker.src === HERO_URI ? STEP_URI : HERO_URI;
+  }, 160);
+  const dx = start.left + start.width * 0.15 - end.left;
+  const dy = start.top + start.height * 0.45 - end.top;
+  const animation = walker.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], {
+    duration: 2200,
+    delay: 400,
+    easing: 'ease-in-out',
+    fill: 'backwards',
+  });
+  const finish = () => {
+    window.clearInterval(step);
+    walker.remove();
+    hero.style.visibility = '';
+  };
+  animation.onfinish = () => {
+    finish();
+    onArrive();
+  };
+  return () => {
+    animation.cancel();
+    finish();
+  };
+}
 
 /** Карта королевства: земли-темы курса. Земли без уровней пока в тумане. */
 export function WorldMap() {
@@ -22,6 +81,26 @@ export function WorldMap() {
   useEffect(() => {
     void refreshAccount();
   }, []);
+
+  const open = (land: Land) => land.regions.length > 0 && isLandOpen(account, land.id);
+  const saved = lands.map((land) => isLandDone(land, progress));
+  // Герой стоит у земли, где открыт последний уровень, или у первой открытой и ещё не спасённой
+  const heroLand = resume?.land.id ?? lands.find((land, i) => open(land) && !saved[i])?.id ?? lands[0].id;
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  // Герой сменил землю — идёт к ней пешком по карте. Новое место запоминаем, когда дошёл
+  useLayoutEffect(() => {
+    const was = read<string | null>(scopedKey(HERO_KEY), null);
+    const arrive = () => write(scopedKey(HERO_KEY), heroLand);
+    const map = mapRef.current;
+    const from = was && was !== heroLand ? map?.querySelector(`[data-land="${was}"] .land__art`) : null;
+    const hero = map?.querySelector<HTMLElement>(`[data-land="${heroLand}"] .land__hero`);
+    if (!map || !from || !hero || !fullEffects()) {
+      arrive();
+      return;
+    }
+    return walk(map, from, hero, arrive);
+  }, [heroLand]);
 
   function landStats(land: Land) {
     const levels = land.regions.flatMap((region) => region.levels);
@@ -68,24 +147,42 @@ export function WorldMap() {
         </section>
       )}
 
-      <div className="world-map">
+      <div className="world-map" ref={mapRef}>
+        <div className="world-map__sky" aria-hidden="true">
+          <PixelArt className="cloud cloud--1" sprite={CLOUD} scale={5} />
+          <PixelArt className="cloud cloud--2" sprite={CLOUD} scale={4} />
+          <PixelArt className="cloud cloud--3" sprite={CLOUD} scale={6} />
+        </div>
+        {/* Тропа загорается за спасёнными землями, а к следующей земле по ней бегут огоньки */}
         <svg className="world-map__path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <polyline points="17,9 83,11 50,42 83,74" />
+          {PATH_POINTS.slice(1).map(([x2, y2], k) => {
+            const [x1, y1] = PATH_POINTS[k];
+            const state = saved[k] ? (saved[k + 1] ? 'walked' : 'open') : 'dim';
+            return <line key={k} className={`path path--${state}`} x1={x1} y1={y1} x2={x2} y2={y2} />;
+          })}
         </svg>
         {lands.map((land, i) => {
           const stats = landStats(land);
           const built = land.regions.length > 0;
-          const open = built && isLandOpen(account, land.id);
+          const isOpen = open(land);
           const body = (
             <>
               <span className="land__art">
                 <PixelArt className="land__emblem" sprite={EMBLEMS[land.emblem]} scale={land.emblem === 'crystal' ? 3 : 4} />
                 <PixelArt className="land__rock" sprite={LAND_ROCKS[land.emblem]} scale={4} />
+                {saved[i] && <PixelArt className="land__spark" sprite={SKY_SPARK} scale={4} />}
+                {!isOpen && (
+                  <>
+                    <PixelArt className="land__fog land__fog--a" sprite={FOG} scale={4} />
+                    <PixelArt className="land__fog land__fog--b" sprite={FOG} scale={3} />
+                  </>
+                )}
+                {land.id === heroLand && <PixelArt className="land__hero" sprite={HERO} scale={3} />}
               </span>
               <span className="land__title">{land.title}</span>
               <span className="land__topic">{land.topic}</span>
               <span className="land__status">
-                {open
+                {isOpen
                   ? `Пройдено ${stats.done} из ${stats.total} · ★ ${stats.stars}`
                   : built
                     ? 'Закрыто учителем'
@@ -93,12 +190,12 @@ export function WorldMap() {
               </span>
             </>
           );
-          return open ? (
-            <a key={land.id} className={`land land--${i + 1}`} href={hrefFor({ name: 'land', id: land.id })}>
+          return isOpen ? (
+            <a key={land.id} className={`land land--${i + 1}`} data-land={land.id} href={hrefFor({ name: 'land', id: land.id })}>
               {body}
             </a>
           ) : (
-            <div key={land.id} className={`land land--${i + 1} land--fog`} aria-disabled="true">
+            <div key={land.id} className={`land land--${i + 1} land--fog`} data-land={land.id} aria-disabled="true">
               {body}
             </div>
           );
