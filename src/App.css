@@ -2111,9 +2111,6 @@ a.land:hover .land__art {
   animation: portrait-bob 2.4s steps(1, end) infinite;
 }
 
-.sa-portrait--laugh {
-  animation: laugh 0.2s steps(1, end) 5;
-}
 
 @keyframes portrait-bob {
   0% {
@@ -2122,16 +2119,6 @@ a.land:hover .land__art {
 
   50% {
     transform: translate(-50%, calc(-50% - 0.8cqw));
-  }
-}
-
-@keyframes laugh {
-  0% {
-    transform: translate(-50%, -50%) rotate(-3deg);
-  }
-
-  50% {
-    transform: translate(-50%, -50%) rotate(3deg);
   }
 }
 
@@ -2625,7 +2612,71 @@ a.land:hover .land__art {
   box-shadow: inset 0 0 0 0.6cqw #6b4a28;
 }
 
+/* Покадровые актёры в сценках: картинка внутри окошка не прыгает, сам актёр стоит где сказано */
+.story-art .sprite-anim img {
+  position: static;
+}
+
+/* Лорд Дефолт во весь рост — в центре кадра, ногами на земле */
+.sa-villain {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  width: 22cqw;
+  transform: translateX(-50%);
+}
+
+/* Финал: дверь <script>, к которой бежит Лорд Дефолт */
+.sa-door {
+  position: absolute;
+  right: 9%;
+  bottom: 6%;
+  display: grid;
+  place-items: start center;
+  width: 16cqw;
+  height: 30cqw;
+  padding-top: 2cqw;
+  background: #020617;
+  box-shadow:
+    inset 0 0 0 0.6cqw #22c55e,
+    0 0 3cqw rgba(34, 197, 94, 0.35);
+  color: #4ade80;
+  font: 700 2cqw/1 Consolas, "Courier New", monospace;
+}
+
+.sa-runner {
+  position: absolute;
+  bottom: 6%;
+  left: 6%;
+  width: 13cqw;
+  animation: run-to-door 3.2s ease-in forwards;
+}
+
+@keyframes run-to-door {
+  0% {
+    left: 6%;
+    opacity: 1;
+  }
+
+  85% {
+    left: 74%;
+    opacity: 1;
+  }
+
+  100% {
+    left: 78%;
+    opacity: 0;
+  }
+}
+
+.sa-firefly {
+  width: 6cqw;
+  color: #fde047;
+  filter: drop-shadow(0 0 1cqw currentColor);
+}
+
 .sa-fortress-flag {
+  position: absolute;
   bottom: 24cqw;
   left: calc(50% - 1cqw);
   width: 7cqw;

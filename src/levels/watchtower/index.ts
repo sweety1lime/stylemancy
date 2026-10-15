@@ -1,6 +1,7 @@
 import { defineRegion } from '../../engine/define';
 import { spriteCssUrl } from '../../pixel/pixelArt';
-import { FLAG, LANTERN, SAND_BRICKS } from '../../pixel/sprites';
+import { sheetCssUrl } from '../../pixel/sheet';
+import { FLAG_FRAMES, LANTERN_FRAMES, SAND_BRICKS } from '../../pixel/sprites';
 import { fortressCss } from '../shared/fortress';
 import { POSITION_PROPERTIES } from '../shared/properties';
 import { DUSK_BANDS, skyBackground, twinkleCss } from '../shared/sky';
@@ -20,8 +21,8 @@ body {
     ${skyBackground(DUSK_BANDS)};
 }
 
-.flag { --flag: ${spriteCssUrl(FLAG)}; }
-.lantern { --lantern: ${spriteCssUrl(LANTERN)}; }
+.flag { --flag: ${sheetCssUrl(FLAG_FRAMES)}; }
+.lantern { --lantern: ${sheetCssUrl(LANTERN_FRAMES)}; }
 `;
 
 export const watchtower = defineRegion({

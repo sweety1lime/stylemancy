@@ -24,14 +24,16 @@
   --item-color: #fca5a5;
   width: 48px;
   height: 48px;
-  background: var(--flag) center / 100% 100% no-repeat;
+  background: var(--flag) 0 0 / 300% 100% no-repeat;
+  animation: frames-3 0.75s steps(3, end) infinite;
 }
 
 .lantern {
   --item-color: #fde68a;
   width: 32px;
   height: 48px;
-  background: var(--lantern) center / 100% 100% no-repeat;
+  background: var(--lantern) 0 0 / 200% 100% no-repeat;
+  animation: frames-2 0.9s steps(2, end) infinite;
 }
 
 .lantern[data-in-place] {

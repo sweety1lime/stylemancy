@@ -1,9 +1,24 @@
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import type { StoryFrame } from '../engine/types';
 import { recolor } from '../pixel/pixelArt';
-import { AMANITA, BOLETUS, FIREFLY, FLAG, GEMS, GLASS, ISLAND_ROCK, MOON, OAK, PORTRAITS, SKY_SPARK, SPRUCE } from '../pixel/sprites';
+import {
+  AMANITA,
+  BOLETUS,
+  FIREFLY_FRAMES,
+  FLAG_FRAMES,
+  GEMS,
+  GLASS,
+  ISLAND_ROCK,
+  MOON,
+  OAK,
+  PORTRAITS,
+  SKY_SPARK,
+  SPRUCE,
+  VILLAIN_ANIMATIONS,
+} from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 import { Face } from './Portrait';
+import { SpriteAnim } from './SpriteAnim';
 
 const ROW = [GEMS.amethyst, GEMS.emerald, GEMS.ruby];
 const CROWN = [GEMS.amethyst, GEMS.emerald, GEMS.sapphire, GEMS.ruby, GEMS.topaz];
@@ -12,7 +27,7 @@ const FOREST_ART = {
   spruce: recolor(SPRUCE, { c: '#15803d', h: '#4ade80', d: '#14532d' }),
   oak: recolor(OAK, { c: '#22c55e', h: '#86efac', d: '#15803d' }),
   amanita: recolor(AMANITA, { c: '#dc2626', h: '#f87171', d: '#991b1b' }),
-  firefly: recolor(FIREFLY, { c: '#fde047', h: '#fef9c3' }),
+  firefly: FIREFLY_FRAMES.map((frame) => recolor(frame, { c: '#fde047', h: '#fef9c3' })),
   boletus: recolor(BOLETUS, { c: '#ea580c', h: '#fb923c', d: '#9a3412' }),
 };
 /** Стёкла витража в кадре: так же стоят в испытании Витражной обители */
@@ -22,11 +37,33 @@ function Pane({ color }: { color: string }) {
   return <span style={{ '--pane': color } as CSSProperties} />;
 }
 
+/** Настроение Лорда Дефолта по его реплике: проигрыш его злит, всё остальное — смешит */
+function villainMood(text = ''): 'laugh' | 'angry' {
+  return /опять ты|(^|[^а-яё])пал[аио]?([^а-яё]|$)|не побеждён|не думай|невозможно/i.test(text) ? 'angry' : 'laugh';
+}
+
+/** Лорд Дефолт во весь рост: сначала хохочет или злится, потом ухмыляется и поблёскивает моноклем. */
+function VillainActor({ mood }: { mood: 'laugh' | 'angry' }) {
+  const [calm, setCalm] = useState(false);
+  const move = calm ? 'idle' : mood;
+  return (
+    <SpriteAnim
+      key={move}
+      className="sa-villain"
+      frames={VILLAIN_ANIMATIONS[move]}
+      fps={move === 'idle' ? 2 : move === 'laugh' ? 8 : 6}
+      repeat={calm ? undefined : 3}
+      fluid
+      onEnd={calm ? undefined : () => setCalm(true)}
+    />
+  );
+}
+
 /**
  * Пиксельная картинка кадра сценки. Размеры — в долях ширины кадра, поэтому кадр масштабируется целиком.
  * speaker — чей портрет показать в кадре наставника.
  */
-export function StoryArt({ art, speaker, talking = false }: { art: StoryFrame['art']; speaker?: string; talking?: boolean }) {
+export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFrame['art']; speaker?: string; talking?: boolean; text?: string }) {
   return (
     <div className={`story-art story-art--${art}`} aria-hidden="true">
       {art === 'kingdom' && (
@@ -46,8 +83,7 @@ export function StoryArt({ art, speaker, talking = false }: { art: StoryFrame['a
           <span className="sa-default-text sa-default-text--1">Times New Roman</span>
           <span className="sa-default-text sa-default-text--2">синяя ссылка</span>
           <span className="sa-default-text sa-default-text--3">&lt;div&gt;&lt;div&gt;&lt;div&gt;</span>
-          {/* Лорд Дефолт хохочет, когда появляется */}
-          <Face className="sa-portrait sa-portrait--laugh" id="default" talking={talking} />
+          <VillainActor mood={villainMood(text)} />
         </>
       )}
 
@@ -231,6 +267,11 @@ export function StoryArt({ art, speaker, talking = false }: { art: StoryFrame['a
           <span className="sa-code sa-code--4">onclick</span>
           <span className="sa-code sa-code--5">()</span>
           <span className="sa-code sa-code--6">let</span>
+          {/* Лорд Дефолт убегает за дверь <script> */}
+          <span className="sa-door">
+            <span>&lt;script&gt;</span>
+          </span>
+          <SpriteAnim className="sa-runner" frames={VILLAIN_ANIMATIONS.run} fps={8} fluid />
         </>
       )}
 
@@ -245,7 +286,7 @@ export function StoryArt({ art, speaker, talking = false }: { art: StoryFrame['a
           </div>
           <div className="sa-forest-floor">
             <PixelArt sprite={FOREST_ART.amanita} />
-            <PixelArt className="sa-gem" sprite={FOREST_ART.firefly} />
+            <SpriteAnim className="sa-firefly" frames={FOREST_ART.firefly} fps={6} fluid />
             <PixelArt sprite={FOREST_ART.boletus} />
           </div>
         </>
@@ -261,7 +302,7 @@ export function StoryArt({ art, speaker, talking = false }: { art: StoryFrame['a
             <span className="sa-keep" />
             <span className="sa-tower" />
           </div>
-          <PixelArt className="sa-fortress-flag" sprite={FLAG} />
+          <SpriteAnim className="sa-fortress-flag" frames={FLAG_FRAMES} fps={5} fluid />
         </>
       )}
 

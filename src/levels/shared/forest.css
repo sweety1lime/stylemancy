@@ -107,6 +107,21 @@ ol {
   background: var(--details) center / 100% 100% no-repeat;
 }
 
+/* Светлячки машут крыльями, пламя фонарей мерцает: рисунок поверх заливки — лента из двух кадров */
+.firefly::after,
+.lantern::after {
+  background: var(--details) 0 0 / 200% 100% no-repeat;
+  animation: frames-2 0.5s steps(2, end) infinite;
+}
+
+.lantern::after {
+  animation-duration: 0.9s;
+}
+
+.firefly:nth-child(2n)::after {
+  animation-delay: -0.25s;
+}
+
 /* Мелкие предметы светятся своим цветом; погасшие — едва заметно серым */
 .mushroom,
 .firefly,

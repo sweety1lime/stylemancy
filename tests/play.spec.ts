@@ -710,6 +710,18 @@ test.describe('эффекты и звук', () => {
     await expect(hero).toHaveClass(/hero--idle/);
   });
 
+  test('наставник задумывается над промахом и радуется успеху', async ({ page }) => {
+    await openLevel(page, 1);
+    const portrait = page.locator('.dialog .portrait');
+    await cast(page);
+    await expect(portrait).toHaveClass(/portrait--think/);
+    await expect(portrait).not.toHaveClass(/portrait--think/);
+
+    await typeCode(page, '.island {\n  display: flex;\n}\n');
+    await cast(page);
+    await expect(portrait).toHaveClass(/portrait--joy/);
+  });
+
   test('персонаж говорит, пока печатается его реплика', async ({ page }) => {
     await page.goto('/#/land/floating-lands');
     const dialog = page.getByRole('dialog', { name: 'Пролог: Парящие острова' });

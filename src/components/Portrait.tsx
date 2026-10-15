@@ -1,7 +1,9 @@
 import { useState, type CSSProperties } from 'react';
-import { faceOf } from '../pixel/faces';
+import { faceOf, reactionsOf } from '../pixel/faces';
 import { PORTRAITS } from '../pixel/sprites';
+import type { HeroCue } from './Hero';
 import { PixelArt } from './PixelArt';
+import { SpriteAnim } from './SpriteAnim';
 
 /**
  * Живое лицо персонажа: поверх портрета лежат кадры «моргнул» и «открыл рот».
@@ -20,11 +22,42 @@ export function Face({ id, scale = 4, talking = false, className }: { id: string
   );
 }
 
-/** Пиксельный портрет персонажа в рамке. */
-export function Portrait({ id, scale = 4, talking = false }: { id: string; scale?: number; talking?: boolean }) {
+interface PortraitProps {
+  id: string;
+  scale?: number;
+  talking?: boolean;
+  /** Чем закончилось заклинание: наставник радуется успеху или задумывается над промахом */
+  cue?: HeroCue | null;
+}
+
+/** Пиксельный портрет персонажа в рамке. С cue — ещё и реагирует на заклинания. */
+export function Portrait({ id, scale = 4, talking = false, cue }: PortraitProps) {
+  const [reaction, setReaction] = useState<'joy' | 'think' | null>(null);
+  const [seen, setSeen] = useState(cue);
+  const [run, setRun] = useState(0);
+  // Новое заклинание — новая реакция. Состояние меняется во время отрисовки, без эффекта
+  if (cue !== seen) {
+    setSeen(cue);
+    if (cue) {
+      setReaction(cue.kind === 'success' ? 'joy' : 'think');
+      setRun((n) => n + 1);
+    }
+  }
+  const current = reaction ? reactionsOf(id)[reaction] : null;
   return (
-    <span className="portrait">
-      <Face id={id} scale={scale} talking={talking} />
+    <span className={reaction ? `portrait portrait--${reaction}` : 'portrait'}>
+      {current ? (
+        <SpriteAnim
+          key={run}
+          frames={current.frames}
+          fps={current.fps}
+          repeat={current.repeat}
+          scale={scale}
+          onEnd={() => setReaction(null)}
+        />
+      ) : (
+        <Face id={id} scale={scale} talking={talking} />
+      )}
     </span>
   );
 }

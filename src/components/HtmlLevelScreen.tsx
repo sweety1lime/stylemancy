@@ -57,7 +57,7 @@ export function HtmlLevelScreen({ level, number, region, trailHref, onNext }: Ht
 
   return (
     <main className="level level--html">
-      <LevelBrief level={level} number={number} />
+      <LevelBrief level={level} number={number} cue={flow.outcome} />
 
       <section className="stage" aria-label="Страница">
         <HtmlScene level={level} code={liveCode} images={IMAGE_LIBRARY} celebrate={flow.outcome?.kind === 'success'} />

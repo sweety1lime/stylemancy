@@ -71,7 +71,7 @@ export function StoryScene({ title, frames, finishLabel, onClose }: StoryScenePr
         <p className="story__title">
           {title} · {index + 1} из {frames.length}
         </p>
-        <StoryArt key={index} art={frame.art} speaker={frame.speaker} talking={typing} />
+        <StoryArt key={index} art={frame.art} speaker={frame.speaker} talking={typing} text={frame.text} />
         <div className="story__caption">
           {frame.speaker && <Portrait id={frame.speaker} scale={3} talking={typing} />}
           <div>

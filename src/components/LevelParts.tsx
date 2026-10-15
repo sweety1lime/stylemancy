@@ -5,7 +5,7 @@ import { useAuth } from '../game/auth';
 import { SPELLS } from '../game/spells';
 import { CodeEditor, type CodeEditorHandle, type EditorLanguage } from './CodeEditor';
 import { FeedbackDialog } from './FeedbackDialog';
-import { Hero } from './Hero';
+import { Hero, type HeroCue } from './Hero';
 import { Portrait } from './Portrait';
 import { ResultPanel, type RegionStats } from './ResultPanel';
 import { ReviewCard } from './ReviewCard';
@@ -14,7 +14,8 @@ import { StoryScene } from './StoryScene';
 import type { LevelFlow } from './useLevelFlow';
 
 /** Шапка уровня: район, название, реплики персонажа и задача. */
-export function LevelBrief({ level, number }: { level: Level; number: number }) {
+/** Шапка уровня. cue — итог последнего заклинания: наставник на него реагирует */
+export function LevelBrief({ level, number, cue }: { level: Level; number: number; cue?: HeroCue | null }) {
   return (
     <section className="brief">
       <p className="brief__eyebrow">
@@ -22,7 +23,7 @@ export function LevelBrief({ level, number }: { level: Level; number: number }) 
       </p>
       <h1 className="brief__title">{level.title}</h1>
       <div className="dialog px-panel">
-        <Portrait id={level.npc.portrait} />
+        <Portrait id={level.npc.portrait} cue={cue} />
         <div className="dialog__body">
           <p className="dialog__name">
             {level.npc.name}

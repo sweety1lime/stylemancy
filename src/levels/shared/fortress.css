@@ -6,11 +6,17 @@
   Картинки-спрайты подставляются в fortress.ts.
 */
 
-/* Часовые и солдаты — пиксельный спрайт во всю коробку */
+/* Часовые и солдаты — пиксельный спрайт во всю коробку. Дышат в два кадра, каждый второй — в свой такт */
 .guard,
 .soldier {
   --item-color: #f6c453;
-  background: var(--sprite) center / 100% 100% no-repeat;
+  background: var(--sprite) 0 0 / 200% 100% no-repeat;
+  animation: frames-2 1.8s steps(2, end) infinite;
+}
+
+.guard:nth-child(2n),
+.soldier:nth-child(2n) {
+  animation-delay: -0.9s;
 }
 
 /* Спрайт на своём месте — светится. Фильтр только у предметов без вложенных: он не должен менять слои */

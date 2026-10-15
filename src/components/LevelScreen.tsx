@@ -60,7 +60,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
 
   return (
     <main className={viewsOf(level).length > 1 ? 'level level--mirrors' : 'level'}>
-      <LevelBrief level={level} number={number} />
+      <LevelBrief level={level} number={number} cue={flow.outcome} />
 
       <section className="stage" aria-label="Сцена">
         <Scene

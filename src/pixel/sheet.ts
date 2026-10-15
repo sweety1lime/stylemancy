@@ -1,4 +1,4 @@
-import { spriteDataUri, type Sprite } from './pixelArt';
+import { colorParts, spriteDataUri, type Sprite } from './pixelArt';
 
 /** Лента кадров: все кадры анимации стоят рядом в одной картинке. */
 export interface SpriteSheet {
@@ -42,4 +42,22 @@ export function spriteAnimElement(frames: Sprite[], fps: number, scale: number):
   img.style.animation = sheetAnimation(sheet, fps);
   box.append(img);
   return box;
+}
+
+/**
+ * Анимированный предмет, который красит color: маска заливки — общая для всех кадров
+ * (объединение, чтобы нигде не просвечивало), а рисунок поверх — лента кадров.
+ */
+export function colorSheet(frames: Sprite[], fillChars = 'chdv'): { fill: Sprite; details: SpriteSheet } {
+  const base = frames[0];
+  const fill = {
+    rows: base.rows.map((row, y) => [...row].map((_, x) => (frames.some((frame) => fillChars.includes(frame.rows[y]?.[x] ?? '.')) ? 'x' : '.')).join('')),
+    palette: { x: '#000' },
+  };
+  return { fill, details: spriteSheet(frames.map((frame) => colorParts(frame, fillChars).details)) };
+}
+
+/** Значение для CSS: url("data:…") ленты кадров. */
+export function sheetCssUrl(frames: Sprite[]): string {
+  return `url("${spriteSheet(frames).uri}")`;
 }
