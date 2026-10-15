@@ -1,0 +1,39 @@
+/*
+  Дозорная башня — позиционирование. Сцена — ночное небо над крепостью.
+  Башня (.tower) нарисована фоном: зубцы, бойница и дверь не меняют её размеров.
+  У башни нет position — точкой отсчёта её делает студент. Поэтому никаких
+  абсолютно позиционированных украшений внутри неё: они бы улетали вместе с флагом.
+*/
+
+.tower {
+  box-sizing: border-box;
+  width: 160px;
+  height: 200px;
+  background:
+    repeating-linear-gradient(90deg, #2a1d3d 0 8px, #d1aa6c 8px 32px, #2a1d3d 32px 40px) 0 0 / 100% 16px no-repeat,
+    linear-gradient(#e0bd80, #e0bd80) 0 16px / 100% 4px no-repeat,
+    radial-gradient(circle at 50% 100%, #1a1030 0 12px, transparent 12.5px) 50% 44px / 24px 12px no-repeat,
+    linear-gradient(#1a1030, #1a1030) 50% 56px / 24px 32px no-repeat,
+    radial-gradient(circle at 50% 100%, #1a1030 0 20px, transparent 20.5px) 50% calc(100% - 36px) / 40px 20px no-repeat,
+    linear-gradient(#1a1030, #1a1030) 50% 100% / 40px 36px no-repeat,
+    var(--bricks) 0 20px / 48px 24px repeat,
+    #8a6236;
+}
+
+.flag {
+  --item-color: #fca5a5;
+  width: 48px;
+  height: 48px;
+  background: var(--flag) center / 100% 100% no-repeat;
+}
+
+.lantern {
+  --item-color: #fde68a;
+  width: 32px;
+  height: 48px;
+  background: var(--lantern) center / 100% 100% no-repeat;
+}
+
+.lantern[data-in-place] {
+  filter: drop-shadow(0 0 10px #fbbf24);
+}

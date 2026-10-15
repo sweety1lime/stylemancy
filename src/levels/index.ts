@@ -1,12 +1,15 @@
 import type { Level, Region } from '../engine/types';
+import { barracks } from './barracks';
 import { defaultCitadel } from './default-citadel';
 import { floatingIslands } from './floating-islands';
 import { formForge } from './form-forge';
 import { linkFair } from './link-fair';
 import { mirrorTower } from './mirror-tower';
+import { paradeGround } from './parade-ground';
 import { semanticCity } from './semantic-city';
 import { stainedAbbey } from './stained-abbey';
 import { tagVillage } from './tag-village';
+import { watchtower } from './watchtower';
 
 /** Земля на карте королевства — одна тема курса. Внутри — районы с уровнями. */
 export interface Land {
@@ -49,11 +52,11 @@ export const lands: Land[] = [
     id: 'block-fortress',
     title: 'Крепость Блоков',
     topic: 'CSS: блочная модель',
-    blurb: 'margin, padding, border и позиционирование',
+    blurb: 'Размеры, отступы, рамки, display и позиционирование',
     emblem: 'fortress',
     where: 'в Крепости Блоков',
-    regions: [],
-    upcoming: ['Блочная модель', 'Позиционирование'],
+    regions: [barracks, paradeGround, watchtower],
+    upcoming: [],
   },
   {
     id: 'floating-lands',

@@ -46,6 +46,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'lord-default', category: 'secret', secret: true, title: 'Заклинание Лорда Дефолта', description: 'Написать font-family: Times New Roman — любимый шрифт злодея.' },
   { id: 'reverse', category: 'secret', secret: true, title: 'Задом наперёд', description: 'Попробовать row-reverse или column-reverse.' },
   { id: 'marquee', category: 'secret', secret: true, title: 'Ретро-магия', description: 'Написать <marquee> — бегущую строку из прошлого века.' },
+  { id: 'z-war', category: 'secret', secret: true, title: 'Война слоёв', description: 'Написать z-index: 999 или больше — чтобы уж точно сверху.' },
   { id: 'keyboard', category: 'secret', secret: true, title: 'Магия без мыши', description: 'Сотворить заклинание через Ctrl+Enter десять раз.' },
   { id: 'chronicle', category: 'secret', secret: true, title: 'Летопись', description: 'Пройти уровень, оставив в коде свой комментарий.' },
 ];
@@ -76,6 +77,7 @@ export function recordCast(code: string, viaKeyboard: boolean): Achievement[] {
   if (/font-family\s*:[^;{}]*times\s+new\s+roman/i.test(code)) unlock('lord-default', found);
   if (/\b(row|column)-reverse\b/i.test(code)) unlock('reverse', found);
   if (/<marquee\b/i.test(code)) unlock('marquee', found);
+  if (/z-index\s*:\s*\d{3,}/i.test(code)) unlock('z-war', found);
   if (viaKeyboard) {
     stats.update((s) => ({ keyboardCasts: s.keyboardCasts + 1 }));
     if (stats.get().keyboardCasts >= 10) unlock('keyboard', found);

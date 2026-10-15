@@ -23,7 +23,12 @@ const starLayers = STARS.map(([x, y, big]) => {
 export const NIGHT_BANDS =
   'linear-gradient(180deg, #0d0821 0 22%, #120b2e 22% 44%, #1a1040 44% 64%, #23154f 64% 82%, #2d1b5e 82% 100%)';
 
-/** Фон сцены: звёзды, луна и полосы неба. Значение для свойства background. */
-export function skyBackground(bands = NIGHT_BANDS): string {
-  return [...starLayers, `${spriteCssUrl(MOON)} 90% 9% / 40px 40px no-repeat`, bands].join(',\n    ');
+/** Сумерки над Крепостью Блоков — теплее, чем небо над островами */
+export const DUSK_BANDS =
+  'linear-gradient(180deg, #0d0821 0 22%, #1a1040 22% 44%, #2d1b5e 44% 64%, #4a2c6e 64% 82%, #6b3a6e 82% 100%)';
+
+/** Фон сцены: звёзды, луна и полосы неба. Значение для свойства background. Без луны — если луна сама предмет сцены. */
+export function skyBackground(bands = NIGHT_BANDS, moon = true): string {
+  const layers = moon ? [...starLayers, `${spriteCssUrl(MOON)} 90% 9% / 40px 40px no-repeat`] : starLayers;
+  return [...layers, bands].join(',\n    ');
 }

@@ -1,0 +1,119 @@
+/*
+  Казармы — блочная модель. Сцена — дощатая стена казармы (.barracks).
+  Предметы стоят в обычном потоке: сверху вниз, начиная от левого верхнего угла.
+  Ни у одного предмета здесь нет своих отступов и рамок — их добавляет студент.
+*/
+
+.barracks {
+  box-sizing: border-box;
+  width: 480px;
+  height: 288px;
+  padding: 16px;
+  background-color: #6b4423;
+  background-image: repeating-linear-gradient(180deg, #7a4f2a 0 22px, #5e3b1e 22px 24px);
+  box-shadow:
+    0 0 0 4px #2a1a0c,
+    0 0 0 8px #c49a5c,
+    0 0 0 12px #2a1a0c;
+}
+
+/* Ящик: доски, распорка наискосок и окантовка */
+.crate {
+  --item-color: #f59e0b;
+  min-height: 24px;
+  background-color: #b7793a;
+  background-image:
+    linear-gradient(45deg, transparent calc(50% - 4px), #7c4a1e calc(50% - 4px) calc(50% + 4px), transparent calc(50% + 4px)),
+    repeating-linear-gradient(180deg, transparent 0 14px, rgba(0, 0, 0, 0.18) 14px 16px);
+  box-shadow:
+    inset 0 0 0 4px #5c3412,
+    inset 0 0 0 7px #d69a55;
+}
+
+/* Стойка для щита: стёганая обивка Леди Паддинг */
+.stand {
+  --item-color: #c4b5fd;
+  width: fit-content;
+  background-color: #6d28d9;
+  background-image: radial-gradient(circle, #c4b5fd 0 2px, transparent 2.5px);
+  background-size: 12px 12px;
+  box-shadow: inset 0 0 0 3px #3b0764;
+}
+
+.shield {
+  --item-color: #60a5fa;
+  width: 64px;
+  height: 80px;
+  background: var(--shield) center / 100% 100% no-repeat;
+}
+
+/* Стойка для меча — деревянная */
+.rack {
+  --item-color: #fbbf24;
+  width: fit-content;
+  background-color: #7c4a1e;
+  background-image: repeating-linear-gradient(90deg, transparent 0 14px, rgba(0, 0, 0, 0.18) 14px 16px);
+  box-shadow: inset 0 0 0 3px #3f2410;
+}
+
+.sword {
+  --item-color: #e2e8f0;
+  width: 128px;
+  height: 24px;
+  background: var(--sword) center / 100% 100% no-repeat;
+}
+
+/* Портрет коменданта. Цвет текста — цвет рамки, если в border его не написать */
+.portrait {
+  --item-color: #d6d3d1;
+  width: 120px;
+  height: 90px;
+  color: #78716c;
+  background:
+    var(--commander) center 100% / 72px 72px no-repeat,
+    linear-gradient(180deg, #1e3a5f, #0f1f33);
+}
+
+.guard {
+  width: 48px;
+  height: 64px;
+}
+
+/* Ворота: доски, железные полосы и арка сверху */
+.gate {
+  --item-color: #fbbf24;
+  width: 160px;
+  height: 120px;
+  border-radius: 80px 80px 0 0 / 40px 40px 0 0;
+  background-color: #6b3f1d;
+  background-image:
+    linear-gradient(180deg, transparent 0 30%, #3f3f46 30% 36%, transparent 36% 70%, #3f3f46 70% 76%, transparent 76%),
+    repeating-linear-gradient(90deg, #7c4a1e 0 18px, #5c3412 18px 20px);
+  box-shadow: inset 0 0 0 6px #3f3f46;
+}
+
+/* Сундук: золотой замок посередине и окованная крышка */
+.chest {
+  --item-color: #fbbf24;
+  background-color: #a16207;
+  background-image:
+    radial-gradient(circle at 50% 55%, #fde047 0 7px, #713f12 7px 10px, transparent 10px),
+    linear-gradient(180deg, transparent 0 32%, #713f12 32% 38%, transparent 38%);
+}
+
+/* Доска приказов с листком */
+.board {
+  --item-color: #fbbf24;
+  background-color: #b45309;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.25) 0 1px, transparent 1.5px);
+  background-size: 6px 6px;
+}
+
+.order {
+  --item-color: #fef3c7;
+  width: 80px;
+  height: 60px;
+  background-color: #fef3c7;
+  background-image: repeating-linear-gradient(180deg, transparent 0 9px, #c8b27e 9px 11px);
+  box-shadow: inset 0 0 0 4px #fef3c7;
+}

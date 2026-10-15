@@ -435,6 +435,100 @@ export const PORTRAITS: Record<string, Sprite> = {
       H: '#9ca3af',
     },
   },
+  // Леди Паддинг: шлем с плюмажем и стёганый доспех — мягкая обивка
+  padding: {
+    rows: [
+      '.......kk.......',
+      '......kppk......',
+      '.....kppppk.....',
+      '....kssssssk....',
+      '...kssSSSSssk...',
+      '...ksffffffsk...',
+      '...ksfeffefsk...',
+      '...ksffffffsk...',
+      '...ksffmmffsk...',
+      '....kffffffk....',
+      '..kkqqqqqqqqkk..',
+      '.kqqQqqQqqQqqqk.',
+      '.kqqqqqqqqqqqqk.',
+      '.kqQqqQqqQqqQqk.',
+      '.kqqqqqqqqqqqqk.',
+      'kqqqqqqqqqqqqqqk',
+    ],
+    palette: {
+      k: INK,
+      p: '#f472b6',
+      s: '#94a3b8',
+      S: '#e2e8f0',
+      f: '#f1c27d',
+      e: INK,
+      m: '#be123c',
+      q: '#7c3aed',
+      Q: '#c4b5fd',
+    },
+  },
+  // Сержант Дисплей: фуражка с кокардой, усы и шевроны на плечах
+  display: {
+    rows: [
+      '....kkkkkkkk....',
+      '...kccccyccck...',
+      '...kcccccccck...',
+      '..kkkkkkkkkkkk..',
+      '...kffffffffk...',
+      '...kfeffffefk...',
+      '...kffffffffk...',
+      '...kfmmmmmmfk...',
+      '...kffffffffk...',
+      '....kffffffk....',
+      '..kcccccccccck..',
+      '.kcyyccccccyyck.',
+      '.kcccyyccyyccck.',
+      '.kcccccccccccck.',
+      '.kccbbbbbbbbcck.',
+      'kcccccccccccccck',
+    ],
+    palette: {
+      k: INK,
+      c: '#3f6212',
+      y: '#f6c453',
+      f: '#f1c27d',
+      e: INK,
+      m: '#78350f',
+      b: '#451a03',
+    },
+  },
+  // Капитан Абсолют: треуголка, повязка на глазу и мундир с золотыми пуговицами
+  absolute: {
+    rows: [
+      '.....kkkkkk.....',
+      '..kkkhhhhhhkkk..',
+      '.khhhhhyhhhhhhk.',
+      '..kkkkkkkkkkkk..',
+      '...kffffffffk...',
+      '...kfPPffeffk...',
+      '...kffffffffk...',
+      '...kfffmmfffk...',
+      '....kffffffk....',
+      '...kkwwwwwwkk...',
+      '..kbbbwwwwbbbk..',
+      '.kbbbbwyywbbbbk.',
+      '.kbbbbwwwwbbbbk.',
+      '.kbbbbwyywbbbbk.',
+      '.kbbbbwwwwbbbbk.',
+      'kbbbbbbbbbbbbbbk',
+    ],
+    palette: {
+      k: INK,
+      h: '#1e293b',
+      y: '#f6c453',
+      f: '#f1c27d',
+      e: INK,
+      P: '#0f172a',
+      m: '#be123c',
+      w: '#f8fafc',
+      b: '#1e3a8a',
+    },
+  },
   // Провидица Медиа: капюшон, зеркальный камень во лбу и зеркальце-амулет
   media: {
     rows: [
@@ -557,6 +651,116 @@ export const MAP: Sprite = {
   ],
   palette: { k: '#8a6a2a', p: '#f5e6c8', r: '#be123c' },
 };
+
+/* ——— Крепость Блоков ——— */
+
+export const GUARD: Sprite = {
+  rows: [
+    '....kkkk....',
+    '...kssssk...',
+    '..kssSSssk..',
+    '..kkkkkkkk..',
+    '..kffffffk..',
+    '..kfeffefk..',
+    '..kffffffk..',
+    '...kffffk...',
+    '..kkrrrrkk..',
+    '.kssrrrrssk.',
+    '.kssryyrssk.',
+    '.kssrrrrssk.',
+    '.kffrrrrffk.',
+    '..kkrrrrkk..',
+    '..kbbkkbbk..',
+    '..kbbk.kbbk.',
+  ],
+  palette: { k: INK, s: '#94a3b8', S: '#e2e8f0', f: '#f1c27d', e: INK, r: '#b91c1c', y: '#f6c453', b: '#57534e' },
+};
+
+export const FLAG: Sprite = {
+  rows: [
+    'k...........',
+    'kkkkkkkkk...',
+    'krrrrrrrrk..',
+    'krryyrrrrrk.',
+    'krryyrrrrrrk',
+    'krrrrrrrrrk.',
+    'krrrrrrrrk..',
+    'kkkkkkkkk...',
+    'k...........',
+    'k...........',
+    'k...........',
+    'k...........',
+  ],
+  palette: { k: INK, r: '#dc2626', y: '#f6c453' },
+};
+
+export const LANTERN: Sprite = {
+  rows: ['...kk...', '..kkkk..', '.kyyyyk.', 'kyYYYYyk', 'kyYwwYyk', 'kyYwwYyk', 'kyYYYYyk', '.kyyyyk.', '..kkkk..', '...kk...', '...kk...', '..kkkk..'],
+  palette: { k: INK, y: '#f59e0b', Y: '#fde68a', w: '#ffffff' },
+};
+
+/** Шпион Лорда Дефолта: тот же часовой, только в сером */
+export const SPY = recolor(GUARD, { s: '#52525b', S: '#a1a1aa', r: '#3f3f46', y: '#a1a1aa', b: '#27272a' });
+
+export const SHIELD: Sprite = {
+  rows: [
+    '....kkkkkkkk....',
+    '..kkyyyyyyyykk..',
+    '.kyyrrrrrrrryyk.',
+    'kyrrrrrrrrrrrryk',
+    'kyrrrrryyrrrrryk',
+    'kyrrrrryyrrrrryk',
+    'kyrryyyyyyyyrryk',
+    'kyrryyyyyyyyrryk',
+    'kyrrrrryyrrrrryk',
+    'kyrrrrryyrrrrryk',
+    'kyrrrrryyrrrrryk',
+    '.kyrrrryyrrrryk.',
+    '.kyrrrrrrrrrryk.',
+    '..kyrrrrrrrryk..',
+    '..kyrrrrrrrryk..',
+    '...kyrrrrrryk...',
+    '....kyrrrryk....',
+    '.....kyrryk.....',
+    '......kyyk......',
+    '.......kk.......',
+  ],
+  palette: { k: INK, y: '#f6c453', r: '#1d4ed8' },
+};
+
+export const SWORD: Sprite = {
+  rows: [
+    '......kk........................',
+    '.kk..kyyk.kkkkkkkkkkkkkkkkkkkk..',
+    'kyykbkyykkwwwwwwwwwwwwwwwwwwwwk.',
+    'kyykbkyykkSSSSSSSSSSSSSSSSSSSSk.',
+    '.kk..kyyk.kkkkkkkkkkkkkkkkkkkk..',
+    '......kk........................',
+  ],
+  palette: { k: INK, y: '#f6c453', b: '#7c2d12', w: '#f1f5f9', S: '#94a3b8' },
+};
+
+/** Полная луна над Дозорной башней */
+export const FULL_MOON: Sprite = {
+  rows: [
+    '....mmmm....',
+    '..mmmmmmmm..',
+    '.mmmmMmmmmm.',
+    '.mmmMMmmmmm.',
+    'mmmmmmmmmMmm',
+    'mmmmmmmmmmmm',
+    'mmMmmmmmmmmm',
+    'mmMMmmmmmmmm',
+    '.mmmmmmmMmm.',
+    '.mmmmmmmmmm.',
+    '..mmmmmmmm..',
+    '....mmmm....',
+  ],
+  palette: { m: '#fef3c7', M: '#fcd34d' },
+};
+
+/** Песчаная кладка Крепости Блоков */
+export const SAND_BRICKS = recolor(BRICKS, { k: '#4a3219', b: '#8a6236', B: '#9a6e3e' });
 
 /** Серая кладка цитадели Лорда Дефолта */
 export const GRAY_BRICKS = recolor(BRICKS, { k: '#141419', b: '#272730', B: '#30303a' });

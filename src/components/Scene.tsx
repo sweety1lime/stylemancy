@@ -173,8 +173,8 @@ function Mirror({ width, height, scale, srcDoc, label, targets, statuses, onPlay
         />
         <div className="scene__ghosts" aria-hidden="true">
           {targets.map((target, i) =>
-            // Спрятанной цели контур не нужен
-            target.w === 0 && target.h === 0 ? null : (
+            // Спрятанной цели контур не нужен — и невидимой (visibility: hidden) тоже
+            (target.w === 0 && target.h === 0) || target.invisible ? null : (
               <div
                 key={`${target.name}-${i}`}
                 className={statuses[i]?.inPlace ? 'ghost ghost--in-place' : 'ghost'}

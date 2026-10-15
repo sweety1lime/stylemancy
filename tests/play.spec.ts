@@ -18,7 +18,7 @@ async function unlockDistricts(page: Page) {
   await page.addInitScript(() => {
     if (localStorage.getItem('cascadia.progress.v1')) return;
     const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
-    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done, 'tag-07': done, 'fair-08': done, 'sem-07': done }));
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done, 'tag-07': done, 'fair-08': done, 'sem-07': done, 'box-08': done, 'disp-05': done }));
   });
 }
 
@@ -538,6 +538,72 @@ test.describe('Долина Тегов', () => {
   });
 });
 
+test.describe('Крепость Блоков', () => {
+  test.beforeEach(async ({ page }) => {
+    await unlockDistricts(page);
+  });
+
+  test('рамку не заменить обивкой, хоть размер и совпал', async ({ page }) => {
+    await page.goto('/#/level/box-04');
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toHaveText('Портрет: нужно шире на 24px и выше ростом на 24px.');
+
+    await typeCode(page, '.portrait {\n  padding: 12px;\n}\n');
+    await expect(page.getByText('На месте: 1 из 1')).toBeVisible();
+    await cast(page);
+    await expect(page.getByText(/Портрету нужна каменная рамка/)).toBeVisible();
+
+    await typeCode(page, '.portrait {\n  border: 12px solid #78716c;\n}\n');
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('шпион в строю: display: none убирает и место, visibility — только прячет', async ({ page }) => {
+    const soldiers = '.soldier {\n  display: inline-block;\n}\n\n';
+    await page.goto('/#/level/disp-04');
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toHaveText('Шпион: спрячь, но так, чтобы место осталось пустым.');
+
+    await typeCode(page, `${soldiers}.spy {\n  display: none;\n}\n`);
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toHaveText('Шпион: убран вместе со своим местом — а место должно остаться пустым.');
+
+    await typeCode(page, `${soldiers}.spy {\n  visibility: hidden;\n}\n`);
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('на параде шпиона убирают совсем', async ({ page }) => {
+    await page.goto('/#/level/disp-05');
+    await typeCode(page, '.banner {\n  display: block;\n}\n\n.soldier {\n  display: inline-block;\n}\n\n.spy {\n  visibility: hidden;\n}\n');
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toHaveText('Шпион: не виден, но всё ещё занимает место — убери его совсем.');
+  });
+
+  test('z-index: проверка видит, кто кого заслоняет', async ({ page }) => {
+    await page.goto('/#/level/pos-04');
+    await expect(page.getByText('На месте: 0 из 3')).toBeVisible();
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toHaveText('Королевское знамя: сверху лежит «Знамя Востока» — подними через z-index.');
+
+    await typeCode(page, '.standard {\n  position: absolute;\n}\n\n.royal {\n  z-index: 9999;\n}\n');
+    await expect(page.getByText('На месте: 3 из 3')).toBeVisible();
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    // Вместе с ним всплывают и другие достижения — ищем своё
+    await expect(page.locator('.toast', { hasText: 'Война слоёв' })).toBeVisible();
+  });
+
+  test('испытание башни: слои проверяются, когда флаг уже на месте', async ({ page }) => {
+    await page.goto('/#/level/pos-06');
+    // Луну не в чем упрекнуть, пока флаг не долетел
+    await expect(page.getByText('На месте: 1 из 4')).toBeVisible();
+    await typeCode(page, '.tower {\n  position: relative;\n}\n\n.flag {\n  position: absolute;\n  top: -48px;\n  right: 16px;\n}\n');
+    await cast(page);
+    await expect(page.getByText('Флаг: сверху лежит «Луна» — подними через z-index.')).toBeVisible();
+  });
+});
+
 test.describe('общий сюжет', () => {
   test('пролог игры на карте: один раз и с обращением к герою', async ({ page }) => {
     await page.goto('/');
@@ -597,5 +663,47 @@ test.describe('общий сюжет', () => {
     await page.getByLabel('Имя на грамоте').fill('Ариэль');
     await expect(page.locator('.certificate__name')).toHaveText('Ариэль');
     await page.screenshot({ path: `${SCREENS}/14-certificate.png`, fullPage: true });
+  });
+
+  test('пролог крепости: Лорд Дефолт помнит Долину Тегов', async ({ page }) => {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'form-06': done }));
+    });
+    await page.goto('/#/land/block-fortress');
+    const dialog = page.getByRole('dialog', { name: 'Пролог: Казармы' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(dialog).toContainText('Опять ты, странник! Долину Тегов ты у меня отнял');
+    await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(dialog).toContainText('Слава о тебе дошла и до крепости, странник!');
+  });
+
+  test('финал крепости: Руна Блоков, а злодей сбегает в оставшиеся земли', async ({ page }) => {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      const ids = ['form-06', 'box-08', 'disp-05', 'pos-01', 'pos-02', 'pos-03', 'pos-04', 'pos-05'];
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(ids.map((id) => [id, done]))));
+    });
+    await page.goto('/#/level/pos-06');
+    const solution = await page.evaluate<string>("import('/src/levels/watchtower/pos-06.ts').then((m) => m.default.solutionCss)");
+    await typeCode(page, solution);
+    await expect(page.getByText(/На месте: (\d+) из \1$/)).toBeVisible();
+    await cast(page);
+
+    const outro = page.getByRole('dialog', { name: 'Эпилог: Дозорная башня' });
+    await expect(outro).toBeVisible();
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('Держи Руну Блоков, странник');
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('моё проклятие держится в Лесу Селекторов и в Парящих землях');
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('Следующая остановка — Парящие земли');
+    await outro.getByRole('button', { name: 'Закрыть' }).click();
+
+    await page.goto('/#/chronicle');
+    await expect(page.locator('.chronicle__chapter', { hasText: 'Глава 3. Крепость Блоков' })).toContainText('спасена');
   });
 });

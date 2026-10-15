@@ -42,21 +42,33 @@ export interface ItemBox {
   y: number;
   w: number;
   h: number;
+  /** visibility: hidden — места занимает, но не виден */
+  invisible?: boolean;
+  /** Чей предмет сверху в центре этого (номер предмета, −1 — ничей). Только для уровней про z-index */
+  top?: number;
 }
 
 export function measureItems(doc: Document, level: CssLevel): ItemBox[] {
   const view = doc.defaultView;
-  return Array.from(doc.querySelectorAll<HTMLElement>(level.check.items), (el, i) => {
+  const elements = Array.from(doc.querySelectorAll<HTMLElement>(level.check.items));
+  return elements.map((el, i) => {
     const rect = el.getBoundingClientRect();
-    const color = view?.getComputedStyle(el).getPropertyValue('--item-color').trim() || '#f4c76b';
-    return {
+    const style = view?.getComputedStyle(el);
+    const box: ItemBox = {
       name: el.dataset.name ?? `${level.check.itemLabel ?? 'Предмет'} ${i + 1}`,
-      color,
+      color: style?.getPropertyValue('--item-color').trim() || '#f4c76b',
       x: rect.left,
       y: rect.top,
       w: rect.width,
       h: rect.height,
+      invisible: style?.visibility === 'hidden',
     };
+    if (level.check.stacking && rect.width > 0 && rect.height > 0) {
+      const hit = doc.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      const owner = hit?.closest<HTMLElement>(level.check.items);
+      box.top = owner ? elements.indexOf(owner) : -1;
+    }
+    return box;
   });
 }
 
@@ -86,33 +98,61 @@ export interface ItemStatus {
 
 /** Сравнивает предметы студента с эталонными целями (по порядку в разметке). */
 export function compareItems(actual: ItemBox[], targets: ItemBox[], tolerance = 2): ItemStatus[] {
-  const near = (d: number) => Math.abs(d) <= tolerance;
-  return targets.map((target, i) => {
-    const base = { name: target.name, color: target.color, target };
+  const statuses = targets.map((target, i) => comparePlace(actual[i], target, tolerance));
+  // Кто кого заслоняет, проверяем, только когда предмет на своём месте
+  return statuses.map((status, i) => {
+    const target = targets[i];
     const item = actual[i];
-    if (!item) {
-      const delta = { x: 0, y: 0, w: 0, h: 0 };
-      return { ...base, inPlace: false, sizeOk: false, delta, message: `${target.name}: пропал со сцены.` };
+    if (!status.inPlace || target.top === undefined || item?.top === target.top) return status;
+    const other = (index: number | undefined) => (index !== undefined && index >= 0 ? `«${targets[index].name}»` : 'что-то другое');
+    if (target.top === i) {
+      return { ...status, inPlace: false, message: `${target.name}: сверху лежит ${other(item.top)} — подними через z-index.` };
     }
-    const delta = {
-      x: Math.round(target.x - item.x),
-      y: Math.round(target.y - item.y),
-      w: Math.round(target.w - item.w),
-      h: Math.round(target.h - item.h),
-    };
-    // Спрятанный элемент (display: none) — особые слова, а не «шире на 64px»
-    const hidden = (box: ItemBox) => box.w === 0 && box.h === 0;
-    if (hidden(target) !== hidden(item)) {
-      const visibility = hidden(target) ? 'hide' : 'show';
-      const message = visibility === 'hide' ? `${target.name}: здесь нужно спрятать.` : `${target.name}: здесь нужно показать.`;
-      return { ...base, inPlace: false, sizeOk: false, delta, message, visibility };
-    }
-    if (hidden(target)) return { ...base, inPlace: true, sizeOk: true, delta };
-    const sizeOk = near(delta.w) && near(delta.h);
-    if (sizeOk && near(delta.x) && near(delta.y)) return { ...base, inPlace: true, sizeOk, delta };
+    // Закрывать его должен другой предмет — но пока тот не на месте, слоям не с чего совпасть
+    if (!statuses[target.top]?.inPlace) return status;
+    return { ...status, inPlace: false, message: `${target.name}: сейчас закрывает ${other(target.top)} — проверь z-index.` };
+  });
+}
+
+/** Положение, размер и видимость одного предмета. */
+function comparePlace(item: ItemBox | undefined, target: ItemBox, tolerance: number): ItemStatus {
+  const near = (d: number) => Math.abs(d) <= tolerance;
+  const base = { name: target.name, color: target.color, target };
+  if (!item) {
+    const delta = { x: 0, y: 0, w: 0, h: 0 };
+    return { ...base, inPlace: false, sizeOk: false, delta, message: `${target.name}: пропал со сцены.` };
+  }
+  const delta = {
+    x: Math.round(target.x - item.x),
+    y: Math.round(target.y - item.y),
+    w: Math.round(target.w - item.w),
+    h: Math.round(target.h - item.h),
+  };
+  // Спрятанный элемент (display: none) — особые слова, а не «шире на 64px»
+  const hidden = (box: ItemBox) => box.w === 0 && box.h === 0;
+  if (hidden(target) !== hidden(item)) {
+    const visibility = hidden(target) ? 'hide' : 'show';
+    let message = visibility === 'hide' ? `${target.name}: здесь нужно спрятать.` : `${target.name}: здесь нужно показать.`;
+    // Спрятан, но не тем способом: visibility оставляет место, display: none убирает его
+    if (hidden(target) && item.invisible) message = `${target.name}: не виден, но всё ещё занимает место — убери его совсем.`;
+    if (hidden(item) && target.invisible) message = `${target.name}: убран вместе со своим местом — а место должно остаться пустым.`;
+    return { ...base, inPlace: false, sizeOk: false, delta, message, visibility };
+  }
+  if (hidden(target)) return { ...base, inPlace: true, sizeOk: true, delta };
+  const sizeOk = near(delta.w) && near(delta.h);
+  if (!sizeOk || !near(delta.x) || !near(delta.y)) {
     const message = `${target.name}: нужно ${describeDelta(delta, sizeOk, tolerance)}.`;
     return { ...base, inPlace: false, sizeOk, delta, message };
-  });
+  }
+  // Место верное — осталось проверить, видно ли предмет
+  if (Boolean(target.invisible) !== Boolean(item.invisible)) {
+    const visibility = target.invisible ? 'hide' : 'show';
+    const message = target.invisible
+      ? `${target.name}: спрячь, но так, чтобы место осталось пустым.`
+      : `${target.name}: здесь нужно показать.`;
+    return { ...base, inPlace: false, sizeOk, delta, message, visibility };
+  }
+  return { ...base, inPlace: true, sizeOk, delta };
 }
 
 /** «на 40px правее и на 12px ниже» или «шире на 13px». Если размер не тот, говорим сначала о нём. */
@@ -151,11 +191,13 @@ export function summarizeMisses(statuses: ItemStatus[], groupName = 'предм�
   if (!misses.length) return [];
   const [first] = misses;
   const alike = (a: number, b: number) => Math.abs(a - b) <= 1;
+  // Предмет стоит где надо, а не так у него другое — видимость или слой
+  const placed = (s: ItemStatus) => Math.abs(s.delta.x) <= tolerance && Math.abs(s.delta.y) <= tolerance;
 
   if (misses.length > 1 && misses.length === statuses.length) {
-    const sameShift = misses.every((s) => s.sizeOk && alike(s.delta.x, first.delta.x) && alike(s.delta.y, first.delta.y));
+    const sameShift = misses.every((s) => s.sizeOk && !placed(s) && alike(s.delta.x, first.delta.x) && alike(s.delta.y, first.delta.y));
     if (sameShift) return [`Все ${groupName} смещены одинаково — нужно ${describeDelta(first.delta, true, tolerance)}.`];
-    const sameSize = misses.every((s) => !s.sizeOk && alike(s.delta.w, first.delta.w) && alike(s.delta.h, first.delta.h));
+    const sameSize = misses.every((s) => !s.sizeOk && !s.visibility && alike(s.delta.w, first.delta.w) && alike(s.delta.h, first.delta.h));
     if (sameSize) return [`Все ${groupName} не того размера — каждому нужно ${describeDelta(first.delta, false, tolerance)}.`];
   }
 

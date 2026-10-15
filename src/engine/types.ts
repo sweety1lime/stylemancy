@@ -41,6 +41,8 @@ export interface CssLevelDef extends LevelBase {
     tolerance?: number;
     /** Ширины «зеркал» для адаптива: сцена проверяется на каждой */
     viewports?: number[];
+    /** Важно, кто кого заслоняет (z-index): сравнивается, чей предмет сверху в центре каждого */
+    stacking?: boolean;
   };
   /** Свойства, запрещённые именно в этом уровне */
   forbid?: string[];
@@ -132,7 +134,8 @@ export interface StoryFrame {
     | 'city'
     | 'forge'
     | 'academy'
-    | 'chaos';
+    | 'chaos'
+    | 'fortress';
   /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
   speaker?: string;
   name?: string;

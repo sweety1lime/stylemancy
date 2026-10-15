@@ -45,7 +45,9 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
       flow.finish({ passed: true, score: scoreSolution(flow.hintsUsed, evaluation.declCount, solutionDeclCount(level)) }, viaKeyboard);
     } else {
       const misses = summarizeMisses(evaluation.items, level.check.groupName, level.check.tolerance);
-      flow.finish({ passed: false, errors: evaluation.errors, misses }, viaKeyboard);
+      // Обязательный приём — когда сцена уже сложилась. Пока предметы не на местах, важнее подсказать, куда их двигать
+      const errors = misses.length ? evaluation.errors.filter((problem) => problem.kind !== 'required') : evaluation.errors;
+      flow.finish({ passed: false, errors, misses }, viaKeyboard);
     }
   }
 

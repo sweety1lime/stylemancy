@@ -45,6 +45,11 @@ const FOUR_ITEMS = numberedItems(4);
 const SIX_ITEMS = numberedItems(6);
 const NINE_ITEMS = numberedItems(9);
 const AREA_ITEMS = '<div class="box"><div class="item a">a</div><div class="item b">b</div><div class="item c">c</div></div>';
+const ONE_ITEM = numberedItems(1);
+/** Строчные блоки: span вместо div */
+const SPAN_ITEMS = '<div class="box"><span class="item">1</span> <span class="item">2</span> <span class="item">3</span></div>';
+/** Контейнер по размеру содержимого — чтобы были видны отступы и рамка */
+const FIT_BOX_CSS = '.box { width: fit-content; height: auto; }';
 
 /** Сетка в примерах: блоки без своего размера заполняют ячейки целиком */
 const GRID_CSS = '.box { display: grid; gap: 4px; } .item { width: auto; height: auto; }';
@@ -697,6 +702,196 @@ export const SPELLS: Record<string, Spell> = {
           html: '<form>\n  <label for="hero">Имя героя</label>\n  <input id="hero" name="hero" required>\n  <button type="submit">Отправить</button>\n</form>',
         },
       ],
+    },
+  },
+
+  // ——— Казармы: блочная модель ———
+
+  'width-height': {
+    name: 'width и height',
+    description:
+      'Ширина и высота блока. Без них блок растягивается на всю ширину родителя, а в высоту — по содержимому. Значения обычно пишут в пикселях: `160px`.',
+    example: {
+      html: ONE_ITEM,
+      selector: '.item',
+      options: ['width: 40px; height: 40px', 'width: 160px; height: 40px', 'width: 100px; height: 100px', 'width: auto; height: auto'],
+      initial: 1,
+    },
+  },
+  padding: {
+    name: 'padding',
+    description:
+      'Внутренний отступ — обивка между содержимым и краем блока. Блок становится больше, а содержимое отодвигается от краёв. Одно значение — для всех четырёх сторон.',
+    example: {
+      html: ONE_ITEM,
+      css: FIT_BOX_CSS,
+      selector: '.box',
+      options: ['padding: 0', 'padding: 8px', 'padding: 24px', 'padding: 40px'],
+      initial: 2,
+    },
+  },
+  'padding-sides': {
+    name: 'padding: 8px 24px',
+    description:
+      'Отступы по сторонам. Два значения — «сверху и снизу», потом «слева и справа». Четыре — по часовой стрелке от верха: верх, право, низ, лево. А для одной стороны есть `padding-top`, `padding-right`, `padding-bottom` и `padding-left`.',
+    example: {
+      html: ONE_ITEM,
+      css: FIT_BOX_CSS,
+      selector: '.box',
+      options: ['padding: 24px', 'padding: 8px 24px', 'padding: 24px 8px', 'padding: 0 40px 24px 0', 'padding-left: 40px'],
+      initial: 1,
+    },
+  },
+  border: {
+    name: 'border',
+    description:
+      'Рамка вокруг обивки. В ней три части: толщина, стиль и цвет. Стиль `solid` — сплошная линия, `dashed` — пунктир, `dotted` — точки; без стиля рамки не будет. Рамка тоже прибавляется к размеру блока.',
+    example: {
+      html: ONE_ITEM,
+      css: `${FIT_BOX_CSS} .box { padding: 16px; }`,
+      selector: '.box',
+      options: ['border: 4px solid #f6c453', 'border: 8px dashed #fb7185', 'border: 6px dotted #34d399', 'border: 12px solid #78716c'],
+    },
+  },
+  margin: {
+    name: 'margin',
+    description:
+      'Внешний отступ — пустое место снаружи от рамки. Он отталкивает соседей и края родителя. Записывается так же, как padding: одно, два или четыре значения, а для одной стороны — `margin-top`, `margin-right`, `margin-bottom`, `margin-left`.',
+    example: {
+      css: '.box { display: flex; align-items: flex-start; }',
+      selector: '.item:nth-child(2)',
+      options: ['margin: 0', 'margin: 0 24px', 'margin-left: 48px', 'margin-top: 40px'],
+      initial: 1,
+    },
+  },
+  'margin-auto': {
+    name: 'margin: 0 auto',
+    description:
+      'Если внешний отступ слева и справа — `auto`, браузер делит свободное место поровну, и блок встаёт по центру. Работает у блочных элементов с заданной шириной.',
+    example: {
+      html: ONE_ITEM,
+      selector: '.item',
+      options: ['margin: 0', 'margin: 0 auto', 'margin-left: auto'],
+      initial: 1,
+    },
+  },
+  'box-sizing': {
+    name: 'box-sizing: border-box',
+    description:
+      'По умолчанию `width` и `height` — размеры только содержимого, а обивка и рамка прибавляются сверху. С `box-sizing: border-box` размеры считаются по рамке: блок ровно такой, как написано. Поэтому многие сайты включают его сразу всем элементам.',
+    example: {
+      html: ONE_ITEM,
+      css: '.item { width: 120px; height: 64px; padding: 16px; border: 6px solid #fbbf24; }',
+      selector: '.item',
+      options: ['box-sizing: content-box', 'box-sizing: border-box'],
+      initial: 1,
+    },
+  },
+
+  // ——— Плац: display ———
+
+  'inline-block': {
+    name: 'display: inline-block',
+    description:
+      'Строчно-блочный элемент: стоит в строке, как слово, но слушается `width`, `height` и отступов со всех сторон. Так удобно делать кнопки, значки и плитки в ряд.',
+    example: {
+      html: SPAN_ITEMS,
+      selector: '.item',
+      options: ['display: inline', 'display: inline-block', 'display: block'],
+      initial: 1,
+    },
+  },
+  'display-block': {
+    name: 'display: block',
+    description:
+      'Блочный элемент начинается с новой строки и занимает всю ширину родителя, если ширина не задана. Так по умолчанию ведут себя `div`, `p`, `h1`, `ul` и `section`.',
+    example: {
+      html: SPAN_ITEMS,
+      css: '.item { width: auto; height: 32px; }',
+      selector: '.item',
+      options: ['display: inline', 'display: block'],
+      initial: 1,
+    },
+  },
+  'display-inline': {
+    name: 'display: inline',
+    description:
+      'Строчный элемент течёт в строке, как слово в предложении. Его размер — по содержимому: `width`, `height` и отступы сверху и снизу на соседей не действуют. Так по умолчанию ведут себя `span`, `a`, `strong` и `em`.',
+    example: {
+      html: '<div class="box"><div class="item">Слушайте</div> <div class="item">все:</div> <div class="item">смотр!</div></div>',
+      css: '.item { width: auto; height: auto; padding: 4px 8px; }',
+      selector: '.item',
+      options: ['display: block', 'display: inline'],
+      initial: 1,
+    },
+  },
+  visibility: {
+    name: 'visibility: hidden',
+    description:
+      'Прячет элемент, но оставляет его место пустым — соседи не сдвигаются. А `display: none` убирает элемент совсем, вместе с местом. Сравни оба варианта.',
+    example: {
+      css: '.box { display: flex; gap: 12px; }',
+      selector: '.item:nth-child(2)',
+      options: ['visibility: visible', 'visibility: hidden', 'display: none'],
+      initial: 1,
+    },
+  },
+
+  // ——— Дозорная башня: позиционирование ———
+
+  'position-relative': {
+    name: 'position: relative',
+    description:
+      'Блок остаётся на своём месте в потоке, но его можно сдвинуть от этого места свойствами `top`, `right`, `bottom` и `left`. Соседи сдвига не замечают: для них блок стоит где стоял.',
+    example: {
+      css: '.box { display: flex; align-items: center; gap: 12px; }',
+      selector: '.item:nth-child(2)',
+      options: ['position: static', 'position: relative; top: -32px', 'position: relative; top: 24px; left: 24px'],
+      initial: 1,
+    },
+  },
+  'position-absolute': {
+    name: 'position: absolute',
+    description:
+      'Блок выходит из потока — соседи занимают его место — и встаёт по координатам `top`, `right`, `bottom`, `left` от краёв ближайшего предка с `position`. Отрицательные значения выводят блок за край.',
+    example: {
+      css: '.box { position: relative; display: flex; gap: 12px; }',
+      selector: '.item:nth-child(2)',
+      options: ['position: static', 'position: absolute; top: 0; right: 0', 'position: absolute; bottom: 0; left: 0'],
+      initial: 1,
+    },
+  },
+  'absolute-parent': {
+    name: 'Точка отсчёта для absolute',
+    description:
+      '`absolute` ищет ближайшего предка, у которого есть `position`, и отсчитывает координаты от его краёв. Нет такого предка — от краёв окна. Поэтому родителю пишут `position: relative` без сдвигов: он остаётся на месте и становится точкой отсчёта.',
+    example: {
+      css: '.box { display: flex; gap: 12px; } .item:nth-child(2) { position: absolute; top: 0; right: 0; }',
+      selector: '.box',
+      options: ['position: static', 'position: relative'],
+      initial: 1,
+    },
+  },
+  'z-index': {
+    name: 'z-index',
+    description:
+      'Кто кого заслоняет. Когда позиционированные блоки заходят друг на друга, сверху тот, кто позже в разметке. `z-index` меняет порядок слоёв: у кого число больше — тот ближе к нам. Работает только у блоков с `position`.',
+    example: {
+      css: '.box { position: relative; } .item { position: absolute; top: 24px; width: 72px; height: 72px; } .item:nth-child(1) { left: 72px; } .item:nth-child(2) { top: 44px; left: 116px; } .item:nth-child(3) { left: 160px; }',
+      selector: '.item:nth-child(1)',
+      options: ['z-index: auto', 'z-index: 1'],
+      initial: 1,
+    },
+  },
+  'position-fixed': {
+    name: 'position: fixed',
+    description:
+      'Блок прибит к окну браузера: координаты отсчитываются от краёв окна, и при прокрутке страницы он остаётся на месте. Так делают закреплённые шапки, чаты поддержки и кнопку «наверх».',
+    example: {
+      css: '.box { position: relative; display: flex; gap: 12px; }',
+      selector: '.item:nth-child(2)',
+      options: ['position: absolute; bottom: 0; right: 0', 'position: fixed; bottom: 0; right: 0'],
+      initial: 1,
     },
   },
 };

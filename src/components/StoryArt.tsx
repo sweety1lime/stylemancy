@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { StoryFrame } from '../engine/types';
-import { GEMS, GLASS, ISLAND_ROCK, MOON, PORTRAITS, SKY_SPARK } from '../pixel/sprites';
+import { FLAG, GEMS, GLASS, ISLAND_ROCK, MOON, PORTRAITS, SKY_SPARK } from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 
 const ROW = [GEMS.amethyst, GEMS.emerald, GEMS.ruby];
@@ -220,6 +220,20 @@ export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: s
           <span className="sa-code sa-code--4">onclick</span>
           <span className="sa-code sa-code--5">()</span>
           <span className="sa-code sa-code--6">let</span>
+        </>
+      )}
+
+      {art === 'fortress' && (
+        <>
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
+          <PixelArt className="sa-spark sa-spark--2" sprite={SKY_SPARK} />
+          <div className="sa-citadel sa-citadel--sand">
+            <span className="sa-tower" />
+            <span className="sa-keep" />
+            <span className="sa-tower" />
+          </div>
+          <PixelArt className="sa-fortress-flag" sprite={FLAG} />
         </>
       )}
 

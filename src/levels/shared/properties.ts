@@ -57,3 +57,43 @@ export const GRID_PROPERTIES = [
 
 /** Адаптив: Flexbox и Grid вместе. */
 export const LAYOUT_PROPERTIES = [...new Set([...FLEX_PROPERTIES, ...GRID_PROPERTIES])];
+
+/** Блочная модель — магия Казарм: размеры, отступы и рамки. */
+export const BOX_PROPERTIES = [
+  'width',
+  'height',
+  'min-width',
+  'max-width',
+  'min-height',
+  'max-height',
+  'padding',
+  'padding-top',
+  'padding-right',
+  'padding-bottom',
+  'padding-left',
+  'padding-block',
+  'padding-inline',
+  'margin',
+  'margin-top',
+  'margin-right',
+  'margin-bottom',
+  'margin-left',
+  'margin-block',
+  'margin-inline',
+  'border',
+  'border-width',
+  'border-style',
+  'border-color',
+  'border-top',
+  'border-right',
+  'border-bottom',
+  'border-left',
+  'border-radius',
+  'box-sizing',
+];
+
+/** Плац: как блоки встают в строй — display и visibility плюс блочная модель. */
+export const DISPLAY_PROPERTIES = [...BOX_PROPERTIES, 'display', 'visibility'];
+
+/** Дозорная башня: позиционирование плюс всё, что было раньше. */
+export const POSITION_PROPERTIES = [...DISPLAY_PROPERTIES, 'position', 'top', 'right', 'bottom', 'left', 'inset', 'z-index'];
