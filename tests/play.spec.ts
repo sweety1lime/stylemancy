@@ -696,6 +696,20 @@ test.describe('эффекты и звук', () => {
     await expect(page.locator('.spark')).toHaveCount(0);
   });
 
+  test('герой у кнопки взмахивает посохом: при ошибке оглядывается, при успехе подпрыгивает', async ({ page }) => {
+    await openLevel(page, 1);
+    const hero = page.locator('.actions .hero');
+    await expect(hero).toHaveClass(/hero--idle/);
+    await cast(page);
+    await expect(hero).toHaveClass(/hero--oops/);
+    await expect(hero).toHaveClass(/hero--idle/);
+
+    await typeCode(page, '.island {\n  display: flex;\n}\n');
+    await cast(page);
+    await expect(hero).toHaveClass(/hero--joy/);
+    await expect(hero).toHaveClass(/hero--idle/);
+  });
+
   test('персонаж говорит, пока печатается его реплика', async ({ page }) => {
     await page.goto('/#/land/floating-lands');
     const dialog = page.getByRole('dialog', { name: 'Пролог: Парящие острова' });

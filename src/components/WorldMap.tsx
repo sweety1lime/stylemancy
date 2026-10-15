@@ -6,10 +6,11 @@ import { fullEffects } from '../game/settings';
 import { read, scopedKey, write } from '../game/storage';
 import { gamePrologue, isLandDone, isSeen, markSeen, PROLOGUE_KEY } from '../game/story';
 import { findLevel, lands, type Land } from '../levels';
-import { spriteDataUri } from '../pixel/pixelArt';
-import { CLOUD, EMBLEMS, FOG, HERO, HERO_STEP, LAND_ROCKS, SKY_SPARK } from '../pixel/sprites';
+import { spriteAnimElement } from '../pixel/sheet';
+import { CLOUD, EMBLEMS, FOG, HERO_ANIMATIONS, LAND_ROCKS, SKY_SPARK } from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
+import { SpriteAnim } from './SpriteAnim';
 import { StoryScene } from './StoryScene';
 
 /** Тропа на карте: центры земель по порядку курса, в процентах ширины и высоты карты */
@@ -22,29 +23,19 @@ const PATH_POINTS: [number, number][] = [
 
 /** Где герой стоял в прошлый раз — чтобы пройти к новой земле пешком */
 const HERO_KEY = 'cascadia.hero.v1';
-const HERO_URI = spriteDataUri(HERO);
-const STEP_URI = spriteDataUri(HERO_STEP);
+/** Масштаб героя на карте */
+const HERO_SCALE = 2;
 
-/** Герой идёт от одной земли к другой: шагает в два кадра, а настоящий герой ждёт на месте. onArrive — когда дошёл. */
+/** Герой идёт от одной земли к другой: шагает в четыре кадра, а настоящий герой ждёт на месте. onArrive — когда дошёл. */
 function walk(map: HTMLElement, from: Element, hero: HTMLElement, onArrive: () => void): () => void {
   const start = from.getBoundingClientRect();
   const end = hero.getBoundingClientRect();
   const base = map.getBoundingClientRect();
-  const walker = document.createElement('img');
-  walker.className = 'land__walker';
-  walker.src = HERO_URI;
-  walker.alt = '';
-  Object.assign(walker.style, {
-    left: `${end.left - base.left}px`,
-    top: `${end.top - base.top}px`,
-    width: `${end.width}px`,
-    height: `${end.height}px`,
-  });
+  const walker = spriteAnimElement(HERO_ANIMATIONS.walk, 8, HERO_SCALE);
+  walker.classList.add('land__walker');
+  Object.assign(walker.style, { left: `${end.left - base.left}px`, top: `${end.top - base.top}px` });
   hero.style.visibility = 'hidden';
   map.append(walker);
-  const step = window.setInterval(() => {
-    walker.src = walker.src === HERO_URI ? STEP_URI : HERO_URI;
-  }, 160);
   const dx = start.left + start.width * 0.15 - end.left;
   const dy = start.top + start.height * 0.45 - end.top;
   const animation = walker.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], {
@@ -54,7 +45,6 @@ function walk(map: HTMLElement, from: Element, hero: HTMLElement, onArrive: () =
     fill: 'backwards',
   });
   const finish = () => {
-    window.clearInterval(step);
     walker.remove();
     hero.style.visibility = '';
   };
@@ -177,7 +167,7 @@ export function WorldMap() {
                     <PixelArt className="land__fog land__fog--b" sprite={FOG} scale={3} />
                   </>
                 )}
-                {land.id === heroLand && <PixelArt className="land__hero" sprite={HERO} scale={3} />}
+                {land.id === heroLand && <SpriteAnim className="land__hero" frames={HERO_ANIMATIONS.idle} fps={2} scale={HERO_SCALE} />}
               </span>
               <span className="land__title">{land.title}</span>
               <span className="land__topic">{land.topic}</span>

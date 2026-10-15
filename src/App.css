@@ -227,6 +227,54 @@
   color: var(--gold);
 }
 
+/* ——— Покадровая анимация: лента кадров едет в окошке размером с один кадр ——— */
+
+.sprite-anim {
+  display: inline-block;
+  flex: none;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.sprite-anim img {
+  display: block;
+  max-width: none;
+}
+
+@keyframes sprite-frames {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Герой у кнопки «Сотворить» — слева от кнопок */
+.hero {
+  align-self: flex-end;
+  margin-right: auto;
+}
+
+/* Радость: во втором кадре герой в прыжке */
+.hero--joy .sprite-anim {
+  animation: hero-jump 0.5s linear 2;
+}
+
+@keyframes hero-jump {
+  0%,
+  33% {
+    translate: 0 0;
+  }
+
+  40%,
+  60% {
+    translate: 0 -12px;
+  }
+
+  67%,
+  100% {
+    translate: 0 0;
+  }
+}
+
 /* Звук и эффекты — пиксельные значки */
 .toggles {
   display: flex;
@@ -511,19 +559,12 @@
   }
 }
 
-/* Герой у своей земли: переминается с ноги на ногу */
+/* Герой у своей земли — дышит покадрово */
 .land__hero {
   position: absolute;
   bottom: 18px;
-  left: -8px;
+  left: -10px;
   z-index: 2;
-  animation: hero-idle 1.3s steps(1, end) infinite;
-}
-
-@keyframes hero-idle {
-  50% {
-    translate: 0 -3px;
-  }
 }
 
 /* Герой в пути — поверх карты */
@@ -531,7 +572,6 @@
   position: absolute;
   z-index: 3;
   pointer-events: none;
-  image-rendering: pixelated;
 }
 
 .land__emblem {

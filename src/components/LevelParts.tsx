@@ -5,6 +5,7 @@ import { useAuth } from '../game/auth';
 import { SPELLS } from '../game/spells';
 import { CodeEditor, type CodeEditorHandle, type EditorLanguage } from './CodeEditor';
 import { FeedbackDialog } from './FeedbackDialog';
+import { Hero } from './Hero';
 import { Portrait } from './Portrait';
 import { ResultPanel, type RegionStats } from './ResultPanel';
 import { ReviewCard } from './ReviewCard';
@@ -112,6 +113,7 @@ export function Workbench({ flow, level, region, trailHref, onNext, onCast, edit
       {editor}
 
       <div className="actions">
+        <Hero cue={flow.outcome} />
         <button type="button" className="button button--ghost" onClick={flow.takeHint} disabled={flow.hintsLeft <= 0}>
           {flow.hintLabel}
         </button>
