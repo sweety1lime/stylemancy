@@ -97,3 +97,6 @@ export const DISPLAY_PROPERTIES = [...BOX_PROPERTIES, 'display', 'visibility'];
 
 /** Дозорная башня: позиционирование плюс всё, что было раньше. */
 export const POSITION_PROPERTIES = [...DISPLAY_PROPERTIES, 'position', 'top', 'right', 'bottom', 'left', 'inset', 'z-index'];
+
+/** Лес Селекторов: вся сила — в селекторах, а свойство одно. */
+export const FOREST_PROPERTIES = ['color'];

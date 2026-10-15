@@ -1,10 +1,19 @@
 import type { CSSProperties } from 'react';
 import type { StoryFrame } from '../engine/types';
-import { FLAG, GEMS, GLASS, ISLAND_ROCK, MOON, PORTRAITS, SKY_SPARK } from '../pixel/sprites';
+import { recolor } from '../pixel/pixelArt';
+import { AMANITA, BOLETUS, FIREFLY, FLAG, GEMS, GLASS, ISLAND_ROCK, MOON, OAK, PORTRAITS, SKY_SPARK, SPRUCE } from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 
 const ROW = [GEMS.amethyst, GEMS.emerald, GEMS.ruby];
 const CROWN = [GEMS.amethyst, GEMS.emerald, GEMS.sapphire, GEMS.ruby, GEMS.topaz];
+/** Лес в кадре — уже расколдованный: заливка, блик и тень — сплошные оттенки одного цвета */
+const FOREST_ART = {
+  spruce: recolor(SPRUCE, { c: '#15803d', h: '#4ade80', d: '#14532d' }),
+  oak: recolor(OAK, { c: '#22c55e', h: '#86efac', d: '#15803d' }),
+  amanita: recolor(AMANITA, { c: '#dc2626', h: '#f87171', d: '#991b1b' }),
+  firefly: recolor(FIREFLY, { c: '#fde047', h: '#fef9c3' }),
+  boletus: recolor(BOLETUS, { c: '#ea580c', h: '#fb923c', d: '#9a3412' }),
+};
 /** Стёкла витража в кадре: так же стоят в испытании Витражной обители */
 const PANES = [GLASS.star, GLASS.rose, GLASS.moon, GLASS.tree, GLASS.leaf, GLASS.crown].map((glass) => glass.color);
 
@@ -220,6 +229,23 @@ export function StoryArt({ art, speaker }: { art: StoryFrame['art']; speaker?: s
           <span className="sa-code sa-code--4">onclick</span>
           <span className="sa-code sa-code--5">()</span>
           <span className="sa-code sa-code--6">let</span>
+        </>
+      )}
+
+      {art === 'forest' && (
+        <>
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
+          <div className="sa-forest">
+            <PixelArt sprite={FOREST_ART.spruce} />
+            <PixelArt sprite={FOREST_ART.oak} />
+            <PixelArt sprite={FOREST_ART.spruce} />
+          </div>
+          <div className="sa-forest-floor">
+            <PixelArt sprite={FOREST_ART.amanita} />
+            <PixelArt className="sa-gem" sprite={FOREST_ART.firefly} />
+            <PixelArt sprite={FOREST_ART.boletus} />
+          </div>
         </>
       )}
 

@@ -529,6 +529,72 @@ export const PORTRAITS: Record<string, Sprite> = {
       b: '#1e3a8a',
     },
   },
+  // Сова Селекта: круглые глаза — видит любой элемент на странице
+  select: {
+    rows: [
+      '..k..........k..',
+      '.kbk........kbk.',
+      '.kbbkkkkkkkkbbk.',
+      'kbbbbbbbbbbbbbbk',
+      'kbwwwwbbbbwwwwbk',
+      'kwwyyywbbwyyywwk',
+      'kwykkywbbwykkywk',
+      'kwyyyywbbwyyyywk',
+      'kbwwwwboobwwwwbk',
+      'kbbbbbbobbbbbbbk',
+      '.kbbffffffffbbk.',
+      '.kbfFffFffFffbk.',
+      '.kbffffffffffbk.',
+      '..kbfFffFffFbk..',
+      '..kbbffffffbbk..',
+      '...kkookkookk...',
+    ],
+    palette: { k: INK, b: '#8b5e34', w: '#f8fafc', y: '#fbbf24', o: '#f97316', f: '#e7d3b0', F: '#b08968' },
+  },
+  // Ведунья Ховер: остроконечная шляпа со звездой — колдует, когда наводят мышь
+  hover: {
+    rows: [
+      '.......kk.......',
+      '......kppk......',
+      '.....kpppk......',
+      '.....kppppk.....',
+      '....kppyppk.....',
+      '...kppppppppk...',
+      '.kkkkkkkkkkkkkk.',
+      '..kgffffffffgk..',
+      '..kgfeffffefgk..',
+      '..kgffffffffgk..',
+      '..kgfffmmfffgk..',
+      '..kggffffffggk..',
+      '.kpkggggggggkpk.',
+      '.kppppppppppppk.',
+      'kpppPppppppPpppk',
+      'kppppppppppppppk',
+    ],
+    palette: { k: INK, p: '#7c3aed', P: '#5b21b6', y: '#fbbf24', g: '#4ade80', f: '#f1c27d', e: INK, m: '#be123c' },
+  },
+  // Древень Каскад: крона из листьев, глаза-светлячки и моховая борода
+  cascade: {
+    rows: [
+      '....kkkkkkkk....',
+      '..kkllLlllLlkk..',
+      '.klLllllLllllLk.',
+      'kllllLllllllLllk',
+      'kkbbbbbbbbbbbbkk',
+      '.kbbBbbbbbbBbbk.',
+      '.kbkykbbbbkykbk.',
+      '.kbbbbbbbbbbbbk.',
+      '.kbBbbbkkbbbBbk.',
+      '.kbbbbbbbbbbbbk.',
+      '.kbmmbbbbbbmmbk.',
+      '.kmmmmkkkkmmmmk.',
+      '.kmmmmmmmmmmmmk.',
+      '..kmmMmmmmMmmk..',
+      '..kbmmmmmmmmbk..',
+      '.kbbbkkkkkkbbbk.',
+    ],
+    palette: { k: INK, l: '#16a34a', L: '#86efac', b: '#7a5638', B: '#5c3f28', y: '#fde047', m: '#4d7c0f', M: '#84cc16' },
+  },
   // Провидица Медиа: капюшон, зеркальный камень во лбу и зеркальце-амулет
   media: {
     rows: [
@@ -757,6 +823,130 @@ export const FULL_MOON: Sprite = {
     '....mmmm....',
   ],
   palette: { m: '#fef3c7', M: '#fcd34d' },
+};
+
+/*
+  ——— Лес Селекторов ———
+  У предметов леса цвет задаёт свойство color из кода студента. В рисунке это буквы:
+  c — заливка цветом, h — блик поверх неё, d — тень, v — прожилка. Остальное нарисовано как обычно.
+*/
+
+/** Блик, тень и прожилка поверх заливки — полупрозрачные, чтобы подходили к любому цвету */
+const FILL_SHADES = { h: 'rgba(255, 255, 255, 0.45)', d: 'rgba(0, 0, 0, 0.28)', v: 'rgba(0, 0, 0, 0.4)' };
+
+export const AMANITA: Sprite = {
+  rows: [
+    '...kkkk...',
+    '.kkhcwcck.',
+    'kchccccwck',
+    'kcwcccccck',
+    'kcccwccddk',
+    'kkddddddkk',
+    '..kssssk..',
+    '..ksSssk..',
+    '..kssssk..',
+    '..ksssSk..',
+    '.kssssssk.',
+    '.kkkkkkkk.',
+  ],
+  palette: { k: INK, w: '#f8fafc', s: '#f5e6c8', S: '#d6c49a', ...FILL_SHADES },
+};
+
+export const BOLETUS: Sprite = {
+  rows: [
+    '..kkkkkk..',
+    '.khhcccck.',
+    'khccccccck',
+    'kcccccccck',
+    'kccccccddk',
+    'kkddddddkk',
+    '..kssssk..',
+    '.ksssSssk.',
+    '.kssssssk.',
+    '.ksSssssk.',
+    '.kssssssk.',
+    '..kkkkkk..',
+  ],
+  palette: { k: INK, s: '#f5e6c8', S: '#d6c49a', ...FILL_SHADES },
+};
+
+export const FIREFLY: Sprite = {
+  rows: ['.k....k.', '..k..k..', '.wwkkww.', 'wwwkkwww', '.wkcckw.', '..kchk..', '..kcck..', '...kk...'],
+  palette: { k: INK, w: 'rgba(226, 232, 240, 0.75)', ...FILL_SHADES },
+};
+
+export const FOREST_LANTERN: Sprite = {
+  rows: ['...kk...', '..kkkk..', '.kcccck.', 'kchcccck', 'kchcwcck', 'kccwwcck', 'kccccdck', '.kcccck.', '..kkkk..', '...kk...', '...kk...', '..kkkk..'],
+  palette: { k: INK, w: '#ffffff', ...FILL_SHADES },
+};
+
+export const FLOWER: Sprite = {
+  rows: ['.k.kk.k.', 'kckcckck', 'kchcccck', 'kcccccck', '.kccddk.', '..kkkk..', '...gg...', '.llgg...', '..lgg...', '...ggll.', '...ggl..', '...gg...'],
+  palette: { k: INK, g: '#15803d', l: '#4ade80', ...FILL_SHADES },
+};
+
+export const LEAF: Sprite = {
+  rows: ['.....kk.', '...kkcck', '..kchcck', '.kchccck', 'kccvccck', 'kcvccdk.', 'kvcddk..', 'vkkkk...'],
+  palette: { k: INK, ...FILL_SHADES },
+};
+
+/** Лиственное дерево: крона красится, ствол — нет */
+export const OAK: Sprite = {
+  rows: [
+    '.....kkkkkk.....',
+    '...kkhhcccckk...',
+    '..khhcccccccck..',
+    '.khccccccccccdk.',
+    '.kccccccccccddk.',
+    'kchcccccccccccdk',
+    'kcccccccccccccdk',
+    'kccccccccccccddk',
+    '.kccccccccccddk.',
+    '.kdcccccccccddk.',
+    '..kddccccccddk..',
+    '...kkddddddkk...',
+    '......kttk......',
+    '......kttk......',
+    '......ktTk......',
+    '......kttk......',
+    '.....kttttk.....',
+    '....ktttTttk....',
+    '...kkkkkkkkkk...',
+  ],
+  palette: { k: INK, t: '#7a5638', T: '#5c3f28', ...FILL_SHADES },
+};
+
+export const SPRUCE: Sprite = {
+  rows: [
+    '.....kk.....',
+    '....kcck....',
+    '...kchcck...',
+    '....kcck....',
+    '...kchccck..',
+    '..kcccccdk..',
+    '...kccccdk..',
+    '.kchcccccdk.',
+    '.kccccccddk.',
+    '..kcccccdk..',
+    '.kchcccccdk.',
+    'kcccccccccdk',
+    'kccccccccddk',
+    '.kkddddddkk.',
+    '....kttk....',
+    '....kttk....',
+    '...kkkkkk...',
+  ],
+  palette: { k: INK, t: '#7a5638', ...FILL_SHADES },
+};
+
+export const STONE_ROCK: Sprite = {
+  rows: ['..kkkkkk..', '.kGgggggk.', 'kGggggggdk', 'kgggggggdk', 'kggggggddk', '.kkkkkkkk.'],
+  palette: { k: INK, g: '#6b7280', G: '#9ca3af', d: '#4b5563' },
+};
+
+export const STUMP: Sprite = {
+  rows: ['.kkkkkkkk.', 'kyyyyyyyyk', 'kyYYyyYYyk', 'kkyyyyyykk', 'kbbbbbbbbk', 'kbBbbbbBbk', 'kbbbbBbbbk', 'kkkkkkkkkk'],
+  palette: { k: INK, y: '#d6b47a', Y: '#a87b45', b: '#7a5638', B: '#5c3f28' },
 };
 
 /** Песчаная кладка Крепости Блоков */

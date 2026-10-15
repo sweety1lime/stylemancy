@@ -29,7 +29,15 @@ export interface MarkupExample {
   initial?: number;
 }
 
-export type SpellExample = ValueExample | WidthExample | MarkupExample;
+/** Пример с вариантами CSS целиком: кнопки переключают правила — видно, какой селектор кого находит и какое правило побеждает. */
+export interface VariantsExample {
+  html?: string;
+  css?: string;
+  variants: { label: string; css: string }[];
+  initial?: number;
+}
+
+export type SpellExample = ValueExample | WidthExample | MarkupExample | VariantsExample;
 
 export interface Spell {
   name: string;
@@ -50,6 +58,24 @@ const ONE_ITEM = numberedItems(1);
 const SPAN_ITEMS = '<div class="box"><span class="item">1</span> <span class="item">2</span> <span class="item">3</span></div>';
 /** Контейнер по размеру содержимого — чтобы были видны отступы и рамка */
 const FIT_BOX_CSS = '.box { width: fit-content; height: auto; }';
+
+/**
+ * Примеры про селекторы и каскад: ячейки в ряд, погасшие. Их вид задан через :where() — у него нет силы,
+ * поэтому любой селектор примера его перебивает (обычные .item раскрашены через :nth-child и сильнее класса).
+ */
+const PICK_CSS =
+  '.box { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 8px; } ' +
+  ':where(.cell) { width: 40px; height: 40px; display: grid; place-items: center; font: bold 16px/1 monospace; ' +
+  'color: #a5a3c4; background: #3b3363; box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.25), inset 3px 3px 0 rgba(255, 255, 255, 0.35); }';
+
+function cells(count: number): string {
+  return `<div class="box">${Array.from({ length: count }, (_, i) => `<div class="cell">${i + 1}</div>`).join('')}</div>`;
+}
+
+/** Варианты-селекторы: правило одно и то же, меняется только селектор. */
+function picks(...selectors: string[]): { label: string; css: string }[] {
+  return selectors.map((selector) => ({ label: selector, css: `${selector} {\n  background: gold;\n  color: #1a1030;\n}` }));
+}
 
 /** Сетка в примерах: блоки без своего размера заполняют ячейки целиком */
 const GRID_CSS = '.box { display: grid; gap: 4px; } .item { width: auto; height: auto; }';
@@ -701,6 +727,227 @@ export const SPELLS: Record<string, Spell> = {
           label: 'форма',
           html: '<form>\n  <label for="hero">Имя героя</label>\n  <input id="hero" name="hero" required>\n  <button type="submit">Отправить</button>\n</form>',
         },
+      ],
+    },
+  },
+
+  // ——— Опушка: селекторы ———
+
+  'selector-tag': {
+    name: 'Селектор по тегу',
+    description: 'Самый простой селектор — имя тега: `p`, `h2`, `li`. Правило подействует на все такие теги на странице сразу.',
+    example: {
+      html: '<div class="box"><h3 class="cell">h3</h3><p class="cell">p</p><p class="cell">p</p><h3 class="cell">h3</h3></div>',
+      css: `${PICK_CSS} h3, p { margin: 0; }`,
+      variants: picks('p', 'h3'),
+    },
+  },
+  'selector-class': {
+    name: 'Селектор по классу: .имя',
+    description:
+      'Класс — метка, которую ставят в HTML атрибутом `class`. Селектор по классу начинается с точки: `.gem` найдёт все элементы с классом gem. Классов у элемента может быть несколько — через пробел.',
+    example: {
+      html: '<div class="box"><div class="cell gem">1</div><div class="cell">2</div><div class="cell gem">3</div><div class="cell">4</div></div>',
+      css: PICK_CSS,
+      variants: picks('.cell', '.gem'),
+      initial: 1,
+    },
+  },
+  'selector-id': {
+    name: 'Селектор по id: #имя',
+    description:
+      '`id` — имя элемента, одно-единственное на всю страницу. Селектор по нему пишут с решёткой: `#hero`. Подходит, когда нужен ровно один элемент.',
+    example: {
+      html: '<div class="box"><div class="cell">1</div><div class="cell" id="hero">2</div><div class="cell">3</div></div>',
+      css: PICK_CSS,
+      variants: picks('.cell', '#hero'),
+      initial: 1,
+    },
+  },
+  'selector-group': {
+    name: 'Группа селекторов: a, b',
+    description: 'Селекторы через запятую — одно правило сразу для всех: `h1, h2, h3 { … }`. Так не приходится повторять одинаковые объявления.',
+    example: {
+      html: '<div class="box"><div class="cell a">a</div><div class="cell b">b</div><div class="cell c">c</div><div class="cell a">a</div></div>',
+      css: PICK_CSS,
+      variants: picks('.a', '.a, .c'),
+      initial: 1,
+    },
+  },
+  'selector-compound': {
+    name: 'Два класса сразу: .a.b',
+    description:
+      'Классы, написанные слитно, без пробела, — это «элемент, у которого есть оба класса»: `.cell.red`. С пробелом — `.cell .red` — получится совсем другое: «.red внутри .cell».',
+    example: {
+      html: '<div class="box"><div class="cell red">1</div><div class="cell">2</div><div class="cell red">3</div><div class="red mark">!</div></div>',
+      css: `${PICK_CSS} .mark { padding: 8px 12px; background: #3b3363; color: #a5a3c4; font: bold 16px monospace; }`,
+      variants: picks('.red', '.cell.red', '.cell .red'),
+      initial: 1,
+    },
+  },
+  'selector-attribute': {
+    name: 'Селектор по атрибуту: [href]',
+    description:
+      'В квадратных скобках — атрибут: `[href="#top"]` — точное значение, `[href^="https"]` — начинается с https, `[type]` — атрибут вообще есть. Перед скобками можно написать тег: `a[href^="https"]`.',
+    example: {
+      html: '<div class="box"><a class="cell" href="#top">#</a><a class="cell" href="https://example.com">↗</a><a class="cell" href="#end">#</a></div>',
+      css: `${PICK_CSS} a { text-decoration: none; }`,
+      variants: picks('a', 'a[href^="https"]', '[href="#top"]'),
+      initial: 1,
+    },
+  },
+  'selector-descendant': {
+    name: 'Потомок: a b',
+    description:
+      'Пробел между селекторами значит «внутри»: `.nest .cell` найдёт все `.cell`, которые лежат внутри `.nest` на любой глубине — в детях, внуках и дальше.',
+    example: {
+      html: '<div class="box"><div class="cell">1</div><div class="nest"><div class="cell">2</div><div class="cell">3</div></div><div class="cell">4</div></div>',
+      css: `${PICK_CSS} .nest { display: flex; gap: 6px; padding: 6px; box-shadow: inset 0 0 0 2px #7c4dff; }`,
+      variants: picks('.cell', '.nest .cell'),
+      initial: 1,
+    },
+  },
+  'selector-child': {
+    name: 'Ребёнок: a > b',
+    description:
+      'Знак `>` значит «прямо внутри»: `.box > .cell` — только дети `.box`, а не внуки. Пробел ищет на любой глубине, `>` — только на один уровень вниз.',
+    example: {
+      html: '<div class="box"><div class="cell">1</div><div class="nest"><div class="cell">2</div></div><div class="cell">3</div></div>',
+      css: `${PICK_CSS} .nest { display: flex; padding: 6px; box-shadow: inset 0 0 0 2px #7c4dff; }`,
+      variants: picks('.box .cell', '.box > .cell'),
+      initial: 1,
+    },
+  },
+  'selector-siblings': {
+    name: 'Соседи: a + b и a ~ b',
+    description:
+      '`+` — сосед, который идёт сразу следом: `.mark + .cell`. `~` — все соседи, которые идут после, не обязательно сразу: `.mark ~ .cell`. Оба знака смотрят только вперёд и только среди детей одного родителя.',
+    example: {
+      html: '<div class="box"><div class="cell">1</div><div class="cell mark">★</div><div class="cell">3</div><div class="cell">4</div><div class="cell">5</div></div>',
+      css: `${PICK_CSS} .mark { background: #7c4dff; color: #fff; }`,
+      variants: picks('.mark + .cell', '.mark ~ .cell'),
+    },
+  },
+
+  // ——— Грибные поляны: псевдоклассы ———
+
+  hover: {
+    name: ':hover',
+    description:
+      'Псевдокласс «под мышкой»: правило работает, пока на элемент наведён курсор. Так кнопки и ссылки откликаются на мышь. Наведи мышь на блоки в примере.',
+    example: {
+      html: cells(3),
+      css: PICK_CSS,
+      variants: picks('.cell', '.cell:hover'),
+      initial: 1,
+    },
+  },
+  'first-child': {
+    name: ':first-child и :last-child',
+    description: 'Первый и последний ребёнок своего родителя. Если родителей несколько — у каждого свой первый и свой последний.',
+    example: {
+      html: cells(4),
+      css: PICK_CSS,
+      variants: picks('.cell:first-child', '.cell:last-child'),
+    },
+  },
+  'nth-child': {
+    name: ':nth-child(odd)',
+    description:
+      'Ребёнок по номеру — номера начинаются с единицы. `:nth-child(2)` — второй, `odd` — нечётные (1, 3, 5…), `even` — чётные (2, 4, 6…). Удобно для полосатых таблиц и списков.',
+    example: {
+      html: cells(6),
+      css: PICK_CSS,
+      variants: picks('.cell:nth-child(odd)', '.cell:nth-child(even)', '.cell:nth-child(2)'),
+    },
+  },
+  'nth-child-formula': {
+    name: ':nth-child(3n)',
+    description:
+      'В скобках можно написать формулу: `3n` — каждый третий (3, 6, 9…), `3n+1` — 1, 4, 7…, `n+4` — с четвёртого и дальше. n по очереди становится 0, 1, 2…, а браузер выбирает всех, чей номер подходит.',
+    example: {
+      html: cells(9),
+      css: PICK_CSS,
+      variants: picks('.cell:nth-child(3n)', '.cell:nth-child(3n+1)', '.cell:nth-child(n+4)'),
+    },
+  },
+  not: {
+    name: ':not()',
+    description: '«Кроме»: `.cell:not(.gem)` найдёт все `.cell`, у которых нет класса gem. В скобках — селектор тех, кого исключить.',
+    example: {
+      html: '<div class="box"><div class="cell">1</div><div class="cell gem">2</div><div class="cell">3</div><div class="cell gem">4</div><div class="cell">5</div></div>',
+      css: PICK_CSS,
+      variants: picks('.cell', '.cell:not(.gem)'),
+      initial: 1,
+    },
+  },
+
+  // ——— Древо Каскада: каскад и наследование ———
+
+  'cascade-order': {
+    name: 'Каскад: кто ниже, тот и прав',
+    description:
+      'Когда два правила задают одно свойство одному элементу и их селекторы равны по силе, побеждает правило, которое записано ниже. Поэтому порядок правил в CSS важен.',
+    example: {
+      html: cells(3),
+      css: PICK_CSS,
+      variants: [
+        { label: 'серое ниже', css: '.cell {\n  background: lime;\n}\n\n.cell {\n  background: gray;\n}' },
+        { label: 'салатовое ниже', css: '.cell {\n  background: gray;\n}\n\n.cell {\n  background: lime;\n}' },
+      ],
+      initial: 1,
+    },
+  },
+  specificity: {
+    name: 'Специфичность: класс сильнее тега',
+    description:
+      'Селекторы бывают разной силы. id сильнее класса, класс сильнее тега — и тогда уже неважно, кто ниже: правило с селектором посильнее побеждает всегда.',
+    example: {
+      html: '<div class="box"><span class="cell">1</span><span class="cell">2</span><span class="cell">3</span></div>',
+      css: PICK_CSS,
+      variants: [
+        { label: 'тег ниже', css: '.cell {\n  background: lime;\n}\n\nspan {\n  background: gray;\n}' },
+        { label: 'класс ниже', css: 'span {\n  background: gray;\n}\n\n.cell {\n  background: lime;\n}' },
+      ],
+    },
+  },
+  'specificity-count': {
+    name: 'Как считать силу селектора',
+    description:
+      'Силу складывают: каждый id — сотня, каждый класс, атрибут или псевдокласс — десяток, каждый тег — единица. `.box .cell` (20) сильнее `.cell` (10), а `#hero` (100) сильнее любых классов.',
+    example: {
+      html: '<div class="box"><div class="cell">1</div><div class="cell" id="hero">2</div><div class="cell">3</div></div>',
+      css: PICK_CSS,
+      variants: [
+        { label: '.box .cell против .cell', css: '.box .cell {\n  background: gray;\n}\n\n.cell {\n  background: lime;\n}' },
+        { label: '+ #hero', css: '#hero {\n  background: gold;\n}\n\n.box .cell {\n  background: gray;\n}\n\n.cell {\n  background: lime;\n}' },
+      ],
+    },
+  },
+  inheritance: {
+    name: 'Наследование и inherit',
+    description:
+      'Некоторые свойства дети берут у родителя: `color`, шрифт, межстрочный интервал. Отступы, рамки и фон не наследуются. Свой цвет у элемента всегда сильнее унаследованного, а значение `inherit` велит взять его у родителя.',
+    example: {
+      html: '<div class="box"><p>Абзац с <strong>жирным</strong> словом</p><span class="note">свой цвет</span></div>',
+      css: '.box { color: #a5a3c4; font: 16px/1.4 system-ui, sans-serif; } .note { color: #fb7185; }',
+      variants: [
+        { label: 'color у родителя', css: '.box {\n  color: gold;\n}' },
+        { label: 'border у родителя', css: '.box {\n  border: 4px solid gold;\n}' },
+        { label: 'inherit', css: '.box {\n  color: gold;\n}\n\n.note {\n  color: inherit;\n}' },
+      ],
+    },
+  },
+  important: {
+    name: '!important',
+    description:
+      '`!important` после значения ставит объявление выше любой силы селекторов. Перебить его можно только другим `!important` — и начинается война правил. Пользуйся им как можно реже, а лучше — никогда.',
+    example: {
+      html: '<div class="box"><div class="cell">1</div><div class="cell" id="hero">2</div><div class="cell">3</div></div>',
+      css: PICK_CSS,
+      variants: [
+        { label: 'с !important', css: '.cell {\n  background: gray !important;\n}\n\n#hero {\n  background: lime;\n}' },
+        { label: 'без !important', css: '.cell {\n  background: gray;\n}\n\n#hero {\n  background: lime;\n}' },
       ],
     },
   },

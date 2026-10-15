@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { withImages } from '../engine/htmlCheck';
 import { recordExperiment } from '../game/achievements';
-import type { SpellExample as Example, MarkupExample, ValueExample, WidthExample } from '../game/spells';
+import type { SpellExample as Example, MarkupExample, ValueExample, VariantsExample, WidthExample } from '../game/spells';
 import { IMAGE_LIBRARY } from '../levels/shared/images';
 
 /** Оформление мини-сцены примера: пиксельный контейнер и цветные пронумерованные блоки. */
@@ -69,7 +69,58 @@ function chipLabel(option: string): string {
 /** Живой пример заклинания: нажимаешь на значение или ширину экрана — мини-сцена сразу меняется. */
 export function SpellExample({ spell, example }: { spell: string; example: Example }) {
   if ('markup' in example) return <MarkupDemo spell={spell} example={example} />;
+  if ('variants' in example) return <VariantsDemo spell={spell} example={example} />;
   return 'widths' in example ? <WidthDemo spell={spell} example={example} /> : <ValueDemo spell={spell} example={example} />;
+}
+
+/** Пример с вариантами CSS: кнопки меняют правила целиком — селектор, порядок или силу правил. */
+function VariantsDemo({ spell, example }: { spell: string; example: VariantsExample }) {
+  const initial = example.initial ?? 0;
+  const [selected, setSelected] = useState(initial);
+  const selectedRef = useRef(initial);
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const srcDoc = useMemo(() => exampleDocument(example.css ?? '', example.variants[initial].css, example.html), [example, initial]);
+
+  function show(index: number) {
+    const style = frameRef.current?.contentDocument?.getElementById('live');
+    if (style) style.textContent = example.variants[index].css;
+  }
+
+  function choose(index: number) {
+    selectedRef.current = index;
+    setSelected(index);
+    show(index);
+    recordExperiment(spell);
+  }
+
+  return (
+    <div className="example">
+      <div className="example__chips" role="group" aria-label="Варианты">
+        {example.variants.map((variant, i) => (
+          <button
+            key={variant.label}
+            type="button"
+            className={i === selected ? 'chip chip--on' : 'chip'}
+            aria-pressed={i === selected}
+            onClick={() => choose(i)}
+          >
+            {variant.label}
+          </button>
+        ))}
+      </div>
+      <iframe
+        ref={frameRef}
+        className="example__preview"
+        title={`Живой пример: ${spell}`}
+        sandbox="allow-same-origin"
+        srcDoc={srcDoc}
+        onLoad={() => show(selectedRef.current)}
+      />
+      <pre className="example__code">
+        <code>{example.variants[selected].css}</code>
+      </pre>
+    </div>
+  );
 }
 
 /** Мини-страница для примеров с разметкой — с оформлением браузера по умолчанию. */

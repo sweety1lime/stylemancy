@@ -1,0 +1,212 @@
+/*
+  Лес Селекторов — селекторы и каскад. Лорд Дефолт погасил лес: всё серое.
+  Цвет предмета — свойство color из кода студента: предмет рисует им свою заливку
+  (currentColor под маской из спрайта), а контуры и блики лежат сверху.
+  Серый цвет леса наследуют все — поэтому работает и урок про наследование.
+  Картинки-спрайты подставляются в forest.ts.
+*/
+
+body {
+  color: gray;
+  font-family: system-ui, sans-serif;
+}
+
+/* Ссылки и списки без оформления браузера: их цвет — тоже лесной. По ссылкам сцены не переходят */
+a {
+  color: inherit;
+  pointer-events: none;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ——— Предметы, которые красит color: заливка снизу, рисунок сверху ——— */
+
+.mushroom,
+.firefly,
+.lantern,
+.flower,
+.leaf,
+.tree {
+  position: relative;
+  flex: none;
+}
+
+.mushroom::before,
+.firefly::before,
+.lantern::before,
+.flower::before,
+.leaf::before,
+.tree::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  -webkit-mask: var(--fill) center / 100% 100% no-repeat;
+  mask: var(--fill) center / 100% 100% no-repeat;
+}
+
+.mushroom::after,
+.firefly::after,
+.lantern::after,
+.flower::after,
+.leaf::after,
+.tree::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--details) center / 100% 100% no-repeat;
+}
+
+/* Мелкие предметы светятся своим цветом; погасшие — едва заметно серым */
+.mushroom,
+.firefly,
+.lantern,
+.flower,
+.leaf {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+.mushroom[data-in-place],
+.firefly[data-in-place],
+.lantern[data-in-place],
+.flower[data-in-place],
+.leaf[data-in-place] {
+  filter: drop-shadow(0 0 8px currentColor) brightness(1.15);
+}
+
+.mushroom {
+  width: 40px;
+  height: 48px;
+}
+
+.firefly,
+.leaf {
+  width: 32px;
+  height: 32px;
+}
+
+.lantern,
+.flower {
+  width: 32px;
+  height: 48px;
+}
+
+/* ——— Деревья: крона и ствол сверху, у корней — то, что растёт под деревом ——— */
+
+.tree {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  min-width: 96px;
+  padding-top: 118px;
+}
+
+.tree::before,
+.tree::after {
+  inset: 0 auto auto 50%;
+  width: 96px;
+  height: 114px;
+  transform: translateX(-50%);
+}
+
+.spruce::before,
+.spruce::after {
+  width: 72px;
+  height: 102px;
+}
+
+.roots {
+  display: flex;
+  gap: 8px;
+}
+
+/* Корзинка грибника */
+.basket {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px 4px;
+  border-radius: 0 0 14px 14px;
+  background: repeating-linear-gradient(45deg, #a16207 0 6px, #854d0e 6px 12px);
+  box-shadow: inset 0 4px 0 #713f12;
+}
+
+/* ——— Поляны, тропы и ряды ——— */
+
+.glade,
+.trail {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 20px;
+  min-width: 440px;
+  padding: 20px 28px 14px;
+  background: linear-gradient(transparent calc(100% - 14px), #14532d calc(100% - 14px));
+}
+
+.trail {
+  gap: 12px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding-bottom: 6px;
+  box-shadow: inset 0 -6px 0 #14532d;
+}
+
+.stone {
+  flex: none;
+  width: 40px;
+  height: 24px;
+}
+
+.stump {
+  flex: none;
+  width: 40px;
+  height: 32px;
+}
+
+/* ——— Указатели и доски с надписями ——— */
+
+.sign {
+  min-width: 300px;
+  padding: 14px 22px 8px;
+  background: repeating-linear-gradient(180deg, #3b2a1a 0 22px, #33240f 22px 24px);
+  box-shadow:
+    0 0 0 4px #1c140b,
+    0 6px 0 4px #1c140b;
+}
+
+.sign h2 {
+  margin: 0 0 4px;
+  font: 700 20px/1.3 system-ui, sans-serif;
+}
+
+.sign p {
+  margin: 0 0 10px;
+  font: 15px/1.4 system-ui, sans-serif;
+}
+
+.sign a {
+  display: block;
+  margin: 0 0 8px;
+  font: 600 16px/1.4 system-ui, sans-serif;
+}
+
+.sign [data-in-place] {
+  text-shadow: 0 0 8px currentColor;
+}

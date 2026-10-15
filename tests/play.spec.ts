@@ -18,7 +18,7 @@ async function unlockDistricts(page: Page) {
   await page.addInitScript(() => {
     if (localStorage.getItem('cascadia.progress.v1')) return;
     const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
-    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done, 'tag-07': done, 'fair-08': done, 'sem-07': done, 'box-08': done, 'disp-05': done }));
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': done, 'grid-09': done, 'mq-04': done, 'tag-07': done, 'fair-08': done, 'sem-07': done, 'box-08': done, 'disp-05': done, 'sel-10': done, 'ps-06': done }));
   });
 }
 
@@ -604,6 +604,65 @@ test.describe('Крепость Блоков', () => {
   });
 });
 
+test.describe('Лес Селекторов', () => {
+  test.beforeEach(async ({ page }) => {
+    await unlockDistricts(page);
+  });
+
+  test('селектор по тегу: лишние и не найденные — каждая причина одной строкой', async ({ page }) => {
+    await page.goto('/#/level/sel-01');
+    // Разметка в уровнях про селекторы открыта сразу
+    await expect(page.locator('.markup', { hasText: 'HTML сцены' }).locator('pre')).toBeVisible();
+    await cast(page);
+    await expect(page.locator('.result__list li')).toHaveText([
+      'Селектор не нашёл: Заголовок 1 и Заголовок 2.',
+      'Выбраны лишние: Строка 1 и Строка 2.',
+    ]);
+
+    await typeCode(page, 'h2 {\n  color: gold;\n}\n');
+    await expect(page.getByText('На месте: 4 из 4')).toBeVisible();
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test(':hover проверяется во втором зеркале — «под мышкой»', async ({ page }) => {
+    await page.goto('/#/level/ps-01');
+    await expect(page.getByText('Под мышкой', { exact: true })).toBeVisible();
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toHaveText(
+      'Обычно: Выбраны лишние: Светлячок 1, Светлячок 2 и Светлячок 3.',
+    );
+
+    await typeCode(page, '.firefly:hover {\n  color: gold;\n}\n');
+    await expect(page.getByText('На месте: 8 из 8')).toBeVisible();
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('чары Лорда Дефолта видны, а проигравшее правило объясняется', async ({ page }) => {
+    await page.goto('/#/level/cas-02');
+    const locked = page.locator('.markup--locked');
+    await expect(locked).toContainText('Чары Лорда Дефолта');
+    await expect(locked.locator('pre')).toContainText('li {');
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toHaveText(
+      /^Твоё правило их нашло, но победило другое — проверь специфичность и порядок правил: Лист 1, Лист 2, Лист 3, Лист 4 и ещё 5\.$/,
+    );
+
+    await typeCode(page, '.leaf {\n  color: lime;\n}\n');
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('!important на !important не засчитывается', async ({ page }) => {
+    await page.goto('/#/level/cas-05');
+    await typeCode(page, '.leaf {\n  color: gray !important;\n}\n\n.leaf.spring {\n  color: lime !important;\n}\n');
+    await expect(page.getByText('На месте: 6 из 6')).toBeVisible();
+    await cast(page);
+    await expect(page.getByText(/Не отвечай !important на !important/)).toBeVisible();
+  });
+});
+
 test.describe('общий сюжет', () => {
   test('пролог игры на карте: один раз и с обращением к герою', async ({ page }) => {
     await page.goto('/');
@@ -665,6 +724,49 @@ test.describe('общий сюжет', () => {
     await page.screenshot({ path: `${SCREENS}/14-certificate.png`, fullPage: true });
   });
 
+  test('пролог леса: Лорд Дефолт помнит Долину Тегов', async ({ page }) => {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'form-06': done }));
+    });
+    await page.goto('/#/land/selector-forest');
+    const dialog = page.getByRole('dialog', { name: 'Пролог: Опушка' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(dialog).toContainText('Опять ты, странник! Теги ты расставил');
+    await dialog.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(dialog).toContainText('Слава о тебе долетела и до леса, странник');
+  });
+
+  test('все земли спасены: Лорд Дефолт сбегает за дверь <script>, впереди JavaScript', async ({ page }) => {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      const ids = ['form-06', 'pos-06', 'citadel-02', 'sel-10', 'ps-06', 'cas-01', 'cas-02', 'cas-03', 'cas-04', 'cas-05'];
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(ids.map((id) => [id, done]))));
+    });
+    await page.goto('/#/level/cas-06');
+    const solution = await page.evaluate<string>("import('/src/levels/cascade-tree/cas-06.ts').then((m) => m.default.solutionCss)");
+    await typeCode(page, solution);
+    await expect(page.getByText(/На месте: (\d+) из \1$/)).toBeVisible();
+    await cast(page);
+
+    // Все земли спасены — в эпилоге леса злодею бежать уже некуда
+    const outro = page.getByRole('dialog', { name: 'Эпилог: Древо Каскада' });
+    await expect(outro).toBeVisible();
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('Держи Руну Селекторов, странник');
+    await outro.getByRole('button', { name: 'Закрыть' }).click();
+
+    const finale = page.getByRole('dialog', { name: 'Финал: Магистр Стилемантии' });
+    await expect(finale).toBeVisible();
+    await finale.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(finale).toContainText('дверь с надписью <script>');
+    for (let i = 0; i < 3; i++) await finale.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(finale).toContainText('нужна новая магия — JavaScript');
+  });
+
   test('пролог крепости: Лорд Дефолт помнит Долину Тегов', async ({ page }) => {
     await page.addInitScript(() => {
       if (localStorage.getItem('cascadia.progress.v1')) return;
@@ -700,7 +802,8 @@ test.describe('общий сюжет', () => {
     await outro.getByRole('button', { name: 'Дальше →' }).click();
     await expect(outro).toContainText('моё проклятие держится в Лесу Селекторов и в Парящих землях');
     await outro.getByRole('button', { name: 'Дальше →' }).click();
-    await expect(outro).toContainText('Следующая остановка — Парящие земли');
+    // Лес Селекторов раньше по курсу, чем Парящие земли, — дорога ведёт туда
+    await expect(outro).toContainText('Следующая остановка — Лес Селекторов');
     await outro.getByRole('button', { name: 'Закрыть' }).click();
 
     await page.goto('/#/chronicle');

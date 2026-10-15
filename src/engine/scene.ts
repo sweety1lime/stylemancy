@@ -1,3 +1,4 @@
+import { parseCss } from './cssParse';
 import type { CssLevel } from './types';
 
 /** Базовые стили любой сцены: без отступов браузера, сцена не прокручивается, содержимое по центру. */
@@ -8,19 +9,45 @@ body { display: flex; align-items: center; justify-content: center; font-family:
 
 /**
  * Документ сцены для iframe. Код студента вставляется потом в <style id="player">
- * через textContent — так он не может сломать разметку.
+ * через textContent — так он не может сломать разметку. Чары Лорда Дефолта — после него.
  */
 export function sceneDocument(level: CssLevel): string {
   return `<!doctype html><html lang="ru"><head><meta charset="utf-8">
 <style>${BASE_SCENE_CSS}</style>
 <style>${level.sceneCss}</style>
 <style id="player"></style>
+<style id="locked">${level.lockedCss ?? ''}</style>
 </head><body>${level.html}</body></html>`;
 }
 
-/** Ширины, на которых проверяется уровень: одна сцена или несколько «зеркал». */
-export function viewportsOf(level: CssLevel): number[] {
-  return level.check.viewports ?? [level.scene.width];
+/**
+ * Одно «зеркало» сцены: своя ширина экрана, а в уровнях про :hover — «под мышкой».
+ * У уровня с одной сценой подписей нет.
+ */
+export interface SceneView {
+  width: number;
+  /** Уровни про :hover: true — элементы из check.hover наведены мышью, false — не наведён никто */
+  hover?: boolean;
+  /** Подпись над зеркалом: «Узкое зеркало · 360px», «Под мышкой» */
+  label?: string;
+  /** Начало сообщения о промахе: «Зеркало 360px», «Под мышкой» */
+  prefix?: string;
+  /** Подпись у точек «на месте»: «360px», «под мышкой» */
+  tag?: string;
+}
+
+/** Зеркала уровня: одна сцена, несколько ширин экрана или «обычно» и «под мышкой». */
+export function viewsOf(level: CssLevel): SceneView[] {
+  const width = level.scene.width;
+  if (level.check.hover) {
+    return [
+      { width, hover: false, label: 'Обычно', prefix: 'Обычно', tag: 'обычно' },
+      { width, hover: true, label: 'Под мышкой', prefix: 'Под мышкой', tag: 'под мышкой' },
+    ];
+  }
+  const widths = level.check.viewports ?? [width];
+  if (widths.length === 1) return [{ width: widths[0] }];
+  return widths.map((w, i) => ({ width: w, label: mirrorLabel(widths, i), prefix: `Зеркало ${w}px`, tag: `${w}px` }));
 }
 
 /** Подпись зеркала: самое узкое, самое широкое или среднее. */
@@ -29,9 +56,52 @@ export function mirrorLabel(widths: number[], index: number): string {
   return `${kind} · ${widths[index]}px`;
 }
 
+/** Зеркало «под мышкой»: наведение мышью изображает атрибут data-hover — его ставим нужным элементам. */
+export function prepareView(doc: Document, level: CssLevel, view: SceneView): void {
+  if (!view.hover || !level.check.hover) return;
+  doc.querySelectorAll(level.check.hover).forEach((el) => el.setAttribute('data-hover', ''));
+}
+
+/**
+ * Код для зеркала. В уровнях про :hover наведение изображает метка data-hover, а не настоящий курсор:
+ * иначе мышь, случайно оставленная над сценой, сбивала бы проверку.
+ */
+export function cssForView(css: string, view: SceneView): string {
+  return view.hover === undefined ? css : css.replace(/:hover\b/gi, '[data-hover]');
+}
+
 export function setPlayerCss(doc: Document, css: string): void {
   const style = doc.getElementById('player');
   if (style) style.textContent = css;
+}
+
+/** Ставит код в зеркало и измеряет предметы. */
+export function applyToView(doc: Document, level: CssLevel, view: SceneView, css: string): ItemBox[] {
+  const viewCss = cssForView(css, view);
+  setPlayerCss(doc, viewCss);
+  return measureItems(doc, level, viewCss);
+}
+
+/** Цели для зеркала: сначала сцена без кода (каким был цвет до заклинания), потом эталон. */
+export function measureTargets(doc: Document, level: CssLevel, view: SceneView): ItemBox[] {
+  setPlayerCss(doc, '');
+  const before = measureItems(doc, level);
+  return applyToView(doc, level, view, level.solutionCss).map((box, i) => ({ ...box, base: before[i]?.value }));
+}
+
+/** Селекторы правил студента, которые задают проверяемое свойство (для «нашёл, но проиграл»). */
+function selectorsSetting(css: string, prop: string): string[] {
+  return parseCss(css)
+    .rules.filter((rule) => rule.kind === 'style' && rule.selector && rule.decls.some((decl) => decl.prop.toLowerCase() === prop))
+    .map((rule) => rule.selector);
+}
+
+function matchesSafely(el: Element, selector: string): boolean {
+  try {
+    return el.matches(selector);
+  } catch {
+    return false;
+  }
 }
 
 /** Положение и размер предмета в координатах сцены. */
@@ -46,11 +116,20 @@ export interface ItemBox {
   invisible?: boolean;
   /** Чей предмет сверху в центре этого (номер предмета, −1 — ничей). Только для уровней про z-index */
   top?: number;
+  /** Значение проверяемого свойства (check.style) — в уровнях про селекторы */
+  value?: string;
+  /** Значение того же свойства без кода студента — только у целей */
+  base?: string;
+  /** Предмет нашло правило студента, которое задаёт проверяемое свойство */
+  matched?: boolean;
 }
 
-export function measureItems(doc: Document, level: CssLevel): ItemBox[] {
+/** css — код, который сейчас стоит в сцене: по нему видно, чьё правило нашло предмет. */
+export function measureItems(doc: Document, level: CssLevel, css = ''): ItemBox[] {
   const view = doc.defaultView;
   const elements = Array.from(doc.querySelectorAll<HTMLElement>(level.check.items));
+  const prop = level.check.style;
+  const selectors = prop && css ? selectorsSetting(css, prop) : [];
   return elements.map((el, i) => {
     const rect = el.getBoundingClientRect();
     const style = view?.getComputedStyle(el);
@@ -67,6 +146,12 @@ export function measureItems(doc: Document, level: CssLevel): ItemBox[] {
       const hit = doc.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
       const owner = hit?.closest<HTMLElement>(level.check.items);
       box.top = owner ? elements.indexOf(owner) : -1;
+    }
+    if (prop) {
+      box.value = style?.getPropertyValue(prop).trim();
+      // Контур цели и точка «на месте» — того цвета, каким предмет должен стать
+      box.color = box.value || box.color;
+      box.matched = selectors.some((selector) => matchesSafely(el, selector));
     }
     return box;
   });
@@ -90,11 +175,16 @@ export interface ItemStatus {
   delta: Delta;
   /** Что не так — если предмет не на месте */
   message?: string;
-  /** Ширина зеркала, если уровень проверяется на нескольких */
-  viewport?: number;
+  /** Зеркало, если уровень проверяется в нескольких */
+  view?: SceneView;
   /** Предмет нужно спрятать или, наоборот, показать (display: none) */
   visibility?: 'hide' | 'show';
+  /** Уровни про селекторы: чем не угодил предмет — их сообщения собираются по причинам */
+  reason?: StyleReason;
 }
+
+/** extra — выбран лишний, missing — не найден, lost — найден, но правило проиграло, inherited — цвет от родителя */
+export type StyleReason = 'extra' | 'missing' | 'lost' | 'inherited' | 'color';
 
 /** Сравнивает предметы студента с эталонными целями (по порядку в разметке). */
 export function compareItems(actual: ItemBox[], targets: ItemBox[], tolerance = 2): ItemStatus[] {
@@ -152,7 +242,40 @@ function comparePlace(item: ItemBox | undefined, target: ItemBox, tolerance: num
       : `${target.name}: здесь нужно показать.`;
     return { ...base, inPlace: false, sizeOk, delta, message, visibility };
   }
+  // Уровни про селекторы: нашёл ли селектор предмет и чьё правило победило
+  if (target.value !== undefined && item.value !== target.value) {
+    const reason = styleReason(item, target);
+    return { ...base, inPlace: false, sizeOk, delta, reason, message: `${target.name}: ${STYLE_REASONS[reason].one}` };
+  }
   return { ...base, inPlace: true, sizeOk, delta };
+}
+
+/** Почему цвет предмета не тот: селектор не нашёл его, нашёл лишнее или правило студента проиграло. */
+function styleReason(item: ItemBox, target: ItemBox): StyleReason {
+  const lit = (box: ItemBox) => box.value !== target.base;
+  if (!lit(target)) return item.matched ? 'extra' : 'inherited';
+  if (!lit(item)) return item.matched ? 'lost' : 'missing';
+  return 'color';
+}
+
+const STYLE_REASON_ORDER: StyleReason[] = ['missing', 'lost', 'color', 'extra', 'inherited'];
+
+/** Слова для причин: про один предмет и про несколько сразу (тогда следом идёт список имён). */
+const STYLE_REASONS: Record<StyleReason, { one: string; many: string }> = {
+  extra: { one: 'выбран лишний.', many: 'Выбраны лишние' },
+  missing: { one: 'селектор его не нашёл.', many: 'Селектор не нашёл' },
+  lost: {
+    one: 'твоё правило его нашло, но победило другое — проверь специфичность и порядок правил.',
+    many: 'Твоё правило их нашло, но победило другое — проверь специфичность и порядок правил',
+  },
+  inherited: { one: 'не должен светиться — цвет достался ему от родителя.', many: 'Светятся зря — цвет достался им от родителя' },
+  color: { one: 'цвет не тот.', many: 'Цвет не тот' },
+};
+
+/** «Гриб 1, Гриб 2 и Гриб 3»; длинный список обрезается. */
+function nameList(names: string[], limit = 4): string {
+  if (names.length > limit) return `${names.slice(0, limit).join(', ')} и ещё ${names.length - limit}`;
+  return names.length > 1 ? `${names.slice(0, -1).join(', ')} и ${names[names.length - 1]}` : names[0];
 }
 
 /** «на 40px правее и на 12px ниже» или «шире на 13px». Если размер не тот, говорим сначала о нём. */
@@ -174,16 +297,16 @@ function describeDelta(delta: Delta, sizeOk: boolean, tolerance: number): string
  * одна фраза вместо списка; длинный список обрезается.
  */
 export function summarizeMisses(statuses: ItemStatus[], groupName = 'предметы', tolerance = 2, limit = 4): string[] {
-  // Несколько зеркал — промахи по каждому отдельно, с подписью ширины
-  const viewports = [...new Set(statuses.map((s) => s.viewport).filter((width): width is number => width !== undefined))];
-  if (viewports.length) {
-    return viewports.flatMap((width) =>
+  // Несколько зеркал — промахи по каждому отдельно, с подписью зеркала
+  const prefixes = [...new Set(statuses.map((s) => s.view?.prefix).filter((prefix): prefix is string => prefix !== undefined))];
+  if (prefixes.length) {
+    return prefixes.flatMap((prefix) =>
       summarizeMisses(
-        statuses.filter((s) => s.viewport === width).map((s) => ({ ...s, viewport: undefined })),
+        statuses.filter((s) => s.view?.prefix === prefix).map((s) => ({ ...s, view: undefined })),
         groupName,
         tolerance,
         3,
-      ).map((line) => `Зеркало ${width}px: ${line}`),
+      ).map((line) => `${prefix}: ${line}`),
     );
   }
   // «Спрячь» и «покажи» важнее сдвигов: из-за спрятанного предмета съезжают соседи
@@ -199,6 +322,16 @@ export function summarizeMisses(statuses: ItemStatus[], groupName = 'предм�
     if (sameShift) return [`Все ${groupName} смещены одинаково — нужно ${describeDelta(first.delta, true, tolerance)}.`];
     const sameSize = misses.every((s) => !s.sizeOk && !s.visibility && alike(s.delta.w, first.delta.w) && alike(s.delta.h, first.delta.h));
     if (sameSize) return [`Все ${groupName} не того размера — каждому нужно ${describeDelta(first.delta, false, tolerance)}.`];
+  }
+
+  // Уровни про селекторы: промахи одной причины — одной строкой со списком имён
+  if (misses.every((s) => s.reason)) {
+    // Сначала — кого не нашли, потом — что лишнее
+    const reasons = STYLE_REASON_ORDER.filter((reason) => misses.some((s) => s.reason === reason));
+    return reasons.map((reason) => {
+      const names = misses.filter((s) => s.reason === reason).map((s) => s.name);
+      return names.length === 1 ? `${names[0]}: ${STYLE_REASONS[reason].one}` : `${STYLE_REASONS[reason].many}: ${nameList(names)}.`;
+    });
   }
 
   const lines = misses.slice(0, limit).map((s) => s.message ?? s.name);

@@ -23,6 +23,10 @@ const starLayers = STARS.map(([x, y, big]) => {
 export const NIGHT_BANDS =
   'linear-gradient(180deg, #0d0821 0 22%, #120b2e 22% 44%, #1a1040 44% 64%, #23154f 64% 82%, #2d1b5e 82% 100%)';
 
+/** Ночь в Лесу Селекторов — тёмно-зелёная, сквозь кроны */
+export const FOREST_BANDS =
+  'linear-gradient(180deg, #071a14 0 22%, #0a231b 22% 44%, #0d2c22 44% 64%, #10362a 64% 82%, #134032 82% 100%)';
+
 /** Сумерки над Крепостью Блоков — теплее, чем небо над островами */
 export const DUSK_BANDS =
   'linear-gradient(180deg, #0d0821 0 22%, #1a1040 22% 44%, #2d1b5e 44% 64%, #4a2c6e 64% 82%, #6b3a6e 82% 100%)';

@@ -1,10 +1,13 @@
 import type { Level, Region } from '../engine/types';
 import { barracks } from './barracks';
+import { cascadeTree } from './cascade-tree';
 import { defaultCitadel } from './default-citadel';
 import { floatingIslands } from './floating-islands';
+import { forestEdge } from './forest-edge';
 import { formForge } from './form-forge';
 import { linkFair } from './link-fair';
 import { mirrorTower } from './mirror-tower';
+import { mushroomGlades } from './mushroom-glades';
 import { paradeGround } from './parade-ground';
 import { semanticCity } from './semantic-city';
 import { stainedAbbey } from './stained-abbey';
@@ -42,11 +45,11 @@ export const lands: Land[] = [
     id: 'selector-forest',
     title: 'Лес Селекторов',
     topic: 'CSS: селекторы',
-    blurb: 'Селекторы, каскад и специфичность',
+    blurb: 'Селекторы, псевдоклассы, каскад и наследование',
     emblem: 'forest',
     where: 'в Лесу Селекторов',
-    regions: [],
-    upcoming: ['Селекторы', 'Каскад и специфичность'],
+    regions: [forestEdge, mushroomGlades, cascadeTree],
+    upcoming: [],
   },
   {
     id: 'block-fortress',

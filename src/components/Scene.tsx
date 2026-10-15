@@ -11,13 +11,13 @@ import {
   type SyntheticEvent,
 } from 'react';
 import {
+  applyToView,
   compareItems,
   markInPlace,
-  measureItems,
-  mirrorLabel,
+  measureTargets,
+  prepareView,
   sceneDocument,
-  setPlayerCss,
-  viewportsOf,
+  viewsOf,
   type ItemBox,
   type ItemStatus,
 } from '../engine/scene';
@@ -42,12 +42,12 @@ const MIRROR_GAP = 36;
 const MIN_ROW_SCALE = 0.45;
 
 /**
- * Сцена уровня. В каждом «зеркале» (ширине экрана) — видимый iframe с кодом студента
+ * Сцена уровня. В каждом «зеркале» (ширине экрана или «под мышкой») — видимый iframe с кодом студента
  * и скрытый с эталоном; из эталона берутся светящиеся контуры целей.
  */
 export function Scene({ level, initialCss, celebrate, onStatuses, ref }: SceneProps) {
-  const widths = useMemo(() => viewportsOf(level), [level]);
-  const multi = widths.length > 1;
+  const views = useMemo(() => viewsOf(level), [level]);
+  const multi = views.length > 1;
   const srcDoc = useMemo(() => sceneDocument(level), [level]);
   const boxRef = useRef<HTMLDivElement>(null);
   const docsRef = useRef<(Document | undefined)[]>([]);
@@ -77,32 +77,32 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
       cssRef.current = css;
       const docs = docsRef.current;
       const goals = goalsRef.current;
-      if (widths.some((_, i) => !docs[i] || !goals[i])) return [];
-      const perMirror = widths.map((width, i) => {
+      if (views.some((_, i) => !docs[i] || !goals[i])) return [];
+      const perMirror = views.map((view, i) => {
         const doc = docs[i] as Document;
-        setPlayerCss(doc, css);
-        const result = compareItems(measureItems(doc, level), goals[i] as ItemBox[], level.check.tolerance);
+        const result = compareItems(applyToView(doc, level, view, css), goals[i] as ItemBox[], level.check.tolerance);
         markInPlace(doc, level, result);
-        return multi ? result.map((status) => ({ ...status, viewport: width })) : result;
+        return multi ? result.map((status) => ({ ...status, view })) : result;
       });
       setStatuses(perMirror);
       const all = perMirror.flat();
       onStatusesRef.current?.(all);
       return all;
     },
-    [level, widths, multi],
+    [level, views, multi],
   );
 
   useImperativeHandle(ref, () => ({ apply }), [apply]);
 
   function handlePlayerLoad(index: number, doc: Document) {
+    prepareView(doc, level, views[index]);
     docsRef.current[index] = doc;
     apply(cssRef.current);
   }
 
   function handleTargetLoad(index: number, doc: Document) {
-    setPlayerCss(doc, level.solutionCss);
-    const boxes = measureItems(doc, level);
+    prepareView(doc, level, views[index]);
+    const boxes = measureTargets(doc, level, views[index]);
     goalsRef.current[index] = boxes;
     setTargets((list) => {
       const next = [...list];
@@ -113,19 +113,19 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
   }
 
   // Зеркала в ряд — в одном масштабе, чтобы была видна настоящая разница ширин
-  const total = widths.reduce((sum, width) => sum + width, 0);
-  const rowScale = Math.min(1, (boxWidth - MIRROR_GAP * (widths.length - 1)) / total);
+  const total = views.reduce((sum, view) => sum + view.width, 0);
+  const rowScale = Math.min(1, (boxWidth - MIRROR_GAP * (views.length - 1)) / total);
   const inRow = !multi || rowScale >= MIN_ROW_SCALE;
   const scaleOf = (width: number) => (inRow ? rowScale : Math.min(1, boxWidth / width));
 
-  const mirrors = widths.map((width, i) => (
+  const mirrors = views.map((view, i) => (
     <Mirror
-      key={width}
-      width={width}
+      key={view.label ?? 'scene'}
+      width={view.width}
       height={level.scene.height}
-      scale={scaleOf(width)}
+      scale={scaleOf(view.width)}
       srcDoc={srcDoc}
-      label={multi ? mirrorLabel(widths, i) : undefined}
+      label={view.label}
       targets={targets[i] ?? []}
       statuses={statuses[i] ?? []}
       onPlayerLoad={(doc) => handlePlayerLoad(i, doc)}
@@ -173,8 +173,8 @@ function Mirror({ width, height, scale, srcDoc, label, targets, statuses, onPlay
         />
         <div className="scene__ghosts" aria-hidden="true">
           {targets.map((target, i) =>
-            // Спрятанной цели контур не нужен — и невидимой (visibility: hidden) тоже
-            (target.w === 0 && target.h === 0) || target.invisible ? null : (
+            // Контур не нужен спрятанной цели, невидимой (visibility: hidden) и той, что должна остаться без цвета
+            (target.w === 0 && target.h === 0) || target.invisible || (target.value !== undefined && target.value === target.base) ? null : (
               <div
                 key={`${target.name}-${i}`}
                 className={statuses[i]?.inPlace ? 'ghost ghost--in-place' : 'ghost'}

@@ -20,11 +20,15 @@ async function checkCss(level: CssLevel) {
     ...solution.warnings.map((p) => p.message),
     ...solution.items.filter((item) => !item.inPlace).map((item) => item.message ?? item.name),
   ];
-  for (const { name, target, viewport } of solution.items) {
-    const width = viewport ?? level.scene.width;
+  for (const { name, target, view } of solution.items) {
+    const width = view?.width ?? level.scene.width;
     const visible = target.w > 0 || target.h > 0;
     const outside = target.x < -0.5 || target.y < -0.5 || target.x + target.w > width + 0.5 || target.y + target.h > level.scene.height + 0.5;
-    if (visible && outside) issues.push(`Цель «${name}» выходит за край сцены${viewport ? ` в зеркале ${viewport}px` : ''}.`);
+    if (visible && outside) issues.push(`Цель «${name}» выходит за край сцены${view?.prefix ? ` (${view.prefix})` : ''}.`);
+  }
+  // Уровень про селекторы, где ни одна цель не светится, — проверять нечего
+  if (level.check.style && solution.items.every((item) => item.target.value === item.target.base)) {
+    issues.push('Эталон не меняет цвет ни одного предмета.');
   }
   return { solutionPassed: solution.passed, starterPassed: starter.passed, issues };
 }

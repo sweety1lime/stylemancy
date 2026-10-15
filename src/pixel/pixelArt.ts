@@ -48,6 +48,16 @@ export function recolor(sprite: Sprite, palette: Palette): Sprite {
 }
 
 /**
+ * Предмет, который красит свойство color: маска заливки (буквы c, h, d, v) и рисунок поверх неё.
+ * В CSS заливка — currentColor под маской, а рисунок кладётся сверху.
+ */
+export function colorParts(sprite: Sprite, fillChars = 'chdv'): { fill: Sprite; details: Sprite } {
+  const fill = { rows: sprite.rows.map((row) => [...row].map((ch) => (fillChars.includes(ch) ? 'x' : '.')).join('')), palette: { x: '#000' } };
+  const details = { rows: sprite.rows, palette: Object.fromEntries(Object.entries(sprite.palette).filter(([ch]) => ch !== 'c')) };
+  return { fill, details };
+}
+
+/**
  * Скала парящего острова: трава сверху, земля сужается книзу с неровными краями.
  * Края случайные, но одинаковые при каждом запуске (зависят только от seed).
  */

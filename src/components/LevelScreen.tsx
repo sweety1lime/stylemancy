@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { evaluate, lintOptionsFor, scoreSolution, solutionDeclCount } from '../engine/evaluate';
 import { lintCss } from '../engine/lint';
-import { summarizeMisses, viewportsOf, type ItemStatus } from '../engine/scene';
+import { summarizeMisses, viewsOf, type ItemStatus } from '../engine/scene';
 import type { CssLevel } from '../engine/types';
 import type { CodeEditorHandle } from './CodeEditor';
 import { EditorCard, LevelBrief, Workbench } from './LevelParts';
@@ -54,7 +54,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   const placed = statuses.filter((s) => s.inPlace).length;
 
   return (
-    <main className={viewportsOf(level).length > 1 ? 'level level--mirrors' : 'level'}>
+    <main className={viewsOf(level).length > 1 ? 'level level--mirrors' : 'level'}>
       <LevelBrief level={level} number={number} />
 
       <section className="stage" aria-label="Сцена">
@@ -70,9 +70,9 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
             <span>
               На месте: {placed} из {statuses.length}
             </span>
-            {groupByMirror(statuses).map(({ width, items }) => (
-              <span key={width ?? 'scene'} className="stage__dots">
-                {width !== undefined && <span className="stage__mirror">{width}px</span>}
+            {groupByMirror(statuses).map(({ tag, items }) => (
+              <span key={tag ?? 'scene'} className="stage__dots">
+                {tag !== undefined && <span className="stage__mirror">{tag}</span>}
                 {items.map((s, i) => (
                   <span
                     key={`${s.name}-${i}`}
@@ -106,12 +106,21 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
             onCast={cast}
             editorRef={editorRef}
           >
-            <details className="markup">
+            {/* В уровнях про селекторы без разметки не обойтись — она открыта сразу */}
+            <details className="markup" open={Boolean(level.check.style)}>
               <summary>HTML сцены</summary>
               <pre>
                 <code>{level.html}</code>
               </pre>
             </details>
+            {level.lockedCss && (
+              <details className="markup markup--locked" open>
+                <summary>Чары Лорда Дефолта — их не изменить</summary>
+                <pre>
+                  <code>{level.lockedCss.trim()}</code>
+                </pre>
+              </details>
+            )}
           </EditorCard>
         }
       />
@@ -119,9 +128,9 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   );
 }
 
-/** Точки «на месте» по зеркалам: 360px ●●● 720px ●●● */
-function groupByMirror(statuses: ItemStatus[]): { width?: number; items: ItemStatus[] }[] {
-  const groups = new Map<number | undefined, ItemStatus[]>();
-  for (const status of statuses) groups.set(status.viewport, [...(groups.get(status.viewport) ?? []), status]);
-  return Array.from(groups, ([width, items]) => ({ width, items }));
+/** Точки «на месте» по зеркалам: 360px ●●● 720px ●●● или обычно ●● под мышкой ●● */
+function groupByMirror(statuses: ItemStatus[]): { tag?: string; items: ItemStatus[] }[] {
+  const groups = new Map<string | undefined, ItemStatus[]>();
+  for (const status of statuses) groups.set(status.view?.tag, [...(groups.get(status.view?.tag) ?? []), status]);
+  return Array.from(groups, ([tag, items]) => ({ tag, items }));
 }

@@ -1,0 +1,29 @@
+/*
+  Древо Каскада — каскад, специфичность и наследование. Сцена — древнее дерево:
+  ствол посередине, ветки — списки ul с листьями li. Чары Лорда Дефолта у уровня
+  в lockedCss: они стоят после кода студента и при равной силе селекторов побеждают.
+*/
+
+.ancient {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 36px 44px;
+  background:
+    linear-gradient(#5c3f28, #5c3f28) 50% 100% / 48px 100% no-repeat,
+    radial-gradient(ellipse at 50% 40%, rgba(74, 222, 128, 0.1), transparent 70%);
+}
+
+.branch {
+  display: flex;
+  gap: 12px;
+  padding: 6px 18px;
+  background: linear-gradient(#7a5638, #7a5638) 50% 75% / 100% 8px no-repeat;
+}
+
+/* Крона: здесь живут светлячки */
+.crown {
+  display: flex;
+  gap: 48px;
+}

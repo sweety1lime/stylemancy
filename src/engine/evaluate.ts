@@ -1,14 +1,16 @@
 import { plural } from '../lib/plural';
 import { lintCss, type LintOptions, type LintResult, type Problem } from './lint';
 import {
+  applyToView,
   compareItems,
   createHiddenFrame,
   loadFrame,
-  measureItems,
+  measureTargets,
+  prepareView,
   sceneDocument,
-  setPlayerCss,
-  viewportsOf,
+  viewsOf,
   type ItemStatus,
+  type SceneView,
 } from './scene';
 import type { CssLevel } from './types';
 
@@ -77,30 +79,31 @@ export function solutionDeclCount(level: CssLevel): number {
   return lintCss(level.solutionCss, lintOptionsFor(level)).validDecls.length;
 }
 
-/** Сравнение на одной ширине: эталон и код студента в невидимых iframe. */
-async function compareAtWidth(level: CssLevel, css: string, width: number): Promise<ItemStatus[]> {
+/** Сравнение в одном зеркале: эталон и код студента в невидимых iframe. */
+async function compareInView(level: CssLevel, css: string, view: SceneView): Promise<ItemStatus[]> {
   const height = level.scene.height;
-  const targetFrame = createHiddenFrame(width, height);
-  const playerFrame = createHiddenFrame(width, height);
+  const targetFrame = createHiddenFrame(view.width, height);
+  const playerFrame = createHiddenFrame(view.width, height);
   try {
     const html = sceneDocument(level);
     const [targetDoc, playerDoc] = await Promise.all([loadFrame(targetFrame, html), loadFrame(playerFrame, html)]);
-    setPlayerCss(targetDoc, level.solutionCss);
-    setPlayerCss(playerDoc, css);
-    return compareItems(measureItems(playerDoc, level), measureItems(targetDoc, level), level.check.tolerance);
+    prepareView(targetDoc, level, view);
+    prepareView(playerDoc, level, view);
+    const targets = measureTargets(targetDoc, level, view);
+    return compareItems(applyToView(playerDoc, level, view, css), targets, level.check.tolerance);
   } finally {
     targetFrame.remove();
     playerFrame.remove();
   }
 }
 
-/** Полная проверка без интерфейса — для автотестов уровней. Адаптив проверяется в каждом зеркале. */
+/** Полная проверка без интерфейса — для автотестов уровней. Адаптив и :hover проверяются в каждом зеркале. */
 export async function checkLevelCss(level: CssLevel, css: string): Promise<Evaluation> {
-  const widths = viewportsOf(level);
+  const views = viewsOf(level);
   const items: ItemStatus[] = [];
-  for (const width of widths) {
-    const statuses = await compareAtWidth(level, css, width);
-    items.push(...(widths.length > 1 ? statuses.map((status) => ({ ...status, viewport: width })) : statuses));
+  for (const view of views) {
+    const statuses = await compareInView(level, css, view);
+    items.push(...(views.length > 1 ? statuses.map((status) => ({ ...status, view })) : statuses));
   }
   return evaluate(lintCss(css, lintOptionsFor(level)), items);
 }
