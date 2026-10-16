@@ -1,6 +1,6 @@
 import type { Region, StoryCondition, StoryFrame } from '../engine/types';
-import { lands, type Land } from '../levels';
-import { GAME_PROLOGUE, GRAND_FINALE, SCRIPTORIA_PROLOGUE } from '../levels/storyline';
+import { lands, scriptLands, type Land } from '../levels';
+import { GAME_PROLOGUE, GRAND_FINALE, SCRIPTORIA_FINALE, SCRIPTORIA_PROLOGUE } from '../levels/storyline';
 import { currentAccount } from './auth';
 import { progress, type ProgressMap } from './progress';
 import { stats } from './stats';
@@ -16,6 +16,7 @@ export interface OpenStory {
 export const PROLOGUE_KEY = 'prologue:game';
 export const FINALE_KEY = 'finale:game';
 export const SCRIPTORIA_KEY = 'prologue:scriptoria';
+export const SCRIPTORIA_FINALE_KEY = 'finale:scriptoria';
 
 /**
  * Земля спасена — пройден последний уровень её последнего района (финальное испытание).
@@ -31,6 +32,11 @@ export function isLandDone(land: Land, map: ProgressMap = progress.snapshot()): 
 /** Спасены все земли королевства — даже те, что пока в тумане, должны быть пройдены. */
 export function allLandsDone(map: ProgressMap = progress.snapshot()): boolean {
   return lands.every((land) => isLandDone(land, map));
+}
+
+/** Спасены все земли Скриптории — пройдено Логово Лорда Дефолта и всё, что до него. */
+export function allScriptLandsDone(map: ProgressMap = progress.snapshot()): boolean {
+  return scriptLands.every((land) => isLandDone(land, map));
 }
 
 /** Что сюжет знает о герое прямо сейчас. */
@@ -103,6 +109,16 @@ export function scriptoriaPrologue(): OpenStory {
 
 export function grandFinale(): OpenStory {
   return { key: FINALE_KEY, title: 'Финал: Магистр Стилемантии', frames: resolveFrames(GRAND_FINALE, storyContext()), finishLabel: 'Закрыть' };
+}
+
+/** Большой финал Скриптории. Сюжет знает, спасена ли и Каскадия: тогда спасены оба мира. */
+export function scriptoriaFinale(): OpenStory {
+  return {
+    key: SCRIPTORIA_FINALE_KEY,
+    title: 'Финал: Магистр Скриптории',
+    frames: resolveFrames(SCRIPTORIA_FINALE, storyContext()),
+    finishLabel: 'Закрыть',
+  };
 }
 
 export function isSeen(key: string): boolean {

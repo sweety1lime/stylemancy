@@ -7,7 +7,18 @@ import { currentLevel, drafts, progress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { learnedSpells, pickQuestion, reviewIsDue, skipReview, type ReviewQuestion } from '../game/review';
 import { stats } from '../game/stats';
-import { allLandsDone, FINALE_KEY, grandFinale, isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
+import {
+  allLandsDone,
+  allScriptLandsDone,
+  FINALE_KEY,
+  grandFinale,
+  isSeen,
+  markSeen,
+  SCRIPTORIA_FINALE_KEY,
+  scriptoriaFinale,
+  storyOf,
+  type OpenStory,
+} from '../game/story';
 import { findLevel } from '../levels';
 import type { Outcome, RegionStats } from './ResultPanel';
 
@@ -68,6 +79,7 @@ export function useLevelFlow(level: Level, region: RegionStats, starter: string)
     const finale = place && place.region.levels.every((item) => progress.get(item.id).completed) ? storyOf(place.region, 'outro') : null;
     if (finale && !isSeen(finale.key)) queue.push(finale);
     if (allLandsDone() && !isSeen(FINALE_KEY)) queue.push(grandFinale());
+    if (allScriptLandsDone() && !isSeen(SCRIPTORIA_FINALE_KEY)) queue.push(scriptoriaFinale());
     if (queue.length) setStories(queue);
     // Раз в два новых уровня — вопрос по заклинанию, которое дольше всех не вспоминали
     if (firstTime && reviewIsDue()) {

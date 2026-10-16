@@ -259,7 +259,10 @@ export interface StoryFrame {
     | 'lamps'
     | 'levers'
     | 'arcade'
-    | 'lair';
+    | 'lair'
+    // Финал Скриптории
+    | 'runes'
+    | 'worlds';
   /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
   speaker?: string;
   name?: string;

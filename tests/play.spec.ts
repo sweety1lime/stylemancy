@@ -1415,7 +1415,7 @@ test.describe('Город Механизмов', () => {
     expect(html).not.toContain('__guard');
   });
 
-  test('финал Скриптории: Лорд Дефолт отменён, Руна Механизмов', async ({ page }) => {
+  test('эпилог Логова без остальных земель: Руна Механизмов, но большого финала ещё нет', async ({ page }) => {
     await unlockCity(page, ['lair-01']);
     await page.goto('/#/level/lair-02');
     const solution = await page.evaluate<string>("import('/src/levels/default-lair/lair-02.ts').then((m) => m.default.solutionJs)");
@@ -1426,7 +1426,50 @@ test.describe('Город Механизмов', () => {
     const outro = page.getByRole('dialog', { name: 'Эпилог: Логово Лорда Дефолта' });
     await expect(outro).toContainText('Ты отменил… меня?!');
     for (let i = 0; i < 3; i++) await outro.getByRole('button', { name: 'Дальше →' }).click();
-    await expect(outro).toContainText('Держи Руну Механизмов — Скриптория спасена!');
+    await expect(outro).toContainText('Держи Руну Механизмов — последнюю руну Скриптории!');
+    await outro.getByRole('button', { name: 'Закрыть' }).click();
+    // Врата, Лабиринт и Мастерская не пройдены — Скриптория ещё не спасена
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
+  test('большой финал Скриптории: руны, Лорд Дефолт сдаётся, звание Магистра', async ({ page }) => {
+    // Спасены все земли Скриптории, кроме последнего уровня Логова; Каскадия ещё ждёт
+    await unlockCity(page, ['alch-08', 'heart-02', 'obj-06', 'lair-01']);
+    await page.goto('/#/level/lair-02');
+    const solution = await page.evaluate<string>("import('/src/levels/default-lair/lair-02.ts').then((m) => m.default.solutionJs)");
+    await typeCode(page, solution);
+    await expect(page.locator('.goals__head')).toHaveText(/6 из 6/);
+    await cast(page);
+
+    await page.getByRole('dialog', { name: 'Эпилог: Логово Лорда Дефолта' }).getByRole('button', { name: 'Пропустить' }).click();
+    const finale = page.getByRole('dialog', { name: 'Финал: Магистр Скриптории' });
+    await expect(finale).toContainText('Четыре руны Скриптории');
+    await page.waitForTimeout(2600);
+    await page.screenshot({ path: `${SCREENS}/62-scriptoria-runes.png` });
+    await finale.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(finale).toContainText('Как же так?!');
+    await finale.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(finale).toContainText('просто начало, с которого всё начинают');
+    await finale.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(finale).toContainText('звание Магистра Скриптории, странник');
+    await finale.getByRole('button', { name: 'Дальше →' }).click();
+    // Каскадия не спасена — финал зовёт обратно за дверь
+    await expect(finale).toContainText('проклятие Великого Сброса ещё держится в Долине Тегов');
+    await page.screenshot({ path: `${SCREENS}/63-scriptoria-worlds.png` });
+    await finale.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(finale).toContainText("console.log('Спасибо, странник!')");
+    await finale.getByRole('button', { name: 'Закрыть' }).click();
+
+    await page.goto('/#/chronicle');
+    const chapter = page.locator('.chronicle__chapter', { hasText: 'Финал: Магистр Скриптории' });
+    await expect(chapter.getByRole('button', { name: 'Смотреть финал' })).toBeVisible();
+    await chapter.getByRole('link', { name: 'Грамота Магистра Скриптории' }).click();
+    await expect(page.locator('.certificate__title')).toHaveText('Звание Магистра Скриптории');
+    await expect(page.locator('.certificate')).toContainText('за спасение всех земель Скриптории');
+    // Наставники всех земель Скриптории — без Лорда Дефолта
+    await expect(page.locator('.certificate__mentors > *')).toHaveCount(10);
+    await page.getByLabel('Имя на грамоте').fill('Ариэль');
+    await page.screenshot({ path: `${SCREENS}/64-scriptoria-certificate.png`, fullPage: true });
   });
 
   test.describe('на телефоне', () => {

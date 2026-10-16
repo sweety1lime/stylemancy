@@ -76,6 +76,8 @@ const CARDS: [string, string][][] = [
 const TOWERS = [3, 5, 4, 7, 3, 5, 4];
 /** Кнопки пульта в Цехе Рычагов — имена событий */
 const PANEL = ['click', 'input', 'submit'];
+/** Руны Скриптории — эмблемы её земель: Типов, Решений, Рецептов и Механизмов */
+const SCRIPT_RUNES = ['flask', 'maze', 'cauldron', 'gear'];
 
 /** Стёкла витража в кадре: так же стоят в испытании Витражной обители */
 const PANES = [GLASS.star, GLASS.rose, GLASS.moon, GLASS.tree, GLASS.leaf, GLASS.crown].map((glass) => glass.color);
@@ -609,6 +611,38 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
             <i>письмо…</i>
             <b>Отправить</b>
           </span>
+        </>
+      )}
+
+      {art === 'runes' && (
+        <>
+          {/* Четыре руны Скриптории загораются одна за другой */}
+          <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
+          <PixelArt className="sa-spark sa-spark--3" sprite={SKY_SPARK} />
+          <div className="sa-runes">
+            {SCRIPT_RUNES.map((key, i) => (
+              <span key={key} className="sa-rune" style={{ '--i': i } as CSSProperties}>
+                <PixelArt sprite={EMBLEMS[key]} />
+              </span>
+            ))}
+          </div>
+        </>
+      )}
+
+      {art === 'worlds' && (
+        <>
+          {/* Два мира: остров Каскадии с кристаллами, открытая дверь <script> и шестерни Скриптории */}
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <div className="sa-worlds-gems">
+            {ROW.map((gem, i) => (
+              <PixelArt key={i} className="sa-gem" sprite={gem.sprite} />
+            ))}
+          </div>
+          <PixelArt className="sa-worlds-rock" sprite={ISLAND_ROCK} />
+          <span className="sa-worlds-glow" />
+          <PixelArt className="sa-worlds-door" sprite={SCRIPT_DOOR_OPEN} />
+          <SpriteAnim className="sa-worlds-gear sa-worlds-gear--1" frames={GEAR_FRAMES} fps={3} fluid />
+          <SpriteAnim className="sa-worlds-gear sa-worlds-gear--2" frames={GEAR_FRAMES} fps={4} fluid />
         </>
       )}
 

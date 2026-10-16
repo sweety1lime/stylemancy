@@ -6,13 +6,16 @@ import { hrefFor } from '../game/router';
 import { useStats } from '../game/stats';
 import {
   allLandsDone,
+  allScriptLandsDone,
   FINALE_KEY,
   gamePrologue,
   grandFinale,
   isLandDone,
   markSeen,
   PROLOGUE_KEY,
+  SCRIPTORIA_FINALE_KEY,
   SCRIPTORIA_KEY,
+  scriptoriaFinale,
   scriptoriaPrologue,
   storyOf,
   type OpenStory,
@@ -32,6 +35,7 @@ export function ChronicleScreen() {
   const teacher = account?.role === 'teacher';
   const canWatch = (key: string) => teacher || Boolean(seen[key]);
   const allDone = allLandsDone(progress);
+  const scriptDone = allScriptLandsDone(progress);
 
   /** Глава летописи — земля: её сценки по районам и грамота. */
   function chapter(land: Land, number: number) {
@@ -142,6 +146,22 @@ export function ChronicleScreen() {
           )}
         </li>
         {scriptLands.map((land, i) => chapter(land, lands.length + i + 1))}
+
+        <li className={scriptDone ? 'chronicle__chapter chronicle__chapter--done px-panel' : 'chronicle__chapter px-panel'}>
+          <h2 className="pixel-subtitle">Финал: Магистр Скриптории</h2>
+          {canWatch(SCRIPTORIA_FINALE_KEY) ? (
+            <button type="button" className="text-button" onClick={() => setStory(scriptoriaFinale())}>
+              Смотреть финал
+            </button>
+          ) : (
+            <p className="chronicle__locked">Откроется, когда все земли Скриптории будут спасены.</p>
+          )}
+          {(scriptDone || teacher) && (
+            <a className="button button--ghost chronicle__certificate" href={hrefFor({ name: 'certificate', id: 'master-script' })}>
+              {scriptDone ? 'Грамота Магистра Скриптории' : 'Образец грамоты Магистра Скриптории'}
+            </a>
+          )}
+        </li>
       </ol>
 
       {story && (
