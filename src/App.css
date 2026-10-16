@@ -2733,6 +2733,7 @@ a.land:hover .land__art {
   .example__preview,
   .example__screens,
   .example__media,
+  .example__page,
   .spell-card--locked,
   .spell-card__notes,
   .spell-card__source,
@@ -4723,6 +4724,437 @@ a.land--door .land__door {
   text-shadow: 0 0 1cqw rgba(253, 230, 138, 0.5);
 }
 
+/* ——— Город Механизмов: живая страница на сцене ——— */
+
+.page-scene .browser__tab {
+  flex: 1;
+}
+
+.page-scene__restart {
+  margin: 0 0 6px auto;
+  padding: 2px 10px;
+  border: 0;
+  background: var(--panel-3);
+  color: var(--text);
+  font: 13px/1.4 var(--font-mono);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.page-scene__restart:hover {
+  background: #3a2a73;
+}
+
+.page-scene__page {
+  background: #161b26;
+  transition: opacity 0.2s;
+}
+
+.page-scene--busy .page-scene__page {
+  opacity: 0.75;
+}
+
+/* Форма перезагрузила страницу: она мигает, как при настоящей перезагрузке */
+.page-scene__page--reloaded {
+  animation: page-reload 0.6s steps(3, end);
+}
+
+@keyframes page-reload {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.browser__status.page-scene__status {
+  min-height: 1.6em;
+  white-space: normal;
+  font-family: var(--font-ui);
+  font-size: 14px;
+}
+
+.page-scene__status--error {
+  color: var(--danger);
+}
+
+.page-scene__status--ok {
+  color: var(--gold-strong);
+}
+
+.page-scene__log {
+  min-height: 0;
+  max-height: 120px;
+  margin: 0;
+  padding: 8px 12px;
+  background: #0b1220;
+  font-size: 13px;
+}
+
+.page-download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 12px 14px;
+}
+
+.page-download p {
+  flex: 1 1 220px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ——— Город Механизмов: сцены сюжета ——— */
+
+.story-art--mech-city,
+.story-art--lamps {
+  background-image: linear-gradient(180deg, #0b1020 0 25%, #11182b 25% 50%, #172036 50% 75%, #1d2842 75%);
+  background-size: 100% 100%;
+}
+
+.sa-skyline {
+  position: absolute;
+  right: 4%;
+  bottom: 0;
+  left: 4%;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5cqw;
+}
+
+.sa-skyline span {
+  flex: 1;
+  height: calc(var(--floors) * 5.5cqw);
+  background-color: #262c3b;
+  background-image: radial-gradient(circle, #fde68a 0 0.6cqw, transparent 0.7cqw);
+  background-size: 3cqw 4cqw;
+  background-position: center 1cqw;
+  box-shadow:
+    inset 0 0.6cqw 0 #3b4357,
+    inset 0 0 0 0.4cqw #12161f;
+}
+
+.sa-skyline span:nth-child(even) {
+  background-image: radial-gradient(circle, #fbbf24 0 0.6cqw, transparent 0.7cqw);
+}
+
+.sa-city-gear {
+  position: absolute;
+  opacity: 0.9;
+}
+
+.sa-city-gear--1 {
+  top: 6%;
+  left: 10%;
+  width: 16cqw;
+}
+
+.sa-city-gear--2 {
+  top: 16%;
+  left: 24%;
+  width: 10cqw;
+}
+
+.sa-city-gear--3 {
+  top: 6%;
+  right: 6%;
+  width: 14cqw;
+}
+
+.sa-workshop-sign {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  translate: -50% 0;
+  padding: 1.2cqw 2.4cqw;
+  background: #2a2116;
+  box-shadow:
+    0 0 0 0.5cqw #c8a24a,
+    0 0 3cqw rgba(251, 191, 36, 0.55);
+  color: #ffd978;
+  font: 3cqw/1 var(--font-pixel);
+  white-space: nowrap;
+}
+
+.sa-lamps {
+  position: absolute;
+  right: 8%;
+  bottom: 0;
+  left: 8%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sa-lamp-post {
+  position: relative;
+  width: 6cqw;
+  height: 28cqw;
+  background: linear-gradient(90deg, transparent 2.5cqw, #3b4252 2.5cqw 3.5cqw, transparent 3.5cqw);
+}
+
+.sa-lamp-post .sprite-anim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6cqw;
+  filter: drop-shadow(0 0 2cqw #fbbf24);
+}
+
+.story-art--levers {
+  background-image: linear-gradient(180deg, #14110d 0 25%, #1b1711 25% 50%, #221d15 50% 75%, #29231a 75%);
+  background-size: 100% 100%;
+}
+
+.sa-gate-doors {
+  position: absolute;
+  top: 12%;
+  left: 8%;
+  width: 34cqw;
+  height: 30cqw;
+  overflow: hidden;
+  background: radial-gradient(circle, #fde68a, #f59e0b 45%, #0b0e14 80%);
+  box-shadow:
+    0 0 0 0.8cqw #3b4252,
+    0 0 0 1.4cqw #1b1406;
+}
+
+.sa-gate-doors span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: repeating-linear-gradient(90deg, #6b7280 0 1.2cqw, #4b5563 1.2cqw 2.8cqw);
+  animation: sa-gate-open 4s steps(8) infinite alternate;
+}
+
+.sa-gate-doors span:first-child {
+  left: 0;
+  --shift: -90%;
+}
+
+.sa-gate-doors span:last-child {
+  right: 0;
+  --shift: 90%;
+}
+
+@keyframes sa-gate-open {
+  0%,
+  30% {
+    translate: 0 0;
+  }
+  70%,
+  100% {
+    translate: var(--shift) 0;
+  }
+}
+
+.sa-panel {
+  position: absolute;
+  right: 6%;
+  bottom: 12%;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  align-items: end;
+  gap: 1.6cqw;
+  padding: 2cqw;
+  background: #2a2116;
+  box-shadow:
+    0 0 0 0.5cqw #c8a24a,
+    0 0 0 1cqw #1b1406;
+}
+
+.sa-panel span:not(.sa-panel__lever) {
+  padding: 1cqw 1.4cqw;
+  background: #e0b84c;
+  color: #1b1406;
+  font: 2.4cqw/1 var(--font-mono);
+  box-shadow: inset -0.4cqw -0.4cqw 0 #a07a22;
+}
+
+.sa-panel__lever {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: 1.2cqw;
+  height: 10cqw;
+  background: linear-gradient(#ef4444 0 2.4cqw, #9ca3af 2.4cqw);
+  transform-origin: 50% 100%;
+  animation: sa-lever 4s steps(4) infinite alternate;
+}
+
+@keyframes sa-lever {
+  0%,
+  30% {
+    rotate: -30deg;
+  }
+  70%,
+  100% {
+    rotate: 30deg;
+  }
+}
+
+.story-art--arcade {
+  background-image: linear-gradient(180deg, #120a24 0 25%, #180e30 25% 50%, #1f123d 50% 75%, #26164a 75%);
+  background-size: 100% 100%;
+}
+
+.sa-cabinet {
+  position: absolute;
+  bottom: 0;
+  left: 14%;
+  display: grid;
+  justify-items: center;
+  gap: 2cqw;
+  width: 28cqw;
+  height: 46cqw;
+  padding: 3cqw 2.4cqw 0;
+  background: linear-gradient(#7c3aed, #4c1d95);
+  box-shadow:
+    inset 0 0 0 0.8cqw #2e1065,
+    0 0 4cqw rgba(124, 58, 237, 0.45);
+}
+
+.sa-cabinet--sphinx {
+  right: 14%;
+  left: auto;
+  background: linear-gradient(#0e7490, #164e63);
+  box-shadow:
+    inset 0 0 0 0.8cqw #083344,
+    0 0 4cqw rgba(34, 211, 238, 0.35);
+}
+
+.sa-cabinet__screen {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1.2cqw;
+  width: 100%;
+  height: 20cqw;
+  background: #020617;
+  box-shadow: inset 0 0 0 0.6cqw #0f172a;
+  color: #fde68a;
+  font: 2.6cqw/1 var(--font-pixel);
+  animation: sa-screen 1.6s steps(2) infinite;
+}
+
+.sa-cabinet__screen b {
+  color: #a78bfa;
+  font-size: 8cqw;
+  text-shadow: 0 0 2cqw #7c3aed;
+}
+
+.sa-cabinet__coin {
+  width: 5cqw;
+  height: 5cqw;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fef3c7, #fbbf24 45%, #b45309);
+  box-shadow: 0 0 2cqw #fbbf24;
+}
+
+@keyframes sa-screen {
+  50% {
+    filter: brightness(1.3);
+  }
+}
+
+.sa-cabinet__buttons {
+  display: flex;
+  gap: 1.6cqw;
+}
+
+.sa-cabinet__buttons i {
+  width: 3.4cqw;
+  height: 3.4cqw;
+  border-radius: 50%;
+  background: #f43f5e;
+  box-shadow: inset -0.4cqw -0.4cqw 0 rgba(0, 0, 0, 0.35);
+}
+
+.sa-cabinet__buttons i:nth-child(2) {
+  background: #fbbf24;
+}
+
+.sa-cabinet__buttons i:nth-child(3) {
+  background: #22d3ee;
+}
+
+.story-art--lair {
+  background-image: linear-gradient(180deg, #0a0410 0 25%, #10061a 25% 50%, #160824 50% 75%, #1c0a2e 75%);
+  background-size: 100% 100%;
+}
+
+.sa-lair-tower {
+  position: absolute;
+  bottom: 0;
+  left: 40%;
+  width: 20cqw;
+  height: 44cqw;
+  background:
+    radial-gradient(circle at 50% 22%, #a855f7 0 2cqw, transparent 2.2cqw),
+    repeating-linear-gradient(0deg, #1f1a2e 0 3cqw, #17131f 3cqw 6cqw);
+  clip-path: polygon(10% 100%, 18% 12%, 50% 0, 82% 12%, 90% 100%);
+  filter: drop-shadow(0 0 3cqw rgba(168, 85, 247, 0.4));
+}
+
+.sa-reload {
+  position: absolute;
+  color: #c084fc;
+  font: 8cqw/1 var(--font-ui);
+  text-shadow: 0 0 2cqw #7e22ce;
+  animation: sa-reload 3s linear infinite;
+}
+
+.sa-reload--1 {
+  top: 10%;
+  left: 12%;
+}
+
+.sa-reload--2 {
+  top: 18%;
+  right: 14%;
+  font-size: 6cqw;
+  animation-duration: 2.2s;
+}
+
+.sa-reload--3 {
+  bottom: 14%;
+  left: 22%;
+  font-size: 5cqw;
+  animation-duration: 3.6s;
+}
+
+@keyframes sa-reload {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.sa-lair-form {
+  position: absolute;
+  right: 8%;
+  bottom: 12%;
+  display: flex;
+  gap: 1.2cqw;
+  padding: 1.6cqw;
+  background: #2a2116;
+  box-shadow: 0 0 0 0.5cqw #c8a24a;
+  font: 2.4cqw/1 var(--font-mono);
+}
+
+.sa-lair-form i {
+  padding: 1cqw 2cqw;
+  background: #0d1118;
+  color: #94a3b8;
+}
+
+.sa-lair-form b {
+  padding: 1cqw 1.6cqw;
+  background: #e0b84c;
+  color: #1b1406;
+}
+
 /* Живой пример JS-заклинания в гримуаре: слева код, справа ответ Оракула */
 .example--script {
   grid-template-areas:
@@ -4749,6 +5181,32 @@ a.land--door .land__door {
   margin: 0;
   font-family: var(--font-ui);
   font-size: 14px;
+}
+
+/* Пример Города Механизмов: живая мини-страница, а под ней — что сказал Оракул */
+.example__page {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.example__page iframe {
+  display: block;
+  width: 100%;
+  height: 200px;
+  border: 0;
+  box-shadow: 0 0 0 3px var(--ink);
+}
+
+.example__page .oracle-scroll__lines {
+  min-height: 0;
+  padding: 8px 12px;
+  background: #0b1220;
+  box-shadow: inset 0 0 0 3px #134e4a;
+  font-size: 13px;
 }
 
 @media (max-width: 720px) {

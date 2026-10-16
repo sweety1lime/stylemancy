@@ -48,7 +48,14 @@ export interface ScriptExample {
   initial?: number;
 }
 
-export type SpellExample = ValueExample | WidthExample | MarkupExample | VariantsExample | ScriptExample;
+/** Пример-страница: варианты кода оживляют одну и ту же мини-страницу — по ней можно щёлкать. */
+export interface PageExample {
+  page: { html: string; css?: string };
+  scripts: { label: string; code: string }[];
+  initial?: number;
+}
+
+export type SpellExample = ValueExample | WidthExample | MarkupExample | VariantsExample | ScriptExample | PageExample;
 
 export interface Spell {
   name: string;
@@ -93,6 +100,17 @@ const GRID_CSS = '.box { display: grid; gap: 4px; } .item { width: auto; height:
 const AREAS_CSS = '.a { grid-area: a; } .b { grid-area: b; } .c { grid-area: c; }';
 
 /** Заклинания гримуара. Ключ — поле learns в уровне. */
+/* Мини-страницы Города Механизмов для примеров: оформление берётся из страниц района */
+const LEVER_PAGE = { html: '<div class="gate"></div>\n<button class="lever">Дёрнуть рычаг</button>' };
+const LAMP_PAGE = { html: '<div class="lamp"></div>\n<button class="switch">Щёлк</button>' };
+const SHELF_PAGE = {
+  html: '<ul class="shelf"><li>шестерня</li></ul>',
+  css: '.shelf { display: flex; gap: 8px; margin: 0; padding: 10px; list-style: none; box-shadow: 0 0 0 3px #c8a24a; } .shelf li { padding: 4px 8px; background: #334155; }',
+};
+const FIELD_PAGE = {
+  html: '<p class="plate">…</p>\n<div class="row"><input class="field" placeholder="пиши тут"><button class="ok">Готово</button></div>',
+};
+
 export const SPELLS: Record<string, Spell> = {
   'display-flex': {
     name: 'display: flex',
@@ -1625,6 +1643,234 @@ export const SPELLS: Record<string, Spell> = {
         { label: 'shelf[1].name', code: "let shelf = [{ name: 'Мята', price: 3 }, { name: 'Мёд', price: 7 }];\nconsole.log(shelf[1].name);" },
         { label: 'перебор', code: "let shelf = [{ name: 'Мята', price: 3 }, { name: 'Мёд', price: 7 }];\nfor (const potion of shelf) {\n  console.log(potion.name, potion.price);\n}" },
       ],
+    },
+  },
+  // ——— Город Механизмов ———
+  querySelector: {
+    name: 'document.querySelector',
+    description:
+      "`document` — вся страница. `document.querySelector('.sign')` находит на ней первый элемент по селектору — как в CSS: класс с точкой, id с решёткой, тег просто словом. Не нашёл — вернёт `null`.",
+    example: {
+      page: { html: '<h1 class="sign plate">Закрыто</h1>\n<p>Записка на двери</p>' },
+      scripts: [
+        { label: "'.sign'", code: "let sign = document.querySelector('.sign');\nsign.textContent = 'Открыто!';" },
+        { label: "'p'", code: "let note = document.querySelector('p');\nnote.textContent = 'Нашёл абзац по тегу';" },
+        { label: 'не нашёл', code: "let lamp = document.querySelector('.lamp');\nconsole.log(lamp);" },
+      ],
+    },
+  },
+  classList: {
+    name: 'classList.add / remove',
+    description:
+      "Вид элемента меняют классами: `lamp.classList.add('on')` добавляет класс, `lamp.classList.remove('on')` — убирает, а как выглядит класс, знает CSS. Имя класса — без точки. `classList.contains('on')` спросит, есть ли класс.",
+    example: {
+      page: { html: '<div class="row"><div class="lamp" id="left"></div><div class="lamp on" id="right"></div></div>' },
+      scripts: [
+        { label: 'add', code: "let lamp = document.querySelector('#left');\nlamp.classList.add('on');" },
+        { label: 'remove', code: "let lamp = document.querySelector('#right');\nlamp.classList.remove('on');" },
+        { label: 'contains', code: "let lamp = document.querySelector('#right');\nconsole.log(lamp.classList.contains('on'));" },
+      ],
+    },
+  },
+  querySelectorAll: {
+    name: 'document.querySelectorAll',
+    description:
+      "`document.querySelectorAll('.gear')` находит все элементы по селектору — списком. У списка есть `length`, его перебирают циклом `for (const gear of gears) { … }`, а вот classList у него нет — только у каждого элемента.",
+    example: {
+      page: { html: '<div class="row"><div class="gear"></div><div class="gear"></div><div class="gear"></div><div class="gear"></div></div>' },
+      scripts: [
+        { label: 'querySelector', code: "document.querySelector('.gear').classList.add('spin');" },
+        { label: 'все в цикле', code: "let gears = document.querySelectorAll('.gear');\nfor (const gear of gears) {\n  gear.classList.add('spin');\n}" },
+        { label: 'length', code: "let gears = document.querySelectorAll('.gear');\nconsole.log(gears.length);" },
+      ],
+    },
+  },
+  textContent: {
+    name: 'textContent',
+    description:
+      "`textContent` — текст внутри элемента. Присвоишь — текст заменится: `` counter.textContent = `Деталей: ${n}`; ``. Прочтёшь — получишь строку. Теги в нём не работают: что написал, то и видно.",
+    example: {
+      page: { html: '<p class="counter plate">Деталей: ?</p>' },
+      scripts: [
+        { label: 'записать', code: "let counter = document.querySelector('.counter');\nlet parts = 5;\ncounter.textContent = `Деталей: ${parts}`;" },
+        { label: 'прочесть', code: "let counter = document.querySelector('.counter');\nconsole.log(counter.textContent);" },
+        { label: 'теги — текстом', code: "let counter = document.querySelector('.counter');\ncounter.textContent = '<b>жирно?</b>';" },
+      ],
+    },
+  },
+  createElement: {
+    name: 'createElement и append',
+    description:
+      "`document.createElement('li')` создаёт новый элемент — пока он нигде не висит. Наполни его (`textContent`, `classList`) и повесь на страницу: `shelf.append(item)` — в конец, `shelf.prepend(item)` — в начало.",
+    example: {
+      page: SHELF_PAGE,
+      scripts: [
+        { label: 'append', code: "let shelf = document.querySelector('.shelf');\nlet item = document.createElement('li');\nitem.textContent = 'пружина';\nshelf.append(item);" },
+        { label: 'prepend', code: "let shelf = document.querySelector('.shelf');\nlet item = document.createElement('li');\nitem.textContent = 'пружина';\nshelf.prepend(item);" },
+        {
+          label: 'в цикле',
+          code: "let shelf = document.querySelector('.shelf');\nfor (const name of ['винт', 'ось', 'рычаг']) {\n  let item = document.createElement('li');\n  item.textContent = name;\n  shelf.append(item);\n}",
+        },
+      ],
+    },
+  },
+  addEventListener: {
+    name: 'addEventListener',
+    description:
+      "`lever.addEventListener('click', openGate)` — «когда по рычагу щёлкнут, позови рецепт openGate». Рецепт передают без скобок: его вызовет браузер, потом. Со скобками он сработает сразу, а щелчок ничего не сделает.",
+    example: {
+      page: LEVER_PAGE,
+      scripts: [
+        {
+          label: 'рецепт',
+          code: "let lever = document.querySelector('.lever');\nlet gate = document.querySelector('.gate');\nfunction openGate() {\n  gate.classList.add('open');\n}\nlever.addEventListener('click', openGate);",
+        },
+        {
+          label: 'стрелка',
+          code: "let lever = document.querySelector('.lever');\nlet gate = document.querySelector('.gate');\nlever.addEventListener('click', () => {\n  gate.classList.add('open');\n});",
+        },
+        {
+          label: 'openGate() — ошибка',
+          code: "let lever = document.querySelector('.lever');\nlet gate = document.querySelector('.gate');\nfunction openGate() {\n  gate.classList.add('open');\n}\n// Со скобками ворота открылись сразу, без щелчка\nlever.addEventListener('click', openGate());",
+        },
+      ],
+    },
+  },
+  toggle: {
+    name: 'classList.toggle',
+    description:
+      "`lamp.classList.toggle('on')` переключает класс: нет — добавит, есть — уберёт. Выключатель в одну строку, без `if`.",
+    example: {
+      page: LAMP_PAGE,
+      scripts: [
+        {
+          label: 'toggle',
+          code: "let lamp = document.querySelector('.lamp');\nlet button = document.querySelector('.switch');\nbutton.addEventListener('click', () => {\n  lamp.classList.toggle('on');\n});",
+        },
+        {
+          label: 'только add',
+          code: "let lamp = document.querySelector('.lamp');\nlet button = document.querySelector('.switch');\nbutton.addEventListener('click', () => {\n  lamp.classList.add('on');\n});",
+        },
+      ],
+    },
+  },
+  'event-target': {
+    name: 'event.target',
+    description:
+      'Обработчик получает событие первым параметром: `(event) => { … }`. `event.target` — элемент, по которому щёлкнули. Так один рецепт обслуживает много кнопок.',
+    example: {
+      page: { html: '<p class="plate">—</p>\n<div class="row"><button>Тревога</button><button>Отбой</button><button>Обед</button></div>' },
+      scripts: [
+        {
+          label: 'event.target',
+          code: "let board = document.querySelector('.plate');\nfor (const button of document.querySelectorAll('button')) {\n  button.addEventListener('click', (event) => {\n    board.textContent = event.target.textContent;\n  });\n}",
+        },
+      ],
+    },
+  },
+  'input-value': {
+    name: 'input.value',
+    description:
+      "То, что ввели в поле, лежит в `field.value` — всегда строкой, даже цифры: `'42'`. Для счёта преврати в число: `Number(field.value)`. Очистить поле — `field.value = ''`.",
+    example: {
+      page: FIELD_PAGE,
+      scripts: [
+        {
+          label: 'прочесть',
+          code: "let field = document.querySelector('.field');\nlet board = document.querySelector('.plate');\ndocument.querySelector('.ok').addEventListener('click', () => {\n  board.textContent = `Ввели: ${field.value}`;\n  field.value = '';\n});",
+        },
+        {
+          label: 'это строка',
+          code: "let field = document.querySelector('.field');\ndocument.querySelector('.ok').addEventListener('click', () => {\n  console.log(typeof field.value, field.value + 1);\n});",
+        },
+      ],
+    },
+  },
+  'input-event': {
+    name: "Событие 'input'",
+    description:
+      "`'input'` случается на каждую букву, пока в поле печатают, — табличка может меняться вместе с вводом. `'change'` — только когда поле отпустили.",
+    example: {
+      page: FIELD_PAGE,
+      scripts: [
+        {
+          label: 'input',
+          code: "let field = document.querySelector('.field');\nlet board = document.querySelector('.plate');\nfield.addEventListener('input', () => {\n  board.textContent = field.value;\n});",
+        },
+        {
+          label: 'change',
+          code: "let field = document.querySelector('.field');\nlet board = document.querySelector('.plate');\nfield.addEventListener('change', () => {\n  board.textContent = field.value;\n});",
+        },
+      ],
+    },
+  },
+  disabled: {
+    name: 'disabled',
+    description:
+      '`button.disabled = true` выключает кнопку: она сереет и не нажимается. `false` — включает снова. Удобно писать условием: `upgrade.disabled = coins < 5;`',
+    example: {
+      page: { html: '<p class="plate">Монет: 0</p>\n<div class="row"><button class="mine">Добыть</button><button class="buy">Купить за 3</button></div>' },
+      scripts: [
+        {
+          label: 'disabled = coins < 3',
+          code: "let coins = 0;\nlet board = document.querySelector('.plate');\nlet buy = document.querySelector('.buy');\nfunction update() {\n  board.textContent = `Монет: ${coins}`;\n  buy.disabled = coins < 3;\n}\ndocument.querySelector('.mine').addEventListener('click', () => {\n  coins++;\n  update();\n});\nbuy.addEventListener('click', () => {\n  coins -= 3;\n  update();\n});\nupdate();",
+        },
+      ],
+    },
+  },
+  random: {
+    name: 'Math.random()',
+    description:
+      '`Math.random()` — случайное число от 0 до 1 (единица не выпадет). Целое от 1 до 6: `Math.floor(Math.random() * 6) + 1` — умножили, отбросили дробь, сдвинули на один.',
+    example: {
+      page: { html: '<p class="plate">?</p>\n<button class="roll">Бросить</button>' },
+      scripts: [
+        {
+          label: 'Math.random()',
+          code: "let board = document.querySelector('.plate');\ndocument.querySelector('.roll').addEventListener('click', () => {\n  board.textContent = Math.random();\n});",
+        },
+        {
+          label: 'кубик 1–6',
+          code: "let board = document.querySelector('.plate');\ndocument.querySelector('.roll').addEventListener('click', () => {\n  board.textContent = Math.floor(Math.random() * 6) + 1;\n});",
+        },
+      ],
+    },
+  },
+  hidden: {
+    name: 'hidden',
+    description:
+      '`chest.hidden = true` прячет элемент со страницы, `false` — показывает. В разметке то же самое — атрибут `hidden`: `<button hidden>`.',
+    example: {
+      page: { html: '<p class="plate secret" hidden>Тайник найден!</p>\n<button class="find">Искать</button>' },
+      scripts: [
+        { label: 'показать', code: "let secret = document.querySelector('.secret');\ndocument.querySelector('.find').addEventListener('click', () => {\n  secret.hidden = false;\n});" },
+        {
+          label: 'туда-сюда',
+          code: "let secret = document.querySelector('.secret');\ndocument.querySelector('.find').addEventListener('click', () => {\n  secret.hidden = !secret.hidden;\n});",
+        },
+      ],
+    },
+  },
+  preventDefault: {
+    name: 'event.preventDefault()',
+    description:
+      'У браузера есть поведение по умолчанию: форма отправляется и перезагружает страницу, ссылка уводит. `event.preventDefault()` в обработчике отменяет его — и страница остаётся твоей.',
+    example: {
+      page: {
+        html: '<form class="row"><input class="field" placeholder="письмо"><button>Отправить</button></form>\n<ul class="letters"></ul>',
+        css: '.letters { margin: 0; padding: 0; list-style: none; }',
+      },
+      scripts: [
+        {
+          label: 'без preventDefault',
+          code: "let field = document.querySelector('.field');\ndocument.querySelector('form').addEventListener('submit', () => {\n  let item = document.createElement('li');\n  item.textContent = field.value;\n  document.querySelector('.letters').append(item);\n});",
+        },
+        {
+          label: 'event.preventDefault()',
+          code: "let field = document.querySelector('.field');\ndocument.querySelector('form').addEventListener('submit', (event) => {\n  event.preventDefault();\n  let item = document.createElement('li');\n  item.textContent = field.value;\n  document.querySelector('.letters').append(item);\n  field.value = '';\n});",
+        },
+      ],
+      initial: 1,
     },
   },
 };

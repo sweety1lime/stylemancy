@@ -48,6 +48,25 @@ const CASES: Case[] = [
   { code: 'heor.step();', expect: ['heor — может, hero?'] },
   { code: 'hero.step;', expect: ['hero.step без скобок — приказ не выполнится. Пиши hero.step()'], mark: 'hero.step' },
   { code: 'if (hero.isWall) {\n  hero.turnLeft();\n}', expect: ['hero.isWall без скобок — это сам вопрос, а не ответ на него'] },
+  // Город Механизмов: страница и события
+  { code: "let gears = document.querySelectorAll('.gear');\nfor (const gear of gears) {\n  gear.classList.add('spin');\n}", expect: [] },
+  { code: "let card = { title: 'Мята', disable: true };\nconsole.log(card.disable, card.title.toUpperCase());", expect: [] },
+  { code: "document.querySelecter('.sign');", expect: ['У document нет querySelecter — может, querySelector?'], mark: 'querySelecter' },
+  { code: "document.getElementByID('door');", expect: ['может, getElementById? Большие и маленькие буквы различаются.'] },
+  { code: "let lamp = document.querySelector('.lamp');\nlamp.classList.ad('on');", expect: ['У classList нет команды ad — может, add?'], mark: 'ad' },
+  { code: "let lamp = document.querySelector('.lamp');\nlamp.classList.toogle('on');", expect: ['может, toggle?'] },
+  { code: "let sign = document.querySelector('.sign');\nsign.textContnet = 'Открыто';", expect: ['textContnet — может, textContent?'], mark: 'textContnet' },
+  { code: "let sign = document.querySelector('.sign');\nsign.innerHtml = 'Открыто';", expect: ['может, innerHTML? Большие и маленькие буквы различаются.'] },
+  { code: "let button = document.querySelector('button');\nbutton.addEventListner('click', () => {});", expect: ['addEventListner — может, addEventListener?'] },
+  { code: "let button = document.querySelector('button');\nbutton.addEventListener('onclick', () => {});", expect: ["Имя события пишут без «on»: 'click'"], mark: "'onclick'" },
+  { code: "let button = document.querySelector('button');\nbutton.addEventListener('clik', () => {});", expect: ["События 'clik' не бывает — может, 'click'?"] },
+  { code: "let button = document.querySelector('button');\nbutton.addEventListener('tap', () => {});", expect: ["Событие 'tap' браузеру незнакомо"] },
+  {
+    code: "let lever = document.querySelector('.lever');\nfunction openGate() {}\nlever.addEventListener('click', openGate());",
+    expect: ['openGate() со скобками вызывает рецепт сразу'],
+    mark: 'openGate()',
+  },
+  { code: "let lever = document.querySelector('.lever');\nconst openGate = () => {};\nlever.onclick = openGate();", expect: ['а onclick ждёт сам рецепт'] },
 ];
 
 test('проверка JS объясняет типичные ошибки до запуска', async ({ page }) => {
@@ -174,4 +193,41 @@ test('алхимия функций: вызовы-флаконы, обоз и к
   expect(pair.items?.map((item) => item.shown)).toEqual(['3', '{size: 3}']);
   expect(missing).toMatchObject({ declared: false });
   expect(missing.error?.message).toBe('missing is not defined');
+});
+
+test('страницы Города Механизмов: шаги сценария, перезагрузка формой, страж циклов и изоляция', async ({ page }) => {
+  await page.goto('/');
+  const results = await page.evaluate(`Promise.all([import('/src/engine/pageRun.ts'), import('/src/engine/jsLint.ts')]).then(([m, lint]) => Promise.all([
+    m.runPage({ html: '<p class="sign" data-name="вывеска">a</p>', watch: '.sign' }, "let sign = document.querySelector('.sign');\\nsign.textContent = 'b';", [{ label: 'старт' }]),
+    m.runPage({ html: '<p class="sign">a</p>', watch: '.sign' }, "let sign = document.querySelector('sign');\\nsign.textContent = 'b';", [{ label: 'старт' }]),
+    m.runPage({ html: '<button>go</button>', watch: 'button' }, "document.querySelector('button').addEventListener('click', () => {\\n  while (true) {}\\n});", [{ label: 'старт' }, { label: 'щелчок', click: 'button' }]),
+    m.runPage({ html: '<form><input></form><p>0</p>', watch: 'p' }, "document.querySelector('form').addEventListener('submit', () => {\\n  document.querySelector('p').textContent = '1';\\n});", [{ label: 'отправка', submit: 'form' }]),
+    m.runPage({ html: '<p>x</p>', watch: 'p' }, "let p = document.querySelector('p');\\ntry {\\n  p.textContent = parent.document.title + localStorage.length;\\n} catch (error) {\\n  p.textContent = 'закрыто';\\n}", [{ label: 'старт' }]),
+    m.runPage({ html: '<p>x</p><input>', watch: 'p, input' }, "let p = document.querySelector('p');\\np.textContent = Math.floor(Math.random() * 100) + 1;\\ndocument.querySelector('input').addEventListener('input', (event) => {\\n  p.textContent = event.target.value;\\n});", [{ label: 'старт' }, { label: 'ввод', type: ['input', 'Ада'] }]),
+  ]).then((runs) => ({ runs, hint: lint.runtimeProblem("let sign = document.querySelector('sign');\\nsign.textContent = 'b';", runs[1].errors[0]).message })))`);
+  const { runs, hint } = results as {
+    runs: {
+      shots: { elements: { name: string; text: string; value: string | null }[]; reloaded: boolean; errors: { message: string; line?: number; loop?: boolean }[] }[];
+      errors: { message: string; line?: number }[];
+      timedOut?: boolean;
+    }[];
+    hint: string;
+  };
+  const [plain, missing, loop, reload, isolated, random] = runs;
+
+  expect(plain.shots[0].elements).toEqual([{ name: 'вывеска', classes: 'sign', text: 'b', value: null, hidden: false, disabled: false }]);
+  // Строка ошибки — в коде студента, а не в документе страницы, и подсказка — про селектор
+  expect(missing.errors[0].line).toBe(2);
+  expect(hint).toContain('Если это querySelector — он ничего не нашёл');
+  // Бесконечный цикл в обработчике останавливает страж, а страница отвечает
+  expect(loop.timedOut).toBeUndefined();
+  expect(loop.shots[1].errors[0].loop).toBe(true);
+  // Форма без preventDefault «перезагрузила» страницу: всё сделанное пропало
+  expect(reload.shots[0].reloaded).toBe(true);
+  expect(reload.shots[0].elements[0].text).toBe('0');
+  // Код страницы не видит ни игру, ни её хранилище
+  expect(isolated.shots[0].elements[0].text).toBe('закрыто');
+  // В проверке случайность одна и та же: первое число — 0.42
+  expect(random.shots[0].elements[0].text).toBe('43');
+  expect(random.shots[1].elements.map((item) => item.text || item.value)).toEqual(['Ада', 'Ада']);
 });

@@ -1,10 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { withImages } from '../engine/htmlCheck';
 import { runtimeProblem } from '../engine/jsLint';
-import { runScript, type RunResult } from '../engine/jsRun';
+import { runScript, type OutputLine, type RunResult } from '../engine/jsRun';
+import { pageDocument } from '../engine/pageHarness';
+import type { PageError } from '../engine/pageRun';
 import { recordExperiment } from '../game/achievements';
-import type { SpellExample as Example, MarkupExample, ScriptExample, ValueExample, VariantsExample, WidthExample } from '../game/spells';
+import type { SpellExample as Example, MarkupExample, PageExample, ScriptExample, ValueExample, VariantsExample, WidthExample } from '../game/spells';
 import { IMAGE_LIBRARY } from '../levels/shared/images';
+import { mechanismCss } from '../levels/shared/mechanism';
 import { DungeonView } from './DungeonView';
 import { OracleLine } from './JsScene';
 
@@ -72,6 +75,7 @@ function chipLabel(option: string): string {
 
 /** Живой пример заклинания: нажимаешь на значение или ширину экрана — мини-сцена сразу меняется. */
 export function SpellExample({ spell, example }: { spell: string; example: Example }) {
+  if ('page' in example) return <PageDemo spell={spell} example={example} />;
   if ('scripts' in example) return <ScriptDemo spell={spell} example={example} />;
   if ('markup' in example) return <MarkupDemo spell={spell} example={example} />;
   if ('variants' in example) return <VariantsDemo spell={spell} example={example} />;
@@ -147,6 +151,88 @@ function ScriptDemo({ spell, example }: { spell: string; example: ScriptExample 
           {result && !failure && result.output.length === 0 && <li className="oracle-line oracle-line--empty">Оракул молчит</li>}
         </ol>
       )}
+    </div>
+  );
+}
+
+/** Мини-страница примера: оформление Города Механизмов, только компактнее */
+const PAGE_DEMO_CSS = `${mechanismCss}
+body { min-height: 100vh; padding: 10px; gap: 10px; font-size: 14px; }
+`;
+
+/** Сколько строк Оракула показывать под мини-страницей */
+const PAGE_DEMO_LOG = 3;
+
+/**
+ * Пример-страница Города Механизмов: варианты кода оживляют одну и ту же мини-страницу —
+ * по кнопкам можно щёлкать. Страница отделена от игры, как и на уровнях.
+ */
+function PageDemo({ spell, example }: { spell: string; example: PageExample }) {
+  const [selected, setSelected] = useState(example.initial ?? 0);
+  // Каждый запуск — своя страница: и выбор варианта, и перезагрузка формой
+  const [launch, setLaunch] = useState(0);
+  const [log, setLog] = useState<{ output: OutputLine[]; error: PageError | null; reloaded: boolean }>({ output: [], error: null, reloaded: false });
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const { code } = example.scripts[selected];
+  const nonce = `${spell}:${selected}:${launch}`;
+  const srcDoc = useMemo(
+    () => pageDocument({ html: example.page.html, css: `${PAGE_DEMO_CSS}${example.page.css ?? ''}`, watch: 'body' }, code, { mode: 'live', nonce }),
+    [example.page, code, nonce],
+  );
+
+  useEffect(() => {
+    const listen = (event: MessageEvent) => {
+      const data = event.data as { nonce?: string; type?: string; line?: OutputLine; error?: PageError } | null;
+      if (event.source !== frameRef.current?.contentWindow || data?.nonce !== nonce) return;
+      const { line, error } = data;
+      if (data.type === 'output' && line) setLog((current) => ({ ...current, output: [...current.output, line].slice(-PAGE_DEMO_LOG) }));
+      else if (data.type === 'error' && error) setLog((current) => ({ ...current, error: current.error ?? error }));
+      else if (data.type === 'reload') {
+        setLog({ output: [], error: null, reloaded: true });
+        setLaunch((value) => value + 1);
+      }
+    };
+    window.addEventListener('message', listen);
+    return () => window.removeEventListener('message', listen);
+  }, [nonce]);
+
+  function choose(index: number) {
+    setSelected(index);
+    setLaunch(0);
+    setLog({ output: [], error: null, reloaded: false });
+    recordExperiment(spell);
+  }
+
+  const failure = log.error && runtimeProblem(code, log.error);
+  return (
+    <div className="example example--script example--page">
+      <div className="example__chips" role="group" aria-label="Варианты">
+        {example.scripts.map((script, i) => (
+          <button
+            key={script.label}
+            type="button"
+            className={i === selected ? 'chip chip--on' : 'chip'}
+            aria-pressed={i === selected}
+            onClick={() => choose(i)}
+          >
+            {script.label}
+          </button>
+        ))}
+      </div>
+      <pre className="example__code">
+        <code>{code}</code>
+      </pre>
+      <div className="example__oracle example__page">
+        <iframe key={nonce} ref={frameRef} title="Мини-страница примера" sandbox="allow-scripts allow-forms" srcDoc={srcDoc} />
+        <ol className="oracle-scroll__lines" aria-label="Что сказал Оракул">
+          {log.output.map((line, i) => (
+            <OracleLine key={i} line={line} />
+          ))}
+          {failure && <li className="oracle-line oracle-line--error">✖ {failure.message}</li>}
+          {log.reloaded && <li className="oracle-line oracle-line--error">↻ Форма перезагрузила страницу — всё, что на ней было, пропало</li>}
+          {!failure && !log.reloaded && log.output.length === 0 && <li className="oracle-line oracle-line--empty">Страница живая — пощёлкай по ней</li>}
+        </ol>
+      </div>
     </div>
   );
 }

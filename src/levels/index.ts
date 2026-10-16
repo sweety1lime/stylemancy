@@ -5,17 +5,21 @@ import { cardIndex } from './card-index';
 import { carousel } from './carousel';
 import { cascadeTree } from './cascade-tree';
 import { defaultCitadel } from './default-citadel';
+import { defaultLair } from './default-lair';
 import { floatingIslands } from './floating-islands';
 import { forestEdge } from './forest-edge';
 import { formForge } from './form-forge';
 import { functionCauldron } from './function-cauldron';
 import { forks } from './forks';
+import { gameWorkshop } from './game-workshop';
+import { leverWorks } from './lever-works';
 import { linkFair } from './link-fair';
 import { mazeHeart } from './maze-heart';
 import { mirrorTower } from './mirror-tower';
 import { mushroomGlades } from './mushroom-glades';
 import { oracleHall } from './oracle-hall';
 import { paradeGround } from './parade-ground';
+import { queryWorkshop } from './query-workshop';
 import { semanticCity } from './semantic-city';
 import { stainedAbbey } from './stained-abbey';
 import { tagVillage } from './tag-village';
@@ -120,8 +124,8 @@ export const scriptLands: Land[] = [
     blurb: 'Оживляем страницы и собираем свои мини-игры',
     emblem: 'gear',
     where: 'в Городе Механизмов',
-    regions: [],
-    upcoming: ['Мастерская Квери', 'Рычаги и шестерни', 'Мастерская игр', 'Логово Лорда Дефолта'],
+    regions: [queryWorkshop, leverWorks, gameWorkshop, defaultLair],
+    upcoming: [],
   },
 ];
 

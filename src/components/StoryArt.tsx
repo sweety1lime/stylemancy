@@ -14,6 +14,7 @@ import {
   HERO_ANIMATIONS,
   ISLAND_ROCK,
   JESTER,
+  LANTERN_FRAMES,
   MOON,
   OAK,
   PORTRAITS,
@@ -70,6 +71,11 @@ const CARDS: [string, string][][] = [
     ['size', '2'],
   ],
 ];
+
+/** Башни Города Механизмов: сколько этажей у каждой */
+const TOWERS = [3, 5, 4, 7, 3, 5, 4];
+/** Кнопки пульта в Цехе Рычагов — имена событий */
+const PANEL = ['click', 'input', 'submit'];
 
 /** Стёкла витража в кадре: так же стоят в испытании Витражной обители */
 const PANES = [GLASS.star, GLASS.rose, GLASS.moon, GLASS.tree, GLASS.leaf, GLASS.crown].map((glass) => glass.color);
@@ -517,6 +523,92 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
               </span>
             ))}
           </div>
+        </>
+      )}
+
+      {art === 'mech-city' && (
+        <>
+          {/* Город Механизмов: башни с окнами и большие шестерни над крышами */}
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <SpriteAnim className="sa-city-gear sa-city-gear--1" frames={GEAR_FRAMES} fps={3} fluid />
+          <SpriteAnim className="sa-city-gear sa-city-gear--2" frames={GEAR_FRAMES} fps={4} fluid />
+          <div className="sa-skyline">
+            {TOWERS.map((floors, i) => (
+              <span key={i} style={{ '--floors': floors } as CSSProperties} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {art === 'lamps' && (
+        <>
+          {/* Мастерская Квери ожила: вывеска светится, фонари горят */}
+          <span className="sa-workshop-sign">Мастерская открыта</span>
+          <div className="sa-lamps">
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className="sa-lamp-post">
+                <SpriteAnim frames={LANTERN_FRAMES} fps={3} fluid />
+              </span>
+            ))}
+          </div>
+          <SpriteAnim className="sa-city-gear sa-city-gear--3" frames={GEAR_FRAMES} fps={3} fluid />
+        </>
+      )}
+
+      {art === 'levers' && (
+        <>
+          {/* Цех Рычагов: ворота расходятся, а на пульте — кнопки событий */}
+          <div className="sa-gate-doors">
+            <span />
+            <span />
+          </div>
+          <div className="sa-panel">
+            {PANEL.map((name) => (
+              <span key={name}>{name}</span>
+            ))}
+            <span className="sa-panel__lever" />
+          </div>
+        </>
+      )}
+
+      {art === 'arcade' && (
+        <>
+          {/* Мастерская игр: автомат-кликер и автомат Сфинкса */}
+          <div className="sa-cabinet">
+            <span className="sa-cabinet__screen">
+              <span className="sa-cabinet__coin" />
+              Монет: 99
+            </span>
+            <span className="sa-cabinet__buttons">
+              <i />
+              <i />
+              <i />
+            </span>
+          </div>
+          <div className="sa-cabinet sa-cabinet--sphinx">
+            <span className="sa-cabinet__screen">
+              <b>?</b>
+              Больше!
+            </span>
+            <span className="sa-cabinet__buttons">
+              <i />
+              <i />
+            </span>
+          </div>
+        </>
+      )}
+
+      {art === 'lair' && (
+        <>
+          {/* Логово Лорда Дефолта: страницы перезагружаются сами собой, а у ворот — форма */}
+          <span className="sa-reload sa-reload--1">↻</span>
+          <span className="sa-reload sa-reload--2">↻</span>
+          <span className="sa-reload sa-reload--3">↻</span>
+          <span className="sa-lair-tower" />
+          <span className="sa-lair-form">
+            <i>письмо…</i>
+            <b>Отправить</b>
+          </span>
         </>
       )}
 

@@ -51,6 +51,108 @@ const HERO_ACTIONS = ['step', 'turnLeft', 'turnRight', 'take', 'zap'];
 const HERO_QUESTIONS = ['isWall', 'isGem', 'atExit', 'look', 'read', 'gems'];
 const HERO_METHODS = [...HERO_ACTIONS, ...HERO_QUESTIONS];
 
+/** Что есть у document — опечатки в остальном ловятся по этому списку */
+const DOCUMENT_MEMBERS = [
+  'querySelector',
+  'querySelectorAll',
+  'getElementById',
+  'getElementsByClassName',
+  'getElementsByTagName',
+  'createElement',
+  'createTextNode',
+  'body',
+  'head',
+  'title',
+  'documentElement',
+  'addEventListener',
+  'removeEventListener',
+  'activeElement',
+];
+
+/** Команды classList */
+const CLASSLIST_METHODS = ['add', 'remove', 'toggle', 'contains', 'replace', 'length', 'value', 'item', 'forEach'];
+
+/** Длинные имена свойств и команд страницы: в них чаще всего опечатки */
+const DOM_NAMES = [
+  'addEventListener',
+  'removeEventListener',
+  'querySelector',
+  'querySelectorAll',
+  'getElementById',
+  'textContent',
+  'innerHTML',
+  'innerText',
+  'classList',
+  'className',
+  'appendChild',
+  'removeChild',
+  'createElement',
+  'setAttribute',
+  'getAttribute',
+  'removeAttribute',
+  'hasAttribute',
+  'preventDefault',
+  'stopPropagation',
+  'currentTarget',
+  'parentElement',
+  'children',
+  'firstElementChild',
+  'lastElementChild',
+  'dataset',
+  'disabled',
+  'checked',
+  'placeholder',
+  'closest',
+  'prepend',
+  'append',
+  'replaceChildren',
+  'toLowerCase',
+  'toUpperCase',
+  'includes',
+  'forEach',
+];
+
+/** События, на которые вешают обработчики */
+const EVENTS = [
+  'click',
+  'dblclick',
+  'input',
+  'change',
+  'submit',
+  'reset',
+  'keydown',
+  'keyup',
+  'keypress',
+  'focus',
+  'blur',
+  'mouseover',
+  'mouseout',
+  'mouseenter',
+  'mouseleave',
+  'mousedown',
+  'mouseup',
+  'mousemove',
+  'pointerdown',
+  'pointerup',
+  'pointermove',
+  'touchstart',
+  'touchend',
+  'contextmenu',
+  'wheel',
+  'scroll',
+  'resize',
+  'load',
+  'DOMContentLoaded',
+  'animationend',
+  'transitionend',
+  'select',
+  'copy',
+  'paste',
+  'dragstart',
+  'dragover',
+  'drop',
+];
+
 /** Привычки из других языков и заглавные буквы там, где нужны строчные */
 const WRONG_WORDS: Record<string, string> = {
   Let: 'let',
@@ -466,6 +568,7 @@ function nameProblems(program: AnyNode): Problem[] {
   const problems: Problem[] = [];
   const { declared, reads, writes, members } = collectNames(program);
   const declaredNames = [...declared.keys()];
+  const ownKeys = ownKeysOf(program);
   const reported = new Set<string>();
 
   for (const [name, node] of declared) {
@@ -530,10 +633,114 @@ function nameProblems(program: AnyNode): Problem[] {
     } else if (object.type === 'Identifier' && object.name === 'Math' && !(name in Math)) {
       const typo = nearest(name, Object.getOwnPropertyNames(Math));
       problems.push(error(property.start, property.end, `У Math нет ${name}${typo ? ` — может, ${typo}?` : '.'}`, 'name'));
+    } else if (object.type === 'Identifier' && object.name === 'document' && !DOCUMENT_MEMBERS.includes(name) && !(name in globalThis.document)) {
+      const typo = nearest(name, DOCUMENT_MEMBERS);
+      problems.push(error(property.start, property.end, `У document нет ${name}${typo ? ` — может, ${typo}?${caseNote(name, typo)}` : '.'}`, 'name'));
+    } else if (isMember(object, 'classList') && !CLASSLIST_METHODS.includes(name)) {
+      const typo = nearest(name, CLASSLIST_METHODS);
+      const known = 'Есть add, remove, toggle и contains.';
+      problems.push(error(property.start, property.end, `У classList нет команды ${name}${typo ? ` — может, ${typo}?${caseNote(name, typo)}` : `. ${known}`}`, 'name'));
     } else if (name !== 'length' && nearest(name, ['length']) === 'length') {
       problems.push(error(property.start, property.end, `${name} — может, length? Длина пишется так: l-e-n-g-t-h.`, 'name'));
+    } else if (name.length >= 6 && !DOM_NAMES.includes(name) && !ownKeys.has(name)) {
+      const typo = nearest(name, DOM_NAMES);
+      if (typo) problems.push(error(property.start, property.end, `${name} — может, ${typo}?${caseNote(name, typo)}`, 'name'));
     }
   }
+  return problems;
+}
+
+/** Опечатка только в больших и маленьких буквах — об этом стоит сказать отдельно */
+function caseNote(name: string, typo: string): string {
+  return typo.toLowerCase() === name.toLowerCase() ? ' Большие и маленькие буквы различаются.' : '';
+}
+
+/** obj.classList — свойство с этим именем */
+function isMember(node: AnyNode, name: string): boolean {
+  const property = node.property as AnyNode | undefined;
+  return node.type === 'MemberExpression' && !node.computed && property?.type === 'Identifier' && property.name === name;
+}
+
+/** Все узлы дерева по порядку */
+function walk(node: AnyNode, visit: (node: AnyNode) => void): void {
+  visit(node);
+  childNodes(node).forEach((child) => walk(child, visit));
+}
+
+/**
+ * Свои ключи студента — поля в его карточках-объектах: это не опечатки.
+ * Запись через точку сюда не входит: `sign.textContnet = …` — как раз самая частая опечатка.
+ */
+function ownKeysOf(program: AnyNode): Set<string> {
+  const keys = new Set<string>();
+  walk(program, (node) => {
+    const key = node.key as AnyNode | undefined;
+    if (node.type === 'Property' && !node.computed && key) keys.add(key.type === 'Identifier' ? (key.name as string) : String(key.value));
+  });
+  return keys;
+}
+
+/** Имена объявленных функций — их передают обработчиками */
+function functionNames(program: AnyNode): Set<string> {
+  const names = new Set<string>();
+  walk(program, (node) => {
+    const id = node.id as AnyNode | undefined;
+    if (node.type === 'FunctionDeclaration' && id) names.add(id.name as string);
+    const init = node.init as AnyNode | undefined;
+    if (node.type === 'VariableDeclarator' && id?.type === 'Identifier' && init && /Function/.test(init.type)) names.add(id.name as string);
+  });
+  return names;
+}
+
+/**
+ * Обработчики событий: имя события с опечаткой или с «on», рецепт со скобками вместо самого рецепта —
+ * код с такой ошибкой работает, но обработчик не срабатывает никогда (или срабатывает сразу).
+ */
+function eventProblems(program: AnyNode): Problem[] {
+  const problems: Problem[] = [];
+  const recipes = functionNames(program);
+  const calledTooEarly = (handler: AnyNode | undefined): string | undefined => {
+    const callee = handler?.callee as AnyNode | undefined;
+    if (handler?.type !== 'CallExpression' || callee?.type !== 'Identifier') return undefined;
+    return recipes.has(callee.name as string) ? (callee.name as string) : undefined;
+  };
+  walk(program, (node) => {
+    if (node.type === 'CallExpression' && isMember(node.callee as AnyNode, 'addEventListener')) {
+      const [kind, handler] = node.arguments as AnyNode[];
+      const event = kind?.type === 'Literal' && typeof kind.value === 'string' ? kind.value : undefined;
+      if (event !== undefined && !EVENTS.includes(event)) {
+        const bare = event.replace(/^on/i, '').toLowerCase();
+        const typo = nearest(event, EVENTS);
+        if (/^on/i.test(event) && EVENTS.includes(bare)) {
+          problems.push(error(kind.start, kind.end, `Имя события пишут без «on»: '${bare}', а не '${event}'. «on» бывает только в свойствах вроде onclick.`, 'name'));
+        } else if (typo) {
+          problems.push(error(kind.start, kind.end, `События '${event}' не бывает — может, '${typo}'?${caseNote(event, typo)}`, 'name'));
+        } else {
+          problems.push({
+            from: kind.start,
+            to: kind.end,
+            severity: 'warning',
+            kind: 'name',
+            message: `Событие '${event}' браузеру незнакомо — обработчик не сработает. Обычные события: click, input, submit, keydown.`,
+          });
+        }
+      }
+      const early = calledTooEarly(handler);
+      if (early) {
+        const message = `${early}() со скобками вызывает рецепт сразу, а addEventListener ждёт сам рецепт — чтобы позвать его потом. Пиши без скобок: ${early}`;
+        problems.push(error(handler.start, handler.end, message, 'name'));
+      }
+    }
+    const left = node.left as AnyNode | undefined;
+    const right = node.right as AnyNode | undefined;
+    if (node.type === 'AssignmentExpression' && left?.type === 'MemberExpression' && !left.computed && right) {
+      const property = (left.property as AnyNode).name as string;
+      const early = /^on[a-z]+$/.test(property) ? calledTooEarly(right) : undefined;
+      if (early) {
+        problems.push(error(right.start, right.end, `${early}() со скобками вызывает рецепт сразу, а ${property} ждёт сам рецепт. Пиши без скобок: ${early}`, 'name'));
+      }
+    }
+  });
   return problems;
 }
 
@@ -602,7 +809,12 @@ export function lintJs(code: string, rules?: { require?: CodeRule[]; reject?: Co
     const problems = structure.length ? structure : words.length ? words : [syntaxProblem(code, failure as AcornError)];
     return { problems, topLevel: [] };
   }
-  const problems = [...words, ...nameProblems(program).filter((problem) => !words.some((word) => word.from === problem.from)), ...lostValues(program, code)];
+  const problems = [
+    ...words,
+    ...nameProblems(program).filter((problem) => !words.some((word) => word.from === problem.from)),
+    ...eventProblems(program),
+    ...lostValues(program, code),
+  ];
   if (rules) problems.push(...ruleProblems(code, rules));
   return { problems, topLevel: topLevelNames(program) };
 }
@@ -654,14 +866,34 @@ function runtimeMessage({ name, message }: RunError, lineText: string, code: str
     const which = constName ? `Колба ${constName} запечатана` : 'Эта колба запечатана';
     return `${which}: она объявлена через const, и менять её нельзя. Если значение должно меняться — объяви её через let.`;
   }
+  // На странице пустота чаще всего — элемент, который querySelector не нашёл
+  const clean = stripJsComments(code);
+  const findsOne = /\b(querySelector|getElementById)\s*\(/.test(clean);
+  const findsMany = /\bquerySelectorAll\s*\(/.test(clean);
+  const notFound = ' Если это querySelector — он ничего не нашёл и вернул null: проверь селектор. Класс пишут с точкой (.door), id — с решёткой (#door).';
+  const manyHint = ' querySelectorAll возвращает список, а не один элемент — перебери его: for (const item of items) { … }';
+  if ((match = /^Failed to execute '\w+' on '\w+': '(.*)' is not a valid selector\.?$/.exec(message))) {
+    return `Селектор «${match[1]}» браузер не понимает. Класс пишут с точкой (.door), id — с решёткой (#door), тег — просто словом (button).`;
+  }
+  if (/^Failed to execute '(appendChild|append|prepend)' on '\w+': parameter 1 is not of type 'Node'\.?$/.test(message)) {
+    return 'appendChild принимает только элемент — созданный через document.createElement(…). Текст кладут через textContent или append.';
+  }
   if ((match = /^(.+) is not a function$/.exec(message))) {
-    return `«${match[1]}» — не команда: её нельзя вызвать со скобками ().`;
+    const onList = /\.(addEventListener|classList)\b/.test(match[1]) && findsMany;
+    return `«${match[1]}» — не команда: её нельзя вызвать со скобками ().${onList ? manyHint : ''}`;
   }
   if ((match = /^Cannot read properties of (undefined|null) \(reading '(.+)'\)$/.exec(message))) {
-    return `Пытаешься взять «${match[2]}» у пустоты — значение ${match[1]}. Проверь, что в колбе что-то есть.`;
+    const hint =
+      match[1] === 'null' && findsOne
+        ? notFound
+        : match[1] === 'undefined' && findsMany && CLASSLIST_METHODS.includes(match[2])
+          ? manyHint
+          : ' Проверь, что в колбе что-то есть.';
+    return `Пытаешься взять «${match[2]}» у пустоты — значение ${match[1]}.${hint}`;
   }
-  if ((match = /^Cannot set properties of (undefined|null)/.exec(message))) {
-    return `Пытаешься записать свойство в пустоту — значение ${match[1]}.`;
+  if ((match = /^Cannot set properties of (undefined|null)(?: \(setting '(.+)'\))?/.exec(message))) {
+    const hint = match[1] === 'null' && findsOne ? notFound : match[1] === 'undefined' && findsMany ? manyHint : '';
+    return `Пытаешься записать ${match[2] ? `«${match[2]}»` : 'свойство'} в пустоту — значение ${match[1]}.${hint}`;
   }
   if (/Maximum call stack size exceeded|too much recursion/.test(message)) {
     return 'Функция вызывает сама себя без конца — у неё нет условия, когда остановиться.';

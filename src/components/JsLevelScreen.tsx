@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { evaluateJs, scoreJs, type JsEvaluation } from '../engine/jsCheck';
 import { lintJs } from '../engine/jsLint';
+import { evaluatePage, type PageEvaluation } from '../engine/pageCheck';
 import type { JsLevel } from '../engine/types';
 import { sfx } from '../game/sound';
 import type { CodeEditorHandle } from './CodeEditor';
 import { DungeonScene } from './DungeonScene';
 import { JsScene } from './JsScene';
+import { PageScene } from './PageScene';
 import { EditorCard, LevelBrief, Workbench } from './LevelParts';
 import type { RegionStats } from './ResultPanel';
 import { useLevelFlow } from './useLevelFlow';
@@ -21,12 +23,17 @@ interface JsLevelScreenProps {
 /** Сколько ждать после последней клавиши, прежде чем запустить код */
 const RUN_DELAY = 400;
 
+/** Проверка уровня: страница Города Механизмов — по шагам сценария, остальное — запуском скрипта. */
+function evaluate(level: JsLevel, code: string, cast = false): Promise<JsEvaluation | PageEvaluation> {
+  return level.page ? evaluatePage(level, code, cast) : evaluateJs(level, code, cast);
+}
+
 /** JS-уровень: студент пишет скрипт, Оракул повторяет вывод, колбы показывают переменные. */
 export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLevelScreenProps) {
   const flow = useLevelFlow(level, region, level.starterJs);
   const editorRef = useRef<CodeEditorHandle>(null);
   // Последняя проверка и код, по которому она сделана: пока код новее — свиток слегка тускнеет
-  const [checked, setChecked] = useState<{ code: string; evaluation: JsEvaluation } | null>(null);
+  const [checked, setChecked] = useState<{ code: string; evaluation: JsEvaluation | PageEvaluation } | null>(null);
   const busy = checked?.code !== flow.code;
   // Запуски асинхронные: показываем только результат последнего
   const ticket = useRef(0);
@@ -37,7 +44,7 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
     const id = ++ticket.current;
     const code = flow.code;
     const timer = setTimeout(() => {
-      void evaluateJs(level, code).then((evaluation) => {
+      void evaluate(level, code).then((evaluation) => {
         if (ticket.current === id) setChecked({ code, evaluation });
       });
     }, RUN_DELAY);
@@ -49,7 +56,7 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
     const current = flow.codeRef.current;
     const id = ++ticket.current;
     sfx.cast();
-    const result = await evaluateJs(level, current, true);
+    const result = await evaluate(level, current, true);
     if (ticket.current === id) setChecked({ code: current, evaluation: result });
     if (result.passed) {
       sfx.success();
@@ -64,7 +71,15 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
     <main className="level level--js">
       <LevelBrief level={level} number={number} cue={flow.outcome} />
 
-      {level.dungeons?.length ? (
+      {level.page ? (
+        <PageScene
+          level={level}
+          code={checked?.code ?? flow.code}
+          evaluation={checked && 'page' in checked.evaluation ? checked.evaluation : null}
+          busy={busy}
+          celebrate={flow.outcome?.kind === 'success'}
+        />
+      ) : level.dungeons?.length ? (
         <DungeonScene
           level={level}
           code={checked?.code ?? flow.code}

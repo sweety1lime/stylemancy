@@ -171,7 +171,7 @@ const SAYS: Record<OutputLine['kind'], string> = {
 const QUOTED_SUM = /(['"`])\d+\1\s*\+|\+\s*(['"`])\d+\2/;
 
 /** Почему строка не совпала — подсказка в конце сообщения. */
-function lineHint(actual: string, target: string, names: string[], code: string): string {
+export function lineHint(actual: string, target: string, names: string[], code: string): string {
   if (names.includes(actual)) return ' — убери кавычки: Оракул прочёл слово, а не заглянул в колбу';
   if (actual === 'undefined') return ' — в колбе пусто (undefined)';
   if (actual.includes('${') && !target.includes('${')) return ' — ${…} подставляет значение только в шаблоне, в обратных кавычках `` ` ``. В обычных кавычках он остаётся текстом';

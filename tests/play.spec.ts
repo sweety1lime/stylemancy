@@ -912,7 +912,7 @@ test.describe('Скриптория', () => {
     await prologue.getByRole('button', { name: 'Пропустить' }).click();
     await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Врата Скриптории/ })).toContainText('Пройдено 0 из 16');
-    await expect(page.locator('[data-land="mechanism-city"]')).toContainText('В тумане — скоро');
+    await expect(page.locator('[data-land="mechanism-city"]')).toContainText('Пройдено 0 из 19');
     await page.screenshot({ path: `${SCREENS}/30-scriptoria-map.png`, fullPage: true });
 
     await page.reload();
@@ -922,7 +922,7 @@ test.describe('Скриптория', () => {
     // Дверь на карте Скриптории ведёт обратно, а дверь Каскадии помнит, что герой заходил
     await page.getByRole('link', { name: /Дверь в Каскадию/ }).click();
     await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 55');
+    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 74');
   });
 
   test('Зал Оракула: свиток повторяет вывод, колба показывает тип', async ({ page }) => {
@@ -1305,6 +1305,138 @@ test.describe('Мастерская Рецептов', () => {
       });
       await page.goto('/#/level/obj-06');
       await expect(page.locator('.call')).toHaveCount(3);
+      await expectNoHorizontalScroll(page);
+    });
+  });
+});
+
+test.describe('Город Механизмов', () => {
+  /** Испытания районов Города пройдены — гостю открыты все районы */
+  async function unlockCity(page: Page, extra: string[] = []) {
+    await page.addInitScript((ids) => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(ids.map((id) => [id, done]))));
+    }, ['dom-06', 'ev-07', 'game-04', ...extra]);
+  }
+
+  test('Мастерская Квери: код меняет живую страницу, ошибка селектора объясняется', async ({ page }) => {
+    await page.goto('/#/level/dom-01');
+    await expect(page.getByRole('heading', { name: 'Вывеска' })).toBeVisible();
+    const frame = page.frameLocator('.page-scene__page');
+    await expect(frame.locator('.sign')).toHaveText('Закрыто навсегда');
+    await expect(page.locator('.goals__head')).toHaveText(/0 из 1/);
+
+    // Селектор без точки ничего не находит — querySelector вернул null
+    await typeCode(page, "let sign = document.querySelector('sign');\nsign.textContent = 'Мастерская открыта';\n");
+    await expect(page.locator('.page-scene__status')).toContainText('Если это querySelector — он ничего не нашёл');
+
+    await typeCode(page, "let sign = document.querySelector('.sign');\nsign.textContent = 'Мастерская открыта';\n");
+    await expect(frame.locator('.sign')).toHaveText('Мастерская открыта');
+    await expect(page.locator('.goals__head')).toHaveText(/1 из 1/);
+    await page.screenshot({ path: `${SCREENS}/60-mechanism-page.png`, fullPage: true });
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('рычаг: обработчик ждёт щелчка, а рецепт со скобками сработал бы сразу', async ({ page }) => {
+    await unlockCity(page);
+    await page.goto('/#/level/ev-01');
+    const frame = page.frameLocator('.page-scene__page');
+    const opener = "let lever = document.querySelector('.lever');\nlet gate = document.querySelector('.gate');\nfunction openGate() {\n  gate.classList.add('open');\n}\n";
+
+    await typeCode(page, `${opener}lever.addEventListener('click', openGate());\n`);
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('openGate() со скобками вызывает рецепт сразу');
+
+    await typeCode(page, `${opener}lever.addEventListener('click', openGate);\n`);
+    await expect(page.locator('.goals__head')).toHaveText(/2 из 2/);
+    // Страница живая: ворота стоят, пока по рычагу не щёлкнули на самой сцене
+    await expect(frame.locator('.gate')).not.toHaveClass(/open/);
+    await frame.locator('.lever').click();
+    await expect(frame.locator('.gate')).toHaveClass(/open/);
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('бесконечный цикл в обработчике останавливается, страница и игра живы', async ({ page }) => {
+    await unlockCity(page);
+    await page.goto('/#/level/ev-01');
+    const frame = page.frameLocator('.page-scene__page');
+    await typeCode(page, "let lever = document.querySelector('.lever');\nlever.addEventListener('click', () => {\n  while (true) {}\n});\n");
+    await expect(page.locator('.goals__head')).toHaveText(/1 из 2/);
+    await frame.locator('.lever').click();
+    await expect(page.locator('.page-scene__status')).toContainText('Код работал слишком долго');
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('похоже, где-то бесконечный цикл');
+  });
+
+  test('Логово: форма без preventDefault перезагружает страницу и всё стирает', async ({ page }) => {
+    await unlockCity(page);
+    await page.goto('/#/level/lair-01');
+    const frame = page.frameLocator('.page-scene__page');
+    await expect(page.locator('.goals')).toBeVisible();
+
+    // Стартовый код Лорда Дефолта: письмо добавляется — и тут же пропадает вместе со страницей
+    await frame.locator('.letter').fill('Сдавайся!');
+    await frame.locator('.letter').press('Enter');
+    await expect(page.locator('.page-scene__status')).toContainText('Форма перезагрузила страницу');
+    await expect(frame.locator('.letters li')).toHaveCount(0);
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('Форма перезагрузила страницу');
+
+    const solution = await page.evaluate<string>("import('/src/levels/default-lair/lair-01.ts').then((m) => m.default.solutionJs)");
+    await typeCode(page, solution);
+    await expect(page.locator('.goals__head')).toHaveText(/2 из 2/);
+    await frame.locator('.letter').fill('Город свободен');
+    await frame.locator('.letter').press('Enter');
+    await expect(frame.locator('.letters li')).toHaveText(['Город свободен']);
+    await page.screenshot({ path: `${SCREENS}/61-default-lair.png`, fullPage: true });
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('Мастерская игр: готовую игру можно скачать — без обвязки тренажёра', async ({ page }) => {
+    await unlockCity(page);
+    await page.goto('/#/level/game-01');
+    const solution = await page.evaluate<string>("import('/src/levels/game-workshop/game-01.ts').then((m) => m.default.solutionJs)");
+    await typeCode(page, solution);
+    await expect(page.locator('.goals__head')).toHaveText(/4 из 4/);
+
+    const downloading = page.waitForEvent('download');
+    await page.getByRole('button', { name: /Скачать игру/ }).click();
+    const download = await downloading;
+    expect(download.suggestedFilename()).toBe('clicker.html');
+    const { readFile } = await import('node:fs/promises');
+    const html = await readFile(await download.path(), 'utf8');
+    expect(html).toContain('<button class="mine"');
+    expect(html).toContain("mine.addEventListener('click'");
+    expect(html).not.toContain('__harness');
+    expect(html).not.toContain('__guard');
+  });
+
+  test('финал Скриптории: Лорд Дефолт отменён, Руна Механизмов', async ({ page }) => {
+    await unlockCity(page, ['lair-01']);
+    await page.goto('/#/level/lair-02');
+    const solution = await page.evaluate<string>("import('/src/levels/default-lair/lair-02.ts').then((m) => m.default.solutionJs)");
+    await typeCode(page, solution);
+    await expect(page.locator('.goals__head')).toHaveText(/6 из 6/);
+    await cast(page);
+
+    const outro = page.getByRole('dialog', { name: 'Эпилог: Логово Лорда Дефолта' });
+    await expect(outro).toContainText('Ты отменил… меня?!');
+    for (let i = 0; i < 3; i++) await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('Держи Руну Механизмов — Скриптория спасена!');
+  });
+
+  test.describe('на телефоне', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test('живая страница и кнопка скачивания помещаются по ширине', async ({ page }) => {
+      await unlockCity(page);
+      await page.goto('/#/level/game-02');
+      await expect(page.frameLocator('.page-scene__page').locator('.mine')).toBeVisible();
+      await expect(page.getByRole('button', { name: /Скачать игру/ })).toBeVisible();
       await expectNoHorizontalScroll(page);
     });
   });

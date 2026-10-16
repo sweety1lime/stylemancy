@@ -4,6 +4,7 @@ import { checkLevelCss } from './evaluate';
 import { evaluateHtml } from './htmlCheck';
 import { dungeonProblems } from './dungeon';
 import { codeLines, evaluateJs, targetRuns } from './jsCheck';
+import { evaluatePage, stepsOf, targetPage } from './pageCheck';
 import { isHtmlLevel, isJsLevel, type CssLevel, type HtmlLevel, type JsLevel, type Level } from './types';
 
 export interface LevelReport {
@@ -47,7 +48,28 @@ function checkHtml(level: HtmlLevel) {
   return { solutionPassed: solution.passed, starterPassed: starter.passed, issues };
 }
 
+/** Страница Города Механизмов: эталон проходит сценарий без ошибок, и на каждом шаге есть что сравнивать. */
+async function checkPage(level: JsLevel) {
+  const solution = await evaluatePage(level, level.solutionJs, true);
+  const starter = await evaluatePage(level, level.starterJs, true);
+  const issues = [...solution.errors.map((p) => p.message), ...solution.warnings.map((p) => p.message), ...solution.misses];
+  const target = await targetPage(level);
+  const steps = stepsOf(level);
+  if (!level.steps?.length) issues.push('У страницы нет шагов сценария.');
+  if (target.timedOut) issues.push('Эталон не ответил: страница зависла.');
+  if (target.errors.length) issues.push(`Эталон падает при запуске: ${target.errors[0].message}`);
+  target.shots.forEach((shot, i) => {
+    const label = steps[i]?.label;
+    if (shot.errors.length) issues.push(`Эталон падает на шаге «${label}»: ${shot.errors[0].message}`);
+    if (shot.missing) issues.push(`Шаг «${label}»: на странице нет ${shot.missing}.`);
+    if (shot.reloaded) issues.push(`Шаг «${label}»: у эталона форма перезагрузила страницу.`);
+    if (!shot.elements.length) issues.push(`Шаг «${label}»: селектор page.watch ничего не нашёл.`);
+  });
+  return { solutionPassed: solution.passed, starterPassed: starter.passed, issues };
+}
+
 async function checkJs(level: JsLevel) {
+  if (level.page) return checkPage(level);
   const solution = await evaluateJs(level, level.solutionJs, true);
   const starter = await evaluateJs(level, level.starterJs, true);
   const issues = [...solution.errors.map((p) => p.message), ...solution.warnings.map((p) => p.message), ...solution.misses];
