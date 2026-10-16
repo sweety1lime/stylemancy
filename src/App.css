@@ -2126,7 +2126,8 @@ a.land:hover .land__art {
   }
 }
 
-.story-art--villain {
+.story-art--villain,
+.story-art--villain-script {
   background-image: linear-gradient(180deg, #1c1c24 0 25%, #23232c 25% 50%, #2a2a34 50% 75%, #32323d 75%);
   /* Один слой фона — во весь кадр, а не плиткой, как звёзды базового неба */
   background-size: 100% 100%;
@@ -2158,6 +2159,13 @@ a.land:hover .land__art {
   color: #8b8b99;
   text-decoration: none;
   transform: rotate(4deg);
+}
+
+/* В Скриптории вокруг Лорда Дефолта — пустые значения JavaScript, серые и моноширинные */
+.sa-default-text--script {
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  text-decoration: none;
 }
 
 .sa-spark {
@@ -3817,6 +3825,200 @@ a.land--door .land__door {
   color: var(--text);
 }
 
+/* Лабиринт Решений: подземелье «Пути героя» — клетки карты и герой поверх них */
+.dungeon-scene {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  background-color: #0d0a1c;
+}
+
+.dungeon {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--w), 1fr);
+  width: min(100%, calc(var(--w) * 52px));
+  margin: 0 auto;
+  box-shadow: 0 0 0 3px #2a2350;
+  container-type: inline-size;
+}
+
+.dungeon--compact {
+  width: min(100%, calc(var(--w) * 30px));
+}
+
+.dungeon__cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: var(--floor) center / 100% 100%;
+}
+
+.dungeon__cell--wall {
+  background-image: var(--wall);
+}
+
+.dungeon__cell img {
+  position: relative;
+  z-index: 1;
+  width: 62%;
+  height: auto;
+}
+
+.dungeon__cell--exit img {
+  width: 76%;
+  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.6));
+}
+
+.dungeon__cell--bug img {
+  width: 70%;
+  animation: bob 0.8s steps(1, end) infinite;
+}
+
+/* Где герой уже прошёл — золотые следы */
+.dungeon__cell--trail::after {
+  content: "";
+  position: absolute;
+  width: 16%;
+  aspect-ratio: 1;
+  background: rgba(246, 196, 83, 0.4);
+}
+
+.dungeon__sign {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 62%;
+  aspect-ratio: 1;
+  background: #7c4a1e;
+  box-shadow:
+    inset 0 0 0 2px #3b2208,
+    0 3px 0 0 #3b2208;
+  color: #fde68a;
+  /* Цифра — в половину клетки, какой бы ни была карта */
+  font: 700 calc(52cqw / var(--w)) / 1 var(--font-pixel);
+}
+
+.dungeon__hero {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: calc(100% / var(--w));
+  height: calc(100% / var(--h));
+  transform: translate(calc(var(--x) * 100%), calc(var(--y) * 100%));
+  transition: transform var(--step) linear;
+  pointer-events: none;
+}
+
+.dungeon__hero .sprite-anim {
+  width: 74%;
+}
+
+.dungeon__hero .sprite-anim img {
+  position: static;
+}
+
+/* Спрайт героя смотрит вправо; влево — отражаем. Куда он смотрит — показывает золотая стрелка */
+.dungeon__hero--left .sprite-anim {
+  transform: scaleX(-1);
+}
+
+.dungeon__hero::after {
+  content: "";
+  position: absolute;
+  border: 6px solid transparent;
+}
+
+.dungeon--compact .dungeon__hero::after {
+  border-width: 4px;
+}
+
+.dungeon__hero--right::after {
+  top: 50%;
+  right: -2px;
+  border-right-width: 0;
+  border-left-color: var(--gold);
+  translate: 0 -50%;
+}
+
+.dungeon__hero--left::after {
+  top: 50%;
+  left: -2px;
+  border-left-width: 0;
+  border-right-color: var(--gold);
+  translate: 0 -50%;
+}
+
+.dungeon__hero--up::after {
+  top: -2px;
+  left: 50%;
+  border-top-width: 0;
+  border-bottom-color: var(--gold);
+  translate: -50% 0;
+}
+
+.dungeon__hero--down::after {
+  bottom: -2px;
+  left: 50%;
+  border-bottom-width: 0;
+  border-top-color: var(--gold);
+  translate: -50% 0;
+}
+
+/* Удар о стену или укус бага: клетка вспыхивает красным */
+.dungeon__bonk {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: calc(100% / var(--w));
+  height: calc(100% / var(--h));
+  background: radial-gradient(circle, rgba(248, 113, 113, 0.85) 0 26%, rgba(248, 113, 113, 0.25) 46%, transparent 70%);
+  transform: translate(calc(var(--x) * 100%), calc(var(--y) * 100%));
+  animation: twinkle 0.5s steps(1, end) 3;
+  pointer-events: none;
+}
+
+.dungeon-scene__status {
+  margin: 0;
+  font-size: 15px;
+}
+
+.dungeon-scene__status--error {
+  color: var(--danger);
+}
+
+.dungeon-scene__status--ok {
+  color: var(--gold-strong);
+}
+
+.dungeon-scene__status--info {
+  color: var(--muted);
+}
+
+.dungeon-scene__log {
+  min-height: 0;
+  max-height: 140px;
+  padding: 8px 12px;
+  background: #0b1220;
+  box-shadow: inset 0 0 0 2px #134e4a;
+}
+
+.dungeon-scene__lines {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.dungeon-scene__lines--over {
+  color: var(--gold);
+}
+
 /* Сценка «Дверь <script>»: дверь приоткрыта, из неё льётся свет, герой идёт к порогу */
 .sa-gate-glow {
   position: absolute;
@@ -4096,6 +4298,94 @@ a.land--door .land__door {
   animation-delay: -1.1s;
 }
 
+/* Лабиринт Решений: настоящее подземелье «Пути героя», только маленькое */
+.story-art--maze {
+  background-image: linear-gradient(180deg, #0d0a1c 0 25%, #120d26 25% 50%, #171030 50% 75%, #1c133a 75%);
+  background-size: 100% 100%;
+}
+
+.sa-maze {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 78cqw;
+  translate: -50% -50%;
+}
+
+.sa-maze .dungeon {
+  width: 100%;
+}
+
+/* Карусель Циклопа: кристаллы катаются по кругу под полосатым шатром */
+.story-art--carousel {
+  background-image: linear-gradient(180deg, #1a0f2e 0 25%, #221338 25% 50%, #2b1743 50% 75%, #341b4e 75%);
+  background-size: 100% 100%;
+}
+
+.sa-carousel-tent {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  width: 42cqw;
+  height: 12cqw;
+  background: repeating-linear-gradient(90deg, #dc2626 0 4cqw, #fef3c7 4cqw 8cqw);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  translate: -50% 0;
+}
+
+.sa-carousel {
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  width: 40cqw;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  animation: sa-spin 9s steps(36, end) infinite;
+}
+
+.sa-carousel::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28cqw;
+  aspect-ratio: 1;
+  border: 0.8cqw dashed #fbbf24;
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+
+.sa-carousel__seat {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  transform: rotate(calc(var(--i) * 60deg)) translateY(-14cqw);
+}
+
+/* Кристаллы не переворачиваются: каждый повёрнут обратно своему месту и крутится обратно карусели */
+.sa-carousel__seat img {
+  position: static;
+  width: 6cqw;
+  transform: rotate(calc(var(--i) * -60deg));
+  animation: sa-spin 9s steps(36, end) infinite reverse;
+}
+
+@keyframes sa-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.sa-loop-text {
+  position: absolute;
+  right: 5%;
+  bottom: 8%;
+  color: #fde68a;
+  font: 3cqw/1 var(--font-mono);
+  text-shadow: 0 0 1cqw rgba(253, 230, 138, 0.5);
+}
+
 /* Живой пример JS-заклинания в гримуаре: слева код, справа ответ Оракула */
 .example--script {
   grid-template-areas:
@@ -4109,6 +4399,19 @@ a.land--door .land__door {
   padding: 12px 14px;
   background: #0b1220;
   box-shadow: inset 0 0 0 3px #134e4a;
+}
+
+/* Пример с подземельем: карта, а под ней — чем закончился путь */
+.example__hero {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.example__hero .oracle-line {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 14px;
 }
 
 @media (max-width: 720px) {

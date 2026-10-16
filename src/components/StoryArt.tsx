@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react';
-import type { StoryFrame } from '../engine/types';
+import type { Dungeon, StoryFrame } from '../engine/types';
 import { recolor } from '../pixel/pixelArt';
 import {
   AMANITA,
@@ -22,6 +22,7 @@ import {
   SPRUCE,
   VILLAIN_ANIMATIONS,
 } from '../pixel/sprites';
+import { DungeonView } from './DungeonView';
 import { PixelArt } from './PixelArt';
 import { Face } from './Portrait';
 import { SpriteAnim } from './SpriteAnim';
@@ -45,6 +46,12 @@ const FLASKS = [
 ];
 /** Строчки, которые бегут по Скриптории: здесь всё — приказы */
 const SCRIPT_LINES = ["let gems = 5;", "console.log('Привет!');", 'button.onclick = …'];
+/** Лабиринт Решений в кадре: развилки, кристаллы, баг и выход */
+const STORY_MAZE: Dungeon = {
+  map: ['#############', '#>..#...#..g#', '##.##.#.#.###', '#..b..#...#E#', '#.#####.#.#.#', '#g......#...#', '#############'],
+};
+/** Сиденья Карусели Циклопа */
+const CAROUSEL = [GEMS.ruby, GEMS.topaz, GEMS.emerald, GEMS.sapphire, GEMS.amethyst, GEMS.ruby];
 
 /** Стёкла витража в кадре: так же стоят в испытании Витражной обители */
 const PANES = [GLASS.star, GLASS.rose, GLASS.moon, GLASS.tree, GLASS.leaf, GLASS.crown].map((glass) => glass.color);
@@ -53,9 +60,9 @@ function Pane({ color }: { color: string }) {
   return <span style={{ '--pane': color } as CSSProperties} />;
 }
 
-/** Настроение Лорда Дефолта по его реплике: проигрыш его злит, всё остальное — смешит */
+/** Настроение Лорда Дефолта по его реплике: проигрыш и возмущённое «?!» его злят, всё остальное — смешит */
 function villainMood(text = ''): 'laugh' | 'angry' {
-  return /опять ты|(^|[^а-яё])пал[аио]?([^а-яё]|$)|не побеждён|не думай|невозможно/i.test(text) ? 'angry' : 'laugh';
+  return /опять ты|(^|[^а-яё])пал[аио]?([^а-яё]|$)|не побеждён|не думай|невозможно|\?!/i.test(text) ? 'angry' : 'laugh';
 }
 
 /** Лорд Дефолт во весь рост: сначала хохочет или злится, потом ухмыляется и поблёскивает моноклем. */
@@ -99,6 +106,16 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
           <span className="sa-default-text sa-default-text--1">Times New Roman</span>
           <span className="sa-default-text sa-default-text--2">синяя ссылка</span>
           <span className="sa-default-text sa-default-text--3">&lt;div&gt;&lt;div&gt;&lt;div&gt;</span>
+          <VillainActor mood={villainMood(text)} />
+        </>
+      )}
+
+      {/* Лорд Дефолт в Скриптории: вместо Times New Roman вокруг него — значения по умолчанию из JavaScript */}
+      {art === 'villain-script' && (
+        <>
+          <span className="sa-default-text sa-default-text--1 sa-default-text--script">undefined</span>
+          <span className="sa-default-text sa-default-text--2 sa-default-text--script">NaN</span>
+          <span className="sa-default-text sa-default-text--3 sa-default-text--script">null</span>
           <VillainActor mood={villainMood(text)} />
         </>
       )}
@@ -394,6 +411,27 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
             ))}
           </div>
           <PixelArt className="sa-jester" sprite={JESTER} />
+        </>
+      )}
+
+      {art === 'maze' && (
+        <div className="sa-maze">
+          <DungeonView dungeon={STORY_MAZE} compact />
+        </div>
+      )}
+
+      {art === 'carousel' && (
+        <>
+          {/* Карусель Циклопа: кристаллы катаются по кругу, а над ней — полосатый шатёр */}
+          <span className="sa-carousel-tent" />
+          <div className="sa-carousel">
+            {CAROUSEL.map((gem, i) => (
+              <span key={i} className="sa-carousel__seat" style={{ '--i': i } as CSSProperties}>
+                <PixelArt sprite={gem.sprite} />
+              </span>
+            ))}
+          </div>
+          <span className="sa-loop-text">for (let i = 0; i &lt; 3; i++)</span>
         </>
       )}
 

@@ -8,6 +8,8 @@ interface LevelReport {
 }
 
 test('каждый уровень: эталон проходит, стартовый код — нет', async ({ page }) => {
+  // Уровней всё больше, а JS-уровни запускают код в фоновых потоках по каждому подземелью
+  test.setTimeout(120_000);
   await page.goto('/');
   // Строка, а не функция: модули движка подгрузит и скомпилирует сам Vite
   const reports = await page.evaluate<LevelReport[]>(

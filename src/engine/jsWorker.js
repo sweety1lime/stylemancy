@@ -3,7 +3,8 @@
   Код подключается как настоящий <script>: переменные верхнего уровня остаются в общей области видимости,
   и после запуска их можно прочитать по имени — это колбы на полке.
 
-  Получает: { nonce, code, inputs, vars }. Отвечает: { nonce, output, flasks, error, overflow }.
+  Получает: { nonce, code, inputs, vars, world }. Отвечает: { nonce, output, flasks, error, overflow, hero }.
+  world — карта подземелья: тогда в коде есть герой (hero), а в ответе — его путь и где он остановился.
   Каждый запуск — новый поток: переменные прошлого запуска не мешают.
 */
 
@@ -75,6 +76,130 @@ function snapshot(value) {
   return { type: typeOf(value), shown: show(value, true, 0), key: compareKey(value, 0) };
 }
 
+/* ——— Путь героя: подземелье, по которому герой ходит по приказам студента ——— */
+
+const DIRECTIONS = { '>': [1, 0], v: [0, 1], '<': [-1, 0], '^': [0, -1] };
+/** По часовой стрелке: поворот направо — следующее направление, налево — предыдущее */
+const CLOCKWISE = ['>', 'v', '<', '^'];
+/** Что герой видит впереди: hero.look() */
+const LOOKS = { '#': 'wall', '.': 'floor', g: 'gem', b: 'bug', E: 'exit' };
+/** Больше действий — значит, цикл не заканчивается */
+const MAX_ACTIONS = 500;
+const MAX_LOOKS = 5000;
+/** Герой остановился: это бросается, чтобы прервать код студента, и ловится запуском */
+const STOPPED = { toString: () => 'Герой остановился' };
+
+function makeHero(map) {
+  const grid = map.map((row) => [...row]);
+  let x = 0;
+  let y = 0;
+  let dir = '>';
+  grid.forEach((row, j) =>
+    row.forEach((cell, i) => {
+      if (DIRECTIONS[cell]) {
+        x = i;
+        y = j;
+        dir = cell;
+        row[i] = '.';
+      }
+    }),
+  );
+  const events = [];
+  let gems = 0;
+  let actions = 0;
+  let looks = 0;
+  let failure;
+
+  const cellAt = (cx, cy) => grid[cy]?.[cx] ?? '#';
+  const ahead = () => [x + DIRECTIONS[dir][0], y + DIRECTIONS[dir][1]];
+  const record = (kind, at) => events.push(at ? { kind, x, y, dir, cx: at[0], cy: at[1] } : { kind, x, y, dir });
+
+  function stop(message, at) {
+    failure = { message, x: at ? at[0] : x, y: at ? at[1] : y };
+    throw STOPPED;
+  }
+  // После остановки герой больше ничего не делает, даже если код поймал остановку
+  function act() {
+    if (failure) throw STOPPED;
+    actions += 1;
+    if (actions > MAX_ACTIONS) stop(`Герой выбился из сил: больше ${MAX_ACTIONS} действий. Похоже, цикл не заканчивается.`);
+  }
+  function sense() {
+    if (failure) throw STOPPED;
+    looks += 1;
+    if (looks > MAX_LOOKS) stop('Герой всё осматривается и не двигается с места. Похоже, цикл не заканчивается.');
+  }
+
+  const hero = Object.freeze({
+    step() {
+      act();
+      const [tx, ty] = ahead();
+      const cell = cellAt(tx, ty);
+      if (cell === '#') stop('Герой врезался в стену.', [tx, ty]);
+      if (cell === 'b') stop('Герой наступил на баг, и тот его укусил. Баг впереди прогоняют: hero.zap()', [tx, ty]);
+      x = tx;
+      y = ty;
+      record('step');
+    },
+    turnLeft() {
+      act();
+      dir = CLOCKWISE[(CLOCKWISE.indexOf(dir) + 3) % 4];
+      record('turn');
+    },
+    turnRight() {
+      act();
+      dir = CLOCKWISE[(CLOCKWISE.indexOf(dir) + 1) % 4];
+      record('turn');
+    },
+    take() {
+      act();
+      if (grid[y][x] !== 'g') stop('Под ногами нет кристалла — герой схватил воздух. Сначала проверь: hero.isGem()');
+      grid[y][x] = '.';
+      gems += 1;
+      record('take', [x, y]);
+    },
+    zap() {
+      act();
+      const [tx, ty] = ahead();
+      if (cellAt(tx, ty) !== 'b') stop("Впереди нет бага — заклинание ушло в пустоту. Сначала проверь: hero.look() === 'bug'", [tx, ty]);
+      grid[ty][tx] = '.';
+      record('zap', [tx, ty]);
+    },
+    isWall() {
+      sense();
+      return cellAt(...ahead()) === '#';
+    },
+    isGem() {
+      sense();
+      return grid[y][x] === 'g';
+    },
+    atExit() {
+      sense();
+      return grid[y][x] === 'E';
+    },
+    look() {
+      sense();
+      const cell = cellAt(...ahead());
+      return LOOKS[cell] ?? (/\d/.test(cell) ? 'sign' : 'floor');
+    },
+    read() {
+      sense();
+      if (!/\d/.test(grid[y][x])) stop('Здесь нет таблички — читать нечего.');
+      return Number(grid[y][x]);
+    },
+    gems() {
+      sense();
+      return gems;
+    },
+  });
+
+  function report() {
+    const gemsLeft = grid.reduce((sum, row) => sum + row.filter((cell) => cell === 'g').length, 0);
+    return { events, x, y, dir, gems, gemsLeft, atExit: grid[y][x] === 'E', actions, failure };
+  }
+  return { hero, report };
+}
+
 function describe(error, url) {
   if (error instanceof Error) {
     const stack = String(error.stack || '');
@@ -91,7 +216,7 @@ function describe(error, url) {
 }
 
 self.onmessage = (event) => {
-  const { nonce, code, inputs = [], vars = [] } = event.data;
+  const { nonce, code, inputs = [], vars = [], world } = event.data;
   const output = [];
   const answers = inputs.slice();
   let overflow = false;
@@ -114,12 +239,17 @@ self.onmessage = (event) => {
     return true;
   };
 
+  // Подземелье: герой — глобальная переменная, как console
+  const dungeon = world ? makeHero(world) : null;
+  if (dungeon) Object.defineProperty(self, 'hero', { value: dungeon.hero, writable: false, configurable: true });
+
   let error;
   const url = makeUrl(new BlobType([code], { type: 'text/javascript' }));
   try {
     loadScript(url);
   } catch (failure) {
-    error = describe(failure, url);
+    // Остановку героя показывает карта, это не ошибка кода
+    if (failure !== STOPPED) error = describe(failure, url);
   }
   dropUrl(url);
 
@@ -133,5 +263,5 @@ self.onmessage = (event) => {
     }
   }
 
-  send({ nonce, output, flasks, error, overflow });
+  send({ nonce, output, flasks, error, overflow, hero: dungeon?.report() });
 };

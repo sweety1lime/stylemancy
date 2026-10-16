@@ -28,6 +28,34 @@ export interface RunError {
   column?: number;
 }
 
+/** Куда смотрит герой: > вправо, v вниз, < влево, ^ вверх. */
+export type Direction = '>' | 'v' | '<' | '^';
+
+/** Действие героя и где он после него. take и zap — ещё и клетка, где взят кристалл или прогнан баг. */
+export interface HeroEvent {
+  kind: 'step' | 'turn' | 'take' | 'zap';
+  x: number;
+  y: number;
+  dir: Direction;
+  cx?: number;
+  cy?: number;
+}
+
+/** Путь героя по подземелью и чем он закончился. */
+export interface HeroReport {
+  events: HeroEvent[];
+  x: number;
+  y: number;
+  dir: Direction;
+  /** Сколько кристаллов поднято и сколько осталось на карте */
+  gems: number;
+  gemsLeft: number;
+  atExit: boolean;
+  actions: number;
+  /** Почему герой остановился раньше времени: врезался в стену, наступил на баг… x, y — где это случилось */
+  failure?: { message: string; x: number; y: number };
+}
+
 export interface RunResult {
   output: OutputLine[];
   flasks: Record<string, Flask>;
@@ -36,6 +64,8 @@ export interface RunResult {
   overflow?: boolean;
   /** Код работал слишком долго и был остановлен — похоже на бесконечный цикл */
   timedOut?: boolean;
+  /** Путь героя — если код шёл по подземелью */
+  hero?: HeroReport;
 }
 
 export interface RunOptions {
@@ -45,6 +75,8 @@ export interface RunOptions {
   vars?: string[];
   /** Сколько ждать, мс */
   timeout?: number;
+  /** Карта подземелья: тогда в коде есть герой */
+  world?: string[];
 }
 
 let workerUrl: string | null = null;
@@ -58,7 +90,7 @@ function workerScript(): string {
  * Выполняет код студента в отдельном фоновом потоке: страница игры недоступна, а зависший код
  * останавливается по таймеру. Каждый запуск — новый поток.
  */
-export function runScript(code: string, { inputs = [], vars = [], timeout = 2000 }: RunOptions = {}): Promise<RunResult> {
+export function runScript(code: string, { inputs = [], vars = [], timeout = 2000, world }: RunOptions = {}): Promise<RunResult> {
   return new Promise((resolve) => {
     const nonce = Math.random().toString(36).slice(2);
     const worker = new Worker(workerScript());
@@ -71,12 +103,12 @@ export function runScript(code: string, { inputs = [], vars = [], timeout = 2000
     worker.onmessage = (event: MessageEvent) => {
       const data = event.data as (RunResult & { nonce?: string }) | null;
       if (data?.nonce !== nonce) return;
-      finish({ output: data.output, flasks: data.flasks, error: data.error, overflow: data.overflow });
+      finish({ output: data.output, flasks: data.flasks, error: data.error, overflow: data.overflow, hero: data.hero });
     };
     worker.onerror = (event) => {
       event.preventDefault();
       finish({ output: [], flasks: {}, error: { name: 'Error', message: event.message } });
     };
-    worker.postMessage({ nonce, code, inputs, vars });
+    worker.postMessage({ nonce, code, inputs, vars, world });
   });
 }

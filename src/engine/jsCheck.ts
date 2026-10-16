@@ -1,12 +1,16 @@
+import { plural } from '../lib/plural';
+import { countGems, distanceToExit, parseDungeon } from './dungeon';
+import { scoreSolution, type Score } from './evaluate';
 import type { GoalStatus } from './htmlCheck';
-import { lintJs, runtimeProblem } from './jsLint';
-import { runScript, type Flask, type OutputLine, type RunResult, type ValueType } from './jsRun';
+import { lintJs, runtimeProblem, stripJsComments } from './jsLint';
+import { runScript, type Flask, type HeroReport, type OutputLine, type RunResult, type ValueType } from './jsRun';
 import type { Problem } from './lint';
-import type { JsLevel, JsRun } from './types';
+import type { Dungeon, JsLevel, JsRun } from './types';
 
 /*
   Проверка JS-уровня: код студента и эталон запускаются с одними и теми же ответами на prompt,
   потом сравниваются слова Оракула (строки по порядку) и колбы (значение и тип).
+  В «Пути героя» запуск — это подземелье: герой должен дойти до выхода и собрать все кристаллы.
 */
 
 export const TYPE_NAMES: Record<ValueType, string> = {
@@ -57,12 +61,13 @@ export interface JsEvaluation {
 }
 
 function runsOf(level: JsLevel): JsRun[] {
+  if (level.dungeons?.length) return level.dungeons.map((dungeon) => ({ label: dungeon.label, dungeon }));
   return level.runs?.length ? level.runs : [{}];
 }
 
 function runLabel(level: JsLevel, run: JsRun, index: number): string | undefined {
   if (runsOf(level).length < 2) return undefined;
-  return run.label ?? `Запуск ${index + 1}`;
+  return run.label ?? `${run.dungeon ? 'Подземелье' : 'Запуск'} ${index + 1}`;
 }
 
 const targetCache = new Map<string, Promise<RunResult[]>>();
@@ -72,10 +77,60 @@ export function targetRuns(level: JsLevel): Promise<RunResult[]> {
   let cached = targetCache.get(level.id);
   if (!cached) {
     const vars = level.check.vars ?? [];
-    cached = Promise.all(runsOf(level).map((run) => runScript(level.solutionJs, { inputs: run.inputs, vars, timeout: 4000 })));
+    cached = Promise.all(
+      runsOf(level).map((run) => runScript(level.solutionJs, { inputs: run.inputs, vars, timeout: 4000, world: run.dungeon?.map })),
+    );
     targetCache.set(level.id, cached);
   }
   return cached;
+}
+
+/** Строки кода — без пустых, комментариев и строк из одних скобок: так считается краткость. */
+export function codeLines(code: string): number {
+  return stripJsComments(code)
+    .split('\n')
+    .filter((line) => /[^\s{}();]/.test(line)).length;
+}
+
+/** Звёзды JS-уровня: подсказки снимают звёзды, а длинный код — ещё одну, если уровень просит уложиться в maxLines. */
+export function scoreJs(level: JsLevel, code: string, hintsUsed: number): Score {
+  const score = scoreSolution(hintsUsed, 0, 0);
+  const lines = codeLines(code);
+  if (level.maxLines && lines > level.maxLines) {
+    const note = `${lines} ${plural(lines, 'строка', 'строки', 'строк')} кода, а можно уложиться в ${level.maxLines}`;
+    if (score.stars > 1) {
+      score.stars -= 1;
+      score.notes.push(`${note}: −1 ★`);
+    } else {
+      score.notes.push(note);
+    }
+  }
+  return score;
+}
+
+/** Цели в подземелье: дойти до выхода и собрать кристаллы. */
+function dungeonGoals(dungeon: Dungeon, report: HeroReport | undefined, prefix: string): GoalStatus[] {
+  const total = countGems(parseDungeon(dungeon).cells);
+  const goals: GoalStatus[] = [{ label: `${prefix}дойти до выхода`, done: Boolean(report && !report.failure && report.atExit) }];
+  if (total) {
+    goals.push({ label: `${prefix}${total === 1 ? 'поднять кристалл' : `собрать все кристаллы (${total})`}`, done: Boolean(report && report.gemsLeft === 0) });
+  }
+  return goals;
+}
+
+/** Что не так в подземелье — по-русски. */
+function dungeonMisses(dungeon: Dungeon, report: HeroReport | undefined): string[] {
+  if (!report) return [];
+  if (report.failure) return [report.failure.message];
+  const misses: string[] = [];
+  if (!report.atExit) {
+    const left = distanceToExit(parseDungeon(dungeon).cells, report.x, report.y);
+    if (!report.events.some((event) => event.kind === 'step')) misses.push('Герой не сдвинулся с места.');
+    else if (left === undefined) misses.push('Герой не дошёл до выхода.');
+    else misses.push(`Герой не дошёл до выхода: оставалось ${left} ${plural(left, 'шаг', 'шага', 'шагов')}.`);
+  }
+  if (report.gemsLeft > 0) misses.push(report.gemsLeft === 1 ? 'Один кристалл остался лежать.' : `Остались кристаллы: ${report.gemsLeft}.`);
+  return misses;
 }
 
 /** Колбы на полке: сначала проверяемые, потом свои переменные студента. */
@@ -157,11 +212,12 @@ function compareFlask(name: string, flask: Flask | undefined, target: Flask): st
   return `В колбе ${name} — ${flask.shown}, а нужно ${target.shown}.`;
 }
 
-/** Цели в списке: слова Оракула по строкам и колбы. Если запусков несколько — у каждого свои. */
-function goalsOf(level: JsLevel, runs: { label?: string; target: RunResult; lineOk: boolean[]; flasks: FlaskStatus[] }[]): GoalStatus[] {
+/** Цели в списке: слова Оракула по строкам, колбы и подземелье. Если запусков несколько — у каждого свои. */
+function goalsOf(level: JsLevel, runs: RunStatus[]): GoalStatus[] {
   const goals: GoalStatus[] = [];
-  for (const { label, target, lineOk, flasks } of runs) {
+  for (const { run, label, result, target, lineOk, flasks } of runs) {
     const prefix = label ? `${label}: ` : '';
+    if (run.dungeon) goals.push(...dungeonGoals(run.dungeon, result.hero, prefix));
     if (level.check.output) {
       target.output.forEach((line, i) => {
         const text =
@@ -197,7 +253,7 @@ export async function evaluateJs(level: JsLevel, code: string, cast = false): Pr
       const target = targets[index];
       const result: RunResult = codeErrors.length
         ? { output: [], flasks: {} }
-        : await runScript(code, { inputs: run.inputs, vars: names, timeout: cast ? 3000 : 1500 });
+        : await runScript(code, { inputs: run.inputs, vars: names, timeout: cast ? 3000 : 1500, world: run.dungeon?.map });
       const { lineOk, misses } =
         level.check.output && !result.timedOut ? compareOutput(result.output, target.output, names, code) : { lineOk: [], misses: [] };
       const flasks = names.map((name): FlaskStatus => {
@@ -208,6 +264,7 @@ export async function evaluateJs(level: JsLevel, code: string, cast = false): Pr
         if (miss && !result.timedOut) misses.push(miss);
         return { name, flask, target: goal, ok: Boolean(goal) && !miss };
       });
+      if (run.dungeon && !result.timedOut) misses.push(...dungeonMisses(run.dungeon, result.hero));
       // Зависший код остановлен: сравнивать нечего, важно одно — найти бесконечный цикл
       if (result.timedOut) misses.push('Код работал слишком долго и был остановлен — похоже, где-то бесконечный цикл.');
       if (result.overflow) misses.push('Оракул охрип: строк слишком много. Проверь, не повторяется ли вывод без конца.');

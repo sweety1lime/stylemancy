@@ -41,6 +41,13 @@ const CASES: Case[] = [
   },
   { code: 'let gems = 5;\ngems == 8;', expect: ['gems == 8 — это сравнение, и его ответ пропадает'] },
   { code: "'use strict';\nlet gems = 5;\ngems += 3;\nconsole.log(gems);", expect: [] },
+  // Путь героя
+  { code: 'while (!hero.isWall()) {\n  hero.step();\n}', expect: [] },
+  { code: 'hero.stp();', expect: ['У героя нет приказа stp — может, step?'], mark: 'stp' },
+  { code: 'hero.turnleft();', expect: ['может, turnLeft? Большие и маленькие буквы различаются.'] },
+  { code: 'heor.step();', expect: ['heor — может, hero?'] },
+  { code: 'hero.step;', expect: ['hero.step без скобок — приказ не выполнится. Пиши hero.step()'], mark: 'hero.step' },
+  { code: 'if (hero.isWall) {\n  hero.turnLeft();\n}', expect: ['hero.isWall без скобок — это сам вопрос, а не ответ на него'] },
 ];
 
 test('проверка JS объясняет типичные ошибки до запуска', async ({ page }) => {
@@ -123,4 +130,30 @@ test('Оракул и колбы: вывод, типы, prompt и останов
     { kind: 'alert', text: 'Привет, Аня' },
   ]);
   expect(loop.timedOut).toBe(true);
+});
+
+test('герой в подземелье: путь, кристаллы и остановки', async ({ page }) => {
+  await page.goto('/');
+  const results = await page.evaluate(`import('/src/engine/jsRun.ts').then((m) => Promise.all([
+    m.runScript('hero.step();\\nhero.take();\\nhero.step();\\nhero.turnRight();\\nhero.step();', { world: ['#####', '#>g.#', '###E#', '#####'] }),
+    m.runScript('hero.step();\\nhero.step();', { world: ['####', '#>.#', '####'] }),
+    m.runScript('hero.take();', { world: ['####', '#>E#', '####'] }),
+    m.runScript('hero.step();', { world: ['####', '#>b#', '####'] }),
+    m.runScript("console.log(hero.look(), hero.isWall(), hero.read === undefined);\\nhero.zap();\\nhero.step();\\nhero.step();\\nconsole.log(hero.read(), hero.atExit());", { world: ['#####', '#>b3#', '#####'] }),
+    m.runScript('while (true) { hero.turnLeft(); }', { world: ['###', '#>#', '###'] }),
+  ]))`);
+  const [walk, wall, air, bite, sensors, spin] = results as {
+    output: { text: string }[];
+    hero: { x: number; y: number; dir: string; gems: number; gemsLeft: number; atExit: boolean; events: { kind: string }[]; failure?: { message: string } };
+  }[];
+
+  expect(walk.hero).toMatchObject({ x: 3, y: 2, dir: 'v', gems: 1, gemsLeft: 0, atExit: true });
+  expect(walk.hero.events.map((event) => event.kind)).toEqual(['step', 'take', 'step', 'turn', 'step']);
+  expect(wall.hero.failure?.message).toBe('Герой врезался в стену.');
+  expect(wall.hero).toMatchObject({ x: 2, y: 1 });
+  expect(air.hero.failure?.message).toContain('герой схватил воздух');
+  expect(bite.hero.failure?.message).toContain('Герой наступил на баг');
+  expect(sensors.output.map((line) => line.text)).toEqual(['bug false false', '3 false']);
+  expect(sensors.hero.failure).toBeUndefined();
+  expect(spin.hero.failure?.message).toContain('Герой выбился из сил');
 });

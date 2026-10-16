@@ -2,7 +2,8 @@ import { SPELLS } from '../game/spells';
 import { allLevels } from '../levels';
 import { checkLevelCss } from './evaluate';
 import { evaluateHtml } from './htmlCheck';
-import { evaluateJs, targetRuns } from './jsCheck';
+import { dungeonProblems } from './dungeon';
+import { codeLines, evaluateJs, targetRuns } from './jsCheck';
 import { isHtmlLevel, isJsLevel, type CssLevel, type HtmlLevel, type JsLevel, type Level } from './types';
 
 export interface LevelReport {
@@ -51,7 +52,13 @@ async function checkJs(level: JsLevel) {
   const starter = await evaluateJs(level, level.starterJs, true);
   const issues = [...solution.errors.map((p) => p.message), ...solution.warnings.map((p) => p.message), ...solution.misses];
   const targets = await targetRuns(level);
-  if (!level.check.output && !level.check.vars?.length) issues.push('Уровню нечего проверять: нет ни check.output, ни check.vars.');
+  if (!level.check.output && !level.check.vars?.length && !level.dungeons?.length) {
+    issues.push('Уровню нечего проверять: нет ни check.output, ни check.vars, ни подземелий.');
+  }
+  for (const dungeon of level.dungeons ?? []) issues.push(...dungeonProblems(dungeon));
+  if (level.maxLines && codeLines(level.solutionJs) > level.maxLines) {
+    issues.push(`Эталон длиннее, чем просит уровень: ${codeLines(level.solutionJs)} строк при maxLines ${level.maxLines}.`);
+  }
   if (targets.some((target) => target.error || target.timedOut)) issues.push('Эталон падает с ошибкой.');
   if (level.check.output && targets.some((target) => target.output.length === 0)) issues.push('Эталон ничего не говорит Оракулу.');
   for (const name of level.check.vars ?? []) {

@@ -1,3 +1,5 @@
+import type { Dungeon } from '../engine/types';
+
 /** Живой пример заклинания: варианты объявлений подставляются в одно правило. */
 export interface ValueExample {
   /** Разметка; по умолчанию — контейнер .box с тремя блоками .item */
@@ -41,6 +43,8 @@ export interface VariantsExample {
 export interface ScriptExample {
   /** inputs — ответы на prompt по порядку */
   scripts: { label: string; code: string; inputs?: string[] }[];
+  /** Подземелье: варианты кода ведут по нему героя — видно, куда он пришёл */
+  dungeon?: Dungeon;
   initial?: number;
 }
 
@@ -1325,6 +1329,131 @@ export const SPELLS: Record<string, Spell> = {
         { label: 'ответ «3»', code: "let count = prompt('Сколько зелий?');\nconsole.log(count + 1);", inputs: ['3'] },
         { label: 'Number', code: "let count = Number(prompt('Сколько зелий?'));\nconsole.log(count + 1);", inputs: ['3'] },
         { label: 'Отмена', code: "let guest = prompt('Как тебя зовут?');\nconsole.log(guest);" },
+      ],
+    },
+  },
+
+  // ——— Лабиринт Решений: условия и циклы ———
+  hero: {
+    name: 'Приказы героя',
+    description:
+      'Действия: `hero.step()` — шаг вперёд, `hero.turnLeft()` и `hero.turnRight()` — поворот на месте, `hero.take()` — поднять кристалл под ногами, `hero.zap()` — прогнать баг впереди. Вопросы: `hero.isWall()` — впереди стена?, `hero.isGem()` — под ногами кристалл?, `hero.atExit()` — герой у выхода?, `hero.look()` — что впереди: `\'wall\'`, `\'floor\'`, `\'gem\'`, `\'bug\'` или `\'exit\'`, `hero.read()` — число на табличке. Скобки нужны всегда: без них приказ не выполнится.',
+    example: {
+      dungeon: { map: ['######', '#>.g.#', '####E#', '######'] },
+      scripts: [
+        { label: 'два шага', code: 'hero.step();\nhero.step();' },
+        { label: 'до выхода', code: 'hero.step();\nhero.step();\nhero.take();\nhero.step();\nhero.turnRight();\nhero.step();' },
+        { label: 'не туда', code: 'hero.step();\nhero.step();\nhero.step();\nhero.turnLeft();\nhero.step();' },
+      ],
+      initial: 1,
+    },
+  },
+  if: {
+    name: 'if',
+    description:
+      '`if (условие) { … }` выполняет приказы в фигурных скобках, только если условие верно — `true`. Если оно неверно — `false`, — приказы пропускаются, и код идёт дальше.',
+    example: {
+      scripts: [
+        { label: 'gems = 5', code: "let gems = 5;\nif (gems > 3) {\n  console.log('Хватит на зелье!');\n}\nconsole.log('Иду дальше');" },
+        { label: 'gems = 2', code: "let gems = 2;\nif (gems > 3) {\n  console.log('Хватит на зелье!');\n}\nconsole.log('Иду дальше');" },
+      ],
+    },
+  },
+  else: {
+    name: 'else',
+    description: '`else` — «иначе»: приказы после него выполняются, когда условие в `if` не сбылось. Из двух веток всегда срабатывает ровно одна.',
+    example: {
+      scripts: [
+        { label: 'gems = 5', code: "let gems = 5;\nif (gems >= 3) {\n  console.log('Покупаю зелье');\n} else {\n  console.log('Коплю дальше');\n}" },
+        { label: 'gems = 1', code: "let gems = 1;\nif (gems >= 3) {\n  console.log('Покупаю зелье');\n} else {\n  console.log('Коплю дальше');\n}" },
+      ],
+    },
+  },
+  equality: {
+    name: '=== и !==',
+    description:
+      'Три знака `===` спрашивают: равны ли значения и совпадает ли тип. `!==` — «не равно». Один знак `=` не сравнивает, а наливает. Двойное `==` перед сравнением само превращает типы, поэтому маги пишут `===`.',
+    example: {
+      scripts: [
+        { label: "'bug' === 'bug'", code: "console.log('bug' === 'bug');" },
+        { label: "5 === '5'", code: "console.log(5 === '5');" },
+        { label: "5 == '5'", code: "console.log(5 == '5');" },
+        { label: "'bug' !== 'wall'", code: "console.log('bug' !== 'wall');" },
+      ],
+    },
+  },
+  comparison: {
+    name: 'Сравнения > < >= <=',
+    description:
+      '`>` — больше, `<` — меньше, `>=` — больше или равно, `<=` — меньше или равно. Ответ сравнения — `true` или `false`, его можно сразу отдать `if`. Осторожно с границей: `5 > 5` — `false`, а `5 >= 5` — `true`.',
+    example: {
+      scripts: [
+        { label: '7 > 5', code: 'console.log(7 > 5);' },
+        { label: '5 > 5', code: 'console.log(5 > 5);' },
+        { label: '5 >= 5', code: 'console.log(5 >= 5);' },
+        { label: '3 <= 2', code: 'console.log(3 <= 2);' },
+      ],
+    },
+  },
+  'else-if': {
+    name: 'else if',
+    description:
+      'Цепочка проверок: `if (…) { … } else if (…) { … } else { … }`. Условия проверяются сверху вниз, и срабатывает первое верное — остальные пропускаются. Последнее `else` ловит всё, что не подошло.',
+    example: {
+      scripts: [1, 2, 3].map((door) => ({
+        label: `door = ${door}`,
+        code: `let door = ${door};\nif (door === 1) {\n  console.log('Налево');\n} else if (door === 2) {\n  console.log('Направо');\n} else {\n  console.log('Прямо');\n}`,
+      })),
+    },
+  },
+  logic: {
+    name: 'Логика: && || !',
+    description:
+      '`&&` — «и»: верно, только если верны оба условия. `||` — «или»: хватит одного. `!` — «не»: переворачивает ответ. Мост выдержит груз от 3 до 5: `weight >= 3 && weight <= 5`, а в обход — `weight < 3 || weight > 5`.',
+    example: {
+      scripts: [
+        { label: '4: &&', code: 'let weight = 4;\nconsole.log(weight >= 3 && weight <= 5);' },
+        { label: '8: &&', code: 'let weight = 8;\nconsole.log(weight >= 3 && weight <= 5);' },
+        { label: '8: ||', code: 'let weight = 8;\nconsole.log(weight < 3 || weight > 5);' },
+        { label: '!true', code: 'console.log(!true);' },
+      ],
+    },
+  },
+  while: {
+    name: 'while',
+    description:
+      '`while (условие) { … }` — «пока»: тело цикла повторяется, пока условие верно, и условие проверяется перед каждым кругом. Если оно не сбылось с самого начала, цикл не выполнится ни разу. А если никогда не станет ложным — цикл не закончится, поэтому внутри что-то должно меняться.',
+    example: {
+      scripts: [
+        { label: 'до трёх', code: "let gems = 0;\nwhile (gems < 3) {\n  gems = gems + 1;\n  console.log('Кристалл', gems);\n}" },
+        { label: 'через два', code: "let steps = 5;\nwhile (steps > 0) {\n  console.log('Шаг, осталось', steps);\n  steps = steps - 2;\n}" },
+        { label: 'ни разу', code: "let gems = 10;\nwhile (gems < 3) {\n  console.log('Этого не будет');\n}\nconsole.log('Цикл не выполнился ни разу');" },
+      ],
+    },
+  },
+  for: {
+    name: 'for',
+    description:
+      '`for (let i = 0; i < 5; i++) { … }` — цикл со счётчиком. Три части через точку с запятой: с чего начать (`let i = 0`), пока что повторять (`i < 5`) и что делать после каждого круга (`i++` — прибавить единицу). Выйдет ровно 5 кругов: i = 0, 1, 2, 3, 4.',
+    example: {
+      scripts: [
+        { label: 'с нуля', code: "for (let i = 0; i < 3; i++) {\n  console.log('Круг', i);\n}" },
+        { label: 'с единицы', code: "for (let i = 1; i <= 3; i++) {\n  console.log('Круг', i);\n}" },
+        { label: 'обратный отсчёт', code: "for (let i = 3; i > 0; i--) {\n  console.log(i);\n}\nconsole.log('Поехали!');" },
+      ],
+    },
+  },
+  break: {
+    name: 'break',
+    description:
+      '`break` — стоп-кран: сразу выходит из цикла, сколько бы кругов ни осталось, и код продолжается со строки после цикла. Обычно его ставят внутрь `if`: «как только нашёл — хватит».',
+    example: {
+      scripts: [
+        { label: 'стоп на 4', code: "for (let i = 1; i <= 10; i++) {\n  if (i === 4) {\n    break;\n  }\n  console.log(i);\n}\nconsole.log('Стоп!');" },
+        {
+          label: 'поиск',
+          code: "let found = 0;\nfor (let i = 1; i <= 100; i++) {\n  if (i % 7 === 0) {\n    found = i;\n    break;\n  }\n}\nconsole.log('Первое число, которое делится на 7:', found);",
+        },
       ],
     },
   },

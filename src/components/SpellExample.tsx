@@ -5,6 +5,7 @@ import { runScript, type RunResult } from '../engine/jsRun';
 import { recordExperiment } from '../game/achievements';
 import type { SpellExample as Example, MarkupExample, ScriptExample, ValueExample, VariantsExample, WidthExample } from '../game/spells';
 import { IMAGE_LIBRARY } from '../levels/shared/images';
+import { DungeonView } from './DungeonView';
 import { OracleLine } from './JsScene';
 
 /** Оформление мини-сцены примера: пиксельный контейнер и цветные пронумерованные блоки. */
@@ -77,19 +78,23 @@ export function SpellExample({ spell, example }: { spell: string; example: Examp
   return 'widths' in example ? <WidthDemo spell={spell} example={example} /> : <ValueDemo spell={spell} example={example} />;
 }
 
-/** Пример-скрипт: кнопки переключают варианты кода, код выполняется по-настоящему, и Оракул говорит, что вышло. */
+/**
+ * Пример-скрипт: кнопки переключают варианты кода, код выполняется по-настоящему, и Оракул говорит, что вышло.
+ * С подземельем код ведёт героя — видно, куда он пришёл.
+ */
 function ScriptDemo({ spell, example }: { spell: string; example: ScriptExample }) {
   const [selected, setSelected] = useState(example.initial ?? 0);
   const [result, setResult] = useState<RunResult | null>(null);
   const { code, inputs } = example.scripts[selected];
+  const { dungeon } = example;
 
   useEffect(() => {
     let cancelled = false;
-    void runScript(code, { inputs }).then((next) => !cancelled && setResult(next));
+    void runScript(code, { inputs, world: dungeon?.map }).then((next) => !cancelled && setResult(next));
     return () => {
       cancelled = true;
     };
-  }, [code, inputs]);
+  }, [code, inputs, dungeon]);
 
   function choose(index: number) {
     setSelected(index);
@@ -98,8 +103,9 @@ function ScriptDemo({ spell, example }: { spell: string; example: ScriptExample 
   }
 
   const failure = result?.error && runtimeProblem(code, result.error);
+  const hero = result?.hero;
   return (
-    <div className="example example--script">
+    <div className={dungeon ? 'example example--script example--dungeon' : 'example example--script'}>
       <div className="example__chips" role="group" aria-label="Варианты">
         {example.scripts.map((script, i) => (
           <button
@@ -116,13 +122,31 @@ function ScriptDemo({ spell, example }: { spell: string; example: ScriptExample 
       <pre className="example__code">
         <code>{code}</code>
       </pre>
-      <ol className="example__oracle oracle-scroll__lines" aria-label="Что сказал Оракул">
-        {result?.output.map((line, i) => (
-          <OracleLine key={i} line={line} />
-        ))}
-        {failure && <li className="oracle-line oracle-line--error">✖ {failure.message}</li>}
-        {result && !failure && result.output.length === 0 && <li className="oracle-line oracle-line--empty">Оракул молчит</li>}
-      </ol>
+      {dungeon ? (
+        <div className="example__oracle example__hero">
+          <DungeonView
+            dungeon={dungeon}
+            report={hero}
+            success={Boolean(hero?.atExit && !hero.failure)}
+            compact
+            caption={
+              result && (
+                <p className={hero?.failure || failure ? 'oracle-line oracle-line--error' : 'oracle-line oracle-line--empty'}>
+                  {failure ? `✖ ${failure.message}` : hero?.failure ? `✖ ${hero.failure.message}` : hero?.atExit ? 'Герой у выхода' : 'Герой ждёт приказов'}
+                </p>
+              )
+            }
+          />
+        </div>
+      ) : (
+        <ol className="example__oracle oracle-scroll__lines" aria-label="Что сказал Оракул">
+          {result?.output.map((line, i) => (
+            <OracleLine key={i} line={line} />
+          ))}
+          {failure && <li className="oracle-line oracle-line--error">✖ {failure.message}</li>}
+          {result && !failure && result.output.length === 0 && <li className="oracle-line oracle-line--empty">Оракул молчит</li>}
+        </ol>
+      )}
     </div>
   );
 }

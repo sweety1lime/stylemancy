@@ -696,6 +696,71 @@ export const PORTRAITS: Record<string, Sprite> = {
       Y: '#f59e0b',
     },
   },
+  // Страж Иф: шлем с наносником, усы и накидка надвое — зелёная половина true, красная false
+  if: {
+    rows: [
+      '......kkkk......',
+      '....kkssSskk....',
+      '...kssssssSsk...',
+      '..kssssssssssk..',
+      '..kkkkkkkkkkkk..',
+      '...kfffssfffk...',
+      '...kfefssfefk...',
+      '...kffffffffk...',
+      '...kfhhmmhhfk...',
+      '....kffffffk....',
+      '..kkGGGGRRRRkk..',
+      '.kGGGGGGRRRRRRk.',
+      '.kGGGGGGRRRRRRk.',
+      '.kyyyyyyyyyyyyk.',
+      '.kGGGGGGRRRRRRk.',
+      'kkGGGGGGRRRRRRkk',
+    ],
+    palette: {
+      k: INK,
+      s: '#9ca3af',
+      S: '#e5e7eb',
+      f: '#f1c27d',
+      e: INK,
+      h: '#78350f',
+      m: '#be123c',
+      G: '#16a34a',
+      R: '#dc2626',
+      y: '#f6c453',
+    },
+  },
+  // Циклоп Фор: один большой глаз, повязка в точках и полосатый жилет, как у карусели
+  for: {
+    rows: [
+      '.....kkkkkk.....',
+      '...kkffffffkk...',
+      '..kffffffffffk..',
+      '..kbBbBbBbBbBk..',
+      '..kffffffffffk..',
+      '..kffwwwwwwffk..',
+      '..kfwwweewwwfk..',
+      '..kffwwwwwwffk..',
+      '..kffffffffffk..',
+      '..kffmmmmmmffk..',
+      '...kffffffffk...',
+      '....kkkkkkkk....',
+      '..kRWRWRWRWRWk..',
+      '.kRWRWRWRWRWRWk.',
+      '.kRWRWRWRWRWRWk.',
+      'kkRWRWRWRWRWRWkk',
+    ],
+    palette: {
+      k: INK,
+      f: '#94b8a8',
+      b: '#7c3aed',
+      B: '#fbbf24',
+      w: '#f8fafc',
+      e: INK,
+      m: '#be123c',
+      R: '#dc2626',
+      W: '#fef3c7',
+    },
+  },
 };
 
 /* ——— Витражи: цветное стекло с белым узором ——— */
@@ -2215,3 +2280,50 @@ const GEAR_PALETTE = { t: '#b45309', r: '#d97706', R: '#fbbf24', h: '#78350f' };
 
 /** Шестерня в два кадра: зубцы сдвигаются на ползубца — кажется, что она крутится */
 export const GEAR_FRAMES: Sprite[] = [gearSprite(15, 8, 0, GEAR_PALETTE), gearSprite(15, 8, 0.5, GEAR_PALETTE)];
+
+/* ——— Лабиринт Решений: клетки подземелья «Пути героя» ——— */
+
+/** Стена: каменная кладка со швами вразбежку */
+export const DUNGEON_WALL: Sprite = {
+  rows: ['aaaamaaa', 'bbbbmbbb', 'bbbbmbbb', 'mmmmmmmm', 'maaaaaaa', 'mbbbbbbb', 'mbbbbbbb', 'mmmmmmmm'],
+  palette: { a: '#6b6f8e', b: '#4b4f6b', m: '#262840' },
+};
+
+/** Пол: тёмные плиты с редкими крапинками */
+export const DUNGEON_FLOOR: Sprite = {
+  rows: ['ffffffff', 'ffffdfff', 'ffffffff', 'fdffffff', 'ffffffff', 'ffffffdf', 'ffffffff', 'ffdfffff'],
+  palette: { f: '#1c1733', d: '#2a2350' },
+};
+
+/** Выход: арка, из которой льётся зелёный свет, — как дверь <script> */
+export const DUNGEON_EXIT: Sprite = {
+  rows: [
+    '..kkkkkk..',
+    '.kLLLLLLk.',
+    'kLllllllLk',
+    'kLlwwwwlLk',
+    'kLlwwwwlLk',
+    'kLlwwwwlLk',
+    'kLlwwwwlLk',
+    'kLlwwwwlLk',
+    'kLllllllLk',
+    'kkkkkkkkkk',
+  ],
+  palette: { k: INK, L: '#16a34a', l: '#4ade80', w: '#ecfdf5' },
+};
+
+/** Баг-жук, подручный Лорда Дефолта: красная спинка в тёмных пятнах */
+export const DUNGEON_BUG: Sprite = {
+  rows: [
+    '..k....k..',
+    '...k..k...',
+    '...kkkk...',
+    'k.kRrrRk.k',
+    '.krrrrrrk.',
+    'kkrRrrRrkk',
+    '.krrrrrrk.',
+    'k.krRRrk.k',
+    '...kkkk...',
+  ],
+  palette: { k: INK, r: '#ef4444', R: '#7f1d1d' },
+};

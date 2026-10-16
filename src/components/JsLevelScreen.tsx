@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { scoreSolution } from '../engine/evaluate';
-import { evaluateJs, type JsEvaluation } from '../engine/jsCheck';
+import { evaluateJs, scoreJs, type JsEvaluation } from '../engine/jsCheck';
 import { lintJs } from '../engine/jsLint';
 import type { JsLevel } from '../engine/types';
 import { sfx } from '../game/sound';
 import type { CodeEditorHandle } from './CodeEditor';
+import { DungeonScene } from './DungeonScene';
 import { JsScene } from './JsScene';
 import { EditorCard, LevelBrief, Workbench } from './LevelParts';
 import type { RegionStats } from './ResultPanel';
@@ -53,7 +53,7 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
     if (ticket.current === id) setChecked({ code: current, evaluation: result });
     if (result.passed) {
       sfx.success();
-      flow.finish({ passed: true, score: scoreSolution(flow.hintsUsed, 0, 0) }, viaKeyboard);
+      flow.finish({ passed: true, score: scoreJs(level, current, flow.hintsUsed) }, viaKeyboard);
     } else {
       sfx.fail();
       flow.finish({ passed: false, errors: result.errors, misses: result.misses }, viaKeyboard);
@@ -64,13 +64,23 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
     <main className="level level--js">
       <LevelBrief level={level} number={number} cue={flow.outcome} />
 
-      <JsScene
-        level={level}
-        code={checked?.code ?? flow.code}
-        evaluation={checked?.evaluation ?? null}
-        busy={busy}
-        celebrate={flow.outcome?.kind === 'success'}
-      />
+      {level.dungeons?.length ? (
+        <DungeonScene
+          level={level}
+          code={checked?.code ?? flow.code}
+          evaluation={checked?.evaluation ?? null}
+          busy={busy}
+          celebrate={flow.outcome?.kind === 'success'}
+        />
+      ) : (
+        <JsScene
+          level={level}
+          code={checked?.code ?? flow.code}
+          evaluation={checked?.evaluation ?? null}
+          busy={busy}
+          celebrate={flow.outcome?.kind === 'success'}
+        />
+      )}
 
       <Workbench
         flow={flow}

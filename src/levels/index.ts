@@ -1,12 +1,15 @@
 import type { Level, Region } from '../engine/types';
 import { barracks } from './barracks';
 import { alchemistShop } from './alchemist-shop';
+import { carousel } from './carousel';
 import { cascadeTree } from './cascade-tree';
 import { defaultCitadel } from './default-citadel';
 import { floatingIslands } from './floating-islands';
 import { forestEdge } from './forest-edge';
 import { formForge } from './form-forge';
+import { forks } from './forks';
 import { linkFair } from './link-fair';
+import { mazeHeart } from './maze-heart';
 import { mirrorTower } from './mirror-tower';
 import { mushroomGlades } from './mushroom-glades';
 import { oracleHall } from './oracle-hall';
@@ -94,8 +97,8 @@ export const scriptLands: Land[] = [
     blurb: 'Герой идёт по подземелью по твоему алгоритму',
     emblem: 'maze',
     where: 'в Лабиринте Решений',
-    regions: [],
-    upcoming: ['Развилки', 'Карусель Циклопа', 'Сердце лабиринта'],
+    regions: [forks, carousel, mazeHeart],
+    upcoming: [],
   },
   {
     id: 'recipe-workshop',

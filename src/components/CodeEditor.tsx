@@ -1,9 +1,16 @@
 import { useEffect, useImperativeHandle, useRef, type Ref } from 'react';
-import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
+import {
+  autocompletion,
+  closeBrackets,
+  closeBracketsKeymap,
+  completionKeymap,
+  type CompletionContext,
+  type CompletionResult,
+} from '@codemirror/autocomplete';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { css } from '@codemirror/lang-css';
 import { html } from '@codemirror/lang-html';
-import { javascript } from '@codemirror/lang-javascript';
+import { javascript, javascriptLanguage } from '@codemirror/lang-javascript';
 import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
 import { linter, lintGutter, type Diagnostic } from '@codemirror/lint';
 import { EditorState } from '@codemirror/state';
@@ -38,6 +45,35 @@ interface CodeEditorProps {
   /** Сразу поставить курсор туда, где студент начнёт писать (кроме сенсорных экранов) */
   autoFocus?: boolean;
   ref?: Ref<CodeEditorHandle>;
+}
+
+/** Приказы героя и Оракула: подсказки после «hero.» и «console.» — с пояснением по-русски */
+const MEMBERS: Record<string, [string, string][]> = {
+  hero: [
+    ['step', 'шаг вперёд'],
+    ['turnLeft', 'поворот налево'],
+    ['turnRight', 'поворот направо'],
+    ['take', 'поднять кристалл'],
+    ['zap', 'прогнать баг впереди'],
+    ['isWall', 'впереди стена?'],
+    ['isGem', 'под ногами кристалл?'],
+    ['atExit', 'герой у выхода?'],
+    ['look', 'что впереди'],
+    ['read', 'число на табличке'],
+    ['gems', 'сколько кристаллов собрано'],
+  ],
+  console: [['log', 'сказать Оракулу']],
+};
+
+function memberCompletions(context: CompletionContext): CompletionResult | null {
+  const match = context.matchBefore(/\b(?:hero|console)\.\w*$/);
+  if (!match) return null;
+  const dot = match.text.indexOf('.');
+  return {
+    from: match.from + dot + 1,
+    options: MEMBERS[match.text.slice(0, dot)].map(([label, detail]) => ({ label, detail, type: 'method', apply: `${label}()` })),
+    validFor: /^\w*$/,
+  };
 }
 
 const highlight = HighlightStyle.define([
@@ -155,7 +191,11 @@ export function CodeEditor({ language = 'css', initialValue, onChange, lint, onS
             indentWithTab,
           ]),
           // Теги студент закрывает сам — этому и учимся
-          setup.current.language === 'html' ? html({ autoCloseTags: false }) : setup.current.language === 'js' ? javascript() : css(),
+          setup.current.language === 'html'
+            ? html({ autoCloseTags: false })
+            : setup.current.language === 'js'
+              ? [javascript(), javascriptLanguage.data.of({ autocomplete: memberCompletions })]
+              : css(),
           syntaxHighlighting(highlight),
           theme,
           lintGutter(),

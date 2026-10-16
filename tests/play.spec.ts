@@ -912,7 +912,7 @@ test.describe('Скриптория', () => {
     await prologue.getByRole('button', { name: 'Пропустить' }).click();
     await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Врата Скриптории/ })).toContainText('Пройдено 0 из 16');
-    await expect(page.locator('[data-land="decision-maze"]')).toContainText('В тумане — скоро');
+    await expect(page.locator('[data-land="recipe-workshop"]')).toContainText('В тумане — скоро');
     await page.screenshot({ path: `${SCREENS}/30-scriptoria-map.png`, fullPage: true });
 
     await page.reload();
@@ -922,7 +922,7 @@ test.describe('Скриптория', () => {
     // Дверь на карте Скриптории ведёт обратно, а дверь Каскадии помнит, что герой заходил
     await page.getByRole('link', { name: /Дверь в Каскадию/ }).click();
     await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 16');
+    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 33');
   });
 
   test('Зал Оракула: свиток повторяет вывод, колба показывает тип', async ({ page }) => {
@@ -1098,6 +1098,129 @@ test.describe('Скриптория', () => {
       await typeCode(page, "console.log(('b' + 'a' + + 'a' + 'a').toLowerCase());\n");
       await cast(page);
       await expect(page.locator('.toast')).toContainText('Банан');
+    });
+  });
+});
+
+test.describe('Лабиринт Решений', () => {
+  /** Пройдены испытания: открыты все районы Лабиринта */
+  async function unlockMaze(page: Page) {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'if-08': done, 'loop-07': done }));
+    });
+  }
+
+  test('герой идёт по приказам, а в стену — врезается', async ({ page }) => {
+    await page.goto('/#/level/if-01');
+    await expect(page.getByRole('heading', { name: 'Первые шаги' })).toBeVisible();
+    await expect(page.locator('.dungeon-scene__status')).toContainText('Герой не дошёл до выхода: оставалось 5 шагов.');
+
+    await typeCode(page, 'hero.step();\nhero.step();\nhero.step();\n');
+    await expect(page.locator('.dungeon-scene__status')).toHaveText('Герой врезался в стену.');
+    await expect(page.locator('.dungeon__bonk')).toBeVisible();
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('Герой врезался в стену.');
+
+    const solution = await page.evaluate<string>("import('/src/levels/forks/if-01.ts').then((m) => m.default.solutionJs)");
+    await typeCode(page, solution);
+    await expect(page.locator('.goals__head')).toHaveText(/1 из 1/);
+    await expect(page.locator('.dungeon-scene__status')).toHaveText('Герой у выхода!');
+    await page.screenshot({ path: `${SCREENS}/40-dungeon.png`, fullPage: true });
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('код проверяют в каждом подземелье: без if герой хватает воздух', async ({ page }) => {
+    await page.goto('/#/level/if-02');
+    await page.getByRole('tab', { name: /Без кристалла/ }).click();
+    await expect(page.locator('.dungeon-scene__status')).toContainText('Под ногами нет кристалла — герой схватил воздух');
+    await typeCode(page, 'hero.step();\nif (hero.isGem()) {\n  hero.take();\n}\nhero.step();\nhero.step();\nhero.step();\n');
+    await expect(page.locator('.goals__head')).toHaveText(/3 из 3/);
+    await expect(page.getByRole('tab', { name: /С кристаллом ✦/ })).toBeVisible();
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('после hero. редактор подсказывает приказы героя', async ({ page }) => {
+    await page.goto('/#/level/if-01');
+    await typeCode(page, '');
+    await page.keyboard.type('hero.tu');
+    const options = page.locator('.cm-tooltip-autocomplete li');
+    await expect(options).toHaveCount(2);
+    await expect(options.first()).toContainText('turnLeft');
+    await expect(options.last()).toContainText('поворот направо');
+    // Сразу после появления списка CodeMirror не принимает Enter — чтобы быстрый набор не вставил подсказку случайно
+    await page.waitForTimeout(150);
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.cm-content')).toContainText('hero.turnLeft()');
+  });
+
+  test('один знак = вместо === объясняется по-русски', async ({ page }) => {
+    await page.goto('/#/level/if-04');
+    await expect(page.locator('.dungeon-scene__status')).toContainText('Чтобы сравнить два значения, нужно ===');
+  });
+
+  test('приказ без скобок: условие с ним выполняется всегда', async ({ page }) => {
+    await page.goto('/#/level/if-03');
+    await typeCode(page, 'hero.step();\nif (hero.isWall) {\n  hero.turnLeft();\n  hero.step();\n} else {\n  hero.step();\n  hero.step();\n}\n');
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toContainText('hero.isWall без скобок — это сам вопрос, а не ответ на него');
+  });
+
+  test.describe('Карусель и Сердце', () => {
+    test.beforeEach(async ({ page }) => {
+      await unlockMaze(page);
+    });
+
+    test('звезда за краткость: лестницу можно пройти и без цикла, но с одной звездой меньше', async ({ page }) => {
+      await page.goto('/#/level/loop-03');
+      const step = 'hero.step();\nhero.turnLeft();\nhero.step();\nhero.turnRight();\n';
+      await typeCode(page, step.repeat(4));
+      await expect(page.locator('.dungeon-scene__lines')).toContainText('16 строк кода · для трёх звёзд уложись в 6');
+      await cast(page);
+      await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+      await expect(page.locator('.result__notes')).toContainText('16 строк кода, а можно уложиться в 6: −1 ★');
+
+      await typeCode(page, `for (let i = 0; i < 4; i++) {\n${step}}\n`);
+      await cast(page);
+      await expect(page.getByRole('img', { name: '3 из 3 звёзд' }).last()).toBeVisible();
+    });
+
+    test('правило правой руки проходит все лабиринты, а финал земли дарит Руну Решений', async ({ page }) => {
+      await page.addInitScript(() => {
+        const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+        const ids = ['if-01', 'if-02', 'if-03', 'if-04', 'if-05', 'if-06', 'if-07', 'if-08', 'loop-01', 'loop-02', 'loop-03', 'loop-04', 'loop-05', 'loop-06', 'loop-07', 'heart-01'];
+        if (!localStorage.getItem('cascadia.progress.v1')?.includes('heart-01')) {
+          localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(ids.map((id) => [id, done]))));
+        }
+      });
+      await page.goto('/#/level/heart-02');
+      const solution = await page.evaluate<string>("import('/src/levels/maze-heart/heart-02.ts').then((m) => m.default.solutionJs)");
+      await typeCode(page, solution);
+      await expect(page.locator('.goals__head')).toHaveText(/6 из 6/);
+      await page.getByRole('tab', { name: /Большой/ }).click();
+      await page.screenshot({ path: `${SCREENS}/41-maze-heart.png`, fullPage: true });
+      await cast(page);
+
+      const outro = page.getByRole('dialog', { name: 'Эпилог: Сердце лабиринта' });
+      await expect(outro).toBeVisible();
+      await outro.getByRole('button', { name: 'Дальше →' }).click();
+      await expect(outro).toContainText('Держи Руну Решений');
+      await outro.getByRole('button', { name: 'Дальше →' }).click();
+      await expect(outro).toContainText('Я спрячусь в Мастерской Рецептов');
+    });
+  });
+
+  test.describe('на телефоне', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test('подземелье помещается по ширине', async ({ page }) => {
+      await unlockMaze(page);
+      await page.goto('/#/level/heart-01');
+      await expect(page.locator('.dungeon')).toBeVisible();
+      await expectNoHorizontalScroll(page);
     });
   });
 });

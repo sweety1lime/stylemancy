@@ -41,9 +41,15 @@ const KNOWN_GLOBALS = [
   'window',
   'setTimeout',
   'setInterval',
+  'hero',
 ];
 
 const CONSOLE_METHODS = ['log', 'info', 'warn', 'error', 'debug', 'table', 'clear', 'dir', 'group', 'groupEnd', 'time', 'timeEnd', 'count', 'assert', 'trace'];
+
+/** Приказы героя в «Пути героя»: действия и вопросы — что впереди, что под ногами */
+const HERO_ACTIONS = ['step', 'turnLeft', 'turnRight', 'take', 'zap'];
+const HERO_QUESTIONS = ['isWall', 'isGem', 'atExit', 'look', 'read', 'gems'];
+const HERO_METHODS = [...HERO_ACTIONS, ...HERO_QUESTIONS];
 
 /** Привычки из других языков и заглавные буквы там, где нужны строчные */
 const WRONG_WORDS: Record<string, string> = {
@@ -517,6 +523,10 @@ function nameProblems(program: AnyNode): Problem[] {
     if (object.type === 'Identifier' && object.name === 'console' && !CONSOLE_METHODS.includes(name)) {
       const typo = nearest(name, CONSOLE_METHODS);
       problems.push(error(property.start, property.end, `У console нет команды ${name}${typo ? ` — может, ${typo}?` : '. Обычно пишут console.log.'}`, 'name'));
+    } else if (object.type === 'Identifier' && object.name === 'hero' && !HERO_METHODS.includes(name)) {
+      const typo = nearest(name, HERO_METHODS);
+      const letters = typo && typo.toLowerCase() === name.toLowerCase() ? ' Большие и маленькие буквы различаются.' : '';
+      problems.push(error(property.start, property.end, `У героя нет приказа ${name}${typo ? ` — может, ${typo}?${letters}` : '.'}`, 'name'));
     } else if (object.type === 'Identifier' && object.name === 'Math' && !(name in Math)) {
       const typo = nearest(name, Object.getOwnPropertyNames(Math));
       problems.push(error(property.start, property.end, `У Math нет ${name}${typo ? ` — может, ${typo}?` : '.'}`, 'name'));
@@ -530,13 +540,30 @@ function nameProblems(program: AnyNode): Problem[] {
 const ARITHMETIC = ['+', '-', '*', '/', '%', '**'];
 const COMPARISON = ['==', '===', '!=', '!==', '<', '>', '<=', '>='];
 
+/** hero.step — приказ героя, записанный без вызова */
+function heroMethodName(node: AnyNode): string | undefined {
+  if (node.type !== 'MemberExpression' || node.computed) return undefined;
+  const object = node.object as AnyNode;
+  const property = node.property as AnyNode;
+  const name = property.name as string;
+  return object.type === 'Identifier' && object.name === 'hero' && HERO_METHODS.includes(name) ? name : undefined;
+}
+
 /**
  * Значение посчитано и сразу забыто: `gems + 3;` не доливает колбу, а `gems == 8;` — сравнивает, а не наливает.
+ * Сюда же — приказ героя без скобок: `hero.step;` ничего не делает, а `if (hero.isWall)` выполняется всегда.
  * Код при этом работает, поэтому это предупреждение, а не ошибка.
  */
 function lostValues(program: AnyNode, code: string): Problem[] {
   const problems: Problem[] = [];
-  function visit(node: AnyNode): void {
+  function visit(node: AnyNode, parent?: AnyNode): void {
+    const method = heroMethodName(node);
+    if (method && !(parent?.type === 'CallExpression' && parent.callee === node)) {
+      const message = HERO_QUESTIONS.includes(method)
+        ? `hero.${method} без скобок — это сам вопрос, а не ответ на него: условие с ним выполняется всегда. Пиши hero.${method}()`
+        : `hero.${method} без скобок — приказ не выполнится. Пиши hero.${method}()`;
+      problems.push({ from: node.start, to: node.end, severity: 'warning', kind: 'unused', message });
+    }
     if (node.type === 'ExpressionStatement' && !node.directive) {
       const expression = node.expression as AnyNode;
       const text = code.slice(expression.start, expression.end);
@@ -555,7 +582,7 @@ function lostValues(program: AnyNode, code: string): Problem[] {
       }
       if (message) problems.push({ from: expression.start, to: expression.end, severity: 'warning', kind: 'unused', message });
     }
-    childNodes(node).forEach(visit);
+    childNodes(node).forEach((child) => visit(child, node));
   }
   visit(program);
   return problems;
