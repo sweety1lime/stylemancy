@@ -45,7 +45,7 @@ export function CertificateScreen({ id }: { id: string }) {
     return (
       <main className="certificate-page">
         <section className="px-panel certificate-page__note">
-          <p>{master ? 'Грамота Магистра откроется, когда все земли Каскадии будут спасены.' : `Грамота откроется, когда ${land!.title} будет спасена.`}</p>
+          <p>{master ? 'Грамота Магистра откроется, когда все земли Каскадии будут спасены.' : `Грамота откроется, когда земля «${land!.title}» будет спасена.`}</p>
           <a className="text-button" href={hrefFor({ name: 'chronicle' })}>
             ← К летописи
           </a>

@@ -51,6 +51,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'keyboard', category: 'secret', secret: true, title: 'Магия без мыши', description: 'Сотворить заклинание через Ctrl+Enter десять раз.' },
   { id: 'chronicle', category: 'secret', secret: true, title: 'Летопись', description: 'Пройти уровень, оставив в коде свой комментарий.' },
   { id: 'hello-world', category: 'secret', secret: true, title: 'Hello, World!', description: 'Сказать Оракулу «Hello, World!» — первые слова любого программиста.' },
+  { id: 'banana', category: 'secret', secret: true, title: 'Банан', description: "Сварить банан из NaN: 'b' + 'a' + + 'a' + 'a' — второй плюс превращает 'a' в число, а выходит baNaNa." },
 ];
 
 type UnlockListener = (achievement: Achievement) => void;
@@ -81,6 +82,7 @@ export function recordCast(code: string, viaKeyboard: boolean): Achievement[] {
   if (/<marquee\b/i.test(code)) unlock('marquee', found);
   if (/z-index\s*:\s*\d{3,}/i.test(code)) unlock('z-war', found);
   if (/console\.log\(\s*(['"`])hello,?\s*world!?\1\s*\)/i.test(code)) unlock('hello-world', found);
+  if (/\+\s*\+\s*(['"`])a\1/i.test(code)) unlock('banana', found);
   if (viaKeyboard) {
     stats.update((s) => ({ keyboardCasts: s.keyboardCasts + 1 }));
     if (stats.get().keyboardCasts >= 10) unlock('keyboard', found);

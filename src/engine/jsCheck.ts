@@ -105,12 +105,16 @@ const QUOTED_SUM = /(['"`])\d+\1\s*\+|\+\s*(['"`])\d+\2/;
 function lineHint(actual: string, target: string, names: string[], code: string): string {
   if (names.includes(actual)) return ' — убери кавычки: Оракул прочёл слово, а не заглянул в колбу';
   if (actual === 'undefined') return ' — в колбе пусто (undefined)';
+  if (actual.includes('${') && !target.includes('${')) return ' — ${…} подставляет значение только в шаблоне, в обратных кавычках `` ` ``. В обычных кавычках он остаётся текстом';
+  if (actual.includes('NaN') && !target.includes('NaN')) {
+    return ' — это шут NaN: где-то Number не смог прочесть строку как число, а всё, что смешали с NaN, тоже стало NaN';
+  }
   if (actual.replace(/\s/g, '') === target.replace(/\s/g, '')) return ' — проверь пробелы';
   if (actual.toLowerCase() === target.toLowerCase()) return ' — проверь большие и маленькие буквы';
   const bare = (text: string) => text.replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
   if (bare(actual) === bare(target)) return ' — проверь знаки препинания';
   if (/^\d+$/.test(actual) && /^-?\d+(\.\d+)?$/.test(target) && (actual.length > target.length || QUOTED_SUM.test(code))) {
-    return ' — похоже, числа склеились как строки: у чисел, которые складывают, не должно быть кавычек';
+    return ' — похоже, числа склеились как строки: плюс складывает только числа. Убери кавычки или преврати строку в число через Number(…)';
   }
   return '';
 }

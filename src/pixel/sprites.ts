@@ -661,6 +661,41 @@ export const PORTRAITS: Record<string, Sprite> = {
       C: '#fde68a',
     },
   },
+  // Алхимик Тайпоф: медные очки на лбу, седые вихры и фартук в пятнах — синих, зелёных и золотых, как типы в колбах
+  typeof: {
+    rows: [
+      '..w..w.ww.w..w..',
+      '..kwwwwwwwwwwk..',
+      '.kwwwwwwwwwwwwk.',
+      '.kwgggkwwkgggwk.',
+      '.kwgLlgkkgLlgwk.',
+      '.kwgggkffkgggwk.',
+      '..kwffffffffwk..',
+      '..kwfeffffefwk..',
+      '...kffffffffk...',
+      '...kwwfmmfwwk...',
+      '...kwwwwwwwwk...',
+      '..kkkwwwwwwkkk..',
+      '.kaaakwwwwkaaak.',
+      '.kaaaakwwkaaaak.',
+      '.kaBaaakkaaaGak.',
+      'kaaaaYaaaaaaaaak',
+    ],
+    palette: {
+      k: INK,
+      w: '#e5e7eb',
+      g: '#b45309',
+      L: '#67e8f9',
+      l: '#ecfeff',
+      f: '#f1c27d',
+      e: INK,
+      m: '#be123c',
+      a: '#5b21b6',
+      B: '#3b82f6',
+      G: '#10b981',
+      Y: '#f59e0b',
+    },
+  },
 };
 
 /* ——— Витражи: цветное стекло с белым узором ——— */
@@ -2149,6 +2184,31 @@ export const SCRIPT_DOOR_OPEN: Sprite = {
     'kSsssSsssSsssSsk',
   ],
   palette: DOOR_PALETTE,
+};
+
+/** Шут NaN, подручный Лорда Дефолта: колпак с бубенцами и костюм в ромбах — половина фиолетовая, половина золотая */
+export const JESTER: Sprite = {
+  rows: [
+    'Y............Y',
+    'kk..........kk',
+    '.kPk......kGk.',
+    '.kPPk....kGGk.',
+    '..kPPkkkkGGk..',
+    '..kPPPPGGGGk..',
+    '..kkkkkkkkkk..',
+    '...kffffffk...',
+    '...kfeffefk...',
+    '...kffffffk...',
+    '...kfmmmmfk...',
+    '....kffffk....',
+    '..kkPPPGGGkk..',
+    '.kPPpPPGGgGGk.',
+    '.kPpPPPGGGgGk.',
+    '..kPPPPGGGGk..',
+    '..kGGk..kPPk..',
+    '..kkkk..kkkk..',
+  ],
+  palette: { k: INK, Y: '#facc15', P: '#7c3aed', p: '#4c1d95', G: '#f59e0b', g: '#b45309', f: '#f8fafc', e: INK, m: '#be123c' },
 };
 
 const GEAR_PALETTE = { t: '#b45309', r: '#d97706', R: '#fbbf24', h: '#78350f' };

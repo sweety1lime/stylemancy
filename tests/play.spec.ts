@@ -911,7 +911,7 @@ test.describe('Скриптория', () => {
     await expect(prologue).toContainText('тревожная весть');
     await prologue.getByRole('button', { name: 'Пропустить' }).click();
     await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Врата Скриптории/ })).toContainText('Пройдено 0 из 8');
+    await expect(page.getByRole('link', { name: /Врата Скриптории/ })).toContainText('Пройдено 0 из 16');
     await expect(page.locator('[data-land="decision-maze"]')).toContainText('В тумане — скоро');
     await page.screenshot({ path: `${SCREENS}/30-scriptoria-map.png`, fullPage: true });
 
@@ -922,7 +922,7 @@ test.describe('Скриптория', () => {
     // Дверь на карте Скриптории ведёт обратно, а дверь Каскадии помнит, что герой заходил
     await page.getByRole('link', { name: /Дверь в Каскадию/ }).click();
     await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 8');
+    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 16');
   });
 
   test('Зал Оракула: свиток повторяет вывод, колба показывает тип', async ({ page }) => {
@@ -993,5 +993,111 @@ test.describe('Скриптория', () => {
     await typeCode(page, "console.log('Hello, World!');\n");
     await cast(page);
     await expect(page.locator('.toast')).toContainText('Hello, World!');
+  });
+
+  test('Лавка Алхимика открывается после испытания Зала Оракула', async ({ page }) => {
+    await page.goto('/#/land/script-gates');
+    await page.getByRole('dialog', { name: 'Пролог: Зал Оракула' }).getByRole('button', { name: 'Пропустить' }).click();
+    const shop = page.locator('.district', { hasText: 'Лавка Алхимика' });
+    await expect(shop).toContainText('Откроется после испытания «Кошелёк героя» в районе «Зал Оракула».');
+    await expect(shop.getByRole('link')).toHaveCount(0);
+  });
+
+  test.describe('Лавка Алхимика', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(() => {
+        if (localStorage.getItem('cascadia.progress.v1')) return;
+        const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+        localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'js-08': done }));
+      });
+    });
+
+    test('гости лавки: код проверяют два гостя, у каждого — своя вкладка', async ({ page }) => {
+      await page.goto('/#/level/alch-07');
+      await expect(page.getByRole('tab', { name: /Фея Лира/ })).toHaveAttribute('aria-selected', 'true');
+      await expect(page.getByRole('tab', { name: /Гном Бурр/ })).toBeVisible();
+
+      await typeCode(page, "let guest = prompt('Как тебя зовут?');\nalert(`Добро пожаловать, ${guest}!`);\nconsole.log(`Гость: ${guest}`);\n");
+      await expect(page.locator('.goals__head')).toHaveText(/8 из 8/);
+      // У второго гостя свой ответ на prompt — и своё приветствие
+      await page.getByRole('tab', { name: /Гном Бурр/ }).click();
+      await expect(page.locator('.oracle-line--prompt')).toContainText('→ Бурр');
+      await expect(page.locator('.oracle-line--alert')).toContainText('Добро пожаловать, Бурр!');
+      await page.screenshot({ path: `${SCREENS}/32-shop-guests.png`, fullPage: true });
+      await cast(page);
+      await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    });
+
+    test('шаблон в обычных кавычках: проверка объясняет, где ошибка', async ({ page }) => {
+      await page.goto('/#/level/alch-02');
+      await typeCode(page, "let potion = 'Зелье силы';\nlet price = 12;\nlet tag = '${potion}: ${price} монет';\nconsole.log(tag);\n");
+      await cast(page);
+      const result = page.locator('.result__list');
+      await expect(result).toContainText('подставляет значение только в шаблоне, в обратных кавычках');
+      // Сама обратная кавычка видна — как код
+      await expect(result.locator('code', { hasText: '`' })).toBeVisible();
+    });
+
+    test('испытание лавки: prompt отвечает строкой, и подарок склеивается', async ({ page }) => {
+      await page.goto('/#/level/alch-08');
+      await typeCode(
+        page,
+        "const price = 12;\nlet guest = prompt('Как тебя зовут?');\nlet count = prompt('Сколько зелий берёшь?');\nlet potions = count + 1;\nlet total = count * price;\nalert(`${guest}: зелий ${potions}, с тебя ${total} монет`);\n",
+      );
+      await cast(page);
+      await expect(page.locator('.result__list')).toContainText("Фея Лира: В колбе count — '3' (строка), а нужно 3 (число).");
+    });
+
+    test('Врата Скриптории спасены: Руна Типов, злодей бежит в Лабиринт, грамота в летописи', async ({ page }) => {
+      await page.addInitScript(() => {
+        const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+        const ids = ['js-01', 'js-02', 'js-03', 'js-04', 'js-05', 'js-06', 'js-07', 'js-08', 'alch-01', 'alch-02', 'alch-03', 'alch-04', 'alch-05', 'alch-06', 'alch-07'];
+        if (!localStorage.getItem('cascadia.progress.v1')?.includes('alch-01')) {
+          localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(ids.map((id) => [id, done]))));
+        }
+      });
+      await page.goto('/#/level/alch-08');
+      const solution = await page.evaluate<string>("import('/src/levels/alchemist-shop/alch-08.ts').then((m) => m.default.solutionJs)");
+      await typeCode(page, solution);
+      await expect(page.locator('.goals__head')).toHaveText(/12 из 12/);
+      await cast(page);
+
+      const outro = page.getByRole('dialog', { name: 'Эпилог: Лавка Алхимика' });
+      await expect(outro).toBeVisible();
+      await outro.getByRole('button', { name: 'Дальше →' }).click();
+      await expect(outro).toContainText('Держи Руну Типов');
+      await outro.getByRole('button', { name: 'Дальше →' }).click();
+      await expect(outro).toContainText('Дальше — Лабиринт Решений');
+      await outro.getByRole('button', { name: 'Дальше →' }).click();
+      await outro.getByRole('button', { name: 'Закрыть' }).click();
+
+      await page.goto('/#/chronicle');
+      const chapter = page.locator('.chronicle__chapter', { hasText: 'Врата Скриптории' });
+      await expect(chapter).toContainText('спасена');
+      await expect(chapter.getByRole('link', { name: 'Грамота: Врата Скриптории' })).toBeVisible();
+    });
+
+    test('гримуар: пример prompt отвечает за гостя', async ({ page }) => {
+      await page.addInitScript(() => {
+        const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+        if (!localStorage.getItem('cascadia.progress.v1')?.includes('alch-07')) {
+          localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'js-08': done, 'alch-07': done }));
+        }
+      });
+      await page.goto('/#/grimoire');
+      const card = page.locator('.spell-card', { has: page.getByRole('heading', { name: 'prompt()' }) });
+      await card.getByRole('button', { name: 'ответ «3»' }).click();
+      await expect(card.locator('.oracle-line--prompt')).toContainText('→ 3');
+      await expect(card.locator('.example__oracle')).toContainText('31');
+      await card.getByRole('button', { name: 'Number', exact: true }).click();
+      await expect(card.locator('.example__oracle')).toContainText('4');
+    });
+
+    test('секрет: банан из NaN', async ({ page }) => {
+      await page.goto('/#/level/alch-05');
+      await typeCode(page, "console.log(('b' + 'a' + + 'a' + 'a').toLowerCase());\n");
+      await cast(page);
+      await expect(page.locator('.toast')).toContainText('Банан');
+    });
   });
 });

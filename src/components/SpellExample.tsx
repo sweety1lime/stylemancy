@@ -5,6 +5,7 @@ import { runScript, type RunResult } from '../engine/jsRun';
 import { recordExperiment } from '../game/achievements';
 import type { SpellExample as Example, MarkupExample, ScriptExample, ValueExample, VariantsExample, WidthExample } from '../game/spells';
 import { IMAGE_LIBRARY } from '../levels/shared/images';
+import { OracleLine } from './JsScene';
 
 /** Оформление мини-сцены примера: пиксельный контейнер и цветные пронумерованные блоки. */
 const BASE_CSS = `
@@ -80,15 +81,15 @@ export function SpellExample({ spell, example }: { spell: string; example: Examp
 function ScriptDemo({ spell, example }: { spell: string; example: ScriptExample }) {
   const [selected, setSelected] = useState(example.initial ?? 0);
   const [result, setResult] = useState<RunResult | null>(null);
-  const code = example.scripts[selected].code;
+  const { code, inputs } = example.scripts[selected];
 
   useEffect(() => {
     let cancelled = false;
-    void runScript(code).then((next) => !cancelled && setResult(next));
+    void runScript(code, { inputs }).then((next) => !cancelled && setResult(next));
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [code, inputs]);
 
   function choose(index: number) {
     setSelected(index);
@@ -117,9 +118,7 @@ function ScriptDemo({ spell, example }: { spell: string; example: ScriptExample 
       </pre>
       <ol className="example__oracle oracle-scroll__lines" aria-label="Что сказал Оракул">
         {result?.output.map((line, i) => (
-          <li key={i} className="oracle-line">
-            <span className="oracle-line__text">{line.text === '' ? ' ' : line.text}</span>
-          </li>
+          <OracleLine key={i} line={line} />
         ))}
         {failure && <li className="oracle-line oracle-line--error">✖ {failure.message}</li>}
         {result && !failure && result.output.length === 0 && <li className="oracle-line oracle-line--empty">Оракул молчит</li>}

@@ -4,6 +4,7 @@ import { recolor } from '../pixel/pixelArt';
 import {
   AMANITA,
   BOLETUS,
+  EMBLEMS,
   FIREFLY_FRAMES,
   FLAG_FRAMES,
   GEAR_FRAMES,
@@ -11,6 +12,7 @@ import {
   GLASS,
   HERO_ANIMATIONS,
   ISLAND_ROCK,
+  JESTER,
   MOON,
   OAK,
   PORTRAITS,
@@ -359,6 +361,39 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
               <PixelArt key={i} sprite={sprite} />
             ))}
           </div>
+        </>
+      )}
+
+      {art === 'shop' && (
+        <>
+          {/* Лавка Алхимика: вывеска, полки с колбами всех типов и котёл, в котором булькает зелье */}
+          <span className="sa-shop-sign">Лавка Алхимика</span>
+          <div className="sa-shop-shelf sa-shop-shelf--1">
+            {FLASKS.map((sprite, i) => (
+              <PixelArt key={i} sprite={sprite} />
+            ))}
+          </div>
+          <div className="sa-shop-shelf sa-shop-shelf--2">
+            {FLASKS.slice(0, 3).map((sprite, i) => (
+              <PixelArt key={i} sprite={sprite} />
+            ))}
+          </div>
+          <PixelArt className="sa-cauldron" sprite={EMBLEMS.cauldron} />
+        </>
+      )}
+
+      {art === 'jester' && (
+        <>
+          {/* Шут NaN жонглирует колбами, а вокруг — его проделки */}
+          <span className="sa-nan sa-nan--1">NaN</span>
+          <span className="sa-nan sa-nan--2">&apos;5&apos; + &apos;3&apos; = &apos;53&apos;</span>
+          <span className="sa-nan sa-nan--3">NaN</span>
+          <div className="sa-juggle">
+            {FLASKS.slice(0, 3).map((sprite, i) => (
+              <PixelArt key={i} sprite={sprite} />
+            ))}
+          </div>
+          <PixelArt className="sa-jester" sprite={JESTER} />
         </>
       )}
 

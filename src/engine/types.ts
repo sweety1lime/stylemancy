@@ -190,7 +190,9 @@ export interface StoryFrame {
     // Скриптория
     | 'gate'
     | 'clockwork'
-    | 'oracle';
+    | 'oracle'
+    | 'shop'
+    | 'jester';
   /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
   speaker?: string;
   name?: string;

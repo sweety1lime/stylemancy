@@ -2,7 +2,7 @@ import { defineJsLevel } from '../../engine/define';
 
 export default defineJsLevel({
   id: 'js-08',
-  title: 'Испытание Оракула',
+  title: 'Испытание: Кошелёк героя',
   trial: true,
   dialog: [
     'Лорд Дефолт уверен, что Скриптория онемела. Докажи, что нет: наполни колбы сам — без моих заготовок.',

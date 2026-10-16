@@ -1,5 +1,6 @@
 import type { Level, Region } from '../engine/types';
 import { barracks } from './barracks';
+import { alchemistShop } from './alchemist-shop';
 import { cascadeTree } from './cascade-tree';
 import { defaultCitadel } from './default-citadel';
 import { floatingIslands } from './floating-islands';
@@ -80,11 +81,11 @@ export const scriptLands: Land[] = [
     id: 'script-gates',
     title: 'Врата Скриптории',
     topic: 'JS: основы',
-    blurb: 'Вывод, переменные, типы и операторы',
+    blurb: 'Вывод, переменные, строки, типы и ввод',
     emblem: 'flask',
     where: 'у Врат Скриптории',
-    regions: [oracleHall],
-    upcoming: ['Лавка Алхимика'],
+    regions: [oracleHall, alchemistShop],
+    upcoming: [],
   },
   {
     id: 'decision-maze',

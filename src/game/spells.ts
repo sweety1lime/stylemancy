@@ -39,7 +39,8 @@ export interface VariantsExample {
 
 /** Пример-скрипт: кнопки переключают варианты кода, а Оракул сразу говорит, что выведет каждый. */
 export interface ScriptExample {
-  scripts: { label: string; code: string }[];
+  /** inputs — ответы на prompt по порядку */
+  scripts: { label: string; code: string; inputs?: string[] }[];
   initial?: number;
 }
 
@@ -1234,6 +1235,96 @@ export const SPELLS: Record<string, Spell> = {
         { label: '17 % 5', code: 'console.log(17 % 5);' },
         { label: '2 + 3 * 4', code: 'console.log(2 + 3 * 4);' },
         { label: '(2 + 3) * 4', code: 'console.log((2 + 3) * 4);' },
+      ],
+    },
+  },
+  concat: {
+    name: 'Склеивание строк +',
+    description:
+      'Плюс между строками склеивает их в одну — вплотную, без пробела: `\'Лавка\' + \'Алхимика\'` даёт `\'ЛавкаАлхимика\'`. Пробел приклеивают отдельной строкой: `shop + \' \' + owner`. Если хоть одна часть — строка, плюс склеивает и числа: `\'Зелий: \' + 3` даёт `\'Зелий: 3\'`.',
+    example: {
+      scripts: [
+        { label: 'без пробела', code: "let shop = 'Лавка';\nlet owner = 'Алхимика';\nconsole.log(shop + owner);" },
+        { label: 'с пробелом', code: "let shop = 'Лавка';\nlet owner = 'Алхимика';\nconsole.log(shop + ' ' + owner);" },
+        { label: 'строка + число', code: "console.log('Зелий: ' + 3);" },
+      ],
+      initial: 1,
+    },
+  },
+  template: {
+    name: 'Шаблонные строки',
+    description:
+      'Строка в обратных кавычках `` ` `` (клавиша Ё в английской раскладке) — шаблон: `${…}` внутри него подставляет значение колбы или результат вычисления. `` `Зелье: ${price} монет` `` — без плюсов и лишних кавычек. В обычных кавычках `${…}` остаётся просто текстом.',
+    example: {
+      scripts: [
+        { label: 'шаблон', code: 'let price = 12;\nconsole.log(`Зелье: ${price} монет`);' },
+        { label: 'вычисление внутри', code: 'let price = 12;\nconsole.log(`Три зелья: ${price * 3} монет`);' },
+        { label: 'в обычных кавычках', code: "let price = 12;\nconsole.log('Зелье: ${price} монет');" },
+      ],
+    },
+  },
+  typeof: {
+    name: 'typeof',
+    description:
+      'Называет тип значения: `typeof 42` — `number`, `typeof \'42\'` — `string`, `typeof true` — `boolean`, а у пустой колбы — `undefined`. Прежде чем смешивать значения, узнай, что в колбе.',
+    example: {
+      scripts: [
+        { label: '42', code: 'console.log(typeof 42);' },
+        { label: "'42'", code: "console.log(typeof '42');" },
+        { label: 'true', code: 'console.log(typeof true);' },
+        { label: 'пустая колба', code: 'let box;\nconsole.log(typeof box);' },
+      ],
+    },
+  },
+  'to-number': {
+    name: 'Number()',
+    description:
+      'Превращает строку в число: `Number(\'5\')` — это 5, с ним можно считать. Плюс со строками склеивает — `\'5\' + \'3\'` даёт `\'53\'`, а с числами складывает. Минус, умножение и деление превращают строки в числа сами: `\'5\' * 2` — это 10.',
+    example: {
+      scripts: [
+        { label: "'5' + '3'", code: "console.log('5' + '3');" },
+        { label: 'Number', code: "console.log(Number('5') + Number('3'));" },
+        { label: "'5' * 2", code: "console.log('5' * 2);" },
+        { label: "'5' - 2", code: "console.log('5' - 2);" },
+      ],
+      initial: 1,
+    },
+  },
+  nan: {
+    name: 'NaN и parseInt()',
+    description:
+      '`NaN` — «не число»: так выходит, когда `Number` не может прочесть строку, например `Number(\'12 монет\')`. Всё, что смешали с `NaN`, тоже становится `NaN`, а `typeof NaN` — всё равно `number`. `parseInt(\'12 монет\')` читает целое число в начале строки — 12.',
+    example: {
+      scripts: [
+        { label: "Number('12 монет')", code: "console.log(Number('12 монет'));" },
+        { label: 'NaN * 3', code: "console.log(Number('12 монет') * 3);" },
+        { label: "parseInt('12 монет')", code: "console.log(parseInt('12 монет'));" },
+        { label: 'typeof NaN', code: 'console.log(typeof NaN);' },
+      ],
+    },
+  },
+  alert: {
+    name: 'alert()',
+    description:
+      'Показывает окно с сообщением — его видит каждый, кто открыл страницу. А `console.log` пишет в консоль, которую видит только разработчик. Пока окно открыто, код ждёт, когда его закроют.',
+    example: {
+      scripts: [
+        { label: 'alert', code: "alert('Динь-дон! Добро пожаловать!');" },
+        { label: 'с шаблоном', code: "let guest = 'Лира';\nalert(`Добро пожаловать, ${guest}!`);" },
+        { label: 'console.log', code: "console.log('Запись в журнал лавки');" },
+      ],
+    },
+  },
+  prompt: {
+    name: 'prompt()',
+    description:
+      'Задаёт вопрос в окне с полем ввода и возвращает ответ — всегда строкой: `let guest = prompt(\'Как тебя зовут?\');`. Если нажать «Отмена», вернётся `null`. Число из ответа получают через `Number(…)`.',
+    example: {
+      scripts: [
+        { label: 'ответ «Лира»', code: "let guest = prompt('Как тебя зовут?');\nconsole.log(`Гость: ${guest}`);", inputs: ['Лира'] },
+        { label: 'ответ «3»', code: "let count = prompt('Сколько зелий?');\nconsole.log(count + 1);", inputs: ['3'] },
+        { label: 'Number', code: "let count = Number(prompt('Сколько зелий?'));\nconsole.log(count + 1);", inputs: ['3'] },
+        { label: 'Отмена', code: "let guest = prompt('Как тебя зовут?');\nconsole.log(guest);" },
       ],
     },
   },

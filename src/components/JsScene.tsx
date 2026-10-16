@@ -50,7 +50,8 @@ function Flask({ status }: { status: FlaskStatus }) {
   );
 }
 
-function OracleLine({ line, ok }: { line: OutputLine; ok: boolean }) {
+/** Строка свитка: слова Оракула, окно alert или вопрос prompt вместе с ответом. */
+export function OracleLine({ line, ok = false }: { line: OutputLine; ok?: boolean }) {
   const mark = ok ? <span className="oracle-line__mark">✦</span> : null;
   if (line.kind === 'prompt') {
     return (
