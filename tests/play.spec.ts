@@ -912,7 +912,7 @@ test.describe('Скриптория', () => {
     await prologue.getByRole('button', { name: 'Пропустить' }).click();
     await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Врата Скриптории/ })).toContainText('Пройдено 0 из 16');
-    await expect(page.locator('[data-land="recipe-workshop"]')).toContainText('В тумане — скоро');
+    await expect(page.locator('[data-land="mechanism-city"]')).toContainText('В тумане — скоро');
     await page.screenshot({ path: `${SCREENS}/30-scriptoria-map.png`, fullPage: true });
 
     await page.reload();
@@ -922,7 +922,7 @@ test.describe('Скриптория', () => {
     // Дверь на карте Скриптории ведёт обратно, а дверь Каскадии помнит, что герой заходил
     await page.getByRole('link', { name: /Дверь в Каскадию/ }).click();
     await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 33');
+    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 55');
   });
 
   test('Зал Оракула: свиток повторяет вывод, колба показывает тип', async ({ page }) => {
@@ -1220,6 +1220,91 @@ test.describe('Лабиринт Решений', () => {
       await unlockMaze(page);
       await page.goto('/#/level/heart-01');
       await expect(page.locator('.dungeon')).toBeVisible();
+      await expectNoHorizontalScroll(page);
+    });
+  });
+});
+
+test.describe('Мастерская Рецептов', () => {
+  test('конвейер: рецепт без return отдаёт пустые флаконы, а с return — полные', async ({ page }) => {
+    await page.goto('/#/level/fn-04');
+    await expect(page.getByRole('heading', { name: 'Призрак Андефайнд' })).toBeVisible();
+    await expect(page.locator('.call').first()).toContainText('triple(2)');
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('triple(2) вернул пустоту (undefined), а ждали 6. Не забыл return?');
+    await expect(page.locator('.call--wrong')).toHaveCount(3);
+
+    await typeCode(page, 'function triple(n) {\n  return n * 3;\n}\n');
+    await expect(page.locator('.call--ok')).toHaveCount(3);
+    await expect(page.locator('.goals__head')).toHaveText(/3 из 3/);
+    await page.screenshot({ path: `${SCREENS}/50-conveyor.png`, fullPage: true });
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('рецепта нет — флакон так и говорит', async ({ page }) => {
+    await page.goto('/#/level/fn-03');
+    await typeCode(page, '// пока пусто\n');
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('Рецепта double нет: объяви функцию — function double(…) { … }');
+  });
+
+  test('массив на полке — обоз с номерами, объект — карточка', async ({ page }) => {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'fn-08': done, 'arr-08': done }));
+    });
+    await page.goto('/#/level/arr-03');
+    await typeCode(page, "let train = ['уголь', 'руда', 'шпион'];\ntrain.pop();\ntrain.push('кристаллы');\nconsole.log(train);\n");
+    const wagons = page.locator('.flask', { hasText: 'train' }).locator('.wagon');
+    await expect(wagons).toHaveCount(3);
+    await expect(wagons.last()).toContainText("'кристаллы'2");
+
+    await page.goto('/#/level/obj-02');
+    await typeCode(page, "let potion = { name: 'Зелье силы', price: 12 };\npotion.price = 15;\npotion.stock = 3;\nconsole.log(potion);\n");
+    const card = page.locator('.flask', { hasText: 'potion' }).locator('.card-value');
+    await expect(card).toContainText('stock:3');
+    await expect(page.locator('.goals__head')).toHaveText(/2 из 2/);
+  });
+
+  test('финал Мастерской: Руна Рецептов, а злодей бежит в Город Механизмов', async ({ page }) => {
+    await page.addInitScript(() => {
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      const ids = [
+        ...['fn-01', 'fn-02', 'fn-03', 'fn-04', 'fn-05', 'fn-06', 'fn-07', 'fn-08'],
+        ...['arr-01', 'arr-02', 'arr-03', 'arr-04', 'arr-05', 'arr-06', 'arr-07', 'arr-08'],
+        ...['obj-01', 'obj-02', 'obj-03', 'obj-04', 'obj-05'],
+      ];
+      if (!localStorage.getItem('cascadia.progress.v1')?.includes('obj-05')) {
+        localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(ids.map((id) => [id, done]))));
+      }
+    });
+    await page.goto('/#/level/obj-06');
+    const solution = await page.evaluate<string>("import('/src/levels/card-index/obj-06.ts').then((m) => m.default.solutionJs)");
+    await typeCode(page, solution);
+    await expect(page.locator('.goals__head')).toHaveText(/3 из 3/);
+    await cast(page);
+
+    const outro = page.getByRole('dialog', { name: 'Эпилог: Картотека' });
+    await expect(outro).toBeVisible();
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('Держи Руну Рецептов');
+    await outro.getByRole('button', { name: 'Дальше →' }).click();
+    await expect(outro).toContainText('Город Механизмов — моё логово');
+  });
+
+  test.describe('на телефоне', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test('конвейер с длинными вызовами помещается по ширине', async ({ page }) => {
+      await page.addInitScript(() => {
+        if (localStorage.getItem('cascadia.progress.v1')) return;
+        const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+        localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'fn-08': done, 'arr-08': done }));
+      });
+      await page.goto('/#/level/obj-06');
+      await expect(page.locator('.call')).toHaveCount(3);
       await expectNoHorizontalScroll(page);
     });
   });

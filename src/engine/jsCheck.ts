@@ -3,7 +3,7 @@ import { countGems, distanceToExit, parseDungeon } from './dungeon';
 import { scoreSolution, type Score } from './evaluate';
 import type { GoalStatus } from './htmlCheck';
 import { lintJs, runtimeProblem, stripJsComments } from './jsLint';
-import { runScript, type Flask, type HeroReport, type OutputLine, type RunResult, type ValueType } from './jsRun';
+import { runScript, type CallResult, type Flask, type HeroReport, type OutputLine, type RunResult, type ValueType } from './jsRun';
 import type { Problem } from './lint';
 import type { Dungeon, JsLevel, JsRun } from './types';
 
@@ -11,6 +11,7 @@ import type { Dungeon, JsLevel, JsRun } from './types';
   Проверка JS-уровня: код студента и эталон запускаются с одними и теми же ответами на prompt,
   потом сравниваются слова Оракула (строки по порядку) и колбы (значение и тип).
   В «Пути героя» запуск — это подземелье: герой должен дойти до выхода и собрать все кристаллы.
+  В «Алхимии функций» после скрипта по конвейеру едут вызовы-флаконы: что они вернули, сверяется с эталоном.
 */
 
 export const TYPE_NAMES: Record<ValueType, string> = {
@@ -37,6 +38,15 @@ export interface FlaskStatus {
   ok?: boolean;
 }
 
+/** Вызов-флакон на конвейере: что вернул код студента и что должен был. */
+export interface CallStatus {
+  call: string;
+  actual?: CallResult;
+  /** Из эталона */
+  target?: CallResult;
+  ok: boolean;
+}
+
 export interface RunStatus {
   run: JsRun;
   /** Подпись запуска, если их несколько */
@@ -46,6 +56,8 @@ export interface RunStatus {
   /** Какие строки вывода совпали с эталоном */
   lineOk: boolean[];
   flasks: FlaskStatus[];
+  /** Вызовы-флаконы «Алхимии функций» */
+  calls: CallStatus[];
   /** Что не так — по-русски */
   misses: string[];
 }
@@ -78,7 +90,9 @@ export function targetRuns(level: JsLevel): Promise<RunResult[]> {
   if (!cached) {
     const vars = level.check.vars ?? [];
     cached = Promise.all(
-      runsOf(level).map((run) => runScript(level.solutionJs, { inputs: run.inputs, vars, timeout: 4000, world: run.dungeon?.map })),
+      runsOf(level).map((run) =>
+        runScript(level.solutionJs, { inputs: run.inputs, vars, timeout: 4000, world: run.dungeon?.map, calls: level.calls }),
+      ),
     );
     targetCache.set(level.id, cached);
   }
@@ -204,6 +218,29 @@ function describeFlask(flask: Flask): string {
   return `${flask.shown} (${TYPE_NAMES[flask.type ?? 'undefined']})`;
 }
 
+/** Имя функции в вызове: «double(5)» → double */
+function calleeName(call: string): string | undefined {
+  return /^\s*([\p{L}_$][\p{L}\p{N}_$]*)\s*\(/u.exec(call)?.[1];
+}
+
+/** Что не так с вызовом-флаконом — по-русски. */
+function callMiss({ call, actual, target, ok }: CallStatus, code: string): string | undefined {
+  if (ok || !actual || !target?.declared) return undefined;
+  if (actual.error) {
+    const name = calleeName(call);
+    if (name && actual.error.message === `${name} is not defined`) return `Рецепта ${name} нет: объяви функцию — function ${name}(…) { … }`;
+    if (name && actual.error.message === `${name} is not a function`) return `${name} — не рецепт: это не функция, и позвать её нельзя.`;
+    return `${call}: ${runtimeProblem(code, actual.error).message}`;
+  }
+  if (actual.type === 'undefined') {
+    // Частая ошибка: рецепт говорит ответ Оракулу или забыл return в стрелке с фигурными скобками
+    const hint = /\breturn\b/.test(stripJsComments(code)) ? '' : ' Не забыл return?';
+    return `${call} вернул пустоту (undefined), а ждали ${target.shown}.${hint}`;
+  }
+  if (actual.type !== target.type) return `${call}: ждали ${describeFlask(target)}, а вышло ${describeFlask(actual)}.`;
+  return `${call}: ждали ${target.shown}, а вышло ${actual.shown}.`;
+}
+
 function compareFlask(name: string, flask: Flask | undefined, target: Flask): string | undefined {
   if (!target.declared) return undefined;
   if (!flask?.declared) return `Колбы ${name} нет на полке: объяви переменную — let ${name} = …`;
@@ -215,9 +252,12 @@ function compareFlask(name: string, flask: Flask | undefined, target: Flask): st
 /** Цели в списке: слова Оракула по строкам, колбы и подземелье. Если запусков несколько — у каждого свои. */
 function goalsOf(level: JsLevel, runs: RunStatus[]): GoalStatus[] {
   const goals: GoalStatus[] = [];
-  for (const { run, label, result, target, lineOk, flasks } of runs) {
+  for (const { run, label, result, target, lineOk, flasks, calls } of runs) {
     const prefix = label ? `${label}: ` : '';
     if (run.dungeon) goals.push(...dungeonGoals(run.dungeon, result.hero, prefix));
+    for (const status of calls) {
+      if (status.target?.declared) goals.push({ label: `${prefix}\`${status.call}\` → ${status.target.shown}`, done: status.ok });
+    }
     if (level.check.output) {
       target.output.forEach((line, i) => {
         const text =
@@ -253,7 +293,7 @@ export async function evaluateJs(level: JsLevel, code: string, cast = false): Pr
       const target = targets[index];
       const result: RunResult = codeErrors.length
         ? { output: [], flasks: {} }
-        : await runScript(code, { inputs: run.inputs, vars: names, timeout: cast ? 3000 : 1500, world: run.dungeon?.map });
+        : await runScript(code, { inputs: run.inputs, vars: names, timeout: cast ? 3000 : 1500, world: run.dungeon?.map, calls: level.calls });
       const { lineOk, misses } =
         level.check.output && !result.timedOut ? compareOutput(result.output, target.output, names, code) : { lineOk: [], misses: [] };
       const flasks = names.map((name): FlaskStatus => {
@@ -265,10 +305,22 @@ export async function evaluateJs(level: JsLevel, code: string, cast = false): Pr
         return { name, flask, target: goal, ok: Boolean(goal) && !miss };
       });
       if (run.dungeon && !result.timedOut) misses.push(...dungeonMisses(run.dungeon, result.hero));
+      const calls = (level.calls ?? []).map((call, i): CallStatus => {
+        const actual = result.calls?.[i];
+        const goal = target.calls?.[i];
+        return { call, actual, target: goal, ok: Boolean(actual?.declared && goal?.declared && actual.key === goal.key) };
+      });
+      if (!result.timedOut) {
+        for (const status of calls) {
+          // «Рецепта double нет» у всех флаконов одинаковое — хватит одного раза
+          const miss = callMiss(status, code);
+          if (miss && !misses.includes(miss)) misses.push(miss);
+        }
+      }
       // Зависший код остановлен: сравнивать нечего, важно одно — найти бесконечный цикл
       if (result.timedOut) misses.push('Код работал слишком долго и был остановлен — похоже, где-то бесконечный цикл.');
       if (result.overflow) misses.push('Оракул охрип: строк слишком много. Проверь, не повторяется ли вывод без конца.');
-      return { run, label: runLabel(level, run, index), result, target, lineOk, flasks, misses };
+      return { run, label: runLabel(level, run, index), result, target, lineOk, flasks, calls, misses };
     }),
   );
 

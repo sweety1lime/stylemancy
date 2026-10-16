@@ -10,6 +10,12 @@ export interface OutputLine {
 
 export type ValueType = 'number' | 'string' | 'boolean' | 'undefined' | 'null' | 'array' | 'object' | 'function' | 'bigint' | 'symbol';
 
+/** Вагон обоза или поле карточки: тип и как выглядит. */
+export interface ValuePreview {
+  type: ValueType;
+  shown: string;
+}
+
 /** Колба — переменная верхнего уровня после запуска. */
 export interface Flask {
   declared: boolean;
@@ -18,6 +24,18 @@ export interface Flask {
   shown?: string;
   /** Ключ для сравнения с эталоном */
   key?: string;
+  /** Сколько вагонов в массиве или полей в объекте */
+  size?: number;
+  /** Массив — обоз: первые вагоны */
+  items?: ValuePreview[];
+  /** Объект — карточка: первые поля */
+  entries?: [string, ValuePreview][];
+}
+
+/** Вызов-флакон «Алхимии функций»: что вернул или на чём сломался. */
+export interface CallResult extends Flask {
+  call: string;
+  error?: RunError;
 }
 
 /** Ошибка, на которой код остановился. Строка и столбец — в коде студента, с единицы. */
@@ -66,6 +84,8 @@ export interface RunResult {
   timedOut?: boolean;
   /** Путь героя — если код шёл по подземелью */
   hero?: HeroReport;
+  /** Вызовы-флаконы — по порядку */
+  calls?: CallResult[];
 }
 
 export interface RunOptions {
@@ -77,6 +97,8 @@ export interface RunOptions {
   timeout?: number;
   /** Карта подземелья: тогда в коде есть герой */
   world?: string[];
+  /** Вызовы-флаконы: вычисляются после скрипта */
+  calls?: string[];
 }
 
 let workerUrl: string | null = null;
@@ -90,7 +112,7 @@ function workerScript(): string {
  * Выполняет код студента в отдельном фоновом потоке: страница игры недоступна, а зависший код
  * останавливается по таймеру. Каждый запуск — новый поток.
  */
-export function runScript(code: string, { inputs = [], vars = [], timeout = 2000, world }: RunOptions = {}): Promise<RunResult> {
+export function runScript(code: string, { inputs = [], vars = [], timeout = 2000, world, calls = [] }: RunOptions = {}): Promise<RunResult> {
   return new Promise((resolve) => {
     const nonce = Math.random().toString(36).slice(2);
     const worker = new Worker(workerScript());
@@ -103,12 +125,12 @@ export function runScript(code: string, { inputs = [], vars = [], timeout = 2000
     worker.onmessage = (event: MessageEvent) => {
       const data = event.data as (RunResult & { nonce?: string }) | null;
       if (data?.nonce !== nonce) return;
-      finish({ output: data.output, flasks: data.flasks, error: data.error, overflow: data.overflow, hero: data.hero });
+      finish({ output: data.output, flasks: data.flasks, error: data.error, overflow: data.overflow, hero: data.hero, calls: data.calls });
     };
     worker.onerror = (event) => {
       event.preventDefault();
       finish({ output: [], flasks: {}, error: { name: 'Error', message: event.message } });
     };
-    worker.postMessage({ nonce, code, inputs, vars, world });
+    worker.postMessage({ nonce, code, inputs, vars, world, calls });
   });
 }

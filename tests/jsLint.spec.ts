@@ -157,3 +157,21 @@ test('герой в подземелье: путь, кристаллы и ост
   expect(sensors.hero.failure).toBeUndefined();
   expect(spin.hero.failure?.message).toContain('Герой выбился из сил');
 });
+
+test('алхимия функций: вызовы-флаконы, обоз и карточка', async ({ page }) => {
+  await page.goto('/');
+  const result = (await page.evaluate(`import('/src/engine/jsRun.ts').then((m) =>
+    m.runScript('function double(n) {\\n  return n * 2;\\n}\\nconst pair = (a) => [a, { size: a }];', {
+      calls: ['double(4)', "double('2')", 'pair(3)', 'missing(1)'],
+    }),
+  )`)) as {
+    calls: { call: string; declared: boolean; type?: string; shown?: string; items?: { shown: string }[]; error?: { message: string } }[];
+  };
+  const [four, text, pair, missing] = result.calls;
+  expect(four).toMatchObject({ call: 'double(4)', declared: true, type: 'number', shown: '8' });
+  expect(text).toMatchObject({ type: 'number', shown: '4' });
+  expect(pair).toMatchObject({ type: 'array', shown: '[3, {size: 3}]' });
+  expect(pair.items?.map((item) => item.shown)).toEqual(['3', '{size: 3}']);
+  expect(missing).toMatchObject({ declared: false });
+  expect(missing.error?.message).toBe('missing is not defined');
+});

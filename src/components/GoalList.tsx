@@ -13,8 +13,9 @@ export function GoalList({ goals }: { goals: GoalStatus[] }) {
         </span>
       </p>
       <ul className="goals__list">
-        {goals.map((goal) => (
-          <li key={goal.label} className={goal.done ? 'goal goal--done' : 'goal'}>
+        {/* Одинаковые цели бывают: Оракул может сказать «Помешиваю!» трижды */}
+        {goals.map((goal, i) => (
+          <li key={`${i}:${goal.label}`} className={goal.done ? 'goal goal--done' : 'goal'}>
             <span className="goal__mark" aria-hidden="true">
               {goal.done ? '✦' : '○'}
             </span>

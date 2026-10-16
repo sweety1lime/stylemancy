@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { TYPE_NAMES, type FlaskStatus, type JsEvaluation, type RunStatus } from '../engine/jsCheck';
+import { TYPE_NAMES, type CallStatus, type FlaskStatus, type JsEvaluation, type RunStatus } from '../engine/jsCheck';
 import { runtimeProblem } from '../engine/jsLint';
-import type { OutputLine, ValueType } from '../engine/jsRun';
+import type { Flask as FlaskValue, OutputLine, ValueType } from '../engine/jsRun';
 import type { JsLevel } from '../engine/types';
 import { recolor, type Sprite } from '../pixel/pixelArt';
 import { POTION } from '../pixel/sprites';
@@ -36,16 +36,74 @@ function flaskSprite(type: ValueType): Sprite {
 /** Типы в легенде полки — в порядке, в каком их изучают */
 const LEGEND: ValueType[] = ['number', 'string', 'boolean', 'undefined', 'null', 'array', 'object', 'function'];
 
+/** Массив — обоз из вагонов с номерами от нуля, объект — карточка с полями: так их показывают колбы и конвейер. */
+function isStructured(value: FlaskValue): boolean {
+  return (value.type === 'array' && Boolean(value.items)) || (value.type === 'object' && Boolean(value.entries));
+}
+
+/** Значение в колбе: массив — обоз, объект — карточка, остальное — как в консоли. */
+function ValueView({ value }: { value: FlaskValue }) {
+  if (value.type === 'array' && value.items) {
+    return (
+      <span className="wagons" title={value.shown}>
+        {value.items.map((item, i) => (
+          <span key={i} className="wagon">
+            <span className="wagon__cargo">{item.shown}</span>
+            <span className="wagon__index">{i}</span>
+          </span>
+        ))}
+        {(value.size ?? 0) > value.items.length && <span className="wagon wagon--more">…</span>}
+        {value.size === 0 && <span className="wagons__empty">пустой обоз []</span>}
+      </span>
+    );
+  }
+  if (value.type === 'object' && value.entries) {
+    return (
+      <span className="card-value" title={value.shown}>
+        {value.entries.map(([key, item]) => (
+          <span key={key} className="card-value__row">
+            <span className="card-value__key">{key}:</span>
+            {item.shown}
+          </span>
+        ))}
+        {(value.size ?? 0) > value.entries.length && <span className="card-value__row">…</span>}
+        {value.size === 0 && <span className="card-value__row">пустая карточка {'{}'}</span>}
+      </span>
+    );
+  }
+  return <>{value.shown}</>;
+}
+
 function Flask({ status }: { status: FlaskStatus }) {
   const { name, flask, target, ok } = status;
   const type: ValueType = flask?.declared ? (flask.type ?? 'undefined') : 'undefined';
   const state = ok ? 'flask--ok' : target?.declared ? 'flask--goal' : '';
+  const wide = Boolean(flask?.declared && isStructured(flask));
   return (
     <figure className={`flask ${state}`}>
       <span className="flask__name">{name}</span>
       <PixelArt className="flask__art" sprite={flaskSprite(type)} scale={4} />
-      <figcaption className="flask__value">{flask?.declared ? flask.shown : 'нет колбы'}</figcaption>
+      <figcaption className={wide ? 'flask__value flask__value--wide' : 'flask__value'}>
+        {flask?.declared ? <ValueView value={flask} /> : 'нет колбы'}
+      </figcaption>
       {target?.declared && !ok && <span className="flask__target">нужно: {target.shown}</span>}
+    </figure>
+  );
+}
+
+/** Флакон-вызов на конвейере: что рецепт вернул, и горит золотом, если это то, что ждали. */
+function CallFlask({ status }: { status: CallStatus }) {
+  const { call, actual, target, ok } = status;
+  const type: ValueType = actual?.declared ? (actual.type ?? 'undefined') : 'undefined';
+  const state = !actual ? '' : ok ? ' call--ok' : ' call--wrong';
+  return (
+    <figure className={`call${state}`}>
+      <code className="call__label">{call}</code>
+      <PixelArt className="call__art" sprite={flaskSprite(type)} scale={3} />
+      <figcaption className="call__value">
+        {actual?.error ? '✖ ошибка' : actual?.declared ? <ValueView value={actual} /> : '…'}
+      </figcaption>
+      {target?.declared && actual && !ok && <span className="call__target">ждали: {target.shown}</span>}
     </figure>
   );
 }
@@ -91,9 +149,17 @@ export function JsScene({ level, code, evaluation, busy, celebrate }: JsScenePro
   const syntax = evaluation?.errors.find((problem) => problem.kind !== 'required' && problem.kind !== 'runtime');
   const failure = status?.result.error && runtimeProblem(code, status.result.error);
   const output = status?.result.output ?? [];
-  const flasks = status?.flasks ?? [];
+  // Конвейер: до первой проверки флаконы едут пустыми
+  const calls: CallStatus[] = status?.calls ?? (level.calls ?? []).map((call) => ({ call, ok: false }));
+  const conveyor = calls.length > 0;
+  // На уровнях с конвейером полка — только если уровень проверяет колбы: главное там — флаконы
+  const flasks = conveyor && !level.check.vars?.length ? [] : (status?.flasks ?? []);
   const showShelf = Boolean(level.check.vars?.length) || flasks.length > 0;
-  const types = new Set(flasks.map((item) => (item.flask?.declared ? (item.flask.type ?? 'undefined') : 'undefined')));
+  const quiet = conveyor && !level.check.output && output.length === 0 && !syntax && !failure && !status?.result.timedOut;
+  const types = new Set([
+    ...flasks.map((item) => (item.flask?.declared ? (item.flask.type ?? 'undefined') : 'undefined')),
+    ...calls.filter((item) => item.actual?.declared).map((item) => item.actual?.type ?? 'undefined'),
+  ]);
 
   return (
     <section className="stage stage--js" aria-label="Скриптория">
@@ -116,29 +182,42 @@ export function JsScene({ level, code, evaluation, busy, celebrate }: JsScenePro
       )}
 
       <div className={`js-scene px-panel${celebrate ? ' js-scene--celebrate' : ''}${busy ? ' js-scene--busy' : ''}`}>
-        <div className="oracle-scroll">
-          <p className="oracle-scroll__title">Свиток Оракула</p>
-          <ol className="oracle-scroll__lines" aria-live="polite">
-            {output.map((line, i) => (
-              <OracleLine key={i} line={line} ok={Boolean(status?.lineOk[i])} />
-            ))}
-            {syntax && (
-              <li className="oracle-line oracle-line--error">
-                ✖ {syntax.kind === 'syntax' ? 'Оракул не может прочесть приказ: строка' : 'Строка'}{' '}
-                {code.slice(0, syntax.from).split('\n').length} — {syntax.message}
-              </li>
-            )}
-            {failure && (
-              <li className="oracle-line oracle-line--error">
-                ✖ Код остановился: строка {code.slice(0, failure.from).split('\n').length} — {failure.message}
-              </li>
-            )}
-            {status?.result.timedOut && <li className="oracle-line oracle-line--error">✖ Код работал слишком долго и был остановлен.</li>}
-            {!syntax && !failure && !status?.result.timedOut && output.length === 0 && (
-              <li className="oracle-line oracle-line--empty">{evaluation ? 'Оракул молчит…' : 'Оракул слушает…'}</li>
-            )}
-          </ol>
-        </div>
+        {conveyor && (
+          <div className="conveyor">
+            <p className="conveyor__title">Конвейер рецептов</p>
+            <div className="conveyor__belt">
+              {calls.map((item, i) => (
+                <CallFlask key={i} status={item} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!quiet && (
+          <div className="oracle-scroll">
+            <p className="oracle-scroll__title">Свиток Оракула</p>
+            <ol className="oracle-scroll__lines" aria-live="polite">
+              {output.map((line, i) => (
+                <OracleLine key={i} line={line} ok={Boolean(status?.lineOk[i])} />
+              ))}
+              {syntax && (
+                <li className="oracle-line oracle-line--error">
+                  ✖ {syntax.kind === 'syntax' ? 'Оракул не может прочесть приказ: строка' : 'Строка'}{' '}
+                  {code.slice(0, syntax.from).split('\n').length} — {syntax.message}
+                </li>
+              )}
+              {failure && (
+                <li className="oracle-line oracle-line--error">
+                  ✖ Код остановился: строка {code.slice(0, failure.from).split('\n').length} — {failure.message}
+                </li>
+              )}
+              {status?.result.timedOut && <li className="oracle-line oracle-line--error">✖ Код работал слишком долго и был остановлен.</li>}
+              {!syntax && !failure && !status?.result.timedOut && output.length === 0 && (
+                <li className="oracle-line oracle-line--empty">{evaluation ? 'Оракул молчит…' : 'Оракул слушает…'}</li>
+              )}
+            </ol>
+          </div>
+        )}
 
         {showShelf && (
           <div className="flask-shelf">

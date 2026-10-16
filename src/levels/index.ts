@@ -1,12 +1,14 @@
 import type { Level, Region } from '../engine/types';
 import { barracks } from './barracks';
 import { alchemistShop } from './alchemist-shop';
+import { cardIndex } from './card-index';
 import { carousel } from './carousel';
 import { cascadeTree } from './cascade-tree';
 import { defaultCitadel } from './default-citadel';
 import { floatingIslands } from './floating-islands';
 import { forestEdge } from './forest-edge';
 import { formForge } from './form-forge';
+import { functionCauldron } from './function-cauldron';
 import { forks } from './forks';
 import { linkFair } from './link-fair';
 import { mazeHeart } from './maze-heart';
@@ -17,6 +19,7 @@ import { paradeGround } from './parade-ground';
 import { semanticCity } from './semantic-city';
 import { stainedAbbey } from './stained-abbey';
 import { tagVillage } from './tag-village';
+import { wagonTrain } from './wagon-train';
 import { watchtower } from './watchtower';
 
 /** Земля на карте — одна тема курса. Внутри — районы с уровнями. */
@@ -107,8 +110,8 @@ export const scriptLands: Land[] = [
     blurb: 'Функции, массивы и объекты',
     emblem: 'cauldron',
     where: 'в Мастерской Рецептов',
-    regions: [],
-    upcoming: ['Котёл Функций', 'Обоз', 'Картотека'],
+    regions: [functionCauldron, wagonTrain, cardIndex],
+    upcoming: [],
   },
   {
     id: 'mechanism-city',

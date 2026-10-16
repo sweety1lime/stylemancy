@@ -109,8 +109,8 @@ export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, o
         </>
       ) : misses.length > 0 ? (
         <ul className="result__list">
-          {misses.map((line) => (
-            <li key={line}>
+          {misses.map((line, i) => (
+            <li key={`${i}:${line}`}>
               <RichText text={line} />
             </li>
           ))}

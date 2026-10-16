@@ -148,6 +148,11 @@ export interface JsLevelDef extends LevelBase {
   dungeons?: Dungeon[];
   /** Звезда за краткость: строк кода (без пустых, комментариев и одиноких скобок) — не больше */
   maxLines?: number;
+  /**
+   * «Алхимия функций»: вызовы-флаконы, которые после скрипта едут по конвейеру, — `double(5)`.
+   * Что вернул каждый вызов, сравнивается с эталоном: значение и тип
+   */
+  calls?: string[];
   /** Приёмы, без которых уровень не засчитывается */
   require?: CodeRule[];
   /** Запрещённые приёмы: «12 не пиши числом — пусть посчитает Оракул» */
@@ -215,7 +220,11 @@ export interface StoryFrame {
     | 'jester'
     | 'maze'
     | 'carousel'
-    | 'villain-script';
+    | 'villain-script'
+    | 'conveyor'
+    | 'ghost'
+    | 'train'
+    | 'archive';
   /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
   speaker?: string;
   name?: string;

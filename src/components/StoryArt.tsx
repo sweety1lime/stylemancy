@@ -9,6 +9,7 @@ import {
   FLAG_FRAMES,
   GEAR_FRAMES,
   GEMS,
+  GHOST,
   GLASS,
   HERO_ANIMATIONS,
   ISLAND_ROCK,
@@ -52,6 +53,23 @@ const STORY_MAZE: Dungeon = {
 };
 /** Сиденья Карусели Циклопа */
 const CAROUSEL = [GEMS.ruby, GEMS.topaz, GEMS.emerald, GEMS.sapphire, GEMS.amethyst, GEMS.ruby];
+/** Вагоны Обоза: груз и номер с нуля */
+const TRAIN = ['уголь', 'руда', 'мёд', 'кристаллы'];
+/** Карточки Картотеки: поля «ключ: значение» */
+const CARDS: [string, string][][] = [
+  [
+    ['name', "'Мята'"],
+    ['price', '3'],
+  ],
+  [
+    ['name', "'Мёд'"],
+    ['stock', '0'],
+  ],
+  [
+    ['color', "'синий'"],
+    ['size', '2'],
+  ],
+];
 
 /** Стёкла витража в кадре: так же стоят в испытании Витражной обители */
 const PANES = [GLASS.star, GLASS.rose, GLASS.moon, GLASS.tree, GLASS.leaf, GLASS.crown].map((glass) => glass.color);
@@ -432,6 +450,73 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
             ))}
           </div>
           <span className="sa-loop-text">for (let i = 0; i &lt; 3; i++)</span>
+        </>
+      )}
+
+      {art === 'conveyor' && (
+        <>
+          {/* Котёл Функций: котёл кипит, рецепт записан, а по конвейеру едут флаконы-проверки */}
+          <PixelArt className="sa-kitchen-cauldron" sprite={EMBLEMS.cauldron} />
+          <span className="sa-recipe">function brew(herb) {'{'} return … {'}'}</span>
+          <div className="sa-belt">
+            <div className="sa-belt__flasks">
+              {[...FLASKS.slice(0, 3), ...FLASKS.slice(0, 3), ...FLASKS.slice(0, 3), ...FLASKS.slice(0, 3)].map((sprite, i) => (
+                <PixelArt key={i} sprite={sprite} />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {art === 'ghost' && (
+        <>
+          {/* Призрак Андефайнд кружит над пустыми флаконами */}
+          <span className="sa-nan sa-nan--1 sa-nan--void">undefined</span>
+          <span className="sa-nan sa-nan--3 sa-nan--void">undefined</span>
+          <PixelArt className="sa-ghost" sprite={GHOST} />
+          <div className="sa-empty-flasks">
+            {[0, 1, 2].map((i) => (
+              <PixelArt key={i} sprite={FLASKS[3]} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {art === 'train' && (
+        <>
+          {/* Обоз: вагоны с грузом катятся по рельсам, у каждого номер — с нуля */}
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <div className="sa-train">
+            {TRAIN.map((cargo, i) => (
+              <span key={cargo} className="sa-wagon">
+                <span className="sa-wagon__cargo">{cargo}</span>
+                <span className="sa-wagon__index">{i}</span>
+              </span>
+            ))}
+          </div>
+          <span className="sa-rails" />
+        </>
+      )}
+
+      {art === 'archive' && (
+        <>
+          {/* Картотека: ящики до потолка, а на столе — карточки с полями */}
+          <div className="sa-drawers">
+            {Array.from({ length: 8 }, (_, i) => (
+              <span key={i} />
+            ))}
+          </div>
+          <div className="sa-cards">
+            {CARDS.map((card, i) => (
+              <span key={i} className="sa-card">
+                {card.map(([key, value]) => (
+                  <span key={key}>
+                    <b>{key}:</b> {value}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
         </>
       )}
 

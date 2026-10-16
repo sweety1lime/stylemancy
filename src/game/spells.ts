@@ -1457,4 +1457,174 @@ export const SPELLS: Record<string, Spell> = {
       ],
     },
   },
+
+  // ——— Мастерская Рецептов: функции, массивы, объекты ———
+  function: {
+    name: 'function',
+    description:
+      '`function stir() { … }` записывает рецепт — функцию с именем. Сам по себе рецепт ничего не делает: его зовут по имени со скобками — `stir();`, и тогда выполняются шаги внутри. Звать можно сколько угодно раз.',
+    example: {
+      scripts: [
+        { label: 'позвать дважды', code: "function stir() {\n  console.log('Помешиваю!');\n}\nstir();\nstir();" },
+        { label: 'не позвать', code: "function stir() {\n  console.log('Помешиваю!');\n}\nconsole.log('Рецепт записан, но его не позвали');" },
+      ],
+    },
+  },
+  parameters: {
+    name: 'Параметры',
+    description:
+      'Параметры — колбы рецепта в скобках: `function brew(herb) { … }`. При вызове в них наливается то, что передали: `brew(\'мята\')` — и внутри `herb` равен `\'мята\'`. Не передали ничего — в параметре `undefined`.',
+    example: {
+      scripts: [
+        { label: 'мята и мёд', code: "function brew(herb) {\n  console.log(`Варю зелье: ${herb}`);\n}\nbrew('мята');\nbrew('мёд');" },
+        { label: 'без аргумента', code: "function brew(herb) {\n  console.log(`Варю зелье: ${herb}`);\n}\nbrew();" },
+      ],
+    },
+  },
+  return: {
+    name: 'return',
+    description:
+      '`return` отдаёт значение туда, где рецепт позвали: `let big = double(5);` — и в колбе 10. После `return` рецепт сразу заканчивается. Без `return` рецепт возвращает `undefined`, а `console.log` только показывает значение на свитке, но ничего не отдаёт.',
+    example: {
+      scripts: [
+        { label: 'return', code: 'function double(n) {\n  return n * 2;\n}\nlet big = double(5);\nconsole.log(big);' },
+        { label: 'console.log вместо return', code: "function double(n) {\n  console.log(n * 2);\n}\nlet big = double(5);\nconsole.log('В колбе:', big);" },
+      ],
+    },
+  },
+  arguments: {
+    name: 'Аргументы по порядку',
+    description:
+      'Значения при вызове встают в параметры по порядку: первое — в первый, второе — во второй. `brewTime(3, 10)` — значит, `start` равен 3, а `end` — 10. Поменяешь местами — получится другой ответ.',
+    example: {
+      scripts: [
+        { label: 'brewTime(3, 10)', code: 'function brewTime(start, end) {\n  return end - start;\n}\nconsole.log(brewTime(3, 10));' },
+        { label: 'brewTime(10, 3)', code: 'function brewTime(start, end) {\n  return end - start;\n}\nconsole.log(brewTime(10, 3));' },
+      ],
+    },
+  },
+  arrow: {
+    name: 'Стрелочные функции =>',
+    description:
+      'Короткий рецепт: `const half = (n) => n / 2;` — слева параметры, после `=>` то, что вернуть, без `return`. Если после стрелки поставить фигурные скобки, это уже тело рецепта, и `return` снова нужен.',
+    example: {
+      scripts: [
+        { label: 'стрелка', code: 'const half = (n) => n / 2;\nconsole.log(half(10));' },
+        { label: 'со скобками и return', code: 'const half = (n) => {\n  return n / 2;\n};\nconsole.log(half(10));' },
+        { label: 'скобки без return', code: 'const half = (n) => {\n  n / 2;\n};\nconsole.log(half(10));' },
+      ],
+    },
+  },
+  array: {
+    name: 'Массивы [ ]',
+    description:
+      'Массив — обоз: значения идут друг за другом в квадратных скобках, `[\'уголь\', \'руда\']`. Вагоны нумеруются с нуля: первый — `train[0]`, второй — `train[1]`. Вагона с таким номером нет — получишь `undefined`.',
+    example: {
+      scripts: [
+        { label: 'train[0]', code: "let train = ['уголь', 'руда', 'кристаллы'];\nconsole.log(train[0]);" },
+        { label: 'train[2]', code: "let train = ['уголь', 'руда', 'кристаллы'];\nconsole.log(train[2]);" },
+        { label: 'train[3]', code: "let train = ['уголь', 'руда', 'кристаллы'];\nconsole.log(train[3]);" },
+      ],
+    },
+  },
+  length: {
+    name: 'length',
+    description:
+      '`train.length` — сколько вагонов в обозе. Номер последнего вагона на один меньше длины: `train[train.length - 1]`. А `train[train.length]` — уже за хвостом, там `undefined`.',
+    example: {
+      scripts: [
+        { label: 'длина', code: "let train = ['уголь', 'руда', 'кристаллы'];\nconsole.log(train.length);" },
+        { label: 'последний', code: "let train = ['уголь', 'руда', 'кристаллы'];\nconsole.log(train[train.length - 1]);" },
+        { label: 'за хвостом', code: "let train = ['уголь', 'руда', 'кристаллы'];\nconsole.log(train[train.length]);" },
+      ],
+    },
+  },
+  push: {
+    name: 'push и pop',
+    description:
+      '`train.push(груз)` прицепляет вагон в хвост обоза, `train.pop()` отцепляет последний вагон и отдаёт его груз. Обоз при этом тот же самый, просто длиннее или короче.',
+    example: {
+      scripts: [
+        { label: 'push', code: "let train = ['уголь'];\ntrain.push('руда');\nconsole.log(train);" },
+        { label: 'pop', code: "let train = ['уголь', 'руда', 'шпион'];\nlet spy = train.pop();\nconsole.log(train);\nconsole.log(spy);" },
+      ],
+    },
+  },
+  'array-loop': {
+    name: 'Перебор массива',
+    description:
+      'Обоз перебирают циклом: `for (let i = 0; i < train.length; i++)` — `i` пробегает все номера, а `train[i]` — груз под номером. Если номер не нужен, короче так: `for (const cargo of train)` — сразу груз каждого вагона по очереди.',
+    example: {
+      scripts: [
+        { label: 'по номерам', code: "let train = ['уголь', 'руда'];\nfor (let i = 0; i < train.length; i++) {\n  console.log(i, train[i]);\n}" },
+        { label: 'for…of', code: "let train = ['уголь', 'руда'];\nfor (const cargo of train) {\n  console.log(cargo);\n}" },
+      ],
+    },
+  },
+  map: {
+    name: 'map',
+    description:
+      '`weights.map((w) => w * 2)` — перегонка: каждый элемент проходит через маленький рецепт, а из результатов собирается новый массив той же длины. Старый массив не меняется.',
+    example: {
+      scripts: [
+        { label: 'удвоить', code: 'let weights = [1, 2, 3];\nconsole.log(weights.map((w) => w * 2));' },
+        { label: 'в строки', code: 'let weights = [1, 2, 3];\nconsole.log(weights.map((w) => `${w} кг`));' },
+      ],
+    },
+  },
+  filter: {
+    name: 'filter',
+    description:
+      '`weights.filter((w) => w > 5)` — сито: остаются только те элементы, для которых маленький рецепт ответил `true`. Получается новый массив, может быть, и пустой.',
+    example: {
+      scripts: [
+        { label: 'тяжелее 5', code: 'let weights = [3, 8, 6, 1];\nconsole.log(weights.filter((w) => w > 5));' },
+        { label: 'никто не прошёл', code: 'let weights = [1, 2];\nconsole.log(weights.filter((w) => w > 5));' },
+      ],
+    },
+  },
+  object: {
+    name: 'Объекты { }',
+    description:
+      'Объект — карточка с полями: `{ name: \'Мята\', price: 3 }`. Поле берут через точку: `potion.name`. Имя поля называют ключом. Поля, которого нет, нет и значения — `undefined`.',
+    example: {
+      scripts: [
+        { label: 'potion.name', code: "let potion = { name: 'Мята', price: 3 };\nconsole.log(potion.name);" },
+        { label: 'карточка целиком', code: "let potion = { name: 'Мята', price: 3 };\nconsole.log(potion);" },
+        { label: 'нет поля', code: "let potion = { name: 'Мята', price: 3 };\nconsole.log(potion.color);" },
+      ],
+    },
+  },
+  'object-change': {
+    name: 'Правка полей',
+    description:
+      'Поле меняют присваиванием: `potion.price = 15;`. Если поля ещё нет, присваивание его заведёт: `potion.stock = 3;`. Карточку при этом заново не пишут.',
+    example: {
+      scripts: [
+        { label: 'изменить и добавить', code: "let potion = { name: 'Мята', price: 3 };\npotion.price = 5;\npotion.stock = 2;\nconsole.log(potion);" },
+      ],
+    },
+  },
+  brackets: {
+    name: 'Ключ в квадратных скобках',
+    description:
+      '`card[field]` берёт поле по имени из колбы `field`. Точка так не умеет: `card.field` ищет поле, которое так и называется — «field». `card[\'price\']` — то же самое, что `card.price`.',
+    example: {
+      scripts: [
+        { label: 'card[field]', code: "let card = { name: 'Мята', price: 3 };\nlet field = 'price';\nconsole.log(card[field]);" },
+        { label: 'card.field', code: "let card = { name: 'Мята', price: 3 };\nlet field = 'price';\nconsole.log(card.field);" },
+      ],
+    },
+  },
+  'object-array': {
+    name: 'Массив карточек',
+    description:
+      'Карточки хранят в массиве: `shelf[0]` — первая карточка, `shelf[0].price` — её цена. Перебирают циклом и берут поле у каждой: `for (const potion of shelf) { … potion.price … }`.',
+    example: {
+      scripts: [
+        { label: 'shelf[1].name', code: "let shelf = [{ name: 'Мята', price: 3 }, { name: 'Мёд', price: 7 }];\nconsole.log(shelf[1].name);" },
+        { label: 'перебор', code: "let shelf = [{ name: 'Мята', price: 3 }, { name: 'Мёд', price: 7 }];\nfor (const potion of shelf) {\n  console.log(potion.name, potion.price);\n}" },
+      ],
+    },
+  },
 };

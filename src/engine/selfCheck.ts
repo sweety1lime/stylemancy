@@ -52,8 +52,11 @@ async function checkJs(level: JsLevel) {
   const starter = await evaluateJs(level, level.starterJs, true);
   const issues = [...solution.errors.map((p) => p.message), ...solution.warnings.map((p) => p.message), ...solution.misses];
   const targets = await targetRuns(level);
-  if (!level.check.output && !level.check.vars?.length && !level.dungeons?.length) {
-    issues.push('Уровню нечего проверять: нет ни check.output, ни check.vars, ни подземелий.');
+  if (!level.check.output && !level.check.vars?.length && !level.dungeons?.length && !level.calls?.length) {
+    issues.push('Уровню нечего проверять: нет ни check.output, ни check.vars, ни подземелий, ни вызовов.');
+  }
+  for (const call of targets.flatMap((target) => target.calls ?? []).filter((result) => result.error)) {
+    issues.push(`Эталон ломается на вызове ${call.call}: ${call.error?.message}`);
   }
   for (const dungeon of level.dungeons ?? []) issues.push(...dungeonProblems(dungeon));
   if (level.maxLines && codeLines(level.solutionJs) > level.maxLines) {

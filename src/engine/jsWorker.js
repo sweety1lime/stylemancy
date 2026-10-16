@@ -3,8 +3,9 @@
   Код подключается как настоящий <script>: переменные верхнего уровня остаются в общей области видимости,
   и после запуска их можно прочитать по имени — это колбы на полке.
 
-  Получает: { nonce, code, inputs, vars, world }. Отвечает: { nonce, output, flasks, error, overflow, hero }.
+  Получает: { nonce, code, inputs, vars, world, calls }. Отвечает: { nonce, output, flasks, error, overflow, hero, calls }.
   world — карта подземелья: тогда в коде есть герой (hero), а в ответе — его путь и где он остановился.
+  calls — вызовы-флаконы вроде «double(5)»: после скрипта каждый вычисляется, и в ответе — что вернулось.
   Каждый запуск — новый поток: переменные прошлого запуска не мешают.
 */
 
@@ -72,8 +73,25 @@ function compareKey(value, depth) {
   return `${type}:${show(value, true, depth)}`;
 }
 
+/** Вагон обоза или поле карточки: только тип и как выглядит */
+function preview(value) {
+  return { type: typeOf(value), shown: show(value, true, 1) };
+}
+
 function snapshot(value) {
-  return { type: typeOf(value), shown: show(value, true, 0), key: compareKey(value, 0) };
+  const type = typeOf(value);
+  const result = { type, shown: show(value, true, 0), key: compareKey(value, 0) };
+  // Массив — обоз, объект — карточка: первые вагоны и поля, чтобы показать их на полке и на конвейере
+  if (type === 'array') {
+    result.size = value.length;
+    result.items = value.slice(0, 12).map(preview);
+  }
+  if (type === 'object') {
+    const keys = keysOf(value);
+    result.size = keys.length;
+    result.entries = keys.slice(0, 8).map((key) => [key, preview(value[key])]);
+  }
+  return result;
 }
 
 /* ——— Путь героя: подземелье, по которому герой ходит по приказам студента ——— */
@@ -216,7 +234,7 @@ function describe(error, url) {
 }
 
 self.onmessage = (event) => {
-  const { nonce, code, inputs = [], vars = [], world } = event.data;
+  const { nonce, code, inputs = [], vars = [], world, calls = [] } = event.data;
   const output = [];
   const answers = inputs.slice();
   let overflow = false;
@@ -263,5 +281,14 @@ self.onmessage = (event) => {
     }
   }
 
-  send({ nonce, output, flasks, error, overflow, hero: dungeon?.report() });
+  // Алхимия функций: вызовы-флаконы едут по конвейеру после скрипта — как будто их дописали в конце
+  const results = calls.map((call) => {
+    try {
+      return { call, declared: true, ...snapshot(evalGlobal(call)) };
+    } catch (failure) {
+      return { call, declared: false, error: describe(failure, url) };
+    }
+  });
+
+  send({ nonce, output, flasks, error, overflow, hero: dungeon?.report(), calls: results });
 };
