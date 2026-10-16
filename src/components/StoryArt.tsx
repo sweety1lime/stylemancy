@@ -6,12 +6,16 @@ import {
   BOLETUS,
   FIREFLY_FRAMES,
   FLAG_FRAMES,
+  GEAR_FRAMES,
   GEMS,
   GLASS,
+  HERO_ANIMATIONS,
   ISLAND_ROCK,
   MOON,
   OAK,
   PORTRAITS,
+  POTION,
+  SCRIPT_DOOR_OPEN,
   SKY_SPARK,
   SPRUCE,
   VILLAIN_ANIMATIONS,
@@ -30,6 +34,16 @@ const FOREST_ART = {
   firefly: FIREFLY_FRAMES.map((frame) => recolor(frame, { c: '#fde047', h: '#fef9c3' })),
   boletus: recolor(BOLETUS, { c: '#ea580c', h: '#fb923c', d: '#9a3412' }),
 };
+/** Колбы на полке Зала Оракула: число, строка, логическое и пустая — как на сцене JS-уровней */
+const FLASKS = [
+  recolor(POTION, { r: '#3b82f6', R: '#93c5fd' }),
+  recolor(POTION, { r: '#10b981', R: '#6ee7b7' }),
+  recolor(POTION, { r: '#f59e0b', R: '#fde68a' }),
+  recolor(POTION, { r: 'rgba(148, 163, 184, 0.14)', R: 'rgba(148, 163, 184, 0.22)' }),
+];
+/** Строчки, которые бегут по Скриптории: здесь всё — приказы */
+const SCRIPT_LINES = ["let gems = 5;", "console.log('Привет!');", 'button.onclick = …'];
+
 /** Стёкла витража в кадре: так же стоят в испытании Витражной обители */
 const PANES = [GLASS.star, GLASS.rose, GLASS.moon, GLASS.tree, GLASS.leaf, GLASS.crown].map((glass) => glass.color);
 
@@ -303,6 +317,48 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
             <span className="sa-tower" />
           </div>
           <SpriteAnim className="sa-fortress-flag" frames={FLAG_FRAMES} fps={5} fluid />
+        </>
+      )}
+
+      {art === 'gate' && (
+        <>
+          <PixelArt className="sa-moon" sprite={MOON} />
+          <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
+          {/* Дверь <script> приоткрыта, из неё льётся свет, а герой идёт к порогу */}
+          <span className="sa-gate-glow" />
+          <PixelArt className="sa-gate" sprite={SCRIPT_DOOR_OPEN} />
+          <SpriteAnim className="sa-walker" frames={HERO_ANIMATIONS.walk} fps={8} fluid />
+          <PixelArt className="sa-rock" sprite={ISLAND_ROCK} />
+        </>
+      )}
+
+      {art === 'clockwork' && (
+        <>
+          <SpriteAnim className="sa-gear sa-gear--1" frames={GEAR_FRAMES} fps={3} fluid />
+          <SpriteAnim className="sa-gear sa-gear--2" frames={GEAR_FRAMES} fps={4} fluid />
+          <SpriteAnim className="sa-gear sa-gear--3" frames={GEAR_FRAMES} fps={2} fluid />
+          {SCRIPT_LINES.map((line, i) => (
+            <span key={line} className={`sa-line sa-line--${i + 1}`}>
+              {line}
+            </span>
+          ))}
+        </>
+      )}
+
+      {art === 'oracle' && (
+        <>
+          <PixelArt className="sa-spark sa-spark--1" sprite={SKY_SPARK} />
+          <PixelArt className="sa-spark sa-spark--3" sprite={SKY_SPARK} />
+          <div className="sa-oracle-scroll">
+            <span>› Привет, Скриптория!</span>
+            <span>› 12</span>
+            <span className="sa-oracle-cursor">›_</span>
+          </div>
+          <div className="sa-shelf">
+            {FLASKS.map((sprite, i) => (
+              <PixelArt key={i} sprite={sprite} />
+            ))}
+          </div>
         </>
       )}
 

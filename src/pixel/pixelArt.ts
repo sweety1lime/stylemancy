@@ -87,6 +87,36 @@ export function colorParts(sprite: Sprite, fillChars = 'chdv'): { fill: Sprite; 
 }
 
 /**
+ * Шестерня по формуле: зубцы по кругу, диск с бликом сверху слева, ступица и отверстие.
+ * phase — поворот в долях зубца: кадры с phase 0 и 0.5 по очереди дают вращение.
+ * Палитра: t — зубцы, r — диск, R — блик, h — ступица.
+ */
+export function gearSprite(size: number, teeth: number, phase: number, palette: Palette): Sprite {
+  const center = (size - 1) / 2;
+  const outer = size / 2 - 0.3;
+  const rim = outer - 1.6;
+  const hub = rim * 0.5;
+  const hole = hub * 0.5;
+  const rows: string[] = [];
+  for (let y = 0; y < size; y++) {
+    let row = '';
+    for (let x = 0; x < size; x++) {
+      const dx = x - center;
+      const dy = y - center;
+      const r = Math.hypot(dx, dy);
+      const tooth = Math.cos(teeth * Math.atan2(dy, dx) + phase * 2 * Math.PI) > 0.15;
+      if (r <= hole) row += '.';
+      else if (r <= hub) row += 'h';
+      else if (r <= rim) row += dx + dy < -1.5 ? 'R' : 'r';
+      else if (r <= outer && tooth) row += 't';
+      else row += '.';
+    }
+    rows.push(row);
+  }
+  return { rows, palette };
+}
+
+/**
  * Скала парящего острова: трава сверху, земля сужается книзу с неровными краями.
  * Края случайные, но одинаковые при каждом запуске (зависят только от seed).
  */

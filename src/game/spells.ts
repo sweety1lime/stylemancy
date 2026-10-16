@@ -37,7 +37,13 @@ export interface VariantsExample {
   initial?: number;
 }
 
-export type SpellExample = ValueExample | WidthExample | MarkupExample | VariantsExample;
+/** Пример-скрипт: кнопки переключают варианты кода, а Оракул сразу говорит, что выведет каждый. */
+export interface ScriptExample {
+  scripts: { label: string; code: string }[];
+  initial?: number;
+}
+
+export type SpellExample = ValueExample | WidthExample | MarkupExample | VariantsExample | ScriptExample;
 
 export interface Spell {
   name: string;
@@ -1139,6 +1145,96 @@ export const SPELLS: Record<string, Spell> = {
       selector: '.item:nth-child(2)',
       options: ['position: absolute; bottom: 0; right: 0', 'position: fixed; bottom: 0; right: 0'],
       initial: 1,
+    },
+  },
+
+  // ——— Скриптория: JavaScript ———
+  'console-log': {
+    name: 'console.log()',
+    description:
+      'Приказ Оракулу — показать значение в консоли. Текст пишут в кавычках, числа и примеры — без них. Несколько значений через запятую Оракул скажет через пробел. Строки после `//` — заметки для себя: их JavaScript пропускает.',
+    example: {
+      scripts: [
+        { label: 'текст', code: "console.log('Привет, Скриптория!');" },
+        { label: 'число', code: 'console.log(42);' },
+        { label: 'через запятую', code: "console.log('Кристаллов:', 5);" },
+        { label: 'заметка', code: "// console.log('Эту строку Оракул не услышит');\nconsole.log('А эту — услышит');" },
+      ],
+    },
+  },
+  'numbers-strings': {
+    name: 'Числа и строки',
+    description:
+      'Число пишут без кавычек — с ним можно считать. Строка — текст в кавычках `\'…\'` или `"…"`: её повторяют как есть. Если сложить строку и число, JavaScript склеит их в строку: `\'7\' + 5` даёт `\'75\'`, а не 12.',
+    example: {
+      scripts: [
+        { label: '7 + 5', code: 'console.log(7 + 5);' },
+        { label: "'7 + 5'", code: "console.log('7 + 5');" },
+        { label: "'7' + 5", code: "console.log('7' + 5);" },
+        { label: "'7' + '5'", code: "console.log('7' + '5');" },
+      ],
+    },
+  },
+  let: {
+    name: 'let',
+    description:
+      'Создаёт переменную — колбу с этикеткой: `let gems = 5;`. Потом колбу зовут по имени, без кавычек: `console.log(gems)`. С кавычками получится просто слово.',
+    example: {
+      scripts: [
+        { label: 'по имени', code: 'let gems = 5;\nconsole.log(gems);' },
+        { label: 'в кавычках', code: "let gems = 5;\nconsole.log('gems');" },
+        { label: 'две колбы', code: "let hero = 'Странник';\nlet gems = 5;\nconsole.log(hero, gems);" },
+      ],
+    },
+  },
+  assignment: {
+    name: 'Присваивание =',
+    description:
+      'Знак `=` наливает новое значение в колбу, которая уже есть, — `let` второй раз не пишут. Справа можно взять старое значение: `gems = gems + 3`. Коротко то же самое: `gems += 3`.',
+    example: {
+      scripts: [
+        { label: 'gems = gems + 3', code: 'let gems = 5;\ngems = gems + 3;\nconsole.log(gems);' },
+        { label: 'gems += 3', code: 'let gems = 5;\ngems += 3;\nconsole.log(gems);' },
+        { label: 'просто = 3', code: 'let gems = 5;\ngems = 3;\nconsole.log(gems);' },
+      ],
+    },
+  },
+  const: {
+    name: 'const',
+    description:
+      'Запечатанная колба: `const` объявляет переменную, которую нельзя изменить. Попробуешь налить новое значение — ошибка. Всё, что не меняется (цена, имя, скорость), запечатывают в `const`, а то, что меняется, — объявляют через `let`.',
+    example: {
+      scripts: [
+        { label: 'const', code: 'const price = 12;\nconsole.log(price);' },
+        { label: 'попробовать изменить', code: 'const price = 12;\nprice = 10;\nconsole.log(price);' },
+        { label: 'let меняется', code: 'let coins = 50;\ncoins = coins - 12;\nconsole.log(coins);' },
+      ],
+    },
+  },
+  naming: {
+    name: 'Имена переменных',
+    description:
+      'Имя — одно слово латиницей: буквы, цифры, `_` и `$`, но не с цифры и без пробелов. Большие и маленькие буквы различаются: `gems` и `Gems` — разные колбы. Длинные имена склеивают «верблюдом»: `magicPower`, `secondGem`.',
+    example: {
+      scripts: [
+        { label: 'magicPower', code: 'let magicPower = 100;\nconsole.log(magicPower);' },
+        { label: 'gems и Gems', code: 'let gems = 5;\nlet Gems = 7;\nconsole.log(gems, Gems);' },
+        { label: 'gem2', code: "let gem2 = 'ruby';\nconsole.log(gem2);" },
+      ],
+    },
+  },
+  arithmetic: {
+    name: 'Арифметика: + - * / %',
+    description:
+      'Сложение `+`, вычитание `-`, умножение `*`, деление `/` и остаток от деления `%`: `17 % 5` — это 2. Умножение и деление выполняются раньше сложения и вычитания, как в математике, а скобки меняют порядок.',
+    example: {
+      scripts: [
+        { label: '7 * 3', code: 'console.log(7 * 3);' },
+        { label: '17 / 5', code: 'console.log(17 / 5);' },
+        { label: '17 % 5', code: 'console.log(17 % 5);' },
+        { label: '2 + 3 * 4', code: 'console.log(2 + 3 * 4);' },
+        { label: '(2 + 3) * 4', code: 'console.log((2 + 3) * 4);' },
+      ],
     },
   },
 };

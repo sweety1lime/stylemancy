@@ -6,6 +6,7 @@ import { useSyncExternalStore } from 'react';
  */
 export type Route =
   | { name: 'map' }
+  | { name: 'scriptoria' }
   | { name: 'land'; id: string }
   | { name: 'level'; id: string }
   | { name: 'grimoire' }
@@ -17,6 +18,7 @@ export type Route =
 
 export function parseHash(hash: string): Route {
   const [kind, id] = hash.replace(/^#\/?/, '').split('/');
+  if (kind === 'scriptoria') return { name: 'scriptoria' };
   if (kind === 'land' && id) return { name: 'land', id: decodeURIComponent(id) };
   if (kind === 'level' && id) return { name: 'level', id: decodeURIComponent(id) };
   if (kind === 'grimoire') return { name: 'grimoire' };
@@ -32,6 +34,8 @@ export function hrefFor(route: Route): string {
   switch (route.name) {
     case 'map':
       return '#/';
+    case 'scriptoria':
+      return '#/scriptoria';
     case 'land':
       return `#/land/${encodeURIComponent(route.id)}`;
     case 'level':

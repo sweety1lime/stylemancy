@@ -1,7 +1,8 @@
 import { lintOptionsFor } from '../engine/evaluate';
 import { parseMarkup } from '../engine/htmlCheck';
 import { lintCss } from '../engine/lint';
-import { isHtmlLevel, type CssLevel, type HtmlLevel, type Level } from '../engine/types';
+import { stripJsComments } from '../engine/jsLint';
+import { isHtmlLevel, isJsLevel, type CssLevel, type HtmlLevel, type Level } from '../engine/types';
 import { findLevel, regions } from '../levels';
 import { progress } from './progress';
 import { stats } from './stats';
@@ -49,6 +50,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'z-war', category: 'secret', secret: true, title: 'Война слоёв', description: 'Написать z-index: 999 или больше — чтобы уж точно сверху.' },
   { id: 'keyboard', category: 'secret', secret: true, title: 'Магия без мыши', description: 'Сотворить заклинание через Ctrl+Enter десять раз.' },
   { id: 'chronicle', category: 'secret', secret: true, title: 'Летопись', description: 'Пройти уровень, оставив в коде свой комментарий.' },
+  { id: 'hello-world', category: 'secret', secret: true, title: 'Hello, World!', description: 'Сказать Оракулу «Hello, World!» — первые слова любого программиста.' },
 ];
 
 type UnlockListener = (achievement: Achievement) => void;
@@ -78,6 +80,7 @@ export function recordCast(code: string, viaKeyboard: boolean): Achievement[] {
   if (/\b(row|column)-reverse\b/i.test(code)) unlock('reverse', found);
   if (/<marquee\b/i.test(code)) unlock('marquee', found);
   if (/z-index\s*:\s*\d{3,}/i.test(code)) unlock('z-war', found);
+  if (/console\.log\(\s*(['"`])hello,?\s*world!?\1\s*\)/i.test(code)) unlock('hello-world', found);
   if (viaKeyboard) {
     stats.update((s) => ({ keyboardCasts: s.keyboardCasts + 1 }));
     if (stats.get().keyboardCasts >= 10) unlock('keyboard', found);
@@ -152,19 +155,25 @@ function tagSequence(level: HtmlLevel, code: string): string {
   return Array.from(parseMarkup(code, level.document).body.querySelectorAll('*'), (el) => el.localName).join(' ');
 }
 
+/** Скрипт без комментариев и пробелов — чтобы сравнивать сами приказы. */
+function scriptCore(code: string): string {
+  return stripJsComments(code).replace(/\s+/g, '').replace(/;/g, '').replace(/"/g, "'");
+}
+
 /**
  * Своё решение. CSS: нет хотя бы одного объявления из решения наставника.
- * HTML: другие теги или другой их порядок.
+ * HTML: другие теги или другой их порядок. JS: другие приказы.
  */
 function isOwnWay(level: Level, code: string): boolean {
   if (isHtmlLevel(level)) return tagSequence(level, code) !== tagSequence(level, level.solutionHtml);
+  if (isJsLevel(level)) return scriptCore(code) !== scriptCore(level.solutionJs);
   const mine = declSet(level, code);
   return [...declSet(level, level.solutionCss)].some((decl) => !mine.has(decl));
 }
 
 /** Свой комментарий: не заготовка из стартового кода и не пустой. */
 function hasOwnComment(level: Level, code: string): boolean {
-  const pattern = isHtmlLevel(level) ? /<!--[\s\S]*?-->/g : /\/\*[\s\S]*?\*\//g;
-  const starter = new Set((isHtmlLevel(level) ? level.starterHtml : level.starterCss).match(pattern) ?? []);
+  const pattern = isHtmlLevel(level) ? /<!--[\s\S]*?-->/g : isJsLevel(level) ? /\/\/[^\n]*|\/\*[\s\S]*?\*\//g : /\/\*[\s\S]*?\*\//g;
+  const starter = new Set((isHtmlLevel(level) ? level.starterHtml : isJsLevel(level) ? level.starterJs : level.starterCss).match(pattern) ?? []);
   return (code.match(pattern) ?? []).some((c) => !starter.has(c) && c.replace(/<!--|-->|[/*\s]/g, '').length > 0);
 }

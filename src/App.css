@@ -366,7 +366,7 @@
   grid-template-areas:
     "l1 . l2"
     ". l3 ."
-    ". . l4";
+    "dr . l4";
   gap: 8px 24px;
   padding: 24px;
   border: 4px solid var(--ink);
@@ -483,6 +483,10 @@
 
 .land--4 {
   grid-area: l4;
+}
+
+.land--door {
+  grid-area: dr;
 }
 
 .land__art {
@@ -621,7 +625,7 @@ a.land:hover .land__art {
 @media (max-width: 760px) {
   .world-map {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "l1" "l2" "l3" "l4";
+    grid-template-areas: "l1" "l2" "l3" "l4" "dr";
   }
 
   .world-map__path {
@@ -3518,6 +3522,482 @@ button.cell {
     box-shadow: none;
     border: 6px double #8a6a2a;
   }
+}
+
+/* ——— Скриптория: дверь <script>, карта мира скриптов и JS-уровни ——— */
+
+/* Дверь на карте Каскадии стоит на своей скале, как земля. Открытая — светится */
+.land__door {
+  margin-bottom: -4px;
+}
+
+a.land--door .land__door {
+  filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.45));
+  animation: door-glow 2.4s steps(2, end) infinite;
+}
+
+@keyframes door-glow {
+  50% {
+    filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.75));
+  }
+}
+
+.land--locked .land__door,
+.land--locked .land__rock {
+  filter: grayscale(0.6) brightness(0.75);
+}
+
+.land--locked .land__title,
+.land--locked .land__topic,
+.land--locked .land__status {
+  opacity: 0.7;
+}
+
+.world__intro code {
+  color: #4ade80;
+  font-family: var(--font-mono);
+}
+
+/* Карта Скриптории: бирюзовая ночь в клетку, дверь — в начале тропы */
+.world-map--scriptoria {
+  grid-template-areas:
+    "dr . l1"
+    ". l2 ."
+    "l4 . l3";
+  background-color: #04161c;
+  background-image:
+    linear-gradient(rgba(45, 212, 191, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+  box-shadow:
+    inset 0 0 0 3px #115e59,
+    6px 6px 0 0 rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 760px) {
+  .world-map--scriptoria {
+    grid-template-areas: "dr" "l1" "l2" "l3" "l4";
+  }
+}
+
+/* Вместо облаков над Скрипторией крутятся шестерни */
+.sky-gear {
+  position: absolute;
+  opacity: 0.22;
+}
+
+.sky-gear--1 {
+  top: 6%;
+  left: 40%;
+}
+
+.sky-gear--2 {
+  top: 52%;
+  left: 8%;
+  opacity: 0.16;
+}
+
+.sky-gear--3 {
+  right: 34%;
+  bottom: 4%;
+}
+
+/* Сцена JS-уровня: свиток Оракула и полка с колбами */
+.js-scene {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  background-color: #071a20;
+  background-image: repeating-linear-gradient(0deg, rgba(45, 212, 191, 0.04) 0 2px, transparent 2px 4px);
+}
+
+.js-scene--celebrate {
+  animation: celebrate 0.9s steps(3, end);
+}
+
+.oracle-scroll,
+.flask-shelf {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  background: #0b1220;
+  box-shadow:
+    inset 0 0 0 3px #134e4a,
+    inset 0 0 0 4px rgba(45, 212, 191, 0.35);
+}
+
+.oracle-scroll__title,
+.flask-shelf__title {
+  margin: 0;
+  color: #5eead4;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.oracle-scroll__lines {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 72px;
+  max-height: 260px;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  transition: opacity 0.2s;
+}
+
+.js-scene--busy .oracle-scroll__lines {
+  opacity: 0.7;
+}
+
+.oracle-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  color: #d1fae5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.oracle-line::before {
+  content: "›";
+  color: #2dd4bf;
+}
+
+.oracle-line--ok .oracle-line__text {
+  color: var(--gold-strong);
+  text-shadow: 0 0 8px rgba(246, 196, 83, 0.45);
+}
+
+.oracle-line__mark {
+  color: var(--gold);
+}
+
+.oracle-line__badge {
+  padding: 0 6px;
+  background: #854d0e;
+  color: #fef3c7;
+  font-size: 12px;
+}
+
+.oracle-line__question {
+  color: #a5f3fc;
+}
+
+.oracle-line__answer {
+  color: #fde68a;
+}
+
+.oracle-line--error {
+  color: var(--danger);
+  font-family: var(--font-ui);
+  font-size: 14px;
+}
+
+.oracle-line--empty {
+  color: var(--muted-2);
+  font-style: italic;
+}
+
+.oracle-line--error::before,
+.oracle-line--empty::before {
+  content: none;
+}
+
+.flask-shelf__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px 18px;
+  padding: 0 6px 6px;
+  border-bottom: 8px solid #5b3413;
+  box-shadow: 0 4px 0 0 #2b1708;
+}
+
+.flask {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 64px;
+  margin: 0;
+}
+
+.flask__name {
+  max-width: 110px;
+  padding: 1px 6px;
+  overflow: hidden;
+  background: #f5e6c8;
+  color: #3b2a14;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flask__value {
+  max-width: 120px;
+  overflow: hidden;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flask__target {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Проверяемая колба: золотой пунктир, пока значение не то, и сияние, когда то */
+.flask--goal .flask__art {
+  outline: 2px dashed rgba(246, 196, 83, 0.55);
+  outline-offset: 4px;
+}
+
+.flask--ok .flask__art {
+  filter: drop-shadow(0 0 8px rgba(246, 196, 83, 0.75));
+}
+
+.flask--ok .flask__value {
+  color: var(--gold-strong);
+}
+
+.flask-shelf__empty {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 14px;
+}
+
+.flask-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.flask-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  vertical-align: -1px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Запуски с разными ответами на prompt — вкладки над сценой, как зеркала */
+.js-runs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.js-runs__tab {
+  padding: 4px 12px;
+  border: 0;
+  background: var(--panel-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.js-runs__tab--active {
+  background: #134e4a;
+  color: var(--text);
+}
+
+/* Сценка «Дверь <script>»: дверь приоткрыта, из неё льётся свет, герой идёт к порогу */
+.sa-gate-glow {
+  position: absolute;
+  right: 17%;
+  bottom: 14%;
+  width: 26cqw;
+  height: 36cqw;
+  background: radial-gradient(closest-side, rgba(167, 243, 208, 0.45), transparent);
+  animation: gate-pulse 2.6s steps(3, end) infinite;
+}
+
+@keyframes gate-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.sa-gate {
+  right: 24%;
+  bottom: 20%;
+  width: 15cqw;
+}
+
+.sa-walker {
+  position: absolute;
+  bottom: 20%;
+  left: 24%;
+  width: 9cqw;
+  animation: walk-to-gate 4s linear forwards;
+}
+
+@keyframes walk-to-gate {
+  to {
+    left: 52%;
+  }
+}
+
+/* Скриптория: шестерни крутятся, по воздуху плывут строчки кода */
+.story-art--clockwork {
+  background-image: linear-gradient(180deg, #021014 0 25%, #04181d 25% 50%, #062027 50% 75%, #082a33 75%);
+  background-size: 100% 100%;
+}
+
+.sa-gear {
+  position: absolute;
+}
+
+.sa-gear--1 {
+  top: 8%;
+  left: 8%;
+  width: 22cqw;
+}
+
+.sa-gear--2 {
+  top: 30%;
+  left: 27%;
+  width: 13cqw;
+}
+
+.sa-gear--3 {
+  right: 4%;
+  bottom: -6%;
+  width: 22cqw;
+  opacity: 0.85;
+}
+
+.sa-line {
+  position: absolute;
+  color: #5eead4;
+  font: 3.4cqw/1 var(--font-mono);
+  text-shadow: 0 0 1.2cqw rgba(45, 212, 191, 0.6);
+  white-space: nowrap;
+  animation: line-drift 6s linear infinite;
+}
+
+.sa-line--1 {
+  top: 14%;
+  left: 46%;
+}
+
+.sa-line--2 {
+  top: 44%;
+  left: 44%;
+  color: #86efac;
+  animation-delay: -2s;
+}
+
+.sa-line--3 {
+  top: 76%;
+  left: 8%;
+  color: #fde68a;
+  animation-delay: -4s;
+}
+
+@keyframes line-drift {
+  0% {
+    translate: 0 0;
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    translate: 4cqw 0;
+    opacity: 0.35;
+  }
+}
+
+/* Зал Оракула: свиток с первыми словами и полка с колбами */
+.story-art--oracle {
+  background-image: linear-gradient(180deg, #050d16 0 25%, #071722 25% 50%, #0a1f2c 50% 75%, #0d2836 75%);
+  background-size: 100% 100%;
+}
+
+.sa-oracle-scroll {
+  position: absolute;
+  top: 12%;
+  left: 7%;
+  display: grid;
+  gap: 1.4cqw;
+  width: 44cqw;
+  padding: 2.4cqw 3cqw;
+  background: #0b1220;
+  box-shadow:
+    inset 0 0 0 0.6cqw #134e4a,
+    0 0 3cqw rgba(45, 212, 191, 0.25);
+  color: #d1fae5;
+  font: 3cqw/1.2 var(--font-mono);
+}
+
+.sa-oracle-cursor {
+  color: #4ade80;
+  animation: twinkle 1s steps(1, end) infinite;
+}
+
+.sa-shelf {
+  position: absolute;
+  right: 6%;
+  bottom: 14%;
+  display: flex;
+  align-items: flex-end;
+  gap: 2cqw;
+  padding: 0 1.6cqw 1cqw;
+  border-bottom: 1.6cqw solid #5b3413;
+}
+
+.sa-shelf img {
+  position: static;
+  width: 8cqw;
+}
+
+/* Живой пример JS-заклинания в гримуаре: слева код, справа ответ Оракула */
+.example--script {
+  grid-template-areas:
+    "chips chips"
+    "code oracle";
+}
+
+.example__oracle {
+  grid-area: oracle;
+  min-height: 0;
+  padding: 12px 14px;
+  background: #0b1220;
+  box-shadow: inset 0 0 0 3px #134e4a;
+}
+
+@media (max-width: 720px) {
+  .example--script {
+    grid-template-areas: "chips" "code" "oracle";
+  }
+}
+
+/* Летопись: вторая часть — Скриптория */
+.chronicle__part {
+  margin: 32px 0 14px;
+}
+
+.class-view__lands .teacher__muted {
+  flex-basis: 100%;
 }
 
 /* ——— Лёгкие эффекты: без фоновых анимаций — для слабых компьютеров и тех, кому мешает движение ——— */

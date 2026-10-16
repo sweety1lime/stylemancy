@@ -1,4 +1,4 @@
-import { DEFAULT_SCENE, type CssLevelDef, type HtmlLevelDef, type Region, type RegionDef } from './types';
+import { DEFAULT_SCENE, type CssLevelDef, type HtmlLevelDef, type JsLevelDef, type Region, type RegionDef } from './types';
 
 /** Описывает CSS-уровень. Обёртка нужна ради подсказок редактора по полям. */
 export function defineLevel(level: CssLevelDef): CssLevelDef {
@@ -8,6 +8,11 @@ export function defineLevel(level: CssLevelDef): CssLevelDef {
 /** Описывает HTML-уровень: студент пишет или чинит разметку. */
 export function defineHtmlLevel(level: Omit<HtmlLevelDef, 'kind'>): HtmlLevelDef {
   return { ...level, kind: 'html' };
+}
+
+/** Описывает JS-уровень: студент пишет скрипт, Оракул показывает вывод, колбы — переменные. */
+export function defineJsLevel(level: Omit<JsLevelDef, 'kind'>): JsLevelDef {
+  return { ...level, kind: 'js' };
 }
 
 /** Собирает район: каждому уровню достаются оформление, персонаж и правила района. */

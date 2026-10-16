@@ -96,8 +96,46 @@ export interface HtmlLevelDef extends LevelBase {
   document?: boolean;
 }
 
+/**
+ * Запуск JS-уровня. Если запусков несколько, код должен сработать в каждом — как «зеркала» в адаптиве:
+ * так ответ не заучить, нужно решение.
+ */
+export interface JsRun {
+  /** Подпись запуска: «Гость Аня» */
+  label?: string;
+  /** Ответы на prompt по порядку */
+  inputs?: string[];
+}
+
+/** Приём в коде: регулярное выражение (комментарии в коде не считаются) и объяснение. */
+export interface CodeRule {
+  pattern: string;
+  message: string;
+}
+
+/** JS-уровень: студент пишет скрипт; вывод Оракула и колбы-переменные сравниваются с эталоном. */
+export interface JsLevelDef extends LevelBase {
+  kind: 'js';
+  /** Скрипт, с которого студент начинает: пустой, черновик или испорченный Лордом Дефолтом */
+  starterJs: string;
+  /** Эталонный скрипт: по нему строятся цели */
+  solutionJs: string;
+  check: {
+    /** Сравнивать всё, что сказал Оракул (console.log, alert), — строки по порядку */
+    output?: boolean;
+    /** Колбы: переменные верхнего уровня, у которых сравниваются значение и тип */
+    vars?: string[];
+  };
+  /** Запуски с разными ответами на prompt. По умолчанию — один запуск */
+  runs?: JsRun[];
+  /** Приёмы, без которых уровень не засчитывается */
+  require?: CodeRule[];
+  /** Запрещённые приёмы: «12 не пиши числом — пусть посчитает Оракул» */
+  reject?: CodeRule[];
+}
+
 /** Уровень в том виде, в каком его пишет автор. */
-export type LevelDef = CssLevelDef | HtmlLevelDef;
+export type LevelDef = CssLevelDef | HtmlLevelDef | JsLevelDef;
 
 export interface Npc {
   name: string;
@@ -148,7 +186,11 @@ export interface StoryFrame {
     | 'academy'
     | 'chaos'
     | 'fortress'
-    | 'forest';
+    | 'forest'
+    // Скриптория
+    | 'gate'
+    | 'clockwork'
+    | 'oracle';
   /** Чей портрет показать рядом с текстом (ключ в PORTRAITS) */
   speaker?: string;
   name?: string;
@@ -186,10 +228,19 @@ interface RegionPart {
 /** Уровни, дополненные настройками района, — с ними работает движок. */
 export type CssLevel = CssLevelDef & RegionPart;
 export type HtmlLevel = HtmlLevelDef & RegionPart;
-export type Level = CssLevel | HtmlLevel;
+export type JsLevel = JsLevelDef & RegionPart;
+export type Level = CssLevel | HtmlLevel | JsLevel;
 
 export function isHtmlLevel(level: Level): level is HtmlLevel {
   return level.kind === 'html';
+}
+
+export function isJsLevel(level: Level): level is JsLevel {
+  return level.kind === 'js';
+}
+
+export function isCssLevel(level: Level): level is CssLevel {
+  return level.kind === undefined || level.kind === 'css';
 }
 
 export interface Region extends Omit<RegionDef, 'levels'> {

@@ -2,7 +2,8 @@ import { SPELLS } from '../game/spells';
 import { allLevels } from '../levels';
 import { checkLevelCss } from './evaluate';
 import { evaluateHtml } from './htmlCheck';
-import { isHtmlLevel, type CssLevel, type HtmlLevel, type Level } from './types';
+import { evaluateJs, targetRuns } from './jsCheck';
+import { isHtmlLevel, isJsLevel, type CssLevel, type HtmlLevel, type JsLevel, type Level } from './types';
 
 export interface LevelReport {
   id: string;
@@ -45,6 +46,20 @@ function checkHtml(level: HtmlLevel) {
   return { solutionPassed: solution.passed, starterPassed: starter.passed, issues };
 }
 
+async function checkJs(level: JsLevel) {
+  const solution = await evaluateJs(level, level.solutionJs, true);
+  const starter = await evaluateJs(level, level.starterJs, true);
+  const issues = [...solution.errors.map((p) => p.message), ...solution.warnings.map((p) => p.message), ...solution.misses];
+  const targets = await targetRuns(level);
+  if (!level.check.output && !level.check.vars?.length) issues.push('Уровню нечего проверять: нет ни check.output, ни check.vars.');
+  if (targets.some((target) => target.error || target.timedOut)) issues.push('Эталон падает с ошибкой.');
+  if (level.check.output && targets.some((target) => target.output.length === 0)) issues.push('Эталон ничего не говорит Оракулу.');
+  for (const name of level.check.vars ?? []) {
+    if (targets.some((target) => !target.flasks[name]?.declared)) issues.push(`В эталоне нет колбы ${name}.`);
+  }
+  return { solutionPassed: solution.passed, starterPassed: starter.passed, issues };
+}
+
 /**
  * Самопроверка контента: эталон каждого уровня должен проходить проверку,
  * стартовый код — нет, а сам уровень — быть заполнен без пропусков.
@@ -53,7 +68,11 @@ function checkHtml(level: HtmlLevel) {
 export async function checkAllLevels(): Promise<LevelReport[]> {
   const reports: LevelReport[] = [];
   for (const level of allLevels as Level[]) {
-    const { solutionPassed, starterPassed, issues } = isHtmlLevel(level) ? checkHtml(level) : await checkCss(level);
+    const { solutionPassed, starterPassed, issues } = isHtmlLevel(level)
+      ? checkHtml(level)
+      : isJsLevel(level)
+        ? await checkJs(level)
+        : await checkCss(level);
     if (level.learns && !SPELLS[level.learns]) issues.push(`Нет заклинания «${level.learns}» в SPELLS.`);
     if (level.hints.length < 2) issues.push('Меньше двух подсказок.');
     reports.push({ id: level.id, solutionPassed, starterPassed, solutionIssues: issues });

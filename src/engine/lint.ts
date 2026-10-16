@@ -14,7 +14,11 @@ export type ProblemKind =
   // HTML: несуществующий тег, атрибут, неправильная вложенность
   | 'tag'
   | 'attribute'
-  | 'nesting';
+  | 'nesting'
+  // JS: имя (опечатка, не объявлена, русские буквы), ошибка во время работы и значение, посчитанное впустую
+  | 'name'
+  | 'runtime'
+  | 'unused';
 
 export interface Problem {
   from: number;

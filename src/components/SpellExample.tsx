@@ -1,7 +1,9 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { withImages } from '../engine/htmlCheck';
+import { runtimeProblem } from '../engine/jsLint';
+import { runScript, type RunResult } from '../engine/jsRun';
 import { recordExperiment } from '../game/achievements';
-import type { SpellExample as Example, MarkupExample, ValueExample, VariantsExample, WidthExample } from '../game/spells';
+import type { SpellExample as Example, MarkupExample, ScriptExample, ValueExample, VariantsExample, WidthExample } from '../game/spells';
 import { IMAGE_LIBRARY } from '../levels/shared/images';
 
 /** Оформление мини-сцены примера: пиксельный контейнер и цветные пронумерованные блоки. */
@@ -68,9 +70,62 @@ function chipLabel(option: string): string {
 
 /** Живой пример заклинания: нажимаешь на значение или ширину экрана — мини-сцена сразу меняется. */
 export function SpellExample({ spell, example }: { spell: string; example: Example }) {
+  if ('scripts' in example) return <ScriptDemo spell={spell} example={example} />;
   if ('markup' in example) return <MarkupDemo spell={spell} example={example} />;
   if ('variants' in example) return <VariantsDemo spell={spell} example={example} />;
   return 'widths' in example ? <WidthDemo spell={spell} example={example} /> : <ValueDemo spell={spell} example={example} />;
+}
+
+/** Пример-скрипт: кнопки переключают варианты кода, код выполняется по-настоящему, и Оракул говорит, что вышло. */
+function ScriptDemo({ spell, example }: { spell: string; example: ScriptExample }) {
+  const [selected, setSelected] = useState(example.initial ?? 0);
+  const [result, setResult] = useState<RunResult | null>(null);
+  const code = example.scripts[selected].code;
+
+  useEffect(() => {
+    let cancelled = false;
+    void runScript(code).then((next) => !cancelled && setResult(next));
+    return () => {
+      cancelled = true;
+    };
+  }, [code]);
+
+  function choose(index: number) {
+    setSelected(index);
+    setResult(null);
+    recordExperiment(spell);
+  }
+
+  const failure = result?.error && runtimeProblem(code, result.error);
+  return (
+    <div className="example example--script">
+      <div className="example__chips" role="group" aria-label="Варианты">
+        {example.scripts.map((script, i) => (
+          <button
+            key={script.label}
+            type="button"
+            className={i === selected ? 'chip chip--on' : 'chip'}
+            aria-pressed={i === selected}
+            onClick={() => choose(i)}
+          >
+            {script.label}
+          </button>
+        ))}
+      </div>
+      <pre className="example__code">
+        <code>{code}</code>
+      </pre>
+      <ol className="example__oracle oracle-scroll__lines" aria-label="Что сказал Оракул">
+        {result?.output.map((line, i) => (
+          <li key={i} className="oracle-line">
+            <span className="oracle-line__text">{line.text === '' ? ' ' : line.text}</span>
+          </li>
+        ))}
+        {failure && <li className="oracle-line oracle-line--error">✖ {failure.message}</li>}
+        {result && !failure && result.output.length === 0 && <li className="oracle-line oracle-line--empty">Оракул молчит</li>}
+      </ol>
+    </div>
+  );
 }
 
 /** Пример с вариантами CSS: кнопки меняют правила целиком — селектор, порядок или силу правил. */

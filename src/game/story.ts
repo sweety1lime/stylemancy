@@ -1,6 +1,6 @@
 import type { Region, StoryCondition, StoryFrame } from '../engine/types';
 import { lands, type Land } from '../levels';
-import { GAME_PROLOGUE, GRAND_FINALE } from '../levels/storyline';
+import { GAME_PROLOGUE, GRAND_FINALE, SCRIPTORIA_PROLOGUE } from '../levels/storyline';
 import { currentAccount } from './auth';
 import { progress, type ProgressMap } from './progress';
 import { stats } from './stats';
@@ -15,9 +15,14 @@ export interface OpenStory {
 
 export const PROLOGUE_KEY = 'prologue:game';
 export const FINALE_KEY = 'finale:game';
+export const SCRIPTORIA_KEY = 'prologue:scriptoria';
 
-/** Земля спасена — пройден последний уровень её последнего района (финальное испытание). */
+/**
+ * Земля спасена — пройден последний уровень её последнего района (финальное испытание).
+ * Земля, где ещё есть районы в тумане, спасённой не считается.
+ */
 export function isLandDone(land: Land, map: ProgressMap = progress.snapshot()): boolean {
+  if (land.upcoming.length > 0) return false;
   const lastRegion = land.regions[land.regions.length - 1];
   const finalLevel = lastRegion?.levels[lastRegion.levels.length - 1];
   return Boolean(finalLevel && map[finalLevel.id]?.completed);
@@ -90,6 +95,10 @@ export function storyOf(region: Region, part: 'intro' | 'outro'): OpenStory | nu
 
 export function gamePrologue(): OpenStory {
   return { key: PROLOGUE_KEY, title: 'Пролог: Великий Сброс', frames: resolveFrames(GAME_PROLOGUE, storyContext()), finishLabel: 'К карте' };
+}
+
+export function scriptoriaPrologue(): OpenStory {
+  return { key: SCRIPTORIA_KEY, title: 'Пролог: За дверью <script>', frames: resolveFrames(SCRIPTORIA_PROLOGUE, storyContext()), finishLabel: 'В Скрипторию' };
 }
 
 export function grandFinale(): OpenStory {

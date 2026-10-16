@@ -3,6 +3,7 @@ import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } 
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { css } from '@codemirror/lang-css';
 import { html } from '@codemirror/lang-html';
+import { javascript } from '@codemirror/lang-javascript';
 import { bracketMatching, HighlightStyle, indentOnInput, syntaxHighlighting } from '@codemirror/language';
 import { linter, lintGutter, type Diagnostic } from '@codemirror/lint';
 import { EditorState } from '@codemirror/state';
@@ -23,7 +24,7 @@ export interface CodeEditorHandle {
 }
 
 /** На каком языке пишет студент */
-export type EditorLanguage = 'css' | 'html';
+export type EditorLanguage = 'css' | 'html' | 'js';
 
 interface CodeEditorProps {
   language?: EditorLanguage;
@@ -54,6 +55,11 @@ const highlight = HighlightStyle.define([
   { tag: t.angleBracket, color: '#b8b0dc' },
   { tag: t.comment, color: '#7e75a6', fontStyle: 'italic' },
   { tag: t.documentMeta, color: '#f0abfc' },
+  // JavaScript: новые колбы — золотом, команды — голубым
+  { tag: t.definition(t.variableName), color: '#f4c76b' },
+  { tag: [t.function(t.variableName), t.function(t.propertyName)], color: '#9cc9ff' },
+  { tag: [t.bool, t.null], color: '#c9b8ff' },
+  { tag: t.operator, color: '#b8b0dc' },
 ]);
 
 const theme = EditorView.theme(
@@ -91,6 +97,11 @@ function toDiagnostics(problems: Problem[], length: number): Diagnostic[] {
  * иначе курсор — в конец последней строки перед первой «}».
  */
 function startSelection(text: string, language: EditorLanguage): { anchor: number; head?: number } {
+  // В скрипте комментарии — пояснения, их не трогаем: курсор — на первую пустую строку, где писать
+  if (language === 'js') {
+    const empty = /^[ \t]*$/m.exec(text);
+    return { anchor: empty ? empty.index : text.length };
+  }
   const comment = (language === 'html' ? /<!--[\s\S]*?-->/ : /\/\*[\s\S]*?\*\//).exec(text);
   if (comment) return { anchor: comment.index, head: comment.index + comment[0].length };
   // В разметке без заготовки курсор — в начале: чаще всего её нужно чинить
@@ -101,7 +112,7 @@ function startSelection(text: string, language: EditorLanguage): { anchor: numbe
   return { anchor: lineEnd === -1 ? close : lineEnd };
 }
 
-/** Редактор CSS или HTML на CodeMirror 6: подсветка, автодополнение и наши подсказки об ошибках. */
+/** Редактор CSS, HTML или JavaScript на CodeMirror 6: подсветка, автодополнение и наши подсказки об ошибках. */
 export function CodeEditor({ language = 'css', initialValue, onChange, lint, onSubmit, label, autoFocus, ref }: CodeEditorProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
@@ -144,7 +155,7 @@ export function CodeEditor({ language = 'css', initialValue, onChange, lint, onS
             indentWithTab,
           ]),
           // Теги студент закрывает сам — этому и учимся
-          setup.current.language === 'html' ? html({ autoCloseTags: false }) : css(),
+          setup.current.language === 'html' ? html({ autoCloseTags: false }) : setup.current.language === 'js' ? javascript() : css(),
           syntaxHighlighting(highlight),
           theme,
           lintGutter(),

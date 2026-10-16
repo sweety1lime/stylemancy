@@ -6,18 +6,20 @@ import { GrimoireScreen } from './components/GrimoireScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { LandTrail } from './components/LandTrail';
 import { HtmlLevelScreen } from './components/HtmlLevelScreen';
+import { JsLevelScreen } from './components/JsLevelScreen';
 import { LevelScreen } from './components/LevelScreen';
 import type { RegionStats } from './components/ResultPanel';
 import { TeacherScreen } from './components/TeacherScreen';
 import { Toasts } from './components/Toasts';
 import { TopBar } from './components/TopBar';
 import { WorldMap } from './components/WorldMap';
-import { isHtmlLevel } from './engine/types';
-import { isLandOpen, useAuth } from './game/auth';
+import { isHtmlLevel, isJsLevel } from './engine/types';
+import { canEnterLand, isScriptoriaOpen } from './game/access';
+import { useAuth } from './game/auth';
 import { useProgress } from './game/progress';
 import { isRegionOpen } from './game/unlock';
 import { hrefFor, navigate, parseHash, useHash } from './game/router';
-import { findLand, findLevel } from './levels';
+import { findLand, findLevel, isScriptLand, type Land } from './levels';
 import './App.css';
 
 /** Каркас экрана: верхняя панель, содержимое и уведомления о достижениях. */
@@ -29,6 +31,11 @@ function Screen({ back, children }: { back?: { href: string; label: string }; ch
       <Toasts />
     </div>
   );
+}
+
+/** Куда ведёт «назад» с тропы земли: на карту её мира. */
+function mapOf(land: Land): { href: string; label: string } {
+  return isScriptLand(land) ? { href: hrefFor({ name: 'scriptoria' }), label: 'Скриптория' } : { href: hrefFor({ name: 'map' }), label: 'Карта' };
 }
 
 export default function App() {
@@ -44,12 +51,12 @@ export default function App() {
 
   if (route.name === 'level') {
     const place = findLevel(route.id);
-    if (place && isLandOpen(account, place.land.id)) {
+    if (place && canEnterLand(account, place.land, progress)) {
       const { level, region, land, index, regionIndex } = place;
       // Район ещё закрыт — показываем тропу: там видно, какое испытание его откроет
       if (!isRegionOpen(account, land, regionIndex, progress)) {
         return (
-          <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+          <Screen back={mapOf(land)}>
             <LandTrail land={land} />
           </Screen>
         );
@@ -75,6 +82,8 @@ export default function App() {
         <Screen back={{ href: trailHref, label: land.title }}>
           {isHtmlLevel(level) ? (
             <HtmlLevelScreen key={level.id} level={level} {...screenProps} />
+          ) : isJsLevel(level) ? (
+            <JsLevelScreen key={level.id} level={level} {...screenProps} />
           ) : (
             <LevelScreen key={level.id} level={level} {...screenProps} />
           )}
@@ -85,9 +94,9 @@ export default function App() {
 
   if (route.name === 'land') {
     const land = findLand(route.id);
-    if (land && land.regions.length > 0 && isLandOpen(account, land.id)) {
+    if (land && land.regions.length > 0 && canEnterLand(account, land, progress)) {
       return (
-        <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+        <Screen back={mapOf(land)}>
           <LandTrail land={land} />
         </Screen>
       );
@@ -142,9 +151,17 @@ export default function App() {
     );
   }
 
+  if (route.name === 'scriptoria' && isScriptoriaOpen(account, progress)) {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Каскадия' }}>
+        <WorldMap key="scriptoria" world="scriptoria" />
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
-      <WorldMap />
+      <WorldMap key="cascadia" world="cascadia" />
     </Screen>
   );
 }

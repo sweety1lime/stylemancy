@@ -17,7 +17,7 @@ import {
   type Roster,
   type StudentRow,
 } from '../game/teacher';
-import { allLevels, lands, regions } from '../levels';
+import { allLevels, lands, regions, scriptLands } from '../levels';
 import { ClassCard } from './ClassCard';
 import { FeedbackList } from './FeedbackList';
 import { Modal } from './Modal';
@@ -326,23 +326,31 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
         </div>
       </div>
 
-      <div className="class-view__lands px-panel">
-        <span className="teacher__label">Открытые земли</span>
-        {lands.map((land) => (
-          <label key={land.id} className="field--check">
-            <input
-              type="checkbox"
-              disabled={land.regions.length === 0}
-              checked={klass.open_lands.includes(land.id)}
-              onChange={(event) => void toggleLand(land.id, event.target.checked)}
-            />
-            <span>
-              {land.title}
-              {land.regions.length === 0 && ' — в работе'}
-            </span>
-          </label>
-        ))}
-      </div>
+      {[
+        { title: 'Открытые земли · Каскадия (HTML и CSS)', list: lands },
+        { title: 'Скриптория (JavaScript)', list: scriptLands },
+      ].map((group) => (
+        <div key={group.title} className="class-view__lands px-panel">
+          <span className="teacher__label">{group.title}</span>
+          {group.list.map((land) => (
+            <label key={land.id} className="field--check">
+              <input
+                type="checkbox"
+                disabled={land.regions.length === 0}
+                checked={klass.open_lands.includes(land.id)}
+                onChange={(event) => void toggleLand(land.id, event.target.checked)}
+              />
+              <span>
+                {land.title}
+                {land.regions.length === 0 ? ' — в работе' : land.upcoming.length > 0 ? ' — построена частично' : ''}
+              </span>
+            </label>
+          ))}
+          {group.list === scriptLands && (
+            <span className="teacher__muted">Дверь в Скрипторию откроется и сама — тому, кто спасёт все земли Каскадии.</span>
+          )}
+        </div>
+      ))}
 
       {error && (
         <p className="login__error" role="alert">

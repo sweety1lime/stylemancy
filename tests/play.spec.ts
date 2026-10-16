@@ -171,6 +171,17 @@ test.describe('на телефоне', () => {
     await expectNoHorizontalScroll(page);
   });
 
+  test('карта Скриптории и JS-уровень помещаются по ширине', async ({ page }) => {
+    await page.goto('/#/scriptoria');
+    await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
+    await page.getByRole('button', { name: 'Пропустить' }).click();
+    await expectNoHorizontalScroll(page);
+
+    await page.goto('/#/level/js-07');
+    await expect(page.locator('.flask').first()).toBeVisible();
+    await expectNoHorizontalScroll(page);
+  });
+
   test('зеркала адаптивного уровня встают друг под другом и помещаются', async ({ page }) => {
     await unlockDistricts(page);
     await page.goto('/#/level/mq-01');
@@ -723,13 +734,17 @@ test.describe('эффекты и звук', () => {
   });
 
   test('персонаж говорит, пока печатается его реплика', async ({ page }) => {
+    await page.clock.install();
     await page.goto('/#/land/floating-lands');
     const dialog = page.getByRole('dialog', { name: 'Пролог: Парящие острова' });
     await expect(dialog).toBeVisible();
+    // Часы на паузе: реплика печатается около секунды, и на занятой машине успела бы допечататься до проверки
+    await page.clock.pauseAt(Date.now() + 1000);
     await dialog.getByRole('button', { name: 'Дальше →' }).click();
     await dialog.getByRole('button', { name: 'Дальше →' }).click();
     // Кадр Лорда Дефолта: портрет в подписи шевелится, пока идёт текст, а потом замолкает
     await expect(dialog.locator('.story__caption .face--talking')).toHaveCount(1);
+    await page.clock.resume();
     await expect(dialog.locator('.story__caption .face--talking')).toHaveCount(0);
   });
 });
@@ -879,5 +894,104 @@ test.describe('общий сюжет', () => {
 
     await page.goto('/#/chronicle');
     await expect(page.locator('.chronicle__chapter', { hasText: 'Глава 3. Крепость Блоков' })).toContainText('спасена');
+  });
+});
+
+test.describe('Скриптория', () => {
+  test('дверь <script>: из Каскадии в Скрипторию и обратно, пролог — один раз', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('dialog', { name: 'Пролог: Великий Сброс' }).getByRole('button', { name: 'Пропустить' }).click();
+    // Гостю дверь открыта сразу
+    const door = page.getByRole('link', { name: /Дверь <script>/ });
+    await expect(door).toContainText('Открыта — шагни за порог!');
+    await door.click();
+
+    // Общий финал герой не видел — сюжет объясняет, почему он здесь раньше
+    const prologue = page.getByRole('dialog', { name: 'Пролог: За дверью <script>' });
+    await expect(prologue).toContainText('тревожная весть');
+    await prologue.getByRole('button', { name: 'Пропустить' }).click();
+    await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Врата Скриптории/ })).toContainText('Пройдено 0 из 8');
+    await expect(page.locator('[data-land="decision-maze"]')).toContainText('В тумане — скоро');
+    await page.screenshot({ path: `${SCREENS}/30-scriptoria-map.png`, fullPage: true });
+
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    // Дверь на карте Скриптории ведёт обратно, а дверь Каскадии помнит, что герой заходил
+    await page.getByRole('link', { name: /Дверь в Каскадию/ }).click();
+    await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Дверь <script>/ })).toContainText('Скриптория · пройдено 0 из 8');
+  });
+
+  test('Зал Оракула: свиток повторяет вывод, колба показывает тип', async ({ page }) => {
+    await page.goto('/#/level/js-03');
+    await expect(page.getByRole('heading', { name: 'Первая колба' })).toBeVisible();
+    await expect(page.locator('.goals__head')).toHaveText(/0 из 2/);
+
+    // Строка '5' на свитке выглядит как число, но колба зелёная — и проверка это объясняет
+    await typeCode(page, "let gems = '5';\nconsole.log(gems);\n");
+    await expect(page.locator('.flask', { hasText: 'gems' })).toContainText("'5'");
+    await expect(page.locator('.goals__head')).toHaveText(/1 из 2/);
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText("В колбе gems — '5' (строка), а нужно 5 (число).");
+
+    await typeCode(page, 'let gems = 5;\nconsole.log(gems);\n');
+    await expect(page.locator('.goals__head')).toHaveText(/2 из 2/);
+    await page.screenshot({ path: `${SCREENS}/31-oracle-level.png`, fullPage: true });
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    await expect(page.getByText('Новое заклинание')).toBeVisible();
+  });
+
+  test('ошибки по-русски: Лорд Дефолт запечатал колбу и перепутал этикетки', async ({ page }) => {
+    await page.goto('/#/level/js-05');
+    await expect(page.locator('.oracle-line--error')).toContainText('Код остановился: строка 5 — Колба lives запечатана');
+
+    await page.goto('/#/level/js-06');
+    await expect(page.locator('.oracle-line--error')).toContainText('В имени переменной не может быть пробела: «magic power»');
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('Склей слова, вторую часть — с большой буквы: magicPower');
+  });
+
+  test('ответ не написать готовым числом — пусть посчитает Оракул', async ({ page }) => {
+    await page.goto('/#/level/js-02');
+    await typeCode(page, "console.log('7 + 5');\nconsole.log(12);\n");
+    // Свиток совпал, но приём уровня проверяется по «Сотворить»
+    await expect(page.locator('.goals__head')).toHaveText(/2 из 2/);
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('Не пиши 12 готовым числом');
+
+    await typeCode(page, "console.log('7 + 5');\nconsole.log(7 + 5);\n");
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('посчитал, но не налил: подсказка про gems + 3', async ({ page }) => {
+    await page.goto('/#/level/js-04');
+    await typeCode(page, 'let gems = 5;\nconsole.log(gems);\ngems + 3;\nconsole.log(gems);\n');
+    await cast(page);
+    await expect(page.locator('.result__list li').first()).toContainText('Строка 3: gems + 3 посчитано, но никуда не налито');
+    await expect(page.locator('.result__list')).toContainText('Строка 2: Оракул сказал «5», а нужно «8»');
+  });
+
+  test('бесконечный цикл останавливается, а игра не зависает', async ({ page }) => {
+    await page.goto('/#/level/js-01');
+    await typeCode(page, 'while (true) {}\n');
+    await expect(page.locator('.oracle-line--error')).toContainText('Код работал слишком долго');
+    await cast(page);
+    await expect(page.locator('.result__list')).toContainText('похоже, где-то бесконечный цикл');
+
+    await typeCode(page, "console.log('Привет, Скриптория!');\n");
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+
+  test('секрет: первые слова любого программиста', async ({ page }) => {
+    await page.goto('/#/level/js-01');
+    await typeCode(page, "console.log('Hello, World!');\n");
+    await cast(page);
+    await expect(page.locator('.toast')).toContainText('Hello, World!');
   });
 });

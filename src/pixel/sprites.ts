@@ -1,4 +1,4 @@
-import { mirror, recolor, rockSprite, type Sprite } from './pixelArt';
+import { gearSprite, mirror, recolor, rockSprite, type Sprite } from './pixelArt';
 
 const INK = '#1a1030';
 
@@ -626,6 +626,39 @@ export const PORTRAITS: Record<string, Sprite> = {
       s: '#94a3b8',
       S: '#e2e8f0',
       w: '#cffafe',
+    },
+  },
+  // Оракул Консоль: глубокий капюшон, повязка-экран с приглашением «>_» и золотой ворот
+  oracle: {
+    rows: [
+      '.....kkkkkk.....',
+      '...kkhhhhhhkk...',
+      '.khkkkkkkkkkkhk.',
+      '.khkdpddddddkhk.',
+      '.khkddpdddddkhk.',
+      '.khkdpddpppdkhk.',
+      '.khkkkkkkkkkkhk.',
+      '.khkffffffffkhk.',
+      '.khkfeffffefkhk.',
+      '.khkffffffffkhk.',
+      '.khkfffmmfffkhk.',
+      '.khhkffffffkhhk.',
+      'khhhhkkkkkkhhhhk',
+      'khhhkcCccCckhhhk',
+      'khHhhkcppckhhHhk',
+      'khHhhhkkkkhhhHhk',
+    ],
+    palette: {
+      k: INK,
+      h: '#155e75',
+      H: '#22d3ee',
+      d: '#0a0f1e',
+      p: '#4ade80',
+      f: '#f1c27d',
+      e: INK,
+      m: '#be123c',
+      c: '#f6c453',
+      C: '#fde68a',
     },
   },
 };
@@ -1994,7 +2027,42 @@ export const EMBLEMS: Record<string, Sprite> = {
     palette: { s: '#9ca3af', S: '#d1d5db', d: INK },
   },
   crystal: GEMS.amethyst.sprite,
+  // Скриптория
+  flask: recolor(POTION, { r: '#10b981', R: '#6ee7b7' }),
+  maze: {
+    rows: [
+      'kkkkkkkkk',
+      'k...k...k',
+      'k.k.k.k.k',
+      'k.k...k.k',
+      'k.kkkkk.k',
+      'k...k...k',
+      'kkk.k.k.k',
+      'k.....k.k',
+      'kkkkkkkyk',
+    ],
+    palette: { k: '#a78bfa', y: '#fbbf24' },
+  },
+  cauldron: {
+    rows: [
+      '..g...g...',
+      '...g.g..g.',
+      '.kkkkkkkk.',
+      'kgGgggggGk',
+      'kkkkkkkkkk',
+      '.kbbbbbbk.',
+      'kbbBbbbbbk',
+      'kbBbbbbbbk',
+      '.kbbbbbbk.',
+      '..kk..kk..',
+    ],
+    palette: { k: INK, g: '#4ade80', G: '#bbf7d0', b: '#475569', B: '#94a3b8' },
+  },
+  gear: gearSprite(11, 6, 0, { t: '#b45309', r: '#d97706', R: '#fbbf24', h: '#78350f' }),
 };
+
+/** Во сколько раз увеличить эмблему на карте: крупные рисунки — меньше */
+export const EMBLEM_SCALE: Record<string, number> = { crystal: 3, flask: 3, gear: 3 };
 
 /** Скалы под землями на карте — у каждой своя трава. */
 export const LAND_ROCKS: Record<string, Sprite> = {
@@ -2002,4 +2070,88 @@ export const LAND_ROCKS: Record<string, Sprite> = {
   forest: rockSprite(26, 7, { k: INK, G: '#4ade80', g: '#166534', d: '#6b4a30', D: '#523722' }, 5),
   fortress: rockSprite(26, 7, { k: INK, G: '#a3b18a', g: '#5b6b45', d: '#6b6b7a', D: '#4b4b5a' }, 9),
   crystal: rockSprite(26, 7, { k: INK, G: '#c4b5fd', g: '#6d3fe0', d: '#4a3a7a', D: '#352a5c' }, 13),
+  // Скриптория: камень и медь вместо травы
+  flask: rockSprite(26, 7, { k: INK, G: '#5eead4', g: '#0f766e', d: '#475569', D: '#334155' }, 17),
+  maze: rockSprite(26, 7, { k: INK, G: '#c4b5fd', g: '#5b21b6', d: '#44403c', D: '#292524' }, 19),
+  cauldron: rockSprite(26, 7, { k: INK, G: '#86efac', g: '#15803d', d: '#57534e', D: '#44403c' }, 23),
+  gear: rockSprite(26, 7, { k: INK, G: '#fcd34d', g: '#b45309', d: '#52525b', D: '#3f3f46' }, 29),
+  door: rockSprite(26, 7, { k: INK, G: '#9ca3af', g: '#4b5563', d: '#3f3f46', D: '#27272a' }, 31),
 };
+
+/* ——— Скриптория: дверь <script> и шестерни ——— */
+
+const DOOR_PALETTE = {
+  k: INK,
+  s: '#6b7280',
+  S: '#9ca3af',
+  w: '#7c4a1e',
+  W: '#5b3413',
+  y: '#fbbf24',
+  i: '#1f2937',
+  l: '#a7f3d0',
+  L: '#ecfdf5',
+  g: '#4ade80',
+};
+
+/** Дверь <script>, запертая: каменная арка, доски, петли и золотая скважина */
+export const SCRIPT_DOOR: Sprite = {
+  rows: [
+    '....kkkkkkkk....',
+    '..ksSsssSsssSk..',
+    '.kswWwwWwwWwwsk.',
+    '.kswWwwWwwWwwsk.',
+    'kswwWwwWwwWwwWsk',
+    'ksiiiiiWwiiiiisk',
+    'kswwWwwWwwWwwWSk',
+    'kswwWwwWwwWwwWSk',
+    'kswwWwwWwwWwwWSk',
+    'kSwwWwwywwWwwWsk',
+    'kSwwWwwywwWwwWsk',
+    'kSwwWwwWwwWwwWsk',
+    'kswwWwwWwwWwwWsk',
+    'kswwWwwWwwWwwWsk',
+    'kswwWwwWwwWwwWsk',
+    'kswwWwwWwwWwwWsk',
+    'ksiiiiiWwiiiiisk',
+    'kswwWwwWwwWwwWsk',
+    'kswwWwwWwwWwwWSk',
+    'kswwWwwWwwWwwWSk',
+    'kswwWwwWwwWwwWSk',
+    'kSsssSsssSsssSsk',
+  ],
+  palette: DOOR_PALETTE,
+};
+
+/** Дверь <script> приоткрыта: из Скриптории льётся свет, в нём мелькают зелёные огоньки кода */
+export const SCRIPT_DOOR_OPEN: Sprite = {
+  rows: [
+    '....kkkkkkkk....',
+    '..ksSsssSsssSk..',
+    '.ksWwWwWLLlllsk.',
+    '.ksWwWwWgLlllsk.',
+    'kswWwWwWwLllllsk',
+    'kswWwWwWwgllllsk',
+    'kswWwWwWwLllllSk',
+    'kswWwWwWwLglllSk',
+    'kswWwWwWwLllllSk',
+    'kSwWwWwWwLlgllsk',
+    'kSwWwWwWwLllllsk',
+    'kSwWwWwWwLllglsk',
+    'kswWwWwWwLllllsk',
+    'kswWwWwWwLlllgsk',
+    'kswWwWwWwLLLLLsk',
+    'kswWwWwWwLLLLLsk',
+    'kswWwWwWwLLLLLsk',
+    'kswWwWwWwLLLLLsk',
+    'kswWwWwWwgLLLLSk',
+    'kswWwWwWwLLLLLSk',
+    'kswWwWwWwLgLLLSk',
+    'kSsssSsssSsssSsk',
+  ],
+  palette: DOOR_PALETTE,
+};
+
+const GEAR_PALETTE = { t: '#b45309', r: '#d97706', R: '#fbbf24', h: '#78350f' };
+
+/** Шестерня в два кадра: зубцы сдвигаются на ползубца — кажется, что она крутится */
+export const GEAR_FRAMES: Sprite[] = [gearSprite(15, 8, 0, GEAR_PALETTE), gearSprite(15, 8, 0.5, GEAR_PALETTE)];
