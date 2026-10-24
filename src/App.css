@@ -2868,6 +2868,23 @@ a.land:hover .land__art {
   font-size: 30px;
 }
 
+/* Пока подгружается код экрана. Надпись появляется с задержкой, чтобы не мигать на быстрой сети */
+
+.loading {
+  padding: 48px 16px;
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: 18px;
+  text-align: center;
+  animation: loading-appear 0s 0.3s both;
+}
+
+@keyframes loading-appear {
+  from {
+    visibility: hidden;
+  }
+}
+
 /* Экран сбоя: вместо пустой страницы */
 
 .crash {

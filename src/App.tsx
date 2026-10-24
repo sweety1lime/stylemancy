@@ -1,16 +1,8 @@
-import { useEffect, type ReactNode } from 'react';
-import { AchievementsScreen } from './components/AchievementsScreen';
-import { CertificateScreen } from './components/CertificateScreen';
-import { ChronicleScreen } from './components/ChronicleScreen';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { CrashScreen, ErrorBoundary } from './components/ErrorBoundary';
-import { GrimoireScreen } from './components/GrimoireScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { LandTrail } from './components/LandTrail';
-import { HtmlLevelScreen } from './components/HtmlLevelScreen';
-import { JsLevelScreen } from './components/JsLevelScreen';
-import { LevelScreen } from './components/LevelScreen';
 import type { RegionStats } from './components/ResultPanel';
-import { TeacherScreen } from './components/TeacherScreen';
 import { Toasts } from './components/Toasts';
 import { TopBar } from './components/TopBar';
 import { WorldMap } from './components/WorldMap';
@@ -23,6 +15,28 @@ import { hrefFor, navigate, parseHash, useHash } from './game/router';
 import { findLand, findLevel, isScriptLand, type Land } from './levels';
 import './App.css';
 
+// Уровни с редактором кода и редкие экраны грузятся, когда до них дошли: так карта открывается быстрее
+const loadLevelScreen = () => import('./components/LevelScreen');
+const loadHtmlLevelScreen = () => import('./components/HtmlLevelScreen');
+const loadJsLevelScreen = () => import('./components/JsLevelScreen');
+const LevelScreen = lazy(() => loadLevelScreen().then((m) => ({ default: m.LevelScreen })));
+const HtmlLevelScreen = lazy(() => loadHtmlLevelScreen().then((m) => ({ default: m.HtmlLevelScreen })));
+const JsLevelScreen = lazy(() => loadJsLevelScreen().then((m) => ({ default: m.JsLevelScreen })));
+const GrimoireScreen = lazy(() => import('./components/GrimoireScreen').then((m) => ({ default: m.GrimoireScreen })));
+const AchievementsScreen = lazy(() => import('./components/AchievementsScreen').then((m) => ({ default: m.AchievementsScreen })));
+const ChronicleScreen = lazy(() => import('./components/ChronicleScreen').then((m) => ({ default: m.ChronicleScreen })));
+const CertificateScreen = lazy(() => import('./components/CertificateScreen').then((m) => ({ default: m.CertificateScreen })));
+const TeacherScreen = lazy(() => import('./components/TeacherScreen').then((m) => ({ default: m.TeacherScreen })));
+
+/** Пока подгружается код экрана: на медленной сети это заметно, на быстрой надпись не успевает появиться. */
+function Loading() {
+  return (
+    <p className="loading" role="status">
+      Загрузка…
+    </p>
+  );
+}
+
 /** Каркас экрана: верхняя панель, содержимое и уведомления о достижениях. */
 function Screen({ back, children }: { back?: { href: string; label: string }; children: ReactNode }) {
   return (
@@ -31,7 +45,7 @@ function Screen({ back, children }: { back?: { href: string; label: string }; ch
       {/* На новом адресе сломанный экран рисуется заново. Адрес без своей подписки: иначе ключ
           сменится раньше, чем App передаст новый экран, и старый экран сломается ещё раз */}
       <ErrorBoundary key={window.location.hash} fallback={(error, reset) => <CrashScreen error={error} onRetry={reset} />}>
-        {children}
+        <Suspense fallback={<Loading />}>{children}</Suspense>
       </ErrorBoundary>
       <Toasts />
     </div>
@@ -53,6 +67,16 @@ export default function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [hash]);
+
+  // Уровни открывают чаще всего: их код подгружаем заранее, когда первый экран уже нарисован
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Promise.all([loadLevelScreen(), loadHtmlLevelScreen(), loadJsLevelScreen()]).catch(() => {
+        // Нет связи: код подгрузится, когда студент откроет уровень
+      });
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (route.name === 'level') {
     const place = findLevel(route.id);

@@ -1365,8 +1365,11 @@ test.describe('Город Механизмов', () => {
     const frame = page.frameLocator('.page-scene__page');
     await typeCode(page, "let lever = document.querySelector('.lever');\nlever.addEventListener('click', () => {\n  while (true) {}\n});\n");
     await expect(page.locator('.goals__head')).toHaveText(/1 из 2/);
-    await frame.locator('.lever').click();
-    await expect(page.locator('.page-scene__status')).toContainText('Код работал слишком долго');
+    // Страница перезапускается под новый код: первый щелчок может опередить обработчик, как и у живого студента
+    await expect(async () => {
+      await frame.locator('.lever').click();
+      await expect(page.locator('.page-scene__status')).toContainText('Код работал слишком долго', { timeout: 3_000 });
+    }).toPass({ timeout: 15_000 });
     await cast(page);
     await expect(page.locator('.result__list')).toContainText('похоже, где-то бесконечный цикл');
   });
