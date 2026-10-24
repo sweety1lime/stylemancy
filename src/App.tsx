@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { AchievementsScreen } from './components/AchievementsScreen';
 import { CertificateScreen } from './components/CertificateScreen';
 import { ChronicleScreen } from './components/ChronicleScreen';
+import { CrashScreen, ErrorBoundary } from './components/ErrorBoundary';
 import { GrimoireScreen } from './components/GrimoireScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { LandTrail } from './components/LandTrail';
@@ -27,7 +28,11 @@ function Screen({ back, children }: { back?: { href: string; label: string }; ch
   return (
     <div className="app">
       <TopBar back={back} />
-      {children}
+      {/* На новом адресе сломанный экран рисуется заново. Адрес без своей подписки: иначе ключ
+          сменится раньше, чем App передаст новый экран, и старый экран сломается ещё раз */}
+      <ErrorBoundary key={window.location.hash} fallback={(error, reset) => <CrashScreen error={error} onRetry={reset} />}>
+        {children}
+      </ErrorBoundary>
       <Toasts />
     </div>
   );

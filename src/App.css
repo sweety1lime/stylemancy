@@ -2831,7 +2831,7 @@ a.land:hover .land__art {
   text-decoration: underline;
 }
 
-.account-dialog__actions {
+.button-row {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -2866,6 +2866,31 @@ a.land:hover .land__art {
 
 .login__head .pixel-title {
   font-size: 30px;
+}
+
+/* Экран сбоя: вместо пустой страницы */
+
+.crash {
+  display: grid;
+  place-items: start center;
+  padding: 32px 16px 48px;
+}
+
+.crash__card {
+  display: grid;
+  gap: 16px;
+  width: min(520px, 100%);
+  padding: 22px 22px 24px;
+}
+
+.crash__card .pixel-title {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.crash__detail {
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .tabs {

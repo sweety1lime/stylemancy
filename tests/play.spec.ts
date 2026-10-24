@@ -1484,3 +1484,48 @@ test.describe('Город Механизмов', () => {
     });
   });
 });
+
+test.describe('сбой страницы', () => {
+  /** Подменить модуль компонента тем, что падает при отрисовке: так проверяется настоящий путь ошибки. */
+  async function breakComponent(page: Page, name: string, message: string) {
+    await page.route(`**/src/components/${name}.tsx*`, (route) =>
+      route.fulfill({ contentType: 'text/javascript', body: `export function ${name}() { throw new Error('${message}'); }` }),
+    );
+  }
+
+  test('сломанный экран не оставляет пустую страницу: шапка на месте, можно уйти на карту', async ({ page }) => {
+    await breakComponent(page, 'GrimoireScreen', 'Тестовая поломка');
+    await page.goto('/#/grimoire');
+    await expect(page.getByRole('heading', { name: 'Здесь что-то сломалось' })).toBeVisible();
+    await expect(page.locator('.crash__detail')).toContainText('Тестовая поломка');
+    await expect(page.getByRole('link', { name: 'Гримуар' })).toBeVisible();
+    // Гость не на уровне: сообщать некому
+    await expect(page.getByRole('button', { name: 'Сообщить учителю' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Попробовать снова' }).click();
+    await expect(page.getByRole('heading', { name: 'Здесь что-то сломалось' })).toBeVisible();
+    await page.getByRole('link', { name: 'На карту' }).click();
+    await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
+  });
+
+  test('сломалась сама шапка: вся игра показывает экран сбоя и оживает после перезагрузки', async ({ page }) => {
+    await breakComponent(page, 'TopBar', 'Шапка сломалась');
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: 'Здесь что-то сломалось' })).toBeVisible();
+    await expect(page.locator('.crash__detail')).toContainText('Шапка сломалась');
+    await page.unroute('**/src/components/TopBar.tsx*');
+    await page.getByRole('button', { name: 'Перезагрузить' }).click();
+    await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Гримуар' })).toBeVisible();
+  });
+
+  test.describe('на телефоне', () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test('экран сбоя помещается по ширине', async ({ page }) => {
+      await breakComponent(page, 'GrimoireScreen', 'Очень-длинное-сообщение-об-ошибке-без-единого-пробела-которое-не-должно-распирать-страницу');
+      await page.goto('/#/grimoire');
+      await expect(page.getByRole('heading', { name: 'Здесь что-то сломалось' })).toBeVisible();
+      await expectNoHorizontalScroll(page);
+    });
+  });
+});

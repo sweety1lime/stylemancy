@@ -45,7 +45,7 @@ export function AccountDialog({ account, onClose }: { account: Account; onClose:
           Удалить аккаунт…
         </button>
       ) : (
-        <div className="account-dialog__actions">
+        <div className="button-row">
           <button
             type="button"
             className="button button--danger"

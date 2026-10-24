@@ -62,14 +62,27 @@ test.describe('аккаунты на живой базе Supabase', () => {
       await expect(prologue).toBeVisible();
       await prologue.getByRole('button', { name: 'Пропустить' }).click();
 
-      // Студент проходит первый уровень
+      // Студент проходит первый уровень без связи: прогресс уходит на сервер, как только сеть вернулась
       await student.goto('/#/level/flex-01');
       // fill() у CodeMirror иногда вставляет текст, не выделив старый
       await student.locator('.cm-content').click();
       await student.keyboard.press('ControlOrMeta+A');
       await student.keyboard.insertText('.island {\n  display: flex;\n}\n');
+      await studentContext.setOffline(true);
       await student.getByRole('button', { name: /Сотворить/ }).click();
       await expect(student.getByText('Заклинание сработало!')).toBeVisible();
+      // Отправка через секунду падает без сети, а повтор по таймеру был бы только через 15 секунд
+      await student.waitForTimeout(2000);
+      await studentContext.setOffline(false);
+      await expect
+        .poll(
+          () =>
+            student.evaluate<number>(
+              "import('/src/lib/supabase.ts').then(({ supabase }) => supabase.from('level_progress').select('stars').eq('level_id', 'flex-01')).then(({ data }) => data?.[0]?.stars ?? 0)",
+            ),
+          { timeout: 5_000 },
+        )
+        .toBe(3);
 
       // Студент сообщает учителю о проблеме прямо из уровня
       await student.getByRole('button', { name: 'Сообщить о проблеме' }).click();
@@ -135,6 +148,17 @@ test.describe('аккаунты на живой базе Supabase', () => {
       await other.getByRole('button', { name: 'Пропустить' }).click();
       await expect(other.getByRole('img', { name: '3 из 3 звёзд' }).first()).toBeVisible();
       await other.screenshot({ path: `${SCREENS}/12-student-trail.png`, fullPage: true });
+
+      // Уровень сломался: студент одной кнопкой сообщает учителю, код уходит вместе с сообщением
+      const brokenLevel = '**/src/components/LevelScreen.tsx*';
+      await other.route(brokenLevel, (route) =>
+        route.fulfill({ contentType: 'text/javascript', body: "export function LevelScreen() { throw new Error('Тестовая поломка'); }" }),
+      );
+      await other.goto('/#/level/flex-02');
+      await other.reload();
+      await other.getByRole('button', { name: 'Сообщить учителю' }).click();
+      await expect(other.getByText('Учитель получил сообщение вместе с твоим кодом.')).toBeVisible();
+      await other.unroute(brokenLevel);
 
       // Студент удаляет свой аккаунт с телефона: сначала передумал, потом подтвердил
       await other.setViewportSize({ width: 360, height: 740 });

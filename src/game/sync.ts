@@ -94,12 +94,23 @@ async function flush() {
   if (errors.length && userId === owner) schedule(15000);
 }
 
+/** Отправить сразу, не дожидаясь таймера: вернулась сеть или вкладку прячут, а то и закрывают. */
+function flushNow() {
+  if (!dirtyLevels.size && !statsDirty) return;
+  clearTimeout(timer);
+  void flush();
+}
+
+function flushWhenHidden() {
+  if (document.visibilityState === 'hidden') flushNow();
+}
+
 /** Начать синхронизацию: скачать, слить с локальным, дальше отправлять изменения. */
 export async function startSync(id: string): Promise<void> {
   await stopSync();
   userId = id;
 
-  const [levels, document] = await Promise.all([
+  const [levels, statsRow] = await Promise.all([
     supabase.from('level_progress').select('*').eq('student_id', id),
     supabase.from('student_stats').select('data').eq('student_id', id).maybeSingle(),
   ]);
@@ -110,14 +121,18 @@ export async function startSync(id: string): Promise<void> {
     for (const row of levels.data as ProgressRow[]) remote[row.level_id] = fromRow(row);
     progress.mergeRemote(remote).forEach((levelId) => dirtyLevels.add(levelId));
   }
-  if (!document.error) {
-    const remote = (document.data?.data ?? {}) as StatsDocument;
+  if (!statsRow.error) {
+    const remote = (statsRow.data?.data ?? {}) as StatsDocument;
     stats.replace(mergeStats(stats.get(), remote.stats ?? {}));
     notesStore.mergeRemote(remote.notes ?? {});
     statsDirty = true;
   }
 
+  window.addEventListener('online', flushNow);
+  document.addEventListener('visibilitychange', flushWhenHidden);
   unsubscribe = [
+    () => window.removeEventListener('online', flushNow),
+    () => document.removeEventListener('visibilitychange', flushWhenHidden),
     progress.onLevelChange((levelId) => {
       dirtyLevels.add(levelId);
       schedule();
