@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Dungeon, StoryFrame } from '../engine/types';
 import { recolor } from '../pixel/pixelArt';
 import {
@@ -108,13 +108,39 @@ function VillainActor({ mood }: { mood: 'laugh' | 'angry' }) {
   );
 }
 
+/** Ширина спрайта — ближайшая кратная рисунку: доли кадра (cqw) дали бы экранные пиксели разной ширины. */
+function snapToPixels(root: HTMLElement) {
+  for (const el of root.querySelectorAll<HTMLElement>('.pixel-art, .sprite-anim')) {
+    const pixels = parseFloat(el.style.getPropertyValue('--pw'));
+    if (!pixels) continue;
+    el.style.width = '';
+    if (el.offsetWidth) el.style.width = `${Math.max(1, Math.round(el.offsetWidth / pixels)) * pixels}px`;
+  }
+}
+
 /**
  * Пиксельная картинка кадра сценки. Размеры — в долях ширины кадра, поэтому кадр масштабируется целиком.
  * speaker — чей портрет показать в кадре наставника.
  */
 export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFrame['art']; speaker?: string; talking?: boolean; text?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const snap = () => snapToPixels(root);
+    const resize = new ResizeObserver(snap);
+    resize.observe(root);
+    // Злодей сменил движение или кадр сменил картинку: новые спрайты тоже выравниваем
+    const changes = new MutationObserver(snap);
+    changes.observe(root, { childList: true, subtree: true });
+    return () => {
+      resize.disconnect();
+      changes.disconnect();
+    };
+  }, []);
+
   return (
-    <div className={`story-art story-art--${art}`} aria-hidden="true">
+    <div ref={ref} className={`story-art story-art--${art}`} aria-hidden="true">
       {art === 'kingdom' && (
         <>
           <PixelArt className="sa-moon" sprite={MOON} />

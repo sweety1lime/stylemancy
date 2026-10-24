@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { Sprite } from '../pixel/pixelArt';
 import { sheetAnimation, spriteSheet } from '../pixel/sheet';
 
@@ -21,7 +22,11 @@ export function SpriteAnim({ frames, fps = 8, repeat, scale = 3, fluid = false, 
   return (
     <span
       className={className ? `sprite-anim ${className}` : 'sprite-anim'}
-      style={fluid ? { aspectRatio: `${sheet.width} / ${sheet.height}` } : { width: sheet.width * scale, height: sheet.height * scale }}
+      style={
+        fluid
+          ? ({ aspectRatio: `${sheet.width} / ${sheet.height}`, '--pw': `${sheet.width}px` } as CSSProperties)
+          : { width: sheet.width * scale, height: sheet.height * scale }
+      }
       aria-hidden="true"
     >
       <img

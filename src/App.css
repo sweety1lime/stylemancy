@@ -4054,14 +4054,15 @@ a.land--door .land__door {
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--w), 1fr);
-  width: min(100%, calc(var(--w) * 52px));
+  /* Клетка 48px — ровно 6 экранных пикселей на пиксель тайла 8×8 */
+  width: min(100%, calc(var(--w) * 48px));
   margin: 0 auto;
   box-shadow: 0 0 0 3px #2a2350;
   container-type: inline-size;
 }
 
 .dungeon--compact {
-  width: min(100%, calc(var(--w) * 30px));
+  width: min(100%, calc(var(--w) * 32px));
 }
 
 .dungeon__cell {
@@ -4138,6 +4139,33 @@ a.land--door .land__door {
 
 .dungeon__hero .sprite-anim img {
   position: static;
+}
+
+/* На узком экране клетка и предметы тоже кратны своим рисункам: иначе экранные пиксели выходят разной ширины */
+@supports (width: round(down, 10%, 1px)) {
+  .dungeon {
+    width: min(round(down, 100%, calc(var(--w) * 8px)), calc(var(--w) * 48px));
+  }
+
+  .dungeon--compact {
+    width: min(round(down, 100%, calc(var(--w) * 8px)), calc(var(--w) * 32px));
+  }
+
+  .dungeon__cell img {
+    width: max(var(--pw), round(nearest, 62%, var(--pw)));
+  }
+
+  .dungeon__cell--exit img {
+    width: max(var(--pw), round(nearest, 76%, var(--pw)));
+  }
+
+  .dungeon__cell--bug img {
+    width: max(var(--pw), round(nearest, 70%, var(--pw)));
+  }
+
+  .dungeon__hero .sprite-anim {
+    width: max(var(--pw), round(nearest, 74%, var(--pw)));
+  }
 }
 
 /* Спрайт героя смотрит вправо; влево — отражаем. Куда он смотрит — показывает золотая стрелка */

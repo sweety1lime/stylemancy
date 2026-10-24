@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { spriteDataUri, type Sprite } from '../pixel/pixelArt';
 
 const uris = new WeakMap<Sprite, string>();
@@ -20,14 +21,15 @@ interface PixelArtProps {
 }
 
 export function PixelArt({ sprite, scale = 4, alt = '', className }: PixelArtProps) {
-  const width = Math.max(...sprite.rows.map((row) => row.length)) * scale;
-  const height = sprite.rows.length * scale;
+  const pixels = Math.max(...sprite.rows.map((row) => row.length));
   return (
     <img
       className={className ? `pixel-art ${className}` : 'pixel-art'}
       src={uriFor(sprite)}
-      width={width}
-      height={height}
+      width={pixels * scale}
+      height={sprite.rows.length * scale}
+      // Ширина рисунка: по ней CSS и сценки округляют размер до целого масштаба
+      style={{ '--pw': `${pixels}px` } as CSSProperties}
       alt={alt}
       draggable={false}
     />
