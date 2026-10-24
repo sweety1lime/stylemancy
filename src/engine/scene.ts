@@ -228,7 +228,7 @@ function comparePlace(item: ItemBox | undefined, target: ItemBox, tolerance: num
     let message = visibility === 'hide' ? `${target.name}: здесь нужно спрятать.` : `${target.name}: здесь нужно показать.`;
     // Спрятан, но не тем способом: visibility оставляет место, display: none убирает его
     if (hidden(target) && item.invisible) message = `${target.name}: не виден, но всё ещё занимает место — убери его совсем.`;
-    if (hidden(item) && target.invisible) message = `${target.name}: убран вместе со своим местом — а место должно остаться пустым.`;
+    if (hidden(item) && target.invisible) message = `${target.name}: убран вместе со своим местом, а место должно остаться пустым.`;
     return { ...base, inPlace: false, sizeOk: false, delta, message, visibility };
   }
   if (hidden(target)) return { ...base, inPlace: true, sizeOk: true, delta };

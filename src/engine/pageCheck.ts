@@ -32,7 +32,7 @@ export interface PageEvaluation extends JsEvaluation {
 export const LOOP_MESSAGE = 'Код работал слишком долго и был остановлен — похоже, где-то бесконечный цикл.';
 
 export const RELOAD_MESSAGE =
-  'Форма перезагрузила страницу — и всё, что сделал код, пропало. Так форма поступает по умолчанию; отмени это в обработчике submit: `event.preventDefault()`';
+  'Форма перезагрузила страницу, и всё, что сделал код, пропало. Так форма поступает по умолчанию; отмени это в обработчике submit: `event.preventDefault()`';
 
 /** Шаги сценария. Без шагов — один снимок сразу после запуска. */
 export function stepsOf(level: JsLevel): PageStep[] {

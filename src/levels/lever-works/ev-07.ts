@@ -57,6 +57,6 @@ button.addEventListener('click', () => {
   hints: [
     "Всё — в обработчике щелчка по кнопке. Первым делом число: `let count = Number(field.value);`",
     "Проверь длину раньше всего: `if (count > 8) { report.textContent = 'Слишком длинно'; return; }` — return выходит из рецепта.",
-    "Дальше: `bridge.textContent = '';`, цикл `for (let i = 0; i < count; i++)` с `createElement('div')` и классом `plank` — и табло.",
+    "Дальше: `bridge.textContent = '';`, цикл `for (let i = 0; i < count; i++)` с `createElement('div')` и классом `plank`, а в конце табло.",
   ],
 });

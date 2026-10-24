@@ -44,8 +44,6 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
     const items = sceneRef.current?.apply(current) ?? [];
     const evaluation = evaluate(lintCss(current, lintOptions), items);
     sceneRef.current?.cast(evaluation.passed);
-    if (evaluation.passed) sfx.success();
-    else sfx.fail();
     if (evaluation.passed) {
       flow.finish({ passed: true, score: scoreSolution(flow.hintsUsed, evaluation.declCount, solutionDeclCount(level)) }, viaKeyboard);
     } else {

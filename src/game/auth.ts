@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { NOTES_KEY } from './notes';
 import { CURRENT_KEY, DRAFTS_KEY, PROGRESS_KEY } from './progress';
 import { STATS_KEY } from './stats';
-import { copyGuestDataTo, setScope } from './storage';
+import { copyGuestDataTo, forgetUserData, setScope } from './storage';
 import { startSync, stopSync } from './sync';
 
 /**
@@ -26,7 +26,6 @@ export interface Account {
   role: 'teacher' | 'student';
   nickname: string;
   email?: string;
-  /** Класс студента */
   classInfo?: ClassInfo;
 }
 
@@ -128,7 +127,7 @@ export async function refreshAccount(): Promise<void> {
   if (currentUserId === account.id) setState({ ready: true, account });
 }
 
-/* ——— Вход и регистрация ——— */
+/* Вход и регистрация */
 
 export function normalizeCode(code: string): string {
   return code.replace(/\s+/g, '').toUpperCase();
@@ -230,10 +229,19 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
 }
 
-/** Удалить свой аккаунт со всем прогрессом. */
+/**
+ * Удалить свой аккаунт со всем прогрессом: на сервере и на этом компьютере.
+ * Только для студентов: у учителя вместе с аккаунтом удалились бы его классы и профили студентов.
+ */
 export async function deleteMyAccount(): Promise<void> {
+  const id = currentUserId;
   await stopSync();
   const { error } = await supabase.rpc('delete_my_account');
-  if (error) throw explain(error, 'student');
+  if (error) {
+    // Аккаунт остался, синхронизация продолжается
+    if (id) void startSync(id);
+    throw explain(error, 'student');
+  }
   await supabase.auth.signOut({ scope: 'local' });
+  if (id) forgetUserData(id);
 }

@@ -4,19 +4,9 @@ import type { OutputLine } from '../engine/jsRun';
 import { LOOP_MESSAGE, RELOAD_MESSAGE, type PageEvaluation } from '../engine/pageCheck';
 import { pageDocument } from '../engine/pageHarness';
 import { levelPage, type PageError } from '../engine/pageRun';
-import type { JsLevel } from '../engine/types';
 import { GoalList } from './GoalList';
-import { OracleLine } from './JsScene';
+import { OracleLine, type JsSceneProps } from './JsScene';
 import { RichText } from './RichText';
-
-interface PageSceneProps {
-  level: JsLevel;
-  code: string;
-  evaluation: PageEvaluation | null;
-  /** Код ещё проверяется после последнего изменения */
-  busy: boolean;
-  celebrate: boolean;
-}
 
 /** Сколько последних строк Оракула показывать под страницей */
 const LOG_SIZE = 4;
@@ -41,7 +31,7 @@ function fingerprint(text: string): string {
  * Сцена Города Механизмов: живая страница в рамке «браузера». Код студента работает прямо в ней —
  * по кнопкам можно щёлкать, в поля писать. Страница отделена от игры: sandbox без allow-same-origin.
  */
-export function PageScene({ level, code, evaluation, busy, celebrate }: PageSceneProps) {
+export function PageScene({ level, code, evaluation, busy, celebrate }: JsSceneProps<PageEvaluation>) {
   const page = useMemo(() => levelPage(level), [level]);
   const syntax = evaluation?.errors.find((problem) => problem.kind !== 'required' && problem.kind !== 'runtime');
   // Код с ошибкой разбора на страницу не попадает: она остаётся как есть

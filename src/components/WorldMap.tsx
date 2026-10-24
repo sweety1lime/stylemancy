@@ -62,7 +62,6 @@ const PATHS: Record<WorldId, [number, number][]> = {
 const HERO_KEYS: Record<WorldId, string> = { cascadia: 'cascadia.hero.v1', scriptoria: 'cascadia.hero.scriptoria.v1' };
 /** Дверь на карте — для героя она такая же остановка, как земля */
 const DOOR = 'door';
-/** Масштаб героя на карте */
 const HERO_SCALE = 2;
 
 /** Герой идёт от одной земли к другой: шагает в четыре кадра, а настоящий герой ждёт на месте. onArrive — когда дошёл. */
@@ -250,7 +249,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
           <h1 className="pixel-title">{world === 'cascadia' ? 'Карта Каскадии' : 'Карта Скриптории'}</h1>
           {world === 'cascadia' ? (
             <p>
-              Лорд Дефолт проклял королевство: он хочет, чтобы всё снова выглядело как страница без стилей — Times New
+              Лорд Дефолт проклял королевство: он хочет, чтобы всё снова выглядело как страница без стилей: Times New
               Roman и синие ссылки. Каждая земля — тема вёрстки. Освой её магию и сними проклятие. А в углу карты стоит
               загадочная дверь <code>&lt;script&gt;</code> — за ней начинается совсем другая магия.
             </p>

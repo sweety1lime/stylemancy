@@ -14,8 +14,6 @@ export const alchemistShop = defineRegion({
   title: 'Лавка Алхимика',
   topic: 'строки, типы, alert и prompt',
   npc: { name: 'Алхимик Тайпоф', title: 'хозяин лавки', portrait: 'typeof' },
-  // Сцена JS-уровня — свиток и полка с колбами, своего оформления ей не нужно
-  sceneCss: '',
   story: {
     intro: [
       {

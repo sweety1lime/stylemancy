@@ -6,6 +6,7 @@ import { recordCast, recordSuccess } from '../game/achievements';
 import { currentLevel, drafts, progress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { learnedSpells, pickQuestion, reviewIsDue, skipReview, type ReviewQuestion } from '../game/review';
+import { sfx } from '../game/sound';
 import { stats } from '../game/stats';
 import {
   allLandsDone,
@@ -26,7 +27,7 @@ import type { Outcome, RegionStats } from './ResultPanel';
 export type Attempt = { passed: true; score: Score } | { passed: false; errors: Problem[]; misses: string[] };
 
 /**
- * Общее у CSS- и HTML-уровней: черновик, подсказки, попытки, звёзды и опыт, достижения,
+ * Общее у всех уровней: черновик, подсказки, попытки, звук итога, звёзды и опыт, достижения,
  * победная сценка района, вопрос на повторение и сообщение учителю.
  */
 export function useLevelFlow(level: Level, region: RegionStats, starter: string) {
@@ -61,6 +62,8 @@ export function useLevelFlow(level: Level, region: RegionStats, starter: string)
 
   /** viaKeyboard — сотворили через Ctrl+Enter (для секретного достижения) */
   function finish(attempt: Attempt, viaKeyboard: boolean) {
+    if (attempt.passed) sfx.success();
+    else sfx.fail();
     const current = codeRef.current;
     const found = recordCast(current, viaKeyboard);
     progress.addAttempt(level.id);

@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import { ACHIEVEMENTS } from '../game/achievements';
-import { signOut, useAuth } from '../game/auth';
+import { signOut, useAuth, type Account } from '../game/auth';
 import { useProgress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { settings, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
 import { useStats } from '../game/stats';
 import { BOOK, EFFECTS_OFF, EFFECTS_ON, GEMS, MEDALS, SPEAKER_OFF, SPEAKER_ON } from '../pixel/sprites';
+import { AccountDialog } from './AccountDialog';
 import { PixelArt } from './PixelArt';
 
 interface TopBarProps {
@@ -20,6 +22,8 @@ export function TopBar({ back }: TopBarProps) {
   const { rank, next, share } = rankFor(xp);
   const hint = next ? `До ранга «${next.title}» — ${next.xp - xp} XP` : 'Высший ранг';
   const achievementsGot = ACHIEVEMENTS.filter((item) => stats.achievements[item.id]).length;
+  // Окно держит аккаунт, с которым открылось: после удаления оно ещё показывает итог
+  const [accountDialog, setAccountDialog] = useState<Account | null>(null);
 
   return (
     <header className="topbar">
@@ -59,9 +63,20 @@ export function TopBar({ back }: TopBarProps) {
                 Панель учителя
               </a>
             )}
-            <span className="account__name" title={account.classInfo ? `Класс «${account.classInfo.name}»` : account.email}>
-              {account.nickname}
-            </span>
+            {account.role === 'student' ? (
+              <button
+                type="button"
+                className="account__name account__name--button"
+                title={account.classInfo ? `Класс «${account.classInfo.name}»` : undefined}
+                onClick={() => setAccountDialog(account)}
+              >
+                {account.nickname}
+              </button>
+            ) : (
+              <span className="account__name" title={account.email}>
+                {account.nickname}
+              </span>
+            )}
             <button type="button" className="text-button" onClick={() => void signOut()}>
               Выйти
             </button>
@@ -74,6 +89,7 @@ export function TopBar({ back }: TopBarProps) {
           )
         )}
       </div>
+      {accountDialog && <AccountDialog account={accountDialog} onClose={() => setAccountDialog(null)} />}
     </header>
   );
 }

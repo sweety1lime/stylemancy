@@ -783,7 +783,7 @@ function lostValues(program: AnyNode, code: string): Problem[] {
         message =
           left.type === 'Identifier'
             ? `${text} посчитано, но никуда не налито — колба ${left.name as string} не изменилась. Чтобы долить её, пиши ${left.name as string} = ${text};`
-            : `${text} посчитано и сразу забыто. Покажи результат Оракулу — console.log(${text}) — или налей его в колбу.`;
+            : `${text} посчитано и сразу забыто. Покажи результат Оракулу через console.log(${text}) или налей его в колбу.`;
       } else if (expression.type === 'Identifier' || expression.type === 'Literal' || expression.type === 'TemplateLiteral') {
         message = `${text} — значение без приказа: его никто не увидит. Может, нужен console.log(${text})?`;
       }

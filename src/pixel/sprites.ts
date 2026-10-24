@@ -2,7 +2,7 @@ import { gearSprite, mirror, recolor, rockSprite, type Sprite } from './pixelArt
 
 const INK = '#1a1030';
 
-/* ——— Кристаллы ——— */
+/* Кристаллы */
 
 const CRYSTAL_ROWS = [
   '.....oo.....',
@@ -40,7 +40,7 @@ export const GEM_SHADOW: Sprite = {
   palette: { k: 'rgba(8, 4, 20, 0.55)' },
 };
 
-/* ——— Небо ——— */
+/* Небо */
 
 export const SKY_STAR: Sprite = { rows: ['.w.', 'www', '.w.'], palette: { w: '#e9e4ff' } };
 
@@ -80,11 +80,11 @@ export const SKY_TILE: Sprite = (() => {
   };
 })();
 
-/* ——— Скалы ——— */
+/* Скалы */
 
 export const ISLAND_ROCK = rockSprite(100, 14, { k: INK, G: '#6ee7a8', g: '#2f8f5b', d: '#7a5638', D: '#5c3f28' }, 11);
 
-/* ——— Камни моста: левый край, середина (повторяется) и правый край ——— */
+/* Камни моста: левый край, середина (повторяется) и правый край */
 
 const STONE_CAP = [
   '..kk',
@@ -152,7 +152,7 @@ export const RUNE_STONE = {
   right: mirror({ rows: STONE_CAP, palette: RUNE_PALETTE }),
 };
 
-/* ——— Интерфейс ——— */
+/* Интерфейс */
 
 export const STAR_ON: Sprite = {
   rows: ['...y...', '..yyy..', 'yyyyyyy', '.yyyyy.', '..yyy..', '.yy.yy.', 'yy...yy'],
@@ -161,7 +161,7 @@ export const STAR_ON: Sprite = {
 
 export const STAR_OFF = recolor(STAR_ON, { y: '#3b2f66' });
 
-/* ——— Медали достижений: одна форма, цвет по категории ——— */
+/* Медали достижений: одна форма, цвет по категории */
 
 const MEDAL_ROWS = [
   '..rr....rr..',
@@ -204,7 +204,7 @@ export const BOOK: Sprite = {
   palette: { k: '#6d3fe0', p: '#e9e4ff', l: '#7e74ad' },
 };
 
-/* ——— Портреты ——— */
+/* Портреты */
 
 export const PORTRAITS: Record<string, Sprite> = {
   flex: {
@@ -959,7 +959,7 @@ export const PORTRAITS: Record<string, Sprite> = {
   },
 };
 
-/* ——— Витражи: цветное стекло с белым узором ——— */
+/* Витражи: цветное стекло с белым узором */
 
 const MOTIF_PALETTE = { w: 'rgba(255, 255, 255, 0.85)' };
 
@@ -1005,7 +1005,7 @@ export const BRICKS: Sprite = {
   palette: { k: '#120c22', b: '#221a3d', B: '#2b2150' },
 };
 
-/* ——— Товары Ярмарки Ссылок: картинки для HTML-уровней ——— */
+/* Товары Ярмарки Ссылок: картинки для HTML-уровней */
 
 export const POTION: Sprite = {
   rows: [
@@ -1047,7 +1047,7 @@ export const MAP: Sprite = {
   palette: { k: '#8a6a2a', p: '#f5e6c8', r: '#be123c' },
 };
 
-/* ——— Крепость Блоков ——— */
+/* Крепость Блоков */
 
 export const GUARD: Sprite = {
   rows: [
@@ -1170,7 +1170,6 @@ export const GUARD_FRAMES: Sprite[] = [
 
 /** Шпион Лорда Дефолта: тот же часовой, только в сером */
 const SPY_COLORS = { s: '#52525b', S: '#a1a1aa', r: '#3f3f46', y: '#a1a1aa', b: '#27272a' };
-export const SPY = recolor(GUARD, SPY_COLORS);
 export const SPY_FRAMES = GUARD_FRAMES.map((frame) => recolor(frame, SPY_COLORS));
 
 export const SHIELD: Sprite = {
@@ -1231,7 +1230,7 @@ export const FULL_MOON: Sprite = {
 };
 
 /*
-  ——— Лес Селекторов ———
+  Лес Селекторов.
   У предметов леса цвет задаёт свойство color из кода студента. В рисунке это буквы:
   c — заливка цветом, h — блик поверх неё, d — тень, v — прожилка. Остальное нарисовано как обычно.
 */
@@ -1378,7 +1377,7 @@ export const SAND_BRICKS = recolor(BRICKS, { k: '#4a3219', b: '#8a6236', B: '#9a
 /** Серая кладка цитадели Лорда Дефолта */
 export const GRAY_BRICKS = recolor(BRICKS, { k: '#141419', b: '#272730', B: '#30303a' });
 
-/* ——— Переключатели: звук и эффекты ——— */
+/* Переключатели: звук и эффекты */
 
 const TOGGLE_PALETTE = { k: '#e9e4ff', w: '#a78bfa' };
 
@@ -1400,7 +1399,7 @@ export const EFFECTS_ON: Sprite = {
 
 export const EFFECTS_OFF = recolor(EFFECTS_ON, { y: '#4c3f7a', Y: '#6b6394', w: '#8a84ad' });
 
-/* ——— Живая карта: облака, туман и герой ——— */
+/* Живая карта: облака, туман и герой */
 
 export const CLOUD: Sprite = {
   rows: ['......wwww......', '...wwwwwwwww....', '..wwwwwwwwwwwww.', 'wwwwwwwwwwwwwwww', '.WWWWWWWWWWWWWW.', '...WWWWWWWWWW...'],
@@ -1814,9 +1813,6 @@ export type HeroAnimation = keyof typeof HERO_FRAMES;
 export const HERO_ANIMATIONS = Object.fromEntries(
   Object.entries(HERO_FRAMES).map(([name, list]) => [name, list.map((rows): Sprite => ({ rows, palette: HERO_PALETTE }))]),
 ) as Record<HeroAnimation, Sprite[]>;
-
-/** Герой стоит: первый кадр дыхания */
-export const HERO = HERO_ANIMATIONS.idle[0];
 
 /**
  * Лорд Дефолт во весь рост: цилиндр с синей лентой, монокль, усы и трость.
@@ -2286,7 +2282,7 @@ export const VILLAIN_BUST = {
   angry: villainSprites(VILLAIN_BUST_FRAMES.angry),
 };
 
-/* ——— Эмблемы земель на карте ——— */
+/* Эмблемы земель на карте */
 
 export const EMBLEMS: Record<string, Sprite> = {
   tags: {
@@ -2374,7 +2370,7 @@ export const LAND_ROCKS: Record<string, Sprite> = {
   door: rockSprite(26, 7, { k: INK, G: '#9ca3af', g: '#4b5563', d: '#3f3f46', D: '#27272a' }, 31),
 };
 
-/* ——— Скриптория: дверь <script> и шестерни ——— */
+/* Скриптория: дверь <script> и шестерни */
 
 const DOOR_PALETTE = {
   k: INK,
@@ -2477,7 +2473,7 @@ const GEAR_PALETTE = { t: '#b45309', r: '#d97706', R: '#fbbf24', h: '#78350f' };
 /** Шестерня в два кадра: зубцы сдвигаются на ползубца — кажется, что она крутится */
 export const GEAR_FRAMES: Sprite[] = [gearSprite(15, 8, 0, GEAR_PALETTE), gearSprite(15, 8, 0.5, GEAR_PALETTE)];
 
-/* ——— Лабиринт Решений: клетки подземелья «Пути героя» ——— */
+/* Лабиринт Решений: клетки подземелья «Пути героя» */
 
 /** Стена: каменная кладка со швами вразбежку */
 export const DUNGEON_WALL: Sprite = {
@@ -2524,7 +2520,7 @@ export const DUNGEON_BUG: Sprite = {
   palette: { k: INK, r: '#ef4444', R: '#7f1d1d' },
 };
 
-/* ——— Мастерская Рецептов ——— */
+/* Мастерская Рецептов */
 
 /** Призрак Андефайнд, подручный Лорда Дефолта: забирает всё, что рецепт не вернул */
 export const GHOST: Sprite = {

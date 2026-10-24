@@ -22,7 +22,7 @@ export function ClassCard({ klass, joinLink, onClose }: { klass: ClassRow; joinL
           <li>
             Введи код класса: <span className="class-card__code">{klass.code}</span>
           </li>
-          <li>Придумай ник — не настоящие имя и фамилию — и пароль. Запиши их, чтобы не забыть.</li>
+          <li>Придумай ник (не настоящие имя и фамилию) и пароль. Запиши их, чтобы не забыть.</li>
         </ol>
         <p className="class-card__note">Пароль забылся — учитель сбросит его в своей панели.</p>
       </div>

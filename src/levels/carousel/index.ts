@@ -13,8 +13,6 @@ export const carousel = defineRegion({
   title: 'Карусель Циклопа',
   topic: 'while, for и break',
   npc: { name: 'Циклоп Фор', title: 'хозяин Карусели', portrait: 'for' },
-  // Сцена — подземелье «Пути героя», своего оформления ей не нужно
-  sceneCss: '',
   story: {
     intro: [
       {

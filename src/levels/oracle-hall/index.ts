@@ -14,8 +14,6 @@ export const oracleHall = defineRegion({
   title: 'Зал Оракула',
   topic: 'console.log, переменные и арифметика',
   npc: { name: 'Оракул Консоль', title: 'голос Скриптории', portrait: 'oracle' },
-  // Сцена JS-уровня — свиток и полка с колбами, своего оформления ей не нужно
-  sceneCss: '',
   story: {
     intro: [
       {

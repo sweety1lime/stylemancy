@@ -129,7 +129,6 @@ export const scriptLands: Land[] = [
   },
 ];
 
-/** Все земли обоих миров */
 export const allLands = [...lands, ...scriptLands];
 
 export function isScriptLand(land: Land): boolean {

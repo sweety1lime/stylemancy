@@ -54,7 +54,7 @@ export const floatingIslands = defineRegion({
         speaker: 'default',
         name: 'Лорд Дефолт',
         when: { anyDone: true, notDone: ['tags-valley'] },
-        text: '«Опять ты, {name}! Не надейся, что и здесь всё получится!»',
+        text: '«Опять ты, {name}! Острова мои, и кристаллы так и останутся грудой!»',
       },
       {
         art: 'mentor',
@@ -68,7 +68,7 @@ export const floatingIslands = defineRegion({
         speaker: 'flex',
         name: 'Магистр Флекс',
         when: { anyDone: true },
-        text: '«Слава о тебе дошла и до островов, {name}! Я Магистр Флекс — научу расставлять всё по местам. Начнём с Flexbox!»',
+        text: '«Мы ждали тебя, {name}! Я Магистр Флекс — научу расставлять всё по местам. Начнём с Flexbox!»',
       },
     ],
     outro: [

@@ -28,7 +28,7 @@ export default defineLevel({
 `,
   check: { items: '.mushroom', groupName: 'грибы', style: 'color' },
   hints: [
-    'Сейчас пробел находит грибы на любой глубине — и в корзинке тоже.',
+    'Сейчас пробел находит грибы на любой глубине, и в корзинке тоже.',
     '`>` вместо пробела: `.oak > .mushroom` — только прямые потомки дуба, его дети.',
     '`.oak > .mushroom { color: orange; }`',
   ],

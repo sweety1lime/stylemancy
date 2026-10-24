@@ -135,8 +135,29 @@ test.describe('аккаунты на живой базе Supabase', () => {
       await other.getByRole('button', { name: 'Пропустить' }).click();
       await expect(other.getByRole('img', { name: '3 из 3 звёзд' }).first()).toBeVisible();
       await other.screenshot({ path: `${SCREENS}/12-student-trail.png`, fullPage: true });
-      await deleteAccount(other);
+
+      // Студент удаляет свой аккаунт с телефона: сначала передумал, потом подтвердил
+      await other.setViewportSize({ width: 360, height: 740 });
+      expect((await other.getByRole('button', { name: nickname }).boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await other.getByRole('button', { name: nickname }).click();
+      const account = other.getByRole('dialog', { name: 'Аккаунт' });
+      await expect(account).toContainText(`класс «${className}»`);
+      await account.getByRole('button', { name: 'Удалить аккаунт…' }).click();
+      await expect(account.getByRole('button', { name: 'Отмена' })).toBeFocused();
+      await account.getByRole('button', { name: 'Отмена' }).click();
+      await account.getByRole('button', { name: 'Удалить аккаунт…' }).click();
+      await other.screenshot({ path: `${SCREENS}/12-student-delete.png` });
+      expect(await other.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+      await account.getByRole('button', { name: 'Удалить навсегда' }).click();
+      const deleted = other.getByRole('dialog', { name: 'Аккаунт удалён' });
+      await expect(deleted).toBeVisible();
       studentSignedUp = false;
+      await expect(other.locator('.account').getByRole('link', { name: 'Войти' })).toBeVisible();
+      // На этом компьютере не осталось копии прогресса удалённого аккаунта
+      expect(await other.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('cascadia.u.')))).toEqual([]);
+      await deleted.getByRole('link', { name: 'На карту' }).click();
+      await expect(deleted).toHaveCount(0);
+      await expect(other.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
       await otherContext.close();
     } finally {
       if (studentSignedUp) await deleteAccount(student);

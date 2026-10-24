@@ -14,8 +14,6 @@ export const wagonTrain = defineRegion({
   title: 'Обоз',
   topic: 'массивы, map и filter',
   npc: { name: 'Возница Пуш', title: 'хозяин Обоза', portrait: 'push' },
-  // Сцена JS-уровня — свиток, полка и конвейер, своего оформления ей не нужно
-  sceneCss: '',
   story: {
     intro: [
       {

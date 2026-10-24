@@ -16,15 +16,16 @@ export function defineJsLevel(level: Omit<JsLevelDef, 'kind'>): JsLevelDef {
 }
 
 /** Собирает район: каждому уровню достаются оформление, персонаж и правила района. */
-export function defineRegion({ levels, ...region }: RegionDef): Region {
+export function defineRegion({ levels, sceneCss = '', ...region }: RegionDef): Region {
   return {
     ...region,
+    sceneCss,
     levels: levels.map((level) => ({
       ...level,
       regionId: region.id,
       regionTitle: region.title,
       npc: region.npc,
-      sceneCss: level.sceneCss ? `${region.sceneCss}\n${level.sceneCss}` : region.sceneCss,
+      sceneCss: level.sceneCss ? `${sceneCss}\n${level.sceneCss}` : sceneCss,
       allow: region.allow,
       allowMessage: region.allowMessage,
       scene: level.scene ?? DEFAULT_SCENE,

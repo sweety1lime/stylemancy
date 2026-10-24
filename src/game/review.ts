@@ -421,7 +421,7 @@ export const QUESTIONS: ReviewQuestion[] = [
     explain: 'Поле с `required` обязательно: браузер не отправит форму, пока его не заполнят.',
   },
 
-  // ——— Лес Селекторов ———
+  // Лес Селекторов
   {
     id: 'stg-1',
     spell: 'selector-tag',
@@ -556,7 +556,7 @@ export const QUESTIONS: ReviewQuestion[] = [
     explain: '`!important` ломает обычный порядок каскада, и потом его трудно перебить.',
   },
 
-  // ——— Крепость Блоков ———
+  // Крепость Блоков
   {
     id: 'wh-1',
     spell: 'width-height',
@@ -590,7 +590,7 @@ export const QUESTIONS: ReviewQuestion[] = [
     spell: 'border',
     prompt: 'Почему рамка `border: 4px #f6c453` не видна?',
     options: ['Не указан стиль линии, например solid', 'Цвет нужно писать в border-color', 'Толщина слишком маленькая', 'Рамки бывают только у картинок'],
-    explain: 'Без стиля — `solid`, `dashed` или `dotted` — браузер рамку не рисует.',
+    explain: 'Без стиля (`solid`, `dashed` или `dotted`) браузер рамку не рисует.',
   },
   {
     id: 'mg-1',
@@ -690,7 +690,7 @@ export const QUESTIONS: ReviewQuestion[] = [
     options: ['Прибивает блок к окну: при прокрутке он не уезжает', 'Привязывает блок к родителю', 'Запрещает менять размер блока', 'Прячет блок при прокрутке'],
     explain: 'Координаты fixed отсчитываются от краёв окна, и при прокрутке блок остаётся на месте.',
   },
-  // ——— Скриптория: JavaScript ———
+  // Скриптория: JavaScript
   {
     id: 'log-1',
     spell: 'console-log',
@@ -887,7 +887,7 @@ export const QUESTIONS: ReviewQuestion[] = [
     options: ['null', "Пустую строку ''", 'undefined', 'Ошибку'],
     explain: 'Отмена — это «ответа нет»: `prompt` возвращает `null`.',
   },
-  // ——— Лабиринт Решений ———
+  // Лабиринт Решений
   {
     id: 'hero-1',
     spell: 'hero',
@@ -1028,11 +1028,11 @@ export const QUESTIONS: ReviewQuestion[] = [
     options: ['1 и 2', '1, 2 и 3', '3', '1, 2, 4 и 5'],
     explain: 'На третьем круге срабатывает `break` — до `console.log` дело уже не доходит.',
   },
-  // ——— Мастерская Рецептов ———
+  // Мастерская Рецептов
   {
     id: 'fn-1',
     spell: 'function',
-    prompt: "Что скажет Оракул: `function stir() { console.log('Помешиваю'); }` — и больше ничего?",
+    prompt: "Весь код: `function stir() { console.log('Помешиваю'); }`. Что скажет Оракул?",
     options: ['Ничего: рецепт записан, но его не позвали', 'Помешиваю', 'stir', 'Ошибку'],
     explain: 'Рецепт выполняется, только когда его зовут: `stir();`.',
   },
@@ -1209,7 +1209,7 @@ export const QUESTIONS: ReviewQuestion[] = [
     spell: 'object-change',
     prompt: 'Как поменять цену в карточке `potion` на 15?',
     options: ['potion.price = 15;', 'potion = 15;', 'price.potion = 15;', 'potion(price) = 15;'],
-    explain: 'Карточка, точка, ключ — и новое значение через `=`.',
+    explain: 'Карточка, точка, ключ и новое значение через `=`.',
   },
   {
     id: 'field-1',
@@ -1239,7 +1239,7 @@ export const QUESTIONS: ReviewQuestion[] = [
     options: ['Первая карточка целиком', 'Первое поле первой карточки', 'Длина полки', 'undefined'],
     explain: 'Элемент массива карточек — сама карточка, у неё уже берут поля.',
   },
-  // ——— Город Механизмов ———
+  // Город Механизмов
   {
     id: 'qs-1',
     spell: 'querySelector',

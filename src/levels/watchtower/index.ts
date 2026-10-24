@@ -69,7 +69,7 @@ export const watchtower = defineRegion({
         speaker: 'default',
         name: 'Лорд Дефолт',
         when: { allDone: false },
-        text: '«Крепость пала… Но я ещё не побеждён: моё проклятие держится {cursed}. Встретимся там, {name}!»',
+        text: '«Флаг он поднял! Подумаешь. А моё проклятие держится {cursed}, и там флагов тебе не видать, {name}!»',
       },
       {
         art: 'mentor',
@@ -83,7 +83,7 @@ export const watchtower = defineRegion({
         speaker: 'absolute',
         name: 'Капитан Абсолют',
         when: { allDone: false, next: false },
-        text: '«Остальные земли пока в тумане. Он рассеется, когда учитель их откроет, — а пока загляни в гримуар.»',
+        text: '«Остальные земли пока в тумане. Он рассеется, когда учитель их откроет. А пока загляни в гримуар.»',
       },
     ],
   },

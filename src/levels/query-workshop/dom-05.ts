@@ -6,7 +6,7 @@ export default defineJsLevel({
   learns: 'createElement',
   dialog: [
     "Привезли новые детали — их ещё нет на странице. Элемент можно создать: `document.createElement('li')` — новый `<li>`, пока он нигде не висит.",
-    "Наполни его — `item.textContent = 'винт'`, — дай класс и повесь на место: `shelf.append(item)` добавляет элемент в конец полки.",
+    "Наполни его (`item.textContent = 'винт'`), дай класс и повесь на место: `shelf.append(item)` добавляет элемент в конец полки.",
   ],
   task: 'Для каждой детали из массива `delivery` создай `<li>` с классом `part`, напиши в нём имя детали и добавь на полку `.shelf`.',
   starterJs: `let delivery = ['пружина', 'винт', 'рычаг'];

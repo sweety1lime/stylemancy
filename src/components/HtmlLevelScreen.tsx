@@ -43,8 +43,6 @@ export function HtmlLevelScreen({ level, number, region, trailHref, onNext }: Ht
     setLiveCode(current);
     const evaluation = evaluateHtml(level, current);
     sfx.cast();
-    if (evaluation.passed) sfx.success();
-    else sfx.fail();
     if (evaluation.passed) {
       flow.finish({ passed: true, score: scoreSolution(flow.hintsUsed, 0, 0) }, viaKeyboard);
     } else {

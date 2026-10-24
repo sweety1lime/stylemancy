@@ -99,7 +99,6 @@ function picks(...selectors: string[]): { label: string; css: string }[] {
 const GRID_CSS = '.box { display: grid; gap: 4px; } .item { width: auto; height: auto; }';
 const AREAS_CSS = '.a { grid-area: a; } .b { grid-area: b; } .c { grid-area: c; }';
 
-/** Заклинания гримуара. Ключ — поле learns в уровне. */
 /* Мини-страницы Города Механизмов для примеров: оформление берётся из страниц района */
 const LEVER_PAGE = { html: '<div class="gate"></div>\n<button class="lever">Дёрнуть рычаг</button>' };
 const LAMP_PAGE = { html: '<div class="lamp"></div>\n<button class="switch">Щёлк</button>' };
@@ -111,6 +110,7 @@ const FIELD_PAGE = {
   html: '<p class="plate">…</p>\n<div class="row"><input class="field" placeholder="пиши тут"><button class="ok">Готово</button></div>',
 };
 
+/** Заклинания гримуара. Ключ — поле learns в уровне. */
 export const SPELLS: Record<string, Spell> = {
   'display-flex': {
     name: 'display: flex',
@@ -178,7 +178,7 @@ export const SPELLS: Record<string, Spell> = {
   'flex-axes': {
     name: 'Главная и поперечная оси',
     description:
-      '`justify-content` всегда работает вдоль главной оси, а `align-items` — поперёк неё. Поверни ось через `flex-direction` — и они поменяются направлениями.',
+      '`justify-content` всегда работает вдоль главной оси, а `align-items` — поперёк неё. Поверни ось через `flex-direction`, и они поменяются направлениями.',
     example: {
       css: '.box { display: flex; gap: 4px; }',
       selector: '.box',
@@ -240,7 +240,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Витражная обитель: Grid ———
+  // Витражная обитель: Grid
 
   'grid-columns': {
     name: 'display: grid + grid-template-columns',
@@ -346,7 +346,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Зеркальная башня и Цитадель: адаптив ———
+  // Зеркальная башня и Цитадель: адаптив
 
   'media-query': {
     name: '@media (min-width: …)',
@@ -454,7 +454,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Деревня Тегов: HTML ———
+  // Деревня Тегов: HTML
 
   'tag-pair': {
     name: 'Парный тег',
@@ -521,7 +521,7 @@ export const SPELLS: Record<string, Spell> = {
   'doc-skeleton': {
     name: 'Скелет страницы',
     description:
-      'Документ начинается с `<!doctype html>`. Дальше `<html lang="ru">`, в нём `<head>` — служебная часть с кодировкой `<meta charset="utf-8">` и названием вкладки `<title>`, — и `<body>` — всё, что видно на странице.',
+      'Документ начинается с `<!doctype html>`. Дальше `<html lang="ru">`, а в нём две части. `<head>` — служебная: кодировка `<meta charset="utf-8">` и название вкладки `<title>`. `<body>` — всё, что видно на странице.',
     example: {
       markup: [
         {
@@ -532,7 +532,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Ярмарка Ссылок: списки, ссылки, картинки, таблицы ———
+  // Ярмарка Ссылок: списки, ссылки, картинки, таблицы
 
   'ul-li': {
     name: 'Список ul и пункты li',
@@ -620,7 +620,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Город Семантики: каркас страницы ———
+  // Город Семантики: каркас страницы
 
   'header-footer': {
     name: 'header и footer',
@@ -694,7 +694,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Кузница Форм ———
+  // Кузница Форм
 
   'label-input': {
     name: 'form, label и input',
@@ -760,7 +760,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Опушка: селекторы ———
+  // Опушка: селекторы
 
   'selector-tag': {
     name: 'Селектор по тегу',
@@ -806,7 +806,7 @@ export const SPELLS: Record<string, Spell> = {
   'selector-compound': {
     name: 'Два класса сразу: .a.b',
     description:
-      'Классы, написанные слитно, без пробела, — это «элемент, у которого есть оба класса»: `.cell.red`. С пробелом — `.cell .red` — получится совсем другое: «.red внутри .cell».',
+      'Классы, написанные слитно, без пробела, — это «элемент, у которого есть оба класса»: `.cell.red`. С пробелом (`.cell .red`) получится совсем другое: «.red внутри .cell».',
     example: {
       html: '<div class="box"><div class="cell red">1</div><div class="cell">2</div><div class="cell red">3</div><div class="red mark">!</div></div>',
       css: `${PICK_CSS} .mark { padding: 8px 12px; background: #3b3363; color: #a5a3c4; font: bold 16px monospace; }`,
@@ -858,7 +858,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Грибные поляны: псевдоклассы ———
+  // Грибные поляны: псевдоклассы
 
   hover: {
     name: ':hover',
@@ -911,7 +911,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Древо Каскада: каскад и наследование ———
+  // Древо Каскада: каскад и наследование
 
   'cascade-order': {
     name: 'Каскад: кто ниже, тот и прав',
@@ -930,7 +930,7 @@ export const SPELLS: Record<string, Spell> = {
   specificity: {
     name: 'Специфичность: класс сильнее тега',
     description:
-      'Селекторы бывают разной силы. id сильнее класса, класс сильнее тега — и тогда уже неважно, кто ниже: правило с селектором посильнее побеждает всегда.',
+      'Селекторы бывают разной силы. id сильнее класса, класс сильнее тега. Если силы разные, уже неважно, кто ниже: правило с селектором посильнее побеждает всегда.',
     example: {
       html: '<div class="box"><span class="cell">1</span><span class="cell">2</span><span class="cell">3</span></div>',
       css: PICK_CSS,
@@ -970,7 +970,7 @@ export const SPELLS: Record<string, Spell> = {
   important: {
     name: '!important',
     description:
-      '`!important` после значения ставит объявление выше любой силы селекторов. Перебить его можно только другим `!important` — и начинается война правил. Пользуйся им как можно реже, а лучше — никогда.',
+      '`!important` после значения ставит объявление выше любой силы селекторов. Перебить его можно только другим `!important`, и так начинается война правил. Пользуйся им как можно реже, а лучше — никогда.',
     example: {
       html: '<div class="box"><div class="cell">1</div><div class="cell" id="hero">2</div><div class="cell">3</div></div>',
       css: PICK_CSS,
@@ -981,7 +981,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Казармы: блочная модель ———
+  // Казармы: блочная модель
 
   'width-height': {
     name: 'width и height',
@@ -1064,7 +1064,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Плац: display ———
+  // Плац: display
 
   'inline-block': {
     name: 'display: inline-block',
@@ -1113,7 +1113,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Дозорная башня: позиционирование ———
+  // Дозорная башня: позиционирование
 
   'position-relative': {
     name: 'position: relative',
@@ -1129,7 +1129,7 @@ export const SPELLS: Record<string, Spell> = {
   'position-absolute': {
     name: 'position: absolute',
     description:
-      'Блок выходит из потока — соседи занимают его место — и встаёт по координатам `top`, `right`, `bottom`, `left` от краёв ближайшего предка с `position`. Отрицательные значения выводят блок за край.',
+      'Блок выходит из потока (соседи занимают его место) и встаёт по координатам `top`, `right`, `bottom`, `left` от краёв ближайшего предка с `position`. Отрицательные значения выводят блок за край.',
     example: {
       css: '.box { position: relative; display: flex; gap: 12px; }',
       selector: '.item:nth-child(2)',
@@ -1171,7 +1171,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Скриптория: JavaScript ———
+  // Скриптория: JavaScript
   'console-log': {
     name: 'console.log()',
     description:
@@ -1351,7 +1351,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Лабиринт Решений: условия и циклы ———
+  // Лабиринт Решений: условия и циклы
   hero: {
     name: 'Приказы героя',
     description:
@@ -1369,7 +1369,7 @@ export const SPELLS: Record<string, Spell> = {
   if: {
     name: 'if',
     description:
-      '`if (условие) { … }` выполняет приказы в фигурных скобках, только если условие верно — `true`. Если оно неверно — `false`, — приказы пропускаются, и код идёт дальше.',
+      '`if (условие) { … }` выполняет приказы в фигурных скобках, только если условие верно (`true`). Если оно неверно (`false`), приказы пропускаются, и код идёт дальше.',
     example: {
       scripts: [
         { label: 'gems = 5', code: "let gems = 5;\nif (gems > 3) {\n  console.log('Хватит на зелье!');\n}\nconsole.log('Иду дальше');" },
@@ -1476,7 +1476,7 @@ export const SPELLS: Record<string, Spell> = {
     },
   },
 
-  // ——— Мастерская Рецептов: функции, массивы, объекты ———
+  // Мастерская Рецептов: функции, массивы, объекты
   function: {
     name: 'function',
     description:
@@ -1491,7 +1491,7 @@ export const SPELLS: Record<string, Spell> = {
   parameters: {
     name: 'Параметры',
     description:
-      'Параметры — колбы рецепта в скобках: `function brew(herb) { … }`. При вызове в них наливается то, что передали: `brew(\'мята\')` — и внутри `herb` равен `\'мята\'`. Не передали ничего — в параметре `undefined`.',
+      'Параметры — колбы рецепта в скобках: `function brew(herb) { … }`. При вызове в них наливается то, что передали: после `brew(\'мята\')` внутри `herb` лежит `\'мята\'`. Не передали ничего — в параметре `undefined`.',
     example: {
       scripts: [
         { label: 'мята и мёд', code: "function brew(herb) {\n  console.log(`Варю зелье: ${herb}`);\n}\nbrew('мята');\nbrew('мёд');" },
@@ -1502,7 +1502,7 @@ export const SPELLS: Record<string, Spell> = {
   return: {
     name: 'return',
     description:
-      '`return` отдаёт значение туда, где рецепт позвали: `let big = double(5);` — и в колбе 10. После `return` рецепт сразу заканчивается. Без `return` рецепт возвращает `undefined`, а `console.log` только показывает значение на свитке, но ничего не отдаёт.',
+      '`return` отдаёт значение туда, где рецепт позвали: после `let big = double(5);` в колбе 10. После `return` рецепт сразу заканчивается. Без `return` рецепт возвращает `undefined`, а `console.log` только показывает значение на свитке, но ничего не отдаёт.',
     example: {
       scripts: [
         { label: 'return', code: 'function double(n) {\n  return n * 2;\n}\nlet big = double(5);\nconsole.log(big);' },
@@ -1645,7 +1645,7 @@ export const SPELLS: Record<string, Spell> = {
       ],
     },
   },
-  // ——— Город Механизмов ———
+  // Город Механизмов
   querySelector: {
     name: 'document.querySelector',
     description:
@@ -1789,7 +1789,7 @@ export const SPELLS: Record<string, Spell> = {
   'input-event': {
     name: "Событие 'input'",
     description:
-      "`'input'` случается на каждую букву, пока в поле печатают, — табличка может меняться вместе с вводом. `'change'` — только когда поле отпустили.",
+      "`'input'` случается на каждую букву, пока в поле печатают, поэтому табличка может меняться вместе с вводом. `'change'` — только когда поле отпустили.",
     example: {
       page: FIELD_PAGE,
       scripts: [
@@ -1854,7 +1854,7 @@ export const SPELLS: Record<string, Spell> = {
   preventDefault: {
     name: 'event.preventDefault()',
     description:
-      'У браузера есть поведение по умолчанию: форма отправляется и перезагружает страницу, ссылка уводит. `event.preventDefault()` в обработчике отменяет его — и страница остаётся твоей.',
+      'У браузера есть поведение по умолчанию: форма отправляется и перезагружает страницу, ссылка уводит. `event.preventDefault()` в обработчике отменяет его, и страница остаётся твоей.',
     example: {
       page: {
         html: '<form class="row"><input class="field" placeholder="письмо"><button>Отправить</button></form>\n<ul class="letters"></ul>',

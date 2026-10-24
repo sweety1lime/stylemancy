@@ -42,7 +42,7 @@ for (const signal of signals) {
   ],
   require: [{ pattern: '\\.target\\b', message: 'Возьми текст у той кнопки, по которой щёлкнули: event.target.textContent.' }],
   hints: [
-    'Перебери кнопки: `for (const signal of signals) { … }` — и в цикле повесь обработчик на каждую.',
+    'Перебери кнопки циклом `for (const signal of signals) { … }` и в нём повесь обработчик на каждую.',
     "`signal.addEventListener('click', (event) => { … });` — параметр `event` и есть событие.",
     '`board.textContent = event.target.textContent;`',
   ],

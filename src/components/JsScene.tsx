@@ -129,10 +129,11 @@ export function OracleLine({ line, ok = false }: { line: OutputLine; ok?: boolea
   );
 }
 
-interface JsSceneProps {
+/** Общее у сцен JS-уровня: свитка, подземелья и страницы. Различается только вид проверки. */
+export interface JsSceneProps<E = JsEvaluation> {
   level: JsLevel;
   code: string;
-  evaluation: JsEvaluation | null;
+  evaluation: E | null;
   /** Код ещё проверяется после последнего изменения */
   busy: boolean;
   celebrate: boolean;
@@ -229,7 +230,7 @@ export function JsScene({ level, code, evaluation, busy, celebrate }: JsScenePro
                 ))}
               </div>
             ) : (
-              <p className="flask-shelf__empty">Пусто. Объяви переменную через let — и её колба встанет на полку.</p>
+              <p className="flask-shelf__empty">Пусто. Объяви переменную через let, и её колба встанет на полку.</p>
             )}
             <ul className="flask-legend" aria-label="Цвет — тип значения">
               {LEGEND.filter((type) => types.has(type)).map((type) => (

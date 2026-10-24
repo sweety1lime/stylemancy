@@ -154,7 +154,7 @@ function TeacherPanel({ teacherId }: { teacherId: string }) {
   );
 }
 
-/* ——— Класс: код, земли, таблица прогресса ——— */
+/* Класс: код, земли, таблица прогресса */
 
 interface LevelStat {
   level: Level;

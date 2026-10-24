@@ -58,6 +58,6 @@ button.addEventListener('click', () => {
   hints: [
     'В обработчике щелчка: `let guess = Number(field.value);` и `tries++` — колбу `tries` заведи снаружи, с нуля.',
     "Три ветки: `if (guess < secret) { … } else if (guess > secret) { … } else { … }` — меньше значит «Больше!».",
-    "Победа: `` says.textContent = `Угадал! Попыток: ${tries}`; `` — и после всех веток `field.value = '';`",
+    "Победа: `` says.textContent = `Угадал! Попыток: ${tries}`; ``. После всех веток: `field.value = '';`",
   ],
 });

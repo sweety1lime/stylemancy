@@ -13,8 +13,7 @@ import { RichText } from './RichText';
 import { StoryScene } from './StoryScene';
 import type { LevelFlow } from './useLevelFlow';
 
-/** Шапка уровня: район, название, реплики персонажа и задача. */
-/** Шапка уровня. cue — итог последнего заклинания: наставник на него реагирует */
+/** Шапка уровня: район, название, реплики персонажа и задача. cue — итог последнего заклинания: наставник на него реагирует. */
 export function LevelBrief({ level, number, cue }: { level: Level; number: number; cue?: HeroCue | null }) {
   return (
     <section className="brief">
@@ -101,7 +100,6 @@ interface WorkbenchProps {
   trailHref: string;
   onNext?: () => void;
   onCast: (viaKeyboard: boolean) => void;
-  /** Карточка редактора */
   editor: ReactNode;
 }
 

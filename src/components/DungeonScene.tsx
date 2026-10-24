@@ -1,20 +1,10 @@
 import { useState } from 'react';
-import { codeLines, type JsEvaluation, type RunStatus } from '../engine/jsCheck';
+import { codeLines, type RunStatus } from '../engine/jsCheck';
 import { runtimeProblem } from '../engine/jsLint';
-import type { JsLevel } from '../engine/types';
 import { plural } from '../lib/plural';
 import { DungeonView } from './DungeonView';
 import { GoalList } from './GoalList';
-import { OracleLine } from './JsScene';
-
-interface DungeonSceneProps {
-  level: JsLevel;
-  code: string;
-  evaluation: JsEvaluation | null;
-  /** Код ещё проверяется после последнего изменения */
-  busy: boolean;
-  celebrate: boolean;
-}
+import { OracleLine, type JsSceneProps } from './JsScene';
 
 /** Прошёл ли герой это подземелье: дошёл до выхода, всё собрал и код не сломался. */
 function runPassed(status: RunStatus | undefined): boolean {
@@ -25,7 +15,7 @@ function runPassed(status: RunStatus | undefined): boolean {
  * Сцена «Пути героя»: подземелья — вкладками, как зеркала в адаптиве. Код ведёт героя по каждому,
  * поэтому маршрут не заучить — нужен алгоритм.
  */
-export function DungeonScene({ level, code, evaluation, busy, celebrate }: DungeonSceneProps) {
+export function DungeonScene({ level, code, evaluation, busy, celebrate }: JsSceneProps) {
   const dungeons = level.dungeons ?? [];
   const [selected, setSelected] = useState(0);
   const index = Math.min(selected, dungeons.length - 1);

@@ -59,10 +59,8 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
     const result = await evaluate(level, current, true);
     if (ticket.current === id) setChecked({ code: current, evaluation: result });
     if (result.passed) {
-      sfx.success();
       flow.finish({ passed: true, score: scoreJs(level, current, flow.hintsUsed) }, viaKeyboard);
     } else {
-      sfx.fail();
       flow.finish({ passed: false, errors: result.errors, misses: result.misses }, viaKeyboard);
     }
   }

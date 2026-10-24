@@ -275,8 +275,8 @@ export interface RegionDef {
   title: string;
   topic: string;
   npc: Npc;
-  /** Оформление сцен района. Студент его не видит и не меняет */
-  sceneCss: string;
+  /** Оформление сцен района. Студент его не видит и не меняет. Свитку, полке и подземелью своё не нужно */
+  sceneCss?: string;
   /** Разрешённые свойства: всё остальное — «не та магия» */
   allow?: string[];
   /** Начало сообщения о неразрешённом свойстве */
@@ -309,10 +309,6 @@ export function isHtmlLevel(level: Level): level is HtmlLevel {
 
 export function isJsLevel(level: Level): level is JsLevel {
   return level.kind === 'js';
-}
-
-export function isCssLevel(level: Level): level is CssLevel {
-  return level.kind === undefined || level.kind === 'css';
 }
 
 export interface Region extends Omit<RegionDef, 'levels'> {

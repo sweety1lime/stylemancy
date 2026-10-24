@@ -66,3 +66,13 @@ export function copyGuestDataTo(userId: string, keys: string[]): void {
     }
   }
 }
+
+/** Стереть с этого компьютера всё, что хранилось под ключами аккаунта. */
+export function forgetUserData(userId: string): void {
+  try {
+    const prefix = `cascadia.u.${userId}.`;
+    for (const key of Object.keys(localStorage)) if (key.startsWith(prefix)) localStorage.removeItem(key);
+  } catch {
+    // Нет доступа к хранилищу, стирать нечего
+  }
+}

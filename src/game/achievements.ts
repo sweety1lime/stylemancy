@@ -39,7 +39,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   ),
   { id: 'persistent', category: 'persistence', title: 'Упорство', description: 'Пройти уровень, на который ушло пять попыток и больше.' },
   { id: 'stubborn', category: 'persistence', title: 'Несгибаемая магия', description: 'Пройти уровень после десяти попыток и больше.' },
-  { id: 'with-help', category: 'persistence', title: 'Подсказки — тоже магия', description: 'Открыть все подсказки уровня — и всё-таки пройти его.' },
+  { id: 'with-help', category: 'persistence', title: 'Подсказки — тоже магия', description: 'Открыть все подсказки уровня и всё-таки пройти его.' },
   { id: 'own-way', category: 'explore', title: 'Свой путь', description: 'Пройти уровень решением, которое отличается от решения наставника.' },
   { id: 'experiments', category: 'explore', title: 'Пять опытов', description: 'Поиграть с живыми примерами пяти заклинаний в гримуаре.' },
   { id: 'notes', category: 'explore', title: 'Своими словами', description: 'Записать в гримуар своё объяснение заклинания.' },

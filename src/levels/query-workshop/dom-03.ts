@@ -6,7 +6,7 @@ export default defineJsLevel({
   learns: 'querySelectorAll',
   dialog: [
     'Главный механизм стоит: шестерни замерли. Их много, а querySelector находит только первую.',
-    "`document.querySelectorAll('.gear')` находит все — и возвращает список. У списка нет classList: класс добавляют каждой шестерне по очереди, циклом `for (const gear of gears) { … }`.",
+    "`document.querySelectorAll('.gear')` находит все и возвращает их списком. У списка нет classList: класс добавляют каждой шестерне по очереди, циклом `for (const gear of gears) { … }`.",
   ],
   task: 'Запусти главный механизм: найди все шестерни через `querySelectorAll(\'.gear\')` и в цикле добавь каждой класс `spin`.',
   starterJs: `let gears = document.querySelectorAll('.gear');

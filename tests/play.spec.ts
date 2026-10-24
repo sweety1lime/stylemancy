@@ -577,7 +577,7 @@ test.describe('Крепость Блоков', () => {
 
     await typeCode(page, `${soldiers}.spy {\n  display: none;\n}\n`);
     await cast(page);
-    await expect(page.locator('.result__list li').first()).toHaveText('Шпион: убран вместе со своим местом — а место должно остаться пустым.');
+    await expect(page.locator('.result__list li').first()).toHaveText('Шпион: убран вместе со своим местом, а место должно остаться пустым.');
 
     await typeCode(page, `${soldiers}.spy {\n  visibility: hidden;\n}\n`);
     await cast(page);
@@ -865,7 +865,7 @@ test.describe('общий сюжет', () => {
     await dialog.getByRole('button', { name: 'Дальше →' }).click();
     await expect(dialog).toContainText('Опять ты, странник! Долину Тегов ты у меня отнял');
     await dialog.getByRole('button', { name: 'Дальше →' }).click();
-    await expect(dialog).toContainText('Слава о тебе дошла и до крепости, странник!');
+    await expect(dialog).toContainText('Так это ты, странник, гроза Лорда Дефолта?');
   });
 
   test('финал крепости: Руна Блоков, а злодей сбегает в оставшиеся земли', async ({ page }) => {

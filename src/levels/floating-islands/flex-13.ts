@@ -33,7 +33,7 @@ export default defineLevel({
 `,
   check: { items: '.crystal', groupName: 'кристаллы' },
   hints: [
-    'Разбей задачу на шаги: сначала группа в центр, потом вниз, потом промежутки — и в конце Сапфир.',
+    'Разбей задачу на шаги: сначала группа в центр, потом вниз, потом промежутки, а в конце Сапфир.',
     'Понадобятся `justify-content`, `align-items`, `gap` и `align-self`.',
     'У острова: `justify-content: center; align-items: flex-end; gap: 16px;` А у `.sapphire`: `align-self: flex-start;`',
   ],

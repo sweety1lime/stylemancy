@@ -23,6 +23,6 @@ console.log(secondGem);
   hints: [
     'Пробел разрывает имя на два слова, а с цифры имя начинаться не может.',
     '`magicPower` — слова склеены, второе с большой буквы. Вместо `2nd` — слово `second`.',
-    '`let magicPower = 100;`, `let secondGem = \'ruby\';` — и те же имена в `console.log`.',
+    '`let magicPower = 100;`, `let secondGem = \'ruby\';` и те же имена в `console.log`.',
   ],
 });
