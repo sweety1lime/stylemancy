@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "sprites": "vite --open /sprites.html",
+    "lab": "vite --open /lab.html",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",

@@ -1,0 +1,1535 @@
+/* Примерочная стилей: нейтральная рамка страницы, внутри — доски стилей со своим оформлением */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #101014;
+  color: #e8e8ee;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+h1,
+h2,
+h3,
+p,
+pre,
+figure {
+  margin: 0;
+}
+
+.lab__defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.lab__head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #2a2a33;
+  background: rgba(16, 16, 20, 0.94);
+}
+
+.lab__title {
+  font-size: 20px;
+}
+
+.lab__note {
+  margin-top: 2px;
+  color: #9a9aa8;
+  font-size: 13px;
+}
+
+.lab__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lab__tab {
+  padding: 8px 14px;
+  border: 1px solid #33333d;
+  border-radius: 8px;
+  background: #1a1a20;
+  color: #e8e8ee;
+  font: 500 14px system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.lab__tab:hover {
+  border-color: #5a5a68;
+}
+
+/* Вкладки первого круга проб — приглушённо */
+.lab__tab--old {
+  color: #8a8a98;
+}
+
+.lab__tab--on {
+  border-color: #e8e8ee;
+  background: #e8e8ee;
+  color: #101014;
+}
+
+.lab__tab:focus-visible,
+.btn:focus-visible {
+  outline: 3px solid #ffc94d;
+  outline-offset: 2px;
+}
+
+.lab__boards {
+  display: grid;
+  gap: 32px;
+  padding: 24px 16px 48px;
+}
+
+/* Доска стиля: шапка, сцена, диалог и подземелье */
+
+.board {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.board__head {
+  display: grid;
+  gap: 8px;
+}
+
+.board__about {
+  max-width: 760px;
+}
+
+.board__traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.board__traits li {
+  padding: 4px 10px;
+}
+
+.board__scene {
+  overflow: hidden;
+}
+
+.board__scene svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.board__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.panel {
+  position: relative;
+  padding: 20px;
+}
+
+.dialog {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.dialog__portrait svg,
+.dialog__portrait img {
+  display: block;
+  width: 112px;
+  height: 112px;
+}
+
+.dialog__body {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.dialog__code {
+  width: 100%;
+  padding: 10px 14px;
+  font: 14px/1.5 "Cascadia Code", Consolas, monospace;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.btn {
+  margin-top: 6px;
+  cursor: pointer;
+}
+
+.panel__title {
+  margin-bottom: 14px;
+}
+
+.dungeon-map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Готовые иконки из набора, нарисованные в стиле доски */
+.ready__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ready__item {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.ready__icon {
+  display: block;
+  width: 88px;
+  height: 88px;
+  border-radius: 14px;
+}
+
+.ready__title {
+  font-size: 13px;
+}
+
+.ready__credit {
+  margin-top: 14px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+@media (max-width: 860px) {
+  .board {
+    padding: 16px;
+  }
+
+  .board__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .dialog {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* На телефоне шапка с вкладками занимает полэкрана: пусть уезжает вместе со страницей */
+@media (max-width: 640px) {
+  .lab__head {
+    position: static;
+  }
+}
+
+/* ===== Сейчас: пиксель-арт ===== */
+
+.kit-pixel {
+  background-color: #0b0718;
+  background-image: var(--sky-tile, none);
+  background-size: 160px 120px;
+  color: #f1ecff;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.kit-pixel .board__name,
+.kit-pixel .dialog__name,
+.kit-pixel .panel__title {
+  color: #f6c453;
+  font: 400 24px "Tiny5", sans-serif;
+}
+
+.kit-pixel .dialog__name,
+.kit-pixel .panel__title {
+  font-size: 20px;
+}
+
+.kit-pixel .board__about,
+.kit-pixel .dialog__title {
+  color: #b6abde;
+}
+
+.kit-pixel .board__traits li {
+  border: 3px solid #07040f;
+  background: #2c1f5c;
+  font: 400 14px "Tiny5", sans-serif;
+}
+
+.kit-pixel .board__scene {
+  border: 4px solid #3b2a78;
+}
+
+.kit-pixel .panel {
+  border: 4px solid #07040f;
+  background: #191033;
+  box-shadow: 4px 4px 0 #07040f;
+}
+
+.kit-pixel .dialog__code {
+  border: 3px solid #07040f;
+  background: #0d0a1c;
+  color: #a7f3d0;
+}
+
+.kit-pixel .btn {
+  min-height: 46px;
+  padding: 0 18px;
+  border: 4px solid #07040f;
+  background: #f6c453;
+  color: #2a1a05;
+  font: 400 18px "Tiny5", sans-serif;
+  box-shadow:
+    inset -4px -4px 0 rgba(0, 0, 0, 0.28),
+    inset 4px 4px 0 rgba(255, 255, 255, 0.3),
+    4px 4px 0 #07040f;
+}
+
+.pixel-art {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.sprite-anim {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.sprite-anim img {
+  display: block;
+  max-width: none;
+  image-rendering: pixelated;
+}
+
+@keyframes sprite-frames {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.px-scene {
+  position: relative;
+  aspect-ratio: 800 / 360;
+  overflow: hidden;
+  background-color: #0b0718;
+  background-image: var(--sky-tile, none), linear-gradient(#0f0a24 0 25%, #150d33 25% 50%, #1b1142 50% 75%, #231650 75%);
+  background-size: 160px 120px, 100% 100%;
+}
+
+.px-moon {
+  position: absolute;
+  top: 10%;
+  left: 82%;
+}
+
+.px-island {
+  position: absolute;
+  top: 71%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.px-hero,
+.px-villain,
+.px-gem {
+  position: absolute;
+  bottom: 29%;
+  transform: translateX(-50%);
+}
+
+.px-hero {
+  left: 34%;
+}
+
+.px-villain {
+  left: 66%;
+}
+
+.px-gem {
+  bottom: 44%;
+  animation: px-float 1.2s steps(1, end) infinite;
+}
+
+@keyframes px-float {
+  50% {
+    translate: 0 -4px;
+  }
+}
+
+.px-dungeon {
+  display: grid;
+  grid-template-columns: repeat(8, 40px);
+  width: 320px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.px-cell {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: var(--floor) center / 100% 100%;
+  image-rendering: pixelated;
+}
+
+.px-cell--wall {
+  background-image: var(--wall);
+}
+
+/* ===== Плоская иллюстрация ===== */
+
+.kit-flat {
+  border-radius: 28px;
+  background: #141033;
+  color: #e9e5ff;
+  font-family: "Nunito", system-ui, sans-serif;
+}
+
+.kit-flat .board__name {
+  font-size: 30px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.kit-flat .board__about,
+.kit-flat .dialog__title {
+  color: #b8b0e6;
+}
+
+.kit-flat .board__traits li {
+  border-radius: 999px;
+  background: #2a2163;
+  font-weight: 700;
+}
+
+.kit-flat .board__scene {
+  border-radius: 24px;
+}
+
+.kit-flat .panel {
+  border-radius: 22px;
+  background: #221a52;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+}
+
+.kit-flat .dialog__portrait svg {
+  border-radius: 50%;
+  background: #33287a;
+}
+
+.kit-flat .dialog__name,
+.kit-flat .panel__title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.kit-flat .dialog__text {
+  font-size: 17px;
+}
+
+.kit-flat .dialog__code {
+  border-radius: 14px;
+  background: #17123a;
+  color: #9ff0c6;
+}
+
+.kit-flat .btn {
+  padding: 12px 26px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffc94d;
+  color: #2b1a00;
+  font: 800 17px "Nunito", system-ui, sans-serif;
+  box-shadow: 0 5px 0 #c98f2c;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.kit-flat .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 #c98f2c;
+}
+
+.kit-flat .dungeon-map {
+  border-radius: 16px;
+}
+
+/* ===== Тушь и акварель ===== */
+
+.kit-ink {
+  background: radial-gradient(ellipse at 50% 40%, #f3e8cc 0%, #e6d6b0 70%, #d8c497 100%);
+  color: #2b2118;
+  font-family: "Lora", Georgia, serif;
+}
+
+.kit-ink .board__name {
+  font: 700 38px/1.1 "Cormorant Garamond", Georgia, serif;
+}
+
+.kit-ink .board__about,
+.kit-ink .dialog__title {
+  color: #6b5a45;
+  font-style: italic;
+}
+
+.kit-ink .board__traits li {
+  padding-left: 0;
+}
+
+.kit-ink .board__traits li::before {
+  content: "✦ ";
+  color: #8b1e1e;
+}
+
+.kit-ink .board__scene {
+  padding: 8px;
+  border: 1.5px solid #2b2118;
+  outline: 1px solid #2b2118;
+  outline-offset: 4px;
+  background: #f4ead2;
+}
+
+.kit-ink .panel {
+  border: 1.5px solid #2b2118;
+  outline: 1px solid #2b2118;
+  outline-offset: -6px;
+  background: #f7eedb;
+  padding: 24px;
+}
+
+.kit-ink .dialog__portrait svg {
+  border: 1.5px solid #2b2118;
+  border-radius: 50%;
+  background: #efe3c3;
+}
+
+.kit-ink .dialog__name,
+.kit-ink .panel__title {
+  font: 700 28px/1.1 "Cormorant Garamond", Georgia, serif;
+}
+
+.kit-ink .panel__title {
+  text-align: center;
+}
+
+.kit-ink .dialog__text {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.kit-ink .dialog__text::first-letter {
+  float: left;
+  margin: 2px 6px 0 0;
+  color: #8b1e1e;
+  font: 700 3em/0.8 "Cormorant Garamond", Georgia, serif;
+}
+
+.kit-ink .dialog__code {
+  border-left: 3px solid #8b1e1e;
+  background: rgba(139, 30, 30, 0.06);
+  color: #3b2a1c;
+}
+
+.kit-ink .btn {
+  padding: 8px 22px;
+  border: 1.5px solid #2b2118;
+  border-radius: 3px;
+  background: #8b1e1e;
+  color: #fbeee0;
+  font: 700 21px "Cormorant Garamond", Georgia, serif;
+  box-shadow: 2px 3px 0 #2b2118;
+  transform: rotate(-1deg);
+}
+
+.kit-ink .btn:hover {
+  background: #a32626;
+}
+
+.kit-ink .dungeon-map {
+  border: 1.5px solid #2b2118;
+}
+
+/* ===== Бумажная аппликация ===== */
+
+.kit-paper {
+  border-radius: 10px;
+  background-color: #1d2a4d;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 6px 6px;
+  color: #fbf5e9;
+  font-family: "Rubik", system-ui, sans-serif;
+}
+
+.kit-paper .board__name {
+  font: 700 32px "Balsamiq Sans", system-ui, sans-serif;
+}
+
+.kit-paper .board__about {
+  color: #c9d3f0;
+}
+
+.kit-paper .board__traits li {
+  border-radius: 4px;
+  background: #f3e2a6;
+  color: #2a2440;
+  font-weight: 500;
+  box-shadow: 0 2px 0 #c9b26a;
+}
+
+.kit-paper .board__traits li:nth-child(odd) {
+  transform: rotate(-1.5deg);
+}
+
+.kit-paper .board__traits li:nth-child(even) {
+  transform: rotate(1deg);
+}
+
+.kit-paper .board__scene {
+  border: 8px solid #fbf5e9;
+  border-radius: 6px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+  transform: rotate(-0.4deg);
+}
+
+.kit-paper .panel {
+  border-radius: 6px;
+  background: #fbf5e9;
+  color: #2a2440;
+  box-shadow:
+    0 2px 0 #d9cfba,
+    0 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+.kit-paper .dialog {
+  transform: rotate(-0.6deg);
+}
+
+.kit-paper .dungeon-panel {
+  transform: rotate(0.7deg);
+}
+
+/* Полоска скотча, которой карточка «приклеена» */
+.kit-paper .panel::before {
+  content: "";
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 96px;
+  height: 24px;
+  background: rgba(243, 227, 161, 0.78);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transform: translateX(-50%) rotate(-3deg);
+}
+
+.kit-paper .dialog__portrait svg {
+  border-radius: 50%;
+  background: #e8dcc4;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.kit-paper .dialog__name,
+.kit-paper .panel__title {
+  font: 700 24px "Balsamiq Sans", system-ui, sans-serif;
+}
+
+.kit-paper .dialog__title {
+  color: #6b6385;
+}
+
+.kit-paper .dialog__text {
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.kit-paper .dialog__code {
+  border: 2px dashed #cbbfa3;
+  border-radius: 8px;
+  background: #f1e8d5;
+  color: #2a2440;
+}
+
+.kit-paper .btn {
+  padding: 10px 24px;
+  border: 0;
+  border-radius: 10px;
+  background: #f25f4c;
+  color: #ffffff;
+  font: 700 19px "Balsamiq Sans", system-ui, sans-serif;
+  box-shadow: 0 5px 0 #b83d2e;
+  transform: rotate(1deg);
+}
+
+.kit-paper .btn:hover {
+  background: #ff6f5c;
+}
+
+.kit-paper .dungeon-map {
+  border-radius: 4px;
+}
+
+/* ===== Силуэты и свет ===== */
+
+.kit-silhouette {
+  border-radius: 18px;
+  background: linear-gradient(180deg, #120a1d 0%, #24102f 60%, #3a1636 100%);
+  color: #e9dff2;
+  font-family: "Golos Text", system-ui, sans-serif;
+}
+
+.kit-silhouette .board__name,
+.kit-silhouette .dialog__name,
+.kit-silhouette .panel__title {
+  color: #ffd9a8;
+  font-family: "Philosopher", Georgia, serif;
+  font-weight: 700;
+  text-shadow: 0 0 18px rgba(255, 170, 110, 0.45);
+}
+
+.kit-silhouette .board__name {
+  font-size: 36px;
+}
+
+.kit-silhouette .dialog__name,
+.kit-silhouette .panel__title {
+  font-size: 24px;
+}
+
+.kit-silhouette .board__about,
+.kit-silhouette .dialog__title {
+  color: #b49cc4;
+}
+
+.kit-silhouette .board__traits li {
+  border: 1px solid rgba(255, 178, 122, 0.3);
+  border-radius: 999px;
+  color: #ffd9a8;
+}
+
+.kit-silhouette .board__scene {
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.kit-silhouette .panel {
+  border: 1px solid rgba(255, 178, 122, 0.28);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(48, 20, 58, 0.92), rgba(22, 11, 32, 0.95));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 210, 150, 0.22),
+    0 20px 44px rgba(0, 0, 0, 0.5);
+}
+
+.kit-silhouette .dialog__portrait svg {
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 190, 130, 0.5), 0 0 28px rgba(255, 150, 100, 0.35);
+}
+
+.kit-silhouette .dialog__text {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.kit-silhouette .dialog__code {
+  border-left: 2px solid #ffb36b;
+  border-radius: 0 10px 10px 0;
+  background: rgba(0, 0, 0, 0.35);
+  color: #ffd9a8;
+}
+
+.kit-silhouette .btn {
+  padding: 11px 24px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffc27a, #ff7a59);
+  color: #2a0f1f;
+  font: 700 17px "Philosopher", Georgia, serif;
+  box-shadow: 0 0 26px rgba(255, 140, 90, 0.45);
+}
+
+.kit-silhouette .btn:hover {
+  box-shadow: 0 0 36px rgba(255, 160, 100, 0.7);
+}
+
+.kit-silhouette .dungeon-map {
+  border-radius: 10px;
+}
+
+/* ===== Сумрак ===== */
+
+.kit-noir {
+  background: linear-gradient(180deg, #090b12 0%, #05060a 100%);
+  color: #b9b3a8;
+  font-family: "Golos Text", system-ui, sans-serif;
+}
+
+.kit-noir .board__name,
+.kit-noir .dialog__name,
+.kit-noir .panel__title {
+  color: #e4dccd;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.kit-noir .board__name {
+  font-size: 34px;
+}
+
+.kit-noir .dialog__name,
+.kit-noir .panel__title {
+  font-size: 21px;
+}
+
+.kit-noir .board__about {
+  color: #8e897f;
+}
+
+.kit-noir .dialog__title {
+  color: #8e897f;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.kit-noir .board__traits {
+  gap: 0;
+}
+
+.kit-noir .board__traits li {
+  padding: 0 14px;
+  border-left: 1px solid rgba(228, 220, 205, 0.18);
+  color: #8e897f;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kit-noir .board__traits li:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.kit-noir .board__scene {
+  border: 1px solid rgba(228, 220, 205, 0.1);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+.kit-noir .panel {
+  border: 1px solid rgba(228, 220, 205, 0.12);
+  border-radius: 2px;
+  background: rgba(12, 14, 21, 0.92);
+}
+
+.kit-noir .dialog__portrait svg {
+  outline: 1px solid rgba(228, 220, 205, 0.22);
+  outline-offset: 4px;
+}
+
+.kit-noir .dialog__text {
+  color: #cfc8bb;
+  font-size: 15.5px;
+  line-height: 1.7;
+}
+
+.kit-noir .dialog__code {
+  border-left: 1px solid #e0a060;
+  background: #05060a;
+  color: #e8d9c0;
+}
+
+.kit-noir .btn {
+  padding: 12px 26px;
+  border: 1px solid rgba(224, 160, 96, 0.7);
+  border-radius: 0;
+  background: transparent;
+  color: #f0c890;
+  font: 500 13px "Golos Text", system-ui, sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.kit-noir .btn:hover {
+  background: rgba(224, 160, 96, 0.12);
+  box-shadow: 0 0 24px rgba(224, 160, 96, 0.25);
+}
+
+.kit-noir .ready__icon {
+  border-radius: 2px;
+}
+
+.kit-noir .ready__title {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+/* Медленнее и тяжелее, чем у первых силуэтов */
+.kit-noir svg .a-bob {
+  animation-duration: 4.2s;
+}
+
+.kit-noir svg .a-float {
+  animation-duration: 6s;
+}
+
+.kit-noir svg .a-flutter {
+  animation-duration: 2.6s;
+}
+
+/* Свет земель: галерея сцен и правила стиля */
+
+.lands {
+  display: grid;
+  gap: 24px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.lands__head {
+  display: grid;
+  gap: 8px;
+}
+
+.lands__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+  gap: 24px;
+}
+
+.land-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.land-card svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(228, 220, 205, 0.1);
+}
+
+.land-card__caption {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.land-card__landmark {
+  color: #8e897f;
+}
+
+.land-card__palette {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.land-card__palette li {
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(228, 220, 205, 0.2);
+}
+
+.guide__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 18px 28px;
+  margin: 0;
+}
+
+.guide__rule dt {
+  margin-bottom: 4px;
+  color: #f0c890;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.guide__rule dd {
+  margin: 0;
+  color: #b9b3a8;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===== Витраж ===== */
+
+.kit-glass {
+  background-color: #1a1720;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 2px, transparent 2px 46px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0 2px, transparent 2px 92px);
+  color: #ece4f6;
+  font-family: "PT Serif", Georgia, serif;
+}
+
+.kit-glass .board__name,
+.kit-glass .dialog__name,
+.kit-glass .panel__title {
+  color: #e9c46a;
+  font-family: "Old Standard TT", Georgia, serif;
+  font-weight: 700;
+}
+
+.kit-glass .board__name {
+  font-size: 36px;
+}
+
+.kit-glass .dialog__name,
+.kit-glass .panel__title {
+  font-size: 24px;
+}
+
+.kit-glass .board__about,
+.kit-glass .dialog__title {
+  color: #b9add0;
+}
+
+.kit-glass .board__traits li {
+  border: 1px solid #c9a24a;
+  background: #241d33;
+}
+
+/* Окно: каменная рама, железные прутья поперёк стекла и свет, который проходит сквозь витраж */
+.kit-glass .board__scene {
+  position: relative;
+  border: 10px solid #2b2733;
+  border-radius: 6px 6px 0 0;
+  box-shadow:
+    0 0 0 2px #0f0d13,
+    0 0 50px rgba(120, 90, 220, 0.25);
+}
+
+.kit-glass .board__scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent calc(33% - 3px), #0e0b14 calc(33% - 3px) calc(33% + 3px), transparent calc(33% + 3px) calc(66% - 3px), #0e0b14 calc(66% - 3px) calc(66% + 3px), transparent calc(66% + 3px));
+  pointer-events: none;
+}
+
+.kit-glass .board__scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 240, 200, 0.22) 45%, transparent 60%) 0 0 / 300% 100%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: glass-light 9s ease-in-out infinite;
+}
+
+@keyframes glass-light {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0% 0;
+  }
+}
+
+.kit-glass .panel {
+  border: 2px solid #c9a24a;
+  outline: 2px solid #0f0d13;
+  outline-offset: -6px;
+  background: #241d33;
+}
+
+.kit-glass .dialog__portrait svg {
+  border-radius: 50%;
+  box-shadow: 0 0 22px rgba(201, 162, 74, 0.35);
+}
+
+.kit-glass .dialog__text {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.kit-glass .dialog__code {
+  border: 2px solid #0f0d13;
+  background: #15111d;
+  color: #9fe3b8;
+}
+
+.kit-glass .btn {
+  padding: 10px 24px;
+  border: 2px solid #0f0d13;
+  outline: 2px solid #c9a24a;
+  background: linear-gradient(160deg, #e0406f, #8e0e3f);
+  color: #fff4f7;
+  font: 700 18px "Old Standard TT", Georgia, serif;
+  box-shadow: 0 0 20px rgba(233, 30, 99, 0.45);
+}
+
+.kit-glass .btn:hover {
+  background: linear-gradient(160deg, #f0507f, #a3164c);
+}
+
+/* Витраж не шевелится: живёт только свет */
+.kit-glass svg .a-bob,
+.kit-glass svg .a-sway,
+.kit-glass svg .a-float,
+.kit-glass svg .a-flicker,
+.kit-glass svg .a-scuttle,
+.kit-glass svg .a-flutter,
+.kit-glass svg .a-blink {
+  animation: none;
+}
+
+/* ===== Неон-код ===== */
+
+.kit-neon {
+  border-radius: 14px;
+  background-color: #07060d;
+  background-image:
+    linear-gradient(rgba(122, 92, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 92, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: #d9d4ff;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.kit-neon .board__name,
+.kit-neon .dialog__name,
+.kit-neon .panel__title {
+  color: #ff7be5;
+  font-family: "Unbounded", system-ui, sans-serif;
+  font-weight: 700;
+  text-shadow:
+    0 0 6px rgba(255, 79, 216, 0.8),
+    0 0 22px rgba(255, 79, 216, 0.5);
+}
+
+.kit-neon .board__name {
+  font-size: 30px;
+}
+
+.kit-neon .dialog__name,
+.kit-neon .panel__title {
+  font-size: 19px;
+}
+
+.kit-neon .board__about,
+.kit-neon .dialog__title {
+  color: #8f86c9;
+  font-size: 14px;
+}
+
+.kit-neon .board__traits li {
+  border: 1px solid #2ee6ff;
+  color: #2ee6ff;
+  font-size: 13px;
+  box-shadow: 0 0 10px rgba(46, 230, 255, 0.25);
+}
+
+.kit-neon .board__scene {
+  border: 1px solid #2a2150;
+  border-radius: 12px;
+}
+
+.kit-neon .panel {
+  border: 1px solid rgba(46, 230, 255, 0.6);
+  border-radius: 12px;
+  background: rgba(12, 9, 26, 0.92);
+  box-shadow:
+    0 0 18px rgba(46, 230, 255, 0.18),
+    inset 0 0 22px rgba(46, 230, 255, 0.06);
+}
+
+.kit-neon .dialog__portrait svg {
+  border-radius: 50%;
+}
+
+.kit-neon .dialog__text {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.kit-neon .dialog__code {
+  border: 1px solid #2a2150;
+  border-radius: 8px;
+  background: #050409;
+  color: #39ff9f;
+  text-shadow: 0 0 8px rgba(57, 255, 159, 0.5);
+}
+
+.kit-neon .btn {
+  padding: 10px 22px;
+  border: 2px solid #2ee6ff;
+  border-radius: 8px;
+  background: transparent;
+  color: #2ee6ff;
+  font: 700 15px "Unbounded", system-ui, sans-serif;
+  text-shadow: 0 0 8px rgba(46, 230, 255, 0.8);
+  box-shadow:
+    0 0 14px rgba(46, 230, 255, 0.4),
+    inset 0 0 12px rgba(46, 230, 255, 0.2);
+}
+
+.kit-neon .btn:hover {
+  background: #2ee6ff;
+  color: #07060d;
+  text-shadow: none;
+}
+
+.kit-neon .dungeon-map {
+  border-radius: 8px;
+}
+
+/* ===== Движение ===== */
+
+.lab svg .a-bob {
+  animation: lab-bob 2.6s ease-in-out infinite;
+}
+
+.lab svg .a-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: lab-sway 3.4s ease-in-out infinite;
+}
+
+.lab svg .a-float {
+  animation: lab-float 3s ease-in-out infinite;
+}
+
+.lab svg .a-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lab-glow 1.8s ease-in-out infinite;
+}
+
+.lab svg .a-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lab-blink 4.6s infinite;
+}
+
+.lab svg .a-flicker {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: lab-flicker 0.45s ease-in-out infinite alternate;
+}
+
+.lab svg .a-twinkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lab-twinkle 2.4s ease-in-out infinite;
+}
+
+.lab svg .a-scuttle {
+  animation: lab-scuttle 1.6s ease-in-out infinite;
+}
+
+.lab svg .a-dangle {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: lab-dangle 2.8s ease-in-out infinite;
+}
+
+.lab svg .a-delay {
+  animation-delay: -1.3s;
+}
+
+/* Шарф героя на ветру: крепится у шеи, конец полощется */
+.lab svg .a-flutter {
+  transform-box: fill-box;
+  transform-origin: 100% 20%;
+  animation: lab-flutter 1.1s ease-in-out infinite alternate;
+}
+
+/* Лучи от луны медленно поворачиваются вокруг неё */
+.lab svg .a-rays {
+  transform-box: view-box;
+  transform-origin: 640px 226px;
+  animation: lab-rays 14s ease-in-out infinite alternate;
+}
+
+/* Искры поднимаются и гаснут */
+.lab svg .a-rise {
+  animation: lab-rise 6s linear infinite;
+}
+
+/* Шестерни Скриптории медленно крутятся */
+.lab svg .a-spin {
+  animation: lab-spin 40s linear infinite;
+}
+
+.lab svg .a-reverse {
+  animation-direction: reverse;
+}
+
+/* Лучи сквозь кроны то ярче, то тусклее */
+.lab svg .a-breathe {
+  animation: lab-breathe 7s ease-in-out infinite alternate;
+}
+
+/* Светлячки блуждают и мерцают */
+.lab svg .a-firefly {
+  animation: lab-firefly 7s ease-in-out infinite;
+}
+
+@keyframes lab-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lab-breathe {
+  from {
+    opacity: 0.3;
+  }
+
+  to {
+    opacity: 0.6;
+  }
+}
+
+@keyframes lab-firefly {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+
+  30% {
+    transform: translate(10px, -8px);
+    opacity: 1;
+  }
+
+  60% {
+    transform: translate(-6px, -14px);
+    opacity: 0.5;
+  }
+}
+
+/* Облака и туман медленно плывут */
+.lab svg .a-drift {
+  animation: lab-drift 26s ease-in-out infinite alternate;
+}
+
+/* Дальние скалы чуть покачиваются в воздухе */
+.lab svg .a-hover {
+  animation: lab-hover 9s ease-in-out infinite alternate;
+}
+
+@keyframes lab-drift {
+  from {
+    transform: translateX(-22px);
+  }
+
+  to {
+    transform: translateX(22px);
+  }
+}
+
+@keyframes lab-hover {
+  from {
+    transform: translateY(-3px);
+  }
+
+  to {
+    transform: translateY(3px);
+  }
+}
+
+/* Неоновая вывеска барахлит */
+.lab svg .a-buzz {
+  animation: lab-buzz 5s steps(1, end) infinite;
+}
+
+@keyframes lab-flutter {
+  from {
+    transform: skewY(-4deg) scaleX(0.96);
+  }
+
+  to {
+    transform: skewY(5deg) scaleX(1.04);
+  }
+}
+
+@keyframes lab-rays {
+  from {
+    transform: rotate(-2.5deg);
+    opacity: 0.8;
+  }
+
+  to {
+    transform: rotate(2.5deg);
+    opacity: 1;
+  }
+}
+
+@keyframes lab-rise {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
+
+@keyframes lab-buzz {
+  0%,
+  41%,
+  44%,
+  47%,
+  100% {
+    opacity: 1;
+  }
+
+  42%,
+  45.5% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes lab-bob {
+  50% {
+    transform: translateY(1.6px);
+  }
+}
+
+@keyframes lab-sway {
+  25% {
+    transform: rotate(-1deg);
+  }
+
+  75% {
+    transform: rotate(1deg);
+  }
+}
+
+@keyframes lab-float {
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes lab-glow {
+  50% {
+    transform: scale(1.22);
+    opacity: 0.1;
+  }
+}
+
+@keyframes lab-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes lab-flicker {
+  from {
+    transform: scale(1, 1);
+  }
+
+  to {
+    transform: scale(0.9, 1.1) skewX(-3deg);
+  }
+}
+
+@keyframes lab-twinkle {
+  50% {
+    transform: scale(0.4);
+    opacity: 0.3;
+  }
+}
+
+@keyframes lab-scuttle {
+  25% {
+    transform: translateX(-2px);
+  }
+
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes lab-dangle {
+  25% {
+    transform: rotate(3deg);
+  }
+
+  75% {
+    transform: rotate(-3deg);
+  }
+}
+
+/* Бумага двигается рывками, как в покадровой съёмке; персонажи качаются, как куклы на палочке */
+.kit-paper svg .a-bob {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation-name: lab-puppet;
+  animation-duration: 1.6s;
+}
+
+.kit-paper svg [class*="a-"] {
+  animation-timing-function: steps(2, jump-none);
+}
+
+@keyframes lab-puppet {
+  25% {
+    transform: rotate(-1.6deg);
+  }
+
+  75% {
+    transform: rotate(1.6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab *,
+  .lab *::before {
+    animation: none !important;
+  }
+}
