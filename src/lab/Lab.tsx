@@ -3,6 +3,7 @@ import { Board } from './Board';
 import { kitParts } from './parts';
 import { LAND_DEFS } from './lands';
 import { LandsView } from './LandsView';
+import { CastView } from './CastView';
 import { flatKit } from './kits/flat';
 import { glassKit } from './kits/glass';
 import { inkKit } from './kits/ink';
@@ -24,6 +25,7 @@ const TABS = [
   { id: 'pixel', label: 'Сейчас' },
   { id: 'noir', label: 'Сумрак' },
   { id: 'lands', label: 'Свет земель' },
+  { id: 'cast', label: 'Персонажи' },
   { id: 'silhouette', label: 'Силуэты' },
   { id: 'glass', label: 'Витраж', old: true },
   { id: 'neon', label: 'Неон', old: true },
@@ -56,7 +58,7 @@ export function Lab() {
     setTab(id);
   };
 
-  const shown = tab === 'all' ? ['pixel', ...KITS.map((kit) => kit.id)] : tab === 'lands' ? [] : [tab];
+  const shown = tab === 'all' ? ['pixel', ...KITS.map((kit) => kit.id)] : tab === 'lands' || tab === 'cast' ? [] : [tab];
 
   return (
     <div className="lab">
@@ -93,6 +95,7 @@ export function Lab() {
 
       <main className="lab__boards">
         {tab === 'lands' && <LandsView />}
+        {tab === 'cast' && <CastView />}
         {shown.map((id) => {
           if (id === 'pixel') return <Board key="pixel" id="pixel" {...pixelBoard} />;
           const kit = KITS.find((item) => item.id === id);

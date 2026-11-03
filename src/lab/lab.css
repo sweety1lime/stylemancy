@@ -989,6 +989,64 @@ figure {
   line-height: 1.6;
 }
 
+/* Персонажи: сцена-витрина и кнопки движений */
+
+.cast-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.cast-card__note {
+  color: #8e897f;
+  font-size: 14px;
+}
+
+.cast-stage {
+  position: relative;
+}
+
+.cast-stage > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(228, 220, 205, 0.1);
+}
+
+/* Нынешний пиксельный спрайт того же движения — для сравнения */
+.cast-pixel {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 6px 8px 4px;
+  border: 1px solid rgba(228, 220, 205, 0.15);
+  background: rgba(5, 6, 10, 0.75);
+  color: #8e897f;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cast-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kit-noir .cast-move {
+  margin: 0;
+  padding: 9px 16px;
+  font-size: 12px;
+}
+
+.kit-noir .cast-move--on {
+  background: rgba(224, 160, 96, 0.18);
+  box-shadow: 0 0 18px rgba(224, 160, 96, 0.25);
+}
+
 /* ===== Витраж ===== */
 
 .kit-glass {

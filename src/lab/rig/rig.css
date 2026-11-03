@@ -1,0 +1,937 @@
+/*
+  Анимация персонажей на шарнирах. Шарнир — transform-origin в координатах рисунка
+  (transform-box: view-box у своего SVG-окна персонажа). Движение включает класс rig--<анимация>.
+*/
+
+.rig g {
+  transform-box: view-box;
+}
+
+/* Эффекты масштабируются вокруг своей середины и по умолчанию не видны */
+.rig .rig-glow,
+.rig .rig-core,
+.rig .rig-burst,
+.rig .rig-smoke,
+.rig .rig-sparkles,
+.rig .rig-dust,
+.rig .rig-glint,
+.rig .rig-glint-angry {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.rig .rig-burst,
+.rig .rig-smoke,
+.rig .rig-sparkles,
+.rig .rig-dust,
+.rig .rig-glint-angry {
+  opacity: 0;
+}
+
+.rig .rig-glow {
+  animation: rig-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes rig-glow {
+  50% {
+    transform: scale(1.15);
+    opacity: 0.75;
+  }
+}
+
+/* ===== Герой: шарниры ===== */
+
+.rig--hero .rig-whole,
+.rig--hero .rig-body {
+  transform-origin: 47px 136px;
+}
+
+.rig--hero .rig-cloak {
+  transform-origin: 37px 52px;
+}
+
+.rig--hero .rig-bootL {
+  transform-origin: 44px 136px;
+}
+
+.rig--hero .rig-bootR {
+  transform-origin: 51px 136px;
+}
+
+.rig--hero .rig-freeArm {
+  transform-origin: 40px 53px;
+}
+
+.rig--hero .rig-head {
+  transform-origin: 47px 49px;
+}
+
+.rig--hero .rig-staffArm {
+  transform-origin: 55px 54px;
+}
+
+.rig--hero .rig-staff {
+  transform-origin: 66.6px 79.5px;
+}
+
+/* Покой: дышит, чуть кивает, плащ колышется */
+
+.rig--hero.rig--idle .rig-body {
+  animation: hero-breathe 3.6s ease-in-out infinite;
+}
+
+.rig--hero.rig--idle .rig-head {
+  animation: hero-nod 3.6s ease-in-out infinite;
+}
+
+.rig--hero.rig--idle .rig-cloak {
+  animation: hero-flutter 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes hero-breathe {
+  50% {
+    transform: scale(1, 1.012);
+  }
+}
+
+@keyframes hero-nod {
+  50% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@keyframes hero-flutter {
+  from {
+    transform: rotate(-3deg);
+  }
+
+  to {
+    transform: rotate(2deg);
+  }
+}
+
+/* Ходьба: качается на шагах, сапоги по очереди, руки навстречу друг другу */
+
+.rig--hero.rig--walk .rig-whole {
+  animation: hero-walk-bob 0.45s ease-in-out infinite;
+}
+
+.rig--hero.rig--walk .rig-bootL,
+.rig--hero.rig--walk .rig-bootR {
+  animation: hero-step 0.9s ease-in-out infinite;
+}
+
+.rig--hero.rig--walk .rig-bootR {
+  animation-delay: -0.45s;
+}
+
+.rig--hero.rig--walk .rig-staffArm {
+  animation: hero-swing-staff 0.9s ease-in-out infinite;
+}
+
+.rig--hero.rig--walk .rig-freeArm {
+  animation: hero-swing-free 0.9s ease-in-out infinite;
+}
+
+.rig--hero.rig--walk .rig-cloak {
+  animation: hero-flutter 0.45s ease-in-out infinite alternate;
+}
+
+.rig--hero.rig--walk .rig-head {
+  animation: hero-nod 0.45s ease-in-out infinite;
+}
+
+@keyframes hero-walk-bob {
+  0%,
+  100% {
+    transform: rotate(2deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(2deg) translateY(-1.8px);
+  }
+}
+
+@keyframes hero-step {
+  0%,
+  100% {
+    transform: translate(-3.5px, 0);
+  }
+
+  25% {
+    transform: translate(0, -1.5px);
+  }
+
+  50% {
+    transform: translate(3.5px, 0);
+  }
+
+  75% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes hero-swing-staff {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes hero-swing-free {
+  0%,
+  100% {
+    transform: rotate(10deg);
+  }
+
+  50% {
+    transform: rotate(-8deg);
+  }
+}
+
+/* Заклинание: посох вперёд и вверх, свободная рука назад, плащ отбрасывает, кристалл вспыхивает */
+
+.rig--hero.rig--cast .rig-staffArm {
+  animation: hero-cast-staff 1.8s ease-in-out infinite;
+}
+
+.rig--hero.rig--cast .rig-staff {
+  animation: hero-cast-tilt 1.8s ease-in-out infinite;
+}
+
+.rig--hero.rig--cast .rig-freeArm {
+  animation: hero-cast-free 1.8s ease-in-out infinite;
+}
+
+.rig--hero.rig--cast .rig-whole {
+  animation: hero-cast-lean 1.8s ease-in-out infinite;
+}
+
+.rig--hero.rig--cast .rig-cloak {
+  animation: hero-cast-cloak 1.8s ease-in-out infinite;
+}
+
+.rig--hero.rig--cast .rig-glow {
+  animation: hero-cast-glow 1.8s ease-in-out infinite;
+}
+
+.rig--hero.rig--cast .rig-burst {
+  animation: hero-burst 1.8s ease-out infinite;
+}
+
+@keyframes hero-cast-staff {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  30%,
+  70% {
+    transform: rotate(-50deg);
+  }
+}
+
+@keyframes hero-cast-tilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  30%,
+  70% {
+    transform: rotate(75deg);
+  }
+}
+
+@keyframes hero-cast-free {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  30%,
+  70% {
+    transform: rotate(48deg);
+  }
+}
+
+@keyframes hero-cast-lean {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  25% {
+    transform: rotate(-2.5deg);
+  }
+
+  40%,
+  70% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes hero-cast-cloak {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  35%,
+  70% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes hero-cast-glow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  35%,
+  70% {
+    transform: scale(2.2);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-burst {
+  0%,
+  32% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+
+  36% {
+    opacity: 1;
+  }
+
+  75%,
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Радость: подпрыгивает, рука вверх, посох поднят, вокруг искры */
+
+.rig--hero.rig--joy .rig-whole {
+  animation: hero-jump 1s ease-in-out infinite;
+}
+
+.rig--hero.rig--joy .rig-freeArm {
+  animation: hero-joy-arm 1s ease-in-out infinite;
+}
+
+.rig--hero.rig--joy .rig-staffArm {
+  animation: hero-joy-staff 1s ease-in-out infinite;
+}
+
+.rig--hero.rig--joy .rig-staff {
+  animation: hero-joy-tilt 1s ease-in-out infinite;
+}
+
+.rig--hero.rig--joy .rig-sparkles {
+  animation: hero-sparkles 1s ease-out infinite;
+}
+
+.rig--hero.rig--joy .rig-glow {
+  animation: hero-cast-glow 1s ease-in-out infinite;
+}
+
+@keyframes hero-jump {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.03, 0.97);
+  }
+
+  15% {
+    transform: translateY(0) scale(1, 1);
+  }
+
+  45% {
+    transform: translateY(-16px) scale(0.98, 1.03);
+  }
+
+  72% {
+    transform: translateY(0) scale(1.04, 0.95);
+  }
+
+  85% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+@keyframes hero-joy-arm {
+  0%,
+  100% {
+    transform: rotate(30deg);
+  }
+
+  45% {
+    transform: rotate(155deg);
+  }
+}
+
+@keyframes hero-joy-staff {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+
+  45% {
+    transform: rotate(-38deg);
+  }
+}
+
+@keyframes hero-joy-tilt {
+  0%,
+  100% {
+    transform: rotate(10deg);
+  }
+
+  45% {
+    transform: rotate(50deg);
+  }
+}
+
+@keyframes hero-sparkles {
+  0%,
+  30% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+/* «Ой»: отшатнулся, мотает головой, рука к шляпе, кристалл гаснет и дымит */
+
+.rig--hero.rig--oops .rig-whole {
+  animation: hero-oops 1.6s ease-in-out infinite;
+}
+
+.rig--hero.rig--oops .rig-head {
+  animation: hero-shake 1.6s ease-in-out infinite;
+}
+
+.rig--hero.rig--oops .rig-freeArm {
+  animation: hero-oops-arm 1.6s ease-in-out infinite;
+}
+
+.rig--hero.rig--oops .rig-staffArm {
+  animation: hero-oops-staff 1.6s ease-in-out infinite;
+}
+
+.rig--hero.rig--oops .rig-staff {
+  animation: hero-oops-tilt 1.6s ease-in-out infinite;
+}
+
+.rig--hero.rig--oops .rig-glow,
+.rig--hero.rig--oops .rig-core {
+  animation: hero-fizzle 1.6s steps(1, end) infinite;
+}
+
+.rig--hero.rig--oops .rig-smoke {
+  animation: hero-smoke 1.6s ease-out infinite;
+}
+
+@keyframes hero-oops {
+  0%,
+  100% {
+    transform: rotate(0) translateX(0);
+  }
+
+  12% {
+    transform: rotate(-5deg) translateX(-2px);
+  }
+
+  50% {
+    transform: rotate(-3deg) translateX(-1px);
+  }
+}
+
+@keyframes hero-shake {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  15% {
+    transform: rotate(-8deg);
+  }
+
+  30% {
+    transform: rotate(6deg);
+  }
+
+  45% {
+    transform: rotate(-5deg);
+  }
+
+  60% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes hero-oops-arm {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  25%,
+  70% {
+    transform: rotate(150deg);
+  }
+}
+
+@keyframes hero-oops-staff {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  15%,
+  60% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes hero-oops-tilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  15%,
+  60% {
+    transform: rotate(-14deg);
+  }
+}
+
+@keyframes hero-fizzle {
+  0%,
+  8%,
+  24%,
+  100% {
+    opacity: 1;
+  }
+
+  10%,
+  14%,
+  18% {
+    opacity: 0.15;
+  }
+
+  20% {
+    opacity: 0.6;
+  }
+
+  30%,
+  80% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes hero-smoke {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+
+  25% {
+    opacity: 0.8;
+  }
+
+  80%,
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(1.8);
+  }
+}
+
+/* ===== Лорд Дефолт: шарниры ===== */
+
+.rig--villain .rig-whole,
+.rig--villain .rig-body {
+  transform-origin: 50px 146px;
+}
+
+.rig--villain .rig-legL {
+  transform-origin: 47px 91px;
+}
+
+.rig--villain .rig-legR {
+  transform-origin: 53px 91px;
+}
+
+.rig--villain .rig-backArm {
+  transform-origin: 41px 48px;
+}
+
+.rig--villain .rig-head {
+  transform-origin: 50px 44px;
+}
+
+.rig--villain .rig-hat {
+  transform-origin: 50px 28px;
+}
+
+.rig--villain .rig-caneArm {
+  transform-origin: 59px 48px;
+}
+
+.rig--villain .rig-glint {
+  animation: vil-glint 4.2s ease-in-out infinite;
+}
+
+@keyframes vil-glint {
+  0%,
+  30%,
+  60%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+
+  45% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
+}
+
+/* Ухмылка: склоняет голову, постукивает тростью, блестит монокль */
+
+.rig--villain.rig--idle .rig-head {
+  animation: vil-tilt 4.2s ease-in-out infinite;
+}
+
+.rig--villain.rig--idle .rig-caneArm {
+  animation: vil-tap 2.1s ease-in-out infinite;
+}
+
+.rig--villain.rig--idle .rig-body {
+  animation: hero-breathe 4.2s ease-in-out infinite;
+}
+
+@keyframes vil-tilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  40%,
+  60% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes vil-tap {
+  0%,
+  55%,
+  100% {
+    transform: rotate(0);
+  }
+
+  65% {
+    transform: rotate(-7deg);
+  }
+
+  75% {
+    transform: rotate(0);
+  }
+
+  82% {
+    transform: rotate(-5deg);
+  }
+
+  90% {
+    transform: rotate(0);
+  }
+}
+
+/* Хохот: голова запрокинута и трясётся, рука на животе, цилиндр подпрыгивает */
+
+.rig--villain.rig--laugh .rig-head {
+  animation: vil-laugh-head 0.42s ease-in-out infinite;
+}
+
+.rig--villain.rig--laugh .rig-body {
+  animation: vil-laugh-body 0.42s ease-in-out infinite;
+}
+
+.rig--villain.rig--laugh .rig-backArm {
+  transform: rotate(-55deg);
+}
+
+.rig--villain.rig--laugh .rig-hat {
+  animation: vil-hat-bounce 0.42s ease-in-out infinite;
+}
+
+.rig--villain.rig--laugh .rig-caneArm {
+  animation: vil-laugh-cane 0.42s ease-in-out infinite;
+}
+
+@keyframes vil-laugh-head {
+  0%,
+  100% {
+    transform: rotate(-11deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(-14deg) translateY(-1.2px);
+  }
+}
+
+@keyframes vil-laugh-body {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+
+  50% {
+    transform: scale(1.01, 0.985);
+  }
+}
+
+@keyframes vil-hat-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(-3px) rotate(-5deg);
+  }
+}
+
+@keyframes vil-laugh-cane {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+
+  50% {
+    transform: rotate(-3deg);
+  }
+}
+
+/* Злость: подался вперёд, трясёт тростью над головой, топает, монокль горит красным */
+
+.rig--villain.rig--angry .rig-whole {
+  animation: vil-stomp 1.1s ease-in infinite;
+}
+
+.rig--villain.rig--angry .rig-legR {
+  animation: vil-stomp-leg 1.1s ease-in infinite;
+}
+
+.rig--villain.rig--angry .rig-caneArm {
+  animation: vil-shake-cane 1.1s ease-in-out infinite;
+}
+
+.rig--villain.rig--angry .rig-head {
+  transform: rotate(7deg);
+}
+
+.rig--villain.rig--angry .rig-hat {
+  animation: vil-hat-pop 1.1s ease-in infinite;
+}
+
+.rig--villain.rig--angry .rig-glint {
+  opacity: 0;
+  animation: none;
+}
+
+.rig--villain.rig--angry .rig-glint-angry {
+  animation: vil-glint-angry 0.55s ease-in-out infinite;
+}
+
+.rig--villain.rig--angry .rig-dust {
+  animation: vil-dust 1.1s ease-out infinite;
+}
+
+@keyframes vil-stomp {
+  0%,
+  100% {
+    transform: rotate(4deg) translateY(0);
+  }
+
+  30% {
+    transform: rotate(4deg) translateY(-5px);
+  }
+
+  40% {
+    transform: rotate(4deg) translateY(0.6px);
+  }
+
+  48% {
+    transform: rotate(4deg) translateY(0);
+  }
+}
+
+@keyframes vil-stomp-leg {
+  0%,
+  45%,
+  100% {
+    transform: rotate(0);
+  }
+
+  25% {
+    transform: rotate(-16deg);
+  }
+}
+
+@keyframes vil-shake-cane {
+  0%,
+  100% {
+    transform: rotate(-112deg);
+  }
+
+  25% {
+    transform: rotate(-128deg);
+  }
+
+  50% {
+    transform: rotate(-108deg);
+  }
+
+  75% {
+    transform: rotate(-126deg);
+  }
+}
+
+@keyframes vil-hat-pop {
+  0%,
+  30%,
+  60%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  42% {
+    transform: translateY(-6px) rotate(7deg);
+  }
+}
+
+@keyframes vil-glint-angry {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes vil-dust {
+  0%,
+  38% {
+    opacity: 0;
+    transform: scale(0.4, 1);
+  }
+
+  45% {
+    opacity: 0.8;
+  }
+
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(2, 1.4);
+  }
+}
+
+/* Побег: наклонился вперёд, ноги ножницами, рука придерживает цилиндр, фалды полощутся */
+
+.rig--villain.rig--run .rig-whole {
+  animation: vil-run 0.5s ease-in-out infinite;
+}
+
+.rig--villain.rig--run .rig-legL,
+.rig--villain.rig--run .rig-legR {
+  animation: vil-leg 0.5s ease-in-out infinite;
+}
+
+.rig--villain.rig--run .rig-legR {
+  animation-delay: -0.25s;
+}
+
+.rig--villain.rig--run .rig-caneArm {
+  animation: vil-pump 0.5s ease-in-out infinite;
+}
+
+.rig--villain.rig--run .rig-backArm {
+  transform: rotate(150deg);
+}
+
+.rig--villain.rig--run .rig-hat {
+  animation: vil-hat-bounce 0.5s ease-in-out infinite;
+}
+
+.rig--villain.rig--run .rig-body {
+  animation: vil-tails 0.25s ease-in-out infinite alternate;
+}
+
+@keyframes vil-run {
+  0%,
+  100% {
+    transform: rotate(11deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(11deg) translateY(-3px);
+  }
+}
+
+@keyframes vil-leg {
+  0%,
+  100% {
+    transform: rotate(30deg);
+  }
+
+  50% {
+    transform: rotate(-30deg);
+  }
+}
+
+@keyframes vil-pump {
+  0%,
+  100% {
+    transform: rotate(-35deg);
+  }
+
+  50% {
+    transform: rotate(15deg);
+  }
+}
+
+@keyframes vil-tails {
+  from {
+    transform: skewX(-2deg);
+  }
+
+  to {
+    transform: skewX(2deg);
+  }
+}
