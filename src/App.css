@@ -4077,6 +4077,45 @@ a.land--door .land__door {
   background-image: var(--wall);
 }
 
+.dungeon__cell--crack {
+  background-image: var(--floor-crack);
+}
+
+.dungeon__cell--moss {
+  background-image: var(--floor-moss);
+}
+
+/* Факел — тайл 8 × 8 во всю клетку стены: ложится на кладку пиксель в пиксель */
+.dungeon__torch {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.55));
+}
+
+/* Свет факела на полу: кольцами с резкой границей, как в пиксель-арте, и чуть мерцает */
+.dungeon__cell--lit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0, rgba(251, 191, 36, 0.16) 0 35%, rgba(251, 191, 36, 0.07) 35% 70%, transparent 70%);
+  pointer-events: none;
+  animation: torch-light 0.5s steps(1, end) infinite;
+}
+
+@keyframes torch-light {
+  50% {
+    opacity: 0.65;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dungeon__cell--lit::before {
+    animation: none;
+  }
+}
+
 .dungeon__cell img {
   position: relative;
   z-index: 1;

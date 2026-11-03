@@ -4,11 +4,27 @@ import type { Direction, HeroReport } from '../engine/jsRun';
 import type { Dungeon } from '../engine/types';
 import { fullEffects } from '../game/settings';
 import { spriteCssUrl } from '../pixel/pixelArt';
-import { DUNGEON_BUG, DUNGEON_EXIT, DUNGEON_FLOOR, DUNGEON_WALL, GEMS, HERO_ANIMATIONS, type HeroAnimation } from '../pixel/sprites';
+import {
+  DUNGEON_BUG,
+  DUNGEON_EXIT,
+  DUNGEON_FLOOR,
+  DUNGEON_FLOOR_CRACK,
+  DUNGEON_FLOOR_MOSS,
+  DUNGEON_TORCH_FRAMES,
+  DUNGEON_WALL,
+  GEMS,
+  HERO_ANIMATIONS,
+  type HeroAnimation,
+} from '../pixel/sprites';
 import { PixelArt } from './PixelArt';
 import { SpriteAnim } from './SpriteAnim';
 
-const TILES = { '--wall': spriteCssUrl(DUNGEON_WALL), '--floor': spriteCssUrl(DUNGEON_FLOOR) };
+const TILES = {
+  '--wall': spriteCssUrl(DUNGEON_WALL),
+  '--floor': spriteCssUrl(DUNGEON_FLOOR),
+  '--floor-crack': spriteCssUrl(DUNGEON_FLOOR_CRACK),
+  '--floor-moss': spriteCssUrl(DUNGEON_FLOOR_MOSS),
+};
 
 const FACING: Record<Direction, string> = { '>': 'right', v: 'down', '<': 'left', '^': 'up' };
 
@@ -21,6 +37,60 @@ function cellKind(cell: string): string {
   if (cell === '#') return 'wall';
   if (/[1-9]/.test(cell)) return 'sign';
   return { g: 'gem', b: 'bug', E: 'exit' }[cell] ?? 'floor';
+}
+
+/** «Случайное» число 0–99 для клетки: одна и та же карта всегда украшена одинаково. */
+function noise(x: number, y: number, salt: number): number {
+  let h = Math.imul(x + 1, 374761393) ^ Math.imul(y + 1, 668265263) ^ Math.imul(salt, 2246822519);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) % 100;
+}
+
+interface Decor {
+  /** Стены с факелом: под ними проход */
+  torches: Set<string>;
+  /** Клетки под факелом, на которые падает свет */
+  lit: Set<string>;
+  /** Плиты пола с трещиной или мхом */
+  floors: Map<string, 'crack' | 'moss'>;
+}
+
+/**
+ * Убранство подземелья: факелы на стенах над проходом (не теснее чем через две клетки)
+ * и редкие плиты с трещиной или мхом. Только картинка — на путь героя не влияет.
+ */
+function decorate(cells: string[][]): Decor {
+  const torches = new Set<string>();
+  const lit = new Set<string>();
+  const floors = new Map<string, 'crack' | 'moss'>();
+  const spots: [number, number][] = [];
+  cells.forEach((row, y) =>
+    row.forEach((cell, x) => {
+      const below = cells[y + 1]?.[x];
+      if (cell === '#' && below !== undefined && below !== '#') spots.push([x, y]);
+    }),
+  );
+  const placed: [number, number][] = [];
+  for (const [x, y] of spots) {
+    if (noise(x, y, 1) % 3) continue;
+    if (placed.some(([px, py]) => Math.abs(px - x) <= 2 && Math.abs(py - y) <= 1)) continue;
+    placed.push([x, y]);
+  }
+  // Хотя бы один факел на карту, если есть куда повесить
+  if (!placed.length && spots.length) placed.push(spots[Math.floor(spots.length / 2)]);
+  for (const [x, y] of placed) {
+    torches.add(`${x},${y}`);
+    lit.add(`${x},${y + 1}`);
+  }
+  cells.forEach((row, y) =>
+    row.forEach((cell, x) => {
+      if (cell !== '.') return;
+      const n = noise(x, y, 2);
+      if (n < 12) floors.set(`${x},${y}`, 'crack');
+      else if (n < 20) floors.set(`${x},${y}`, 'moss');
+    }),
+  );
+  return { torches, lit, floors };
 }
 
 interface DungeonViewProps {
@@ -42,6 +112,8 @@ interface DungeonViewProps {
  */
 export function DungeonView({ dungeon, report, success = false, compact = false, caption }: DungeonViewProps) {
   const start = useMemo(() => parseDungeon(dungeon), [dungeon]);
+  // Убранство считается по исходной карте: подобранный кристалл не открывает под собой трещину
+  const decor = useMemo(() => decorate(start.cells), [start]);
   const events = useMemo(() => report?.events ?? [], [report]);
   const [shown, setShown] = useState(() => (fullEffects() ? 0 : events.length));
   // Новый путь — проигрываем заново. Состояние меняется во время отрисовки, без эффекта
@@ -74,9 +146,19 @@ export function DungeonView({ dungeon, report, success = false, compact = false,
         {state.cells.map((row, y) =>
           row.map((cell, x) => {
             const kind = cellKind(cell);
-            const trail = kind !== 'wall' && state.trail.has(`${x},${y}`);
+            const key = `${x},${y}`;
+            const trail = kind !== 'wall' && state.trail.has(key);
+            const floor = kind === 'floor' ? decor.floors.get(key) : undefined;
+            const classes = [
+              'dungeon__cell',
+              `dungeon__cell--${kind}`,
+              floor && `dungeon__cell--${floor}`,
+              decor.lit.has(key) && 'dungeon__cell--lit',
+              trail && 'dungeon__cell--trail',
+            ];
             return (
-              <span key={`${x},${y}`} className={`dungeon__cell dungeon__cell--${kind}${trail ? ' dungeon__cell--trail' : ''}`}>
+              <span key={key} className={classes.filter(Boolean).join(' ')}>
+                {decor.torches.has(key) && <SpriteAnim frames={DUNGEON_TORCH_FRAMES} fps={6} fluid className="dungeon__torch" />}
                 {kind === 'gem' && <PixelArt sprite={GEMS.emerald.sprite} scale={2} />}
                 {kind === 'bug' && <PixelArt sprite={DUNGEON_BUG} scale={3} />}
                 {kind === 'exit' && <PixelArt sprite={DUNGEON_EXIT} scale={3} />}

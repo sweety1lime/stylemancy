@@ -1,0 +1,519 @@
+/* Мастерская спрайтов: страница для разработки, в игру не входит */
+
+.ws {
+  --head: 64px;
+  min-height: 100vh;
+}
+
+.ws-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+  min-height: var(--head);
+  padding: 10px 20px;
+  border-bottom: 3px solid var(--frame);
+  background: var(--panel);
+}
+
+.ws-head__title {
+  font-family: var(--font-pixel);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--gold);
+}
+
+.ws-head__meta {
+  color: var(--muted-2);
+  font-size: 14px;
+}
+
+.ws-tabs,
+.ws-head__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ws-head__tools {
+  margin-left: auto;
+}
+
+/* Фон под рисунками: на нём видно, как спрайт смотрится в игре */
+
+.ws-stage {
+  display: grid;
+  place-items: center;
+}
+
+.ws--night .ws-stage {
+  background: var(--bg) var(--sky-tile, none);
+  background-size: 160px 120px;
+}
+
+.ws--panel .ws-stage {
+  background: var(--panel-2);
+}
+
+.ws--light .ws-stage {
+  background: #e9e4ff;
+}
+
+.ws--check .ws-stage {
+  background: repeating-conic-gradient(#3a3355 0 25%, #4a4268 0 50%) 0 0 / 16px 16px;
+}
+
+.ws-frames {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Список */
+
+.ws-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ws-body--open {
+  grid-template-columns: minmax(0, 1fr) minmax(400px, 540px);
+}
+
+.ws-list {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 20px;
+}
+
+.ws-list__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.ws-list__bar .ws-input {
+  flex: 1 1 240px;
+  max-width: 420px;
+}
+
+.ws-color-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ws-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.ws-card {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 3px solid var(--ink);
+  background: var(--panel);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 0 var(--ink);
+}
+
+.ws-card:hover {
+  background: var(--panel-2);
+}
+
+.ws-card--on {
+  border-color: var(--gold);
+}
+
+.ws-card__art {
+  height: 104px;
+  overflow: hidden;
+}
+
+.ws-card__name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.ws-card__meta {
+  color: var(--muted-2);
+  font-size: 12px;
+}
+
+.ws-empty {
+  color: var(--muted);
+}
+
+/* Панель спрайта */
+
+.ws-panel {
+  position: sticky;
+  top: var(--head);
+  display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
+  gap: 12px;
+  height: calc(100vh - var(--head));
+  padding: 16px 20px 40px;
+  overflow: auto;
+  border-left: 3px solid var(--frame);
+  background: var(--panel);
+}
+
+.ws-panel__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ws-panel__title {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.ws-panel__meta {
+  color: var(--muted-2);
+  font-size: 14px;
+}
+
+.ws-preview {
+  min-height: 220px;
+  padding: 16px;
+  overflow: auto;
+  border: 3px solid var(--ink);
+}
+
+.ws-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 20px;
+}
+
+.ws-field {
+  display: grid;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.ws-field--short {
+  min-width: 0;
+  width: 120px;
+}
+
+.ws-label {
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: 14px;
+}
+
+.ws-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.ws-input {
+  padding: 6px 10px;
+  border: 3px solid var(--ink);
+  background: #0d0a1c;
+  color: var(--text);
+  font: 14px var(--font-mono);
+}
+
+.ws-subtitle {
+  margin: 8px 0 0;
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.ws-hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ws-error {
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.ws-swatch {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--ink);
+  vertical-align: middle;
+}
+
+.ws-swatch--big {
+  width: 28px;
+  height: 28px;
+}
+
+.ws-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ws-letter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 2px solid var(--ink);
+  background: var(--panel-3);
+  color: var(--text);
+  font: 12px var(--font-mono);
+  cursor: pointer;
+}
+
+.ws-letter b {
+  font-size: 14px;
+}
+
+.ws-letter--on {
+  border-color: var(--gold);
+  background: #3a2a73;
+}
+
+.ws-letter--unused {
+  opacity: 0.5;
+}
+
+/* Загрузка PNG */
+
+.ws-import {
+  display: grid;
+  gap: 12px;
+}
+
+.ws-drop {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 3px dashed var(--line-strong);
+  cursor: pointer;
+}
+
+.ws-drop:hover,
+.ws-drop--over {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.ws-drop:focus-within {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.ws-drop input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.ws-compare {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ws-compare__item {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.ws-compare__item .ws-stage {
+  min-width: 80px;
+  min-height: 80px;
+  padding: 10px;
+  border: 3px solid var(--ink);
+}
+
+.ws-compare__item figcaption {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ws-new-colors {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.ws-code {
+  display: grid;
+  gap: 6px;
+}
+
+.ws-code__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ws-code pre {
+  max-height: 300px;
+  margin: 0;
+  padding: 10px;
+  overflow: auto;
+  border: 2px solid var(--frame);
+  background: #0d0a1c;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* Палитра */
+
+.ws-palette {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+}
+
+.ws-palette__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ws-palette__bar .ws-hint {
+  max-width: 640px;
+}
+
+.ws-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 8px;
+}
+
+.ws-color {
+  display: grid;
+  gap: 2px;
+  padding: 0 0 6px;
+  border: 3px solid var(--ink);
+  background: var(--panel);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-color:hover {
+  border-color: var(--gold);
+}
+
+.ws-color__box {
+  height: 36px;
+  margin-bottom: 4px;
+}
+
+.ws-color__css,
+.ws-color__count {
+  padding: 0 6px;
+  font: 11px var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.ws-color__count {
+  color: var(--muted-2);
+}
+
+.ws-palette__pairs {
+  display: grid;
+  gap: 10px;
+  max-width: 900px;
+}
+
+.ws-pairs {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ws-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: 2px solid var(--ink);
+  background: var(--panel);
+}
+
+.ws-pair__delta {
+  color: var(--gold);
+  font-family: var(--font-pixel);
+  text-align: center;
+}
+
+.ws-pair__color {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-pair__color code {
+  font-size: 13px;
+}
+
+.ws-pair__where {
+  display: block;
+  color: var(--muted-2);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* Узкий экран: панель спрайта поверх списка */
+@media (max-width: 960px) {
+  .ws-body--open {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ws-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    height: auto;
+    border-left: 0;
+  }
+
+  .ws-head__tools {
+    margin-left: 0;
+  }
+}

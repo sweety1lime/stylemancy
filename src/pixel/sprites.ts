@@ -2488,6 +2488,45 @@ export const DUNGEON_FLOOR: Sprite = {
   palette: { f: '#1c1733', d: '#2a2350' },
 };
 
+/**
+ * Пол с трещиной: свет сверху слева, поэтому под тёмной щелью светлый скол.
+ * Края как у обычной плиты — разные плиты стыкуются без шва.
+ */
+export const DUNGEON_FLOOR_CRACK: Sprite = {
+  rows: ['ffffffff', 'ffffdfff', 'fccfffff', 'ffdccfff', 'fffddcff', 'fffffdcf', 'ffffffdf', 'ffdfffff'],
+  palette: { f: '#1c1733', d: '#2a2350', c: '#0f0b1f' },
+};
+
+/** Пол, проросший мхом: один тёмный кустик в шве, блик сверху слева — не путается с предметами */
+export const DUNGEON_FLOOR_MOSS: Sprite = {
+  rows: ['ffffffff', 'ffffdfff', 'ffffffff', 'fdffffff', 'ffGfffff', 'fGggffff', 'fgggfgff', 'ffffffff'],
+  palette: { f: '#1c1733', d: '#2a2350', g: '#166534', G: '#2f8f5b' },
+};
+
+const TORCH_PALETTE = {
+  r: '#dc2626',
+  o: '#f97316',
+  y: '#fbbf24',
+  Y: '#fef3c7',
+  k: INK,
+  i: '#6b7280',
+  h: '#7a4a24',
+  H: '#451a03',
+};
+
+/** Ручка факела и кольцо, которым он прибит к стене: одинаковые во всех кадрах */
+const TORCH_BASE = ['..kiik..', '.iihHii.', '...hH...'];
+
+/**
+ * Факел на стене подземелья: пламя дрожит в три кадра, а ручка стоит на месте.
+ * Тайл 8 × 8, как стена: ложится поверх неё пиксель в пиксель.
+ */
+export const DUNGEON_TORCH_FRAMES: Sprite[] = [
+  ['....r...', '...ro...', '..roor..', '..oyyo..', '..oYYo..'],
+  ['...r....', '...or...', '..royr..', '..oyYo..', '..oYYo..'],
+  ['........', '...rr...', '..royo..', '..oyyo..', '..oYYo..'],
+].map((flame) => ({ rows: [...flame, ...TORCH_BASE], palette: TORCH_PALETTE }));
+
 /** Выход: арка, из которой льётся зелёный свет, — как дверь <script> */
 export const DUNGEON_EXIT: Sprite = {
   rows: [

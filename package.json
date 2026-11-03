@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "sprites": "vite --open /sprites.html",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
