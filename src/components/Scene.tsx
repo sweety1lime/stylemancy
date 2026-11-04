@@ -170,6 +170,7 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
   function handlePlayerLoad(index: number, doc: Document) {
     prepareView(doc, level, views[index]);
     doc.documentElement.classList.toggle('effects-light', !fullEffects());
+    doc.documentElement.classList.toggle('ambient-still', document.documentElement.classList.contains('ambient-still'));
     // «Сумрак»: планы фона сдвигаются за мышью; предметы стоят на месте
     attachSceneCamera(doc);
     docsRef.current[index] = doc;

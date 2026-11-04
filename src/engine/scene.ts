@@ -8,6 +8,15 @@ body { display: flex; align-items: center; justify-content: center; font-family:
 .effects-light *, .effects-light *::before, .effects-light *::after { animation-duration: 0s !important; animation-iteration-count: 1 !important; }
 @keyframes frames-2 { to { background-position-x: 200%; } }
 @keyframes frames-3 { to { background-position-x: 150%; } }
+/* Автотесты: браузер рисует без видеокарты, и плавный фон отнимал бы процессор у проверок.
+   CSS-анимации идут ступенями — значение меняется только на ключевых кадрах. Эффекты из JS остаются плавными */
+.ambient-still *,
+.ambient-still *::before,
+.ambient-still *::after,
+.ambient-still::before,
+.ambient-still::after {
+  animation-timing-function: steps(1, end) !important;
+}
 `;
 
 /**

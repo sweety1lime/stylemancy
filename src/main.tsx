@@ -31,6 +31,8 @@ window.addEventListener('vite:preloadError', () => {
 
 // Слабый компьютер не успевает за полными эффектами — игра сама включит лёгкие
 watchFrames()
+// Браузером управляет автотест: фоновое движение — ступенями (см. ambient-still в index.css)
+if (navigator.webdriver) document.documentElement.classList.add('ambient-still')
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
