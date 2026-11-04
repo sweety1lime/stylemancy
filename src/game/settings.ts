@@ -9,6 +9,8 @@ export interface Settings {
   effects: 'full' | 'light';
   /** Вид игры: «Сумрак» — силуэты в лунном свете (по умолчанию) или прежний пиксель-арт */
   look: 'pixel' | 'noir';
+  /** Игрок сам выбрал эффекты кнопкой: тогда игра их не переключает (см. frameWatch.ts) */
+  effectsChosen?: boolean;
 }
 
 const KEY = 'cascadia.settings.v1';

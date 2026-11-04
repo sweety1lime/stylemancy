@@ -123,7 +123,7 @@ function Toggles() {
         aria-pressed={full}
         title={full ? 'Эффекты: полные' : 'Эффекты: лёгкие — для слабых компьютеров'}
         onClick={() => {
-          settings.update({ effects: full ? 'light' : 'full' });
+          settings.update({ effects: full ? 'light' : 'full', effectsChosen: true });
           sfx.click();
         }}
       >

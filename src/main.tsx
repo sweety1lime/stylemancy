@@ -11,6 +11,7 @@ import './noir/noir.css'
 import './noir/rig/rig.css'
 import App from './App.tsx'
 import { CrashScreen, ErrorBoundary } from './components/ErrorBoundary'
+import { watchFrames } from './game/frameWatch'
 import { spriteCssUrl } from './pixel/pixelArt'
 import { SKY_TILE } from './pixel/sprites'
 
@@ -27,6 +28,9 @@ window.addEventListener('vite:preloadError', () => {
   }
   window.location.reload()
 })
+
+// Слабый компьютер не успевает за полными эффектами — игра сама включит лёгкие
+watchFrames()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1588,6 +1588,18 @@ a.land:hover .land__art {
   font-size: 20px;
 }
 
+/* Сообщение игры: текст длиннее заголовка достижения */
+.toast--notice {
+  max-width: 360px;
+}
+
+.toast__text {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 .result__achievements {
   display: grid;
   gap: 6px;
