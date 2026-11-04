@@ -12,7 +12,20 @@ import { SpriteAnim } from './SpriteAnim';
  * Живое лицо персонажа: поверх портрета лежат кадры «моргнул» и «открыл рот».
  * Моргание и речь — CSS-анимации; talking — пока печатается текст реплики.
  */
-export function Face({ id, scale = 4, talking = false, className }: { id: string; scale?: number; talking?: boolean; className?: string }) {
+export function Face({
+  id,
+  scale = 4,
+  talking = false,
+  className,
+  pose,
+}: {
+  id: string;
+  scale?: number;
+  talking?: boolean;
+  className?: string;
+  /** Поза реакции в «Сумраке»: радость или раздумье */
+  pose?: 'joy' | 'think' | null;
+}) {
   const face = faceOf(id);
   // Каждый персонаж моргает в своём ритме
   const [delay] = useState(() => `${(-Math.random() * 4).toFixed(2)}s`);
@@ -21,7 +34,7 @@ export function Face({ id, scale = 4, talking = false, className }: { id: string
     // Пока звучит реплика, огоньки персонажа дышат чаще
     return (
       <span className={['face face--noir', talking && 'face--talking', className].filter(Boolean).join(' ')}>
-        <NoirFace id={id} size={16 * scale} />
+        <NoirFace id={id} size={16 * scale} pose={pose} />
       </span>
     );
   }
@@ -75,7 +88,7 @@ export function Portrait({ id, scale = 4, talking = false, cue }: PortraitProps)
           onEnd={() => setReaction(null)}
         />
       ) : (
-        <Face id={id} scale={scale} talking={talking} />
+        <Face id={id} scale={scale} talking={talking} pose={noir ? reaction : null} />
       )}
     </span>
   );

@@ -1,7 +1,7 @@
 import { NoirFace } from '../noir/NoirFace';
 import { BUSTS } from '../noir/mentors';
 
-/** Все наставники «Сумрака»: крупно — чтобы рисовать, мелко — как в игре (64 и 48 пикселей) */
+/** Все наставники «Сумрака»: крупно — чтобы рисовать, мелко — как в игре (64 и 48 пикселей), и позы радости и раздумья */
 export function MentorsView() {
   const ids = ['default', ...Object.keys(BUSTS)];
   return (
@@ -12,6 +12,8 @@ export function MentorsView() {
           <div className="mentors-view__small">
             <NoirFace id={id} size={64} />
             <NoirFace id={id} size={48} />
+            <NoirFace id={id} size={64} pose="joy" />
+            <NoirFace id={id} size={64} pose="think" />
           </div>
           <figcaption>{id}</figcaption>
         </figure>

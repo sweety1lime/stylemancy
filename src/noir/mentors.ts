@@ -25,7 +25,29 @@ export interface Bust {
   halo: Light;
   /** Круг света вокруг главного огонька */
   glow?: { x: number; y: number; r: number; light: Light };
+  /** Руки впереди фигуры: свой силуэт с кромкой, чтобы читались на тёмном теле */
+  hands?: string[];
+  /** Какой рукой наставник радуется и подпирает подбородок: другая занята вещью. Без поз — сова и древень */
+  free?: 'left' | 'right' | 'none';
 }
+
+/*
+  Позы реакций: от радости наставник вскидывает руку с искрой, задумался — подпирает подбородок.
+  Нарисованы для правой руки (справа в кадре); для левой — зеркально.
+*/
+export const POSES = {
+  joy: {
+    arm: 'M91 108 Q97 82 95.6 52 L105.4 51 Q109 82 106 110 Z',
+    hand: `${E(100.5, 46, 5.6, 6.2)} ${E(96.4, 37.6, 1.7, 4.4)} ${E(100.6, 35.4, 1.7, 4.8)} ${E(104.8, 37.6, 1.7, 4.4)} ${E(95, 47, 3.8, 1.8)}`,
+    spark: { x: 100.5, y: 25 },
+  },
+  think: {
+    arm: 'M92 120 Q86 98 71 81 L65.5 84 Q79 99 83.5 120 Z',
+    hand: `${E(65.5, 78.5, 5.8, 4.6)} ${E(61.4, 76, 1.8, 3.6)}`,
+  },
+};
+
+export type Pose = keyof typeof POSES;
 
 const HEAD = E(60, 58, 11, 13.5);
 const NECK = 'M53.5 66 L52.5 84 H67.5 L66.5 66 Z';
@@ -66,6 +88,7 @@ export const BUSTS: Record<string, Bust> = {
       'M34 98 H86 A6 6 0 0 1 86 110 H34 A6 6 0 0 1 34 98 Z',
       'M40 108 H80 L78 120 H42 Z',
     ],
+    hands: [`${E(38, 103.5, 6.4, 5.4)} ${E(82, 103.5, 6.4, 5.4)}`],
     lights: [
       { d: `${R(46, 111.5, 10, 1.4)} ${R(58, 111.5, 14, 1.4)} ${R(47, 115.5, 18, 1.4)} ${R(67, 115.5, 7, 1.4)}`, color: '#ffcf96', opacity: 0.9 },
       { d: `${R(40, 103.4, 3, 1.2)} ${R(77, 103.4, 3, 1.2)}`, color: '#ffcf96', opacity: 0.5 },
@@ -131,6 +154,8 @@ export const BUSTS: Record<string, Bust> = {
       { d: P(105.6, 67.2, 108, 68, 104.6, 78, 102.2, 77.1), color: '#ff9a5a' },
       { d: `${C(100, 56, 0.9)} ${C(107, 49, 0.8)} ${C(95, 46, 0.7)}`, color: EMBER, className: 'a-twinkle' },
     ],
+    hands: [E(85, 97, 5.4, 6)],
+    free: 'left',
     halo: 'amber',
     glow: { x: 60, y: 132, r: 50, light: 'ember' },
   },
@@ -143,6 +168,7 @@ export const BUSTS: Record<string, Bust> = {
       'M34 72 Q30 56 34 36 L46 48 Q60 44 74 48 L86 36 Q90 56 86 72 Q78 82 60 82 Q42 82 34 72 Z',
     ],
     lights: [{ d: `${C(48, 62, 6.4)} ${C(48, 62, 2.6)} ${C(72, 62, 6.4)} ${C(72, 62, 2.6)}`, color: GOLD, className: 'a-blink' }],
+    free: 'none',
     halo: 'emerald',
     glow: { x: 60, y: 62, r: 22, light: 'gold' },
   },
@@ -184,6 +210,7 @@ export const BUSTS: Record<string, Bust> = {
       { d: `${C(54.5, 60, 1.9)} ${C(65.5, 60, 1.9)}`, color: '#b8ffd8', className: 'a-blink' },
       { d: `${C(30, 28, 1.1)} ${C(86, 18, 1)} ${C(98, 38, 1.1)} ${C(22, 60, 0.9)}`, color: '#d6ff8a', className: 'a-firefly' },
     ],
+    free: 'none',
     halo: 'emerald',
     glow: { x: 60, y: 60, r: 16, light: 'emerald' },
   },
@@ -228,6 +255,8 @@ export const BUSTS: Record<string, Bust> = {
         opacity: 0.75,
       },
     ],
+    hands: ['M102 98 Q94 72 77.4 51 L72.6 54.6 Q87 74 93.4 100 Z', `${E(74, 49.6, 5.4, 3.4)}`],
+    free: 'left',
     halo: 'ember',
     glow: { x: 60, y: 40, r: 10, light: 'gold' },
   },
@@ -283,6 +312,7 @@ export const BUSTS: Record<string, Bust> = {
       { d: `${ring(60, 102, 5.4, 1.6)} ${C(60, 102, 2)}`, color: '#d6ecff' },
       { d: 'M50 88 L60 97 L70 88 L70.6 89.4 L60 98.6 L49.4 89.4 Z', color: '#bfe3ff', opacity: 0.45 },
     ],
+    hands: [`${E(52.6, 109.4, 5.6, 4)} ${E(67.4, 109.4, 5.6, 4)}`],
     halo: 'amethyst',
     glow: { x: 60, y: 102, r: 16, light: 'ice' },
   },
@@ -317,6 +347,8 @@ export const BUSTS: Record<string, Bust> = {
       { d: 'M76.2 104 A11 11 0 0 0 97.8 104 Z', color: '#6ff3ff', opacity: 0.9 },
       { d: `${C(84, 98, 1)} ${C(89, 95, 0.8)}`, color: '#b8fbff', className: 'a-twinkle' },
     ],
+    hands: [`${E(87, 89, 5.2, 4.2)} ${E(82.6, 91, 2.4, 1.6)}`],
+    free: 'left',
     halo: 'cyan',
     glow: { x: 87, y: 104, r: 20, light: 'cyan' },
   },
@@ -356,6 +388,8 @@ export const BUSTS: Record<string, Bust> = {
       { d: E(100, 74.4, 7.2, 1.6), color: '#7dff9a' },
       { d: 'M99 70 Q96 64 100 59 Q104 54 101 48 Q106 54 102 60 Q99 64 101 70 Z', color: '#b8ffcc', opacity: 0.45, className: 'a-pulse' },
     ],
+    hands: [E(96.6, 100, 4.6, 5.4)],
+    free: 'left',
     halo: 'green',
     glow: { x: 100, y: 74, r: 16, light: 'green' },
   },
@@ -364,7 +398,6 @@ export const BUSTS: Record<string, Bust> = {
   push: {
     parts: [
       torso(1),
-      'M28 92 Q24 84 22 76 L26 75 Q28 82 32 90 Z',
       'M14 64 L22 58 L30 64 Z',
       R(15, 64, 14, 16),
       R(14, 80, 16, 3),
@@ -380,6 +413,8 @@ export const BUSTS: Record<string, Bust> = {
       { d: R(17.5, 66, 9, 12), color: '#ffd36b', opacity: 0.85 },
       { d: E(22, 72, 1.8, 3.4), color: '#fff1c4', className: 'a-flicker' },
     ],
+    hands: ['M38 96 Q28 78 23 58 L28.6 56.6 Q33 76 44 92 Z', `${E(25, 54.6, 4.6, 4)} ${R(21.4, 55, 1.4, 4)}`],
+    free: 'right',
     halo: 'green',
     glow: { x: 22, y: 72, r: 30, light: 'topaz' },
   },
@@ -423,6 +458,8 @@ export const BUSTS: Record<string, Bust> = {
       { d: C(66, 59, 4.8), color: '#ffc27a', opacity: 0.9 },
       { d: E(54, 59, 1.3, 0.9), color: EMBER, className: 'a-blink' },
     ],
+    hands: ['M84 120 Q86 94 78.6 70 L73.4 71.6 Q79 94 76 120 Z', `${E(76, 67, 4.4, 5.4)} ${E(72.4, 62.4, 1.5, 3.2)}`],
+    free: 'left',
     halo: 'gold',
     glow: { x: 66, y: 59, r: 18, light: 'gold' },
   },
@@ -439,6 +476,7 @@ export const BUSTS: Record<string, Bust> = {
       'M50 49 Q38 46 30 50 Q38 55 52 53 Z',
     ],
     lights: [{ d: C(68, 104, 3.6), color: '#ff4d5e', className: 'a-pulse' }, eyes('#ffc27a', 59)],
+    hands: [E(30.4, 97, 5.2, 5.8)],
     halo: 'gold',
     glow: { x: 68, y: 104, r: 12, light: 'red' },
   },

@@ -389,6 +389,18 @@
   filter: brightness(0.65) saturate(0.6);
 }
 
+/* Поза реакции появляется мягко: рука поднимается из-под кадра */
+.noir-bust__pose {
+  animation: noir-pose-in 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes noir-pose-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
 /* Персонаж говорит — его огоньки дышат чаще */
 .face--talking .noir-bust__lights {
   animation: noir-talk 0.6s ease-in-out infinite alternate;
