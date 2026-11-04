@@ -1,8 +1,10 @@
+import { noirSfx } from './noirSound';
 import { settings } from './settings';
 
 /*
   8-битные звуки, собранные прямо в коде: генератор волны и огибающая громкости.
   Никаких звуковых файлов — как и вся графика игры. Звук играет, только если включён в настройках.
+  В виде «Сумрак» — свои звуки (noirSound.ts): мягкие, с эхом зала.
 */
 
 let context: AudioContext | null = null;
@@ -49,6 +51,11 @@ function slide(from: number, to: number, start: number, duration: number, type: 
   osc.stop(at + duration + 0.05);
 }
 
+/** Звук «Сумрака»: контекст, если звук включён и вид — «Сумрак» */
+function noir(): AudioContext | null {
+  return settings.get().look === 'noir' ? audio() : null;
+}
+
 // Ноты: до, ми, соль, до второй октавы и выше
 const C5 = 523.25;
 const E5 = 659.25;
@@ -60,32 +67,56 @@ const G6 = 1568;
 export const sfx = {
   /** «Сотворить»: короткий магический взлёт */
   cast() {
+    const ctx = noir();
+    if (ctx) return noirSfx.cast(ctx);
     slide(300, 1200, 0, 0.18, 'triangle', 0.05);
   },
   /** Предмет встал на место */
   placed() {
+    const ctx = noir();
+    if (ctx) return noirSfx.placed(ctx);
     tone(E6, 0, 0.07, 'square', 0.035);
     tone(G6, 0.05, 0.1, 'square', 0.035);
   },
   /** Заклинание сработало: фанфара */
   success() {
+    const ctx = noir();
+    if (ctx) return noirSfx.success(ctx);
     [C5, E5, G5, C6].forEach((note, i) => tone(note, 0.12 + i * 0.09, 0.2, 'square', 0.045));
     tone(G6, 0.5, 0.45, 'triangle', 0.04);
   },
   /** Не вышло: заклинание «пшикнуло» */
   fail() {
+    const ctx = noir();
+    if (ctx) return noirSfx.fail(ctx);
     slide(330, 110, 0.1, 0.35, 'sawtooth', 0.03);
   },
   /** Буквы в сценке — едва слышное «бормотание» */
   blip() {
+    const ctx = noir();
+    if (ctx) return noirSfx.blip(ctx);
     tone(560 + Math.random() * 120, 0, 0.03, 'square', 0.012);
   },
   /** Достижение: колокольчик */
   achievement() {
+    const ctx = noir();
+    if (ctx) return noirSfx.achievement(ctx);
     [G5, C6, E6].forEach((note, i) => tone(note, i * 0.07, 0.25, 'triangle', 0.04));
   },
   /** Щелчок переключателя */
   click() {
+    const ctx = noir();
+    if (ctx) return noirSfx.click(ctx);
     tone(880, 0, 0.04, 'square', 0.03);
+  },
+  /** Проклятие: появился Лорд Дефолт. Только в «Сумраке» */
+  curse() {
+    const ctx = noir();
+    if (ctx) noirSfx.curse(ctx);
+  },
+  /** Над спасённой землёй впервые поднимается столб света. Только в «Сумраке» */
+  beacon() {
+    const ctx = noir();
+    if (ctx) noirSfx.beacon(ctx);
   },
 };

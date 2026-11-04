@@ -4,6 +4,7 @@ import { refreshAccount, useAuth } from '../game/auth';
 import { currentLevel, useProgress } from '../game/progress';
 import { hrefFor } from '../game/router';
 import { fullEffects } from '../game/settings';
+import { sfx } from '../game/sound';
 import { read, scopedKey, write } from '../game/storage';
 import { useStats } from '../game/stats';
 import {
@@ -156,6 +157,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
   useEffect(() => {
     if (!noir || dawn.size === 0) return;
     write(litKey, [...new Set([...read<string[]>(litKey, []), ...dawn])]);
+    if (fullEffects()) sfx.beacon();
   }, [noir, dawn, litKey]);
 
   // Герой сменил землю — идёт к ней пешком по карте. Новое место запоминаем, когда дошёл

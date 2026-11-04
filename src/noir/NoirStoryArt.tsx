@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { sfx } from '../game/sound';
 import { sparkle, type GemKind } from './geometry';
 import { HERO_RIG } from './rig/heroRig';
 import { VILLAIN_RIG } from './rig/villainRig';
@@ -95,6 +96,11 @@ export function NoirStoryArt({
   text?: string;
 }) {
   const shoulder = art === 'mentor' || art === 'villain' || art === 'villain-script';
+  // Лорд Дефолт входит в кадр — низкий гул проклятия
+  const cursed = art === 'villain' || art === 'villain-script' || art === 'fallen';
+  useEffect(() => {
+    if (cursed) sfx.curse();
+  }, [cursed]);
   return (
     <div className={`story-art story-art--noir story-art--${art}`} aria-hidden="true">
       <svg className="story-art__noir noir-art" viewBox="80 0 640 360" preserveAspectRatio="xMidYMid slice">
