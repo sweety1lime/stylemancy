@@ -1613,3 +1613,43 @@ figure {
   gap: 8px;
   align-items: end;
 }
+
+/* Сценки сюжета «Сумрака» */
+.scenes-view {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.scenes-view__card {
+  margin: 0;
+  color: #cfd8e6;
+  font: 13px/1.2 monospace;
+}
+
+.scenes-view .story-art {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.scenes-view .sa-default-text {
+  position: absolute;
+  font: 3.4cqw/1 "Times New Roman", Times, serif;
+}
+
+.scenes-view .sa-default-text--1 {
+  top: 12%;
+  left: 5%;
+}
+
+.scenes-view .sa-default-text--2 {
+  right: 6%;
+  bottom: 14%;
+}
+
+.scenes-view .sa-default-text--3 {
+  bottom: 24%;
+  left: 7%;
+}

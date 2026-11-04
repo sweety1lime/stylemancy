@@ -4,12 +4,20 @@ import { VILLAIN_RIG } from './rig/villainRig';
 import { Rig } from './rig/Rig';
 import { BUSTS } from './mentors';
 import { NoirBust } from './NoirFace';
+import { NoirStoryScene, ScriptSky } from './NoirStoryScenes';
 import { NIGHT, NOIR_ISLAND, NOIR_OVERLAY, NOIR_SKY, NoirGem } from './scene';
 
 /*
-  Сценки сюжета Парящих островов в «Сумраке». Кадр 16:9 вырезан из сцены 800 × 360 по центру.
-  Пролог: королевство, кристаллы рухнули, Лорд Дефолт, наставник. Победа: корона из пяти кристаллов.
+  Сценки сюжета в «Сумраке». Кадр 16:9 вырезан из сцены 800 × 360 по центру.
+  Здесь — пролог островов (королевство, кристаллы рухнули, Лорд Дефолт, наставник, корона победы);
+  кадры остальных земель — в NoirStoryScenes. Лорд Дефолт и наставники Скриптории стоят под её бирюзовым небом.
 */
+
+/** Наставники Скриптории: их кадр — под небом Скриптории */
+const SCRIPT_MENTORS = new Set(['oracle', 'typeof', 'if', 'for', 'return', 'push', 'key', 'query', 'click', 'tick']);
+
+/** Кадры, которые рисует этот файл; остальные — NoirStoryScene */
+const OWN = new Set(['kingdom', 'fallen', 'villain', 'villain-script', 'mentor', 'crown']);
 
 const ROW: GemKind[] = ['amethyst', 'emerald', 'ruby'];
 const CROWN: GemKind[] = ['amethyst', 'emerald', 'sapphire', 'ruby', 'topaz'];
@@ -42,7 +50,8 @@ export function NoirStoryArt({ art, speaker, mood = 'laugh' }: { art: string; sp
   return (
     <div className={`story-art story-art--noir story-art--${art}`} aria-hidden="true">
       <svg className="story-art__noir noir-art" viewBox="80 0 640 360" preserveAspectRatio="xMidYMid slice">
-        {NOIR_SKY}
+        {OWN.has(art) && (art === 'villain-script' || (art === 'mentor' && SCRIPT_MENTORS.has(speaker ?? '')) ? <ScriptSky /> : NOIR_SKY)}
+        {!OWN.has(art) && <NoirStoryScene art={art} mood={mood} />}
         {art === 'kingdom' && (
           <>
             {island}
@@ -60,7 +69,7 @@ export function NoirStoryArt({ art, speaker, mood = 'laugh' }: { art: string; sp
             ))}
           </>
         )}
-        {art === 'villain' && (
+        {(art === 'villain' || art === 'villain-script') && (
           <>
             {island}
             <Villain mood={mood} />
@@ -86,11 +95,19 @@ export function NoirStoryArt({ art, speaker, mood = 'laugh' }: { art: string; sp
         )}
         {NOIR_OVERLAY}
       </svg>
-      {art === 'villain' && (
+      {(art === 'villain' || art === 'citadel') && (
         <>
           <span className="sa-default-text sa-default-text--1">Times New Roman</span>
           <span className="sa-default-text sa-default-text--2">синяя ссылка</span>
-          <span className="sa-default-text sa-default-text--3">&lt;div&gt;&lt;div&gt;&lt;div&gt;</span>
+          {art === 'villain' && <span className="sa-default-text sa-default-text--3">&lt;div&gt;&lt;div&gt;&lt;div&gt;</span>}
+        </>
+      )}
+      {/* В Скриптории вокруг Лорда Дефолта — значения по умолчанию из JavaScript */}
+      {art === 'villain-script' && (
+        <>
+          <span className="sa-default-text sa-default-text--1 sa-default-text--script">undefined</span>
+          <span className="sa-default-text sa-default-text--2 sa-default-text--script">NaN</span>
+          <span className="sa-default-text sa-default-text--3 sa-default-text--script">null</span>
         </>
       )}
     </div>

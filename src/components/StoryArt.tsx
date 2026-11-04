@@ -144,6 +144,16 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
 
   // В «Сумраке» нарисованы сценки Парящих островов; кадр наставника — только для тех, у кого есть силуэт
   const noir = useNoir() && NOIR_ARTS.has(art) && (art !== 'mentor' || !speaker || hasNoirFace(speaker));
+  // Лабиринт в кадре — то же подземелье, что на уровне: в «Сумраке» оно само рисуется тёмной кладкой
+  if (noir && art === 'maze') {
+    return (
+      <div className="story-art story-art--noir story-art--maze" aria-hidden="true">
+        <div className="sa-maze">
+          <DungeonView dungeon={STORY_MAZE} compact />
+        </div>
+      </div>
+    );
+  }
   if (noir) return <NoirStoryArt art={art} speaker={speaker} mood={villainMood(text)} />;
 
   return (
