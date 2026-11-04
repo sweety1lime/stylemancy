@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { faceOf, reactionsOf } from '../pixel/faces';
 import { PORTRAITS } from '../pixel/sprites';
 import type { HeroCue } from './Hero';
@@ -18,8 +18,9 @@ export function Face({ id, scale = 4, talking = false, className }: { id: string
   const [delay] = useState(() => `${(-Math.random() * 4).toFixed(2)}s`);
   const noir = useNoir() && hasNoirFace(id);
   if (noir) {
+    // Пока звучит реплика, огоньки персонажа дышат чаще
     return (
-      <span className={['face face--noir', className].filter(Boolean).join(' ')}>
+      <span className={['face face--noir', talking && 'face--talking', className].filter(Boolean).join(' ')}>
         <NoirFace id={id} size={16 * scale} />
       </span>
     );
@@ -55,10 +56,15 @@ export function Portrait({ id, scale = 4, talking = false, cue }: PortraitProps)
     }
   }
   const noir = useNoir() && hasNoirFace(id);
-  // В «Сумраке» лицо в тени: наставник не гримасничает, у него тлеют глаза
+  // В «Сумраке» лицо в тени: наставник не гримасничает — его свет вспыхивает от радости и гаснет, когда он задумался
   const current = reaction && !noir ? reactionsOf(id)[reaction] : null;
+  useEffect(() => {
+    if (!noir || !reaction) return;
+    const timer = setTimeout(() => setReaction(null), 1800);
+    return () => clearTimeout(timer);
+  }, [noir, reaction, run]);
   return (
-    <span className={[reaction && !noir ? `portrait portrait--${reaction}` : 'portrait', noir && 'portrait--noir'].filter(Boolean).join(' ')}>
+    <span className={[reaction ? `portrait portrait--${reaction}` : 'portrait', noir && 'portrait--noir'].filter(Boolean).join(' ')}>
       {current ? (
         <SpriteAnim
           key={run}

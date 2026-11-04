@@ -376,6 +376,34 @@
   display: block;
 }
 
+/* Реакция наставника в «Сумраке»: от радости его свет вспыхивает, задумался — гаснет */
+.look-noir .portrait--noir .noir-face {
+  transition: filter 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.look-noir .portrait--noir.portrait--joy .noir-face {
+  filter: brightness(1.35) drop-shadow(0 0 10px rgba(240, 200, 144, 0.55));
+}
+
+.look-noir .portrait--noir.portrait--think .noir-face {
+  filter: brightness(0.65) saturate(0.6);
+}
+
+/* Персонаж говорит — его огоньки дышат чаще */
+.face--talking .noir-bust__lights {
+  animation: noir-talk 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes noir-talk {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.55;
+  }
+}
+
 /* ===== Значки и тропа земли ===== */
 
 .noir-icon,
@@ -402,7 +430,15 @@
 
 .trail__land .noir-land {
   width: 100%;
-  height: auto;
+}
+
+/* Слои земли лежат друг на друге; дышащие слои двигаются целиком */
+.noir-land__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 /* Шаги тропы — медальоны: пройденный горит янтарём, текущий дышит лунным светом */
@@ -793,6 +829,11 @@
   animation: nl-float 24s ease-in-out infinite alternate;
 }
 
+/* Пыль в лунном свете медленно поднимается — вся сразу, слоем: так её двигает видеокарта */
+.nl--dust .nl__inner {
+  animation: nl-rise 18s ease-in-out infinite alternate;
+}
+
 @keyframes nl-shaft {
   from {
     opacity: 0.4;
@@ -810,6 +851,16 @@
 
   to {
     transform: translateX(18px);
+  }
+}
+
+@keyframes nl-rise {
+  from {
+    transform: translate(4px, 14px);
+  }
+
+  to {
+    transform: translate(-4px, -14px);
   }
 }
 
@@ -893,8 +944,10 @@
 }
 
 .noir-land {
+  position: relative;
   display: block;
-  overflow: visible;
+  width: 184px;
+  aspect-ratio: 160 / 124;
 }
 
 /* Облака у подножия земель — в цвет ночи своего мира */
@@ -979,3 +1032,14 @@
 .hero--noir svg {
   display: block;
 }
+
+/* Пока открыта сценка сюжета, карта под затемнением замирает: её движение никто не видит, а силы оно тратит */
+.look-noir .app:has(.story) .world .nl,
+.look-noir .app:has(.story) .world .nl *,
+.look-noir .app:has(.story) .world .noir-land,
+.look-noir .app:has(.story) .world .noir-land *,
+.look-noir .app:has(.story) .world .land__art,
+.look-noir .app:has(.story) .world .rig * {
+  animation-play-state: paused;
+}
+

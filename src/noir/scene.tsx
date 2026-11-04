@@ -45,28 +45,29 @@ export const NOIR_SKY = (
     <circle cx={MOON.x} cy={MOON.y} r={MOON.r} fill="url(#noir-moon)" />
     <path d="M592 80 a6 5 0 1 0 12 0 a6 5 0 1 0 -12 0 Z M614 104 a4 3.4 0 1 0 8 0 a4 3.4 0 1 0 -8 0 Z" fill="#b8c3d4" opacity="0.6" />
     {/* Облака проходят перед луной */}
-    <g className="a-drift" filter="url(#noir-cloud)">
+    <g filter="url(#noir-cloud)">
       <path d="M500 128 Q540 112 580 118 Q610 106 646 114 Q690 108 724 124 Q700 134 660 132 Q620 138 580 134 Q540 138 500 128 Z" fill="#0d1321" opacity="0.9" />
       <path d="M548 112 Q576 104 604 108 Q630 102 656 110 Q634 116 606 115 Q578 118 548 112 Z" fill="#141c2e" opacity="0.55" />
     </g>
-    {/* Академия на дальней скале, под ней цепи */}
-    <g className="a-hover">
+    {/* Академия на дальней скале, под ней цепи. Неподвижна: движение внутри картинки перерисовывало бы небо */}
+    <g>
       <path d="M118 226 V262 M190 220 V250" stroke="#1d2638" strokeWidth="1.4" strokeDasharray="2.5 2" />
       <path d={`${ACADEMY_ROCK} ${ACADEMY_TOWERS}`} fill="#1a2234" />
       {WINDOWS.map(([x, y], i) => (
         <rect key={i} className={i === 2 ? 'a-twinkle' : undefined} x={x} y={y} width="2.4" height="4" fill="#ffc77a" />
       ))}
     </g>
-    <g className="a-hover a-delay">
+    <g>
       <path d="M686 214 Q722 206 770 214 Q756 230 734 238 Q704 232 686 214 Z M700 214 L704 196 L708 214 Z M744 213 L747 200 L750 213 Z" fill="#141b2b" />
     </g>
     <path d="M0 300 Q120 286 260 298 Q420 284 560 298 Q690 288 800 296 V360 H0 Z" fill="#0e131f" />
-    <g className="a-drift a-delay" filter="url(#noir-mist)">
+    <g filter="url(#noir-mist)">
       <ellipse cx="160" cy="290" rx="190" ry="14" fill="#3a4560" opacity="0.35" />
       <ellipse cx="620" cy="300" rx="220" ry="16" fill="#3a4560" opacity="0.3" />
     </g>
-    {DUST.map(([x, y, r, delay], i) => (
-      <circle key={i} className="a-rise" cx={x} cy={y} r={r} fill={i % 4 ? '#c9d6ea' : '#ffc890'} opacity="0.7" style={{ animationDelay: `${-delay * 6}s`, animationDuration: '11s' }} />
+    {/* Пылинки висят в воздухе неподвижно: движение внутри картинки заставило бы перерисовывать всё небо каждый кадр */}
+    {DUST.map(([x, y, r], i) => (
+      <circle key={i} cx={x} cy={y} r={r} fill={i % 4 ? '#c9d6ea' : '#ffc890'} opacity="0.5" />
     ))}
   </g>
 );

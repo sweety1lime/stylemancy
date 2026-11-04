@@ -18,7 +18,7 @@ export function NoirBust({ bust }: { bust: Bust }) {
         ))}
       </g>
       {bust.glow && <Glow className="a-pulse" x={bust.glow.x} y={bust.glow.y} r={bust.glow.r} light={bust.glow.light} />}
-      <g filter="url(#sil-glow)">
+      <g className="noir-bust__lights" filter="url(#sil-glow)">
         {bust.lights.map((lit) => (
           <path key={lit.d} className={lit.className} d={lit.d} fill={lit.color} fillRule="evenodd" opacity={lit.opacity} />
         ))}

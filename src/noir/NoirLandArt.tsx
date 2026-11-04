@@ -212,8 +212,11 @@ export function NoirLandArt({ emblem, saved = false, fog = false }: NoirLandArtP
   const color = MOODS[emblem] ?? MOODS.door;
   const { shape, lights } = diorama(emblem, color);
   const id = `land-${emblem}`;
+  // Слои: то, что дышит целиком (свет, столб, туман), — отдельные картинки. Их движение делает видеокарта,
+  // а неподвижная скала с размытыми облаками не перерисовывается каждый кадр
   return (
-    <svg className={`noir-land noir-art${fog ? ' noir-land--fog' : ''}`} viewBox="0 0 160 124" width="184" height="143" aria-hidden="true">
+    <span className={`noir-land noir-art${fog ? ' noir-land--fog' : ''}`} aria-hidden="true">
+      <svg className="noir-land__layer" viewBox="0 0 160 124">
       <defs>
         <radialGradient id={`${id}-glow`} cx="0.5" cy="0.5" r="0.5">
           <stop offset="0" stopColor={color} stopOpacity="0.85" />
@@ -235,37 +238,44 @@ export function NoirLandArt({ emblem, saved = false, fog = false }: NoirLandArtP
           <path d={COLLAR} />
         </clipPath>
       </defs>
+      </svg>
       {/* Свет земли: у спасённой — в полную силу, у открытой — вполовину; медленно дышит */}
       {!fog && (
-        <g className={`noir-land__glow${saved ? '' : ' noir-land__glow--dim'}`}>
-          <circle className="a-pulse" cx="82" cy="58" r="72" fill={`url(#${id}-glow)`} />
-        </g>
+        <span className={`noir-land__layer noir-land__glow${saved ? '' : ' noir-land__glow--dim'}`}>
+          <svg className="noir-land__layer a-pulse" viewBox="0 0 160 124">
+            <circle cx="82" cy="58" r="72" fill={`url(#${id}-glow)`} />
+          </svg>
+        </span>
       )}
       {saved && !fog && (
-        <g className="a-breathe">
+        <svg className="noir-land__layer a-breathe" viewBox="0 0 160 124">
           <path d="M70 80 L60 -30 H104 L94 80 Z" fill={`url(#${id}-beam)`} filter="url(#noir-shaft)" />
-        </g>
+        </svg>
       )}
-      <g filter="url(#noir-rim)">
-        <path d="M54 104 q-2 8 1 15 M74 114 q2 6 -1 9 M100 108 q3 6 0 12" fill="none" stroke={NIGHT} strokeWidth="1.2" strokeLinecap="round" />
-        <path d={`${shape}`} fill={NIGHT} />
-        <g transform="translate(12 70) scale(0.34)">
-          <path d={NOIR_ROCK} fill={NIGHT} />
+      <svg className="noir-land__layer" viewBox="0 0 160 124">
+        <g filter="url(#noir-rim)">
+          <path d="M54 104 q-2 8 1 15 M74 114 q2 6 -1 9 M100 108 q3 6 0 12" fill="none" stroke={NIGHT} strokeWidth="1.2" strokeLinecap="round" />
+          <path d={`${shape}`} fill={NIGHT} />
+          <g transform="translate(12 70) scale(0.34)">
+            <path d={NOIR_ROCK} fill={NIGHT} />
+          </g>
         </g>
-      </g>
-      {!fog && lights}
-      {/* Облака у подножия, сверху на них падает свет земли */}
-      <g filter="url(#noir-cloud)" opacity={fog ? 0.6 : 1}>
-        <path d={COLLAR} fill={`url(#${id}-collar)`} />
-        {!fog && <ellipse cx="82" cy="108" rx="46" ry="8" fill={color} opacity={saved ? 0.3 : 0.16} clipPath={`url(#${id}-clip)`} />}
-      </g>
+        {!fog && lights}
+        {/* Облака у подножия, сверху на них падает свет земли */}
+        <g filter="url(#noir-cloud)" opacity={fog ? 0.6 : 1}>
+          <path d={COLLAR} fill={`url(#${id}-collar)`} />
+          {!fog && <ellipse cx="82" cy="108" rx="46" ry="8" fill={color} opacity={saved ? 0.3 : 0.16} clipPath={`url(#${id}-clip)`} />}
+        </g>
+      </svg>
       {fog && (
-        <g className="a-drift" filter="url(#noir-mist)">
-          <ellipse cx="60" cy="58" rx="56" ry="12" fill="#3a4560" opacity="0.6" />
-          <ellipse cx="104" cy="82" rx="50" ry="10" fill="#3a4560" opacity="0.5" />
-        </g>
+        <svg className="noir-land__layer a-drift" viewBox="0 0 160 124">
+          <g filter="url(#noir-mist)">
+            <ellipse cx="60" cy="58" rx="56" ry="12" fill="#3a4560" opacity="0.6" />
+            <ellipse cx="104" cy="82" rx="50" ry="10" fill="#3a4560" opacity="0.5" />
+          </g>
+        </svg>
       )}
-    </svg>
+    </span>
   );
 }
 

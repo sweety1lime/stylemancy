@@ -83,7 +83,7 @@ export function ScriptSky() {
         <path d={gear(690, 310, 64, 14)} className="a-spin a-reverse" style={{ transformOrigin: '690px 310px' }} />
       </g>
       <path d="M0 304 Q160 292 320 302 Q480 290 640 300 Q720 296 800 300 V360 H0 Z" fill="#041012" />
-      <g className="a-drift" filter="url(#noir-mist)">
+      <g filter="url(#noir-mist)">
         <ellipse cx="240" cy="300" rx="220" ry="14" fill="#2b5552" opacity="0.35" />
         <ellipse cx="620" cy="306" rx="200" ry="12" fill="#2b5552" opacity="0.3" />
       </g>
@@ -96,7 +96,7 @@ function Room({ tone = 'amber', x = 400, y = 120 }: { tone?: Light; x?: number; 
   return (
     <g>
       <rect width="800" height="360" fill="#05060a" />
-      <Glow x={x} y={y} r={360} light={tone} className="a-pulse" />
+      <Glow x={x} y={y} r={360} light={tone} />
       <rect width="800" height="360" fill="#05060a" opacity="0.55" />
       <path d="M0 306 H800 V360 H0 Z" fill="#030305" />
       <path d="M0 306 H800" stroke="#b9cbe8" strokeOpacity="0.12" />
@@ -190,7 +190,7 @@ function ScriptDoor({ x, base = 300, open = true }: { x: number; base?: number; 
   const top = base - 110;
   return (
     <g>
-      {open && <Glow x={x + 34} y={base - 50} r={140} light="cyan" className="a-pulse" />}
+      {open && <Glow x={x + 34} y={base - 50} r={140} light="cyan" />}
       <Sil d={`M${x - 10} ${base} V${top + 30} A44 44 0 0 1 ${x + 78} ${top + 30} V${base} Z`} />
       <path d={`M${x + 6} ${base} V${top + 34} A28 28 0 0 1 ${x + 62} ${top + 34} V${base} Z`} fill={open ? '#8ff0e0' : '#06090c'} opacity={open ? 0.85 : 1} filter={open ? 'url(#sil-glow)' : undefined} />
       {open && <path d={`M${x + 34} ${base} L${x - 80} ${base + 60} L${x + 150} ${base + 60} Z`} fill="#8ff0e0" opacity="0.12" filter="url(#noir-shaft)" />}
@@ -371,7 +371,7 @@ const FOREST = (
     <circle cx="610" cy="80" r="200" fill="url(#noir-halo)" />
     <circle cx="610" cy="80" r="34" fill="url(#noir-moon)" />
     <path d={[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => spruce(90 + i * 80, 300, 120 + (i % 3) * 30, 60, i + 3)).join(' ')} fill="#0b1712" />
-    <g filter="url(#noir-mist)" className="a-drift">
+    <g filter="url(#noir-mist)">
       <ellipse cx="400" cy="280" rx="380" ry="20" fill="#3a5a52" opacity="0.4" />
     </g>
     <Sil d={`${spruce(200, 312, 220, 110, 2)} ${spruce(600, 312, 240, 120, 5)}`} />

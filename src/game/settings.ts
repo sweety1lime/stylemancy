@@ -7,7 +7,7 @@ export interface Settings {
   sound: boolean;
   /** Полные эффекты или лёгкие — для слабых компьютеров и тех, кому мешает движение */
   effects: 'full' | 'light';
-  /** Вид игры: пиксель-арт или «Сумрак» — силуэты в лунном свете (пока только Парящие острова) */
+  /** Вид игры: «Сумрак» — силуэты в лунном свете (по умолчанию) или прежний пиксель-арт */
   look: 'pixel' | 'noir';
 }
 
@@ -15,7 +15,7 @@ const KEY = 'cascadia.settings.v1';
 
 function defaults(): Settings {
   const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  return { sound: false, effects: reduced ? 'light' : 'full', look: 'pixel' };
+  return { sound: false, effects: reduced ? 'light' : 'full', look: 'noir' };
 }
 
 let state: Settings = { ...defaults(), ...read<Partial<Settings>>(KEY, {}) };

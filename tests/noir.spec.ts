@@ -3,11 +3,13 @@ import { expect, test } from '@playwright/test';
 /** Код сцены уровня: оформление вида лежит в <style id="look"> внутри iframe */
 const lookCss = (frame: HTMLIFrameElement) => frame.contentDocument?.getElementById('look')?.textContent ?? '';
 
-test('вид «Сумрак»: переключатель, карта и уровень Парящих островов', async ({ page }) => {
+test('вид «Сумрак» по умолчанию: переключатель, карта и уровень Парящих островов', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('dialog', { name: 'Пролог: Великий Сброс' }).getByRole('button', { name: 'Пропустить' }).click();
+  // «Сумрак» — вид по умолчанию; переключатель с луной возвращает прежний пиксель-арт и обратно
+  await expect(page.locator('html')).toHaveClass(/look-noir/);
+  await page.getByRole('button', { name: 'Вид «Сумрак»' }).click();
   await expect(page.locator('html')).not.toHaveClass(/look-noir/);
-
   await page.getByRole('button', { name: 'Вид «Сумрак»' }).click();
   await expect(page.locator('html')).toHaveClass(/look-noir/);
   // Земли на карте — силуэты скал с эмблемами, герой — силуэт на шарнирах

@@ -278,7 +278,7 @@ export function NoirMapSky({ world }: { world: World }) {
         {STARS.map(([x, y, r], i) => (
           <g key={i} opacity={Math.max(0.12, 0.9 - y / 520)}>
             {r > 1.1 && <circle cx={x} cy={y} r={r * 5} fill="url(#nms-star)" />}
-            <circle className={i % 9 ? undefined : 'a-twinkle'} cx={x} cy={y} r={r} fill={c.star} />
+            <circle cx={x} cy={y} r={r} fill={c.star} />
           </g>
         ))}
         <circle cx={MOON.x} cy={MOON.y} r="380" fill="url(#noir-halo)" />
@@ -289,7 +289,7 @@ export function NoirMapSky({ world }: { world: World }) {
           <ellipse cx={MOON.x + 14} cy={MOON.y - 22} rx="9" ry="7" />
           <ellipse cx={MOON.x + 6} cy={MOON.y + 4} rx="12" ry="8" />
         </g>
-        <g className="a-drift">
+        <g>
           <path d={`M${MOON.x - 120} ${MOON.y - 30} Q${MOON.x - 60} ${MOON.y - 42} ${MOON.x} ${MOON.y - 34} Q${MOON.x + 60} ${MOON.y - 44} ${MOON.x + 130} ${MOON.y - 30} Q${MOON.x + 40} ${MOON.y - 24} ${MOON.x - 120} ${MOON.y - 30} Z`} fill={c.sky[2]} opacity="0.5" filter="url(#nms-soft)" />
           <path d={CLOUD} fill={c.sky[1]} opacity="0.88" filter="url(#nms-soft)" />
           <path d={CLOUD_TOP} fill="none" stroke="url(#nms-lining)" strokeWidth="1.2" strokeLinecap="round" />
@@ -331,23 +331,23 @@ export function NoirMapSky({ world }: { world: World }) {
         <circle cx="850" cy="340" r="200" fill="url(#nms-warm)" />
         {script ? (
           <g fill={c.far}>
-            <g className="a-spin" style={{ transformOrigin: '800px 250px' }}>
+            <g>
               <path d={gear(800, 250, 44, 12)} fillRule="evenodd" />
             </g>
-            <g className="a-spin a-reverse" style={{ transformOrigin: '900px 262px' }}>
+            <g>
               <path d={gear(900, 262, 30, 10)} fillRule="evenodd" />
             </g>
             <path d={MECH_CITY} />
             {CITY_WINDOWS.map(([x, y], i) => (
-              <rect key={i} className={i === 1 ? 'a-twinkle' : undefined} x={x} y={y} width="3" height="5" fill={c.window} />
+              <rect key={i} x={x} y={y} width="3" height="5" fill={c.window} />
             ))}
           </g>
         ) : (
-          <g className="a-hover">
+          <g>
             <path d="M800 384 V430 M880 384 V420" stroke={c.far} strokeWidth="1.6" strokeDasharray="3 2.4" />
             <path d={ACADEMY} fill={c.far} />
             {ACADEMY_WINDOWS.map(([x, y], i) => (
-              <rect key={i} className={i === 2 ? 'a-twinkle' : undefined} x={x} y={y} width="3" height="5" fill={c.window} />
+              <rect key={i} x={x} y={y} width="3" height="5" fill={c.window} />
             ))}
           </g>
         )}
@@ -426,17 +426,8 @@ export function NoirMapSky({ world }: { world: World }) {
 
       {/* Пыль в лунном свете поднимается вверх */}
       <Layer name="dust" depth={1} order={5}>
-        {DUST.map(([x, y, r, delay], i) => (
-          <circle
-            key={i}
-            className="a-rise"
-            cx={x}
-            cy={y}
-            r={r}
-            fill={i % 4 ? c.star : '#ffc890'}
-            opacity="0.6"
-            style={{ animationDelay: `${-delay * 12}s` }}
-          />
+        {DUST.map(([x, y, r], i) => (
+          <circle key={i} cx={x} cy={y} r={r} fill={i % 4 ? c.star : '#ffc890'} opacity="0.6" />
         ))}
       </Layer>
     </div>
