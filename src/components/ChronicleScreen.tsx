@@ -22,12 +22,15 @@ import {
 } from '../game/story';
 import { lands, scriptLands, type Land } from '../levels';
 import { BOOK } from '../pixel/sprites';
+import { NoirIcon } from '../noir/icons';
+import { useNoir } from '../noir/look';
 import { PixelArt } from './PixelArt';
 import { StoryScene } from './StoryScene';
 
 /** Летопись героя: вся история по главам — пересмотреть сценки и забрать грамоты. */
 export function ChronicleScreen() {
   const progress = useProgress();
+  const noir = useNoir();
   const { seen } = useStats();
   const { account } = useAuth();
   const [story, setStory] = useState<OpenStory | null>(null);
@@ -90,7 +93,7 @@ export function ChronicleScreen() {
   return (
     <main className="chronicle">
       <header className="chronicle__head">
-        <PixelArt sprite={BOOK} scale={4} />
+        {noir ? <NoirIcon name="book" size={48} /> : <PixelArt sprite={BOOK} scale={4} />}
         <div>
           <h1 className="pixel-title">Летопись героя</h1>
           <p className="chronicle__lead">

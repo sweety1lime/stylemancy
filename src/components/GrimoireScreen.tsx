@@ -8,6 +8,8 @@ import { SPELLS } from '../game/spells';
 import { useStats } from '../game/stats';
 import { allLevels } from '../levels';
 import { BOOK } from '../pixel/sprites';
+import { NoirIcon } from '../noir/icons';
+import { useNoir } from '../noir/look';
 import { PixelArt } from './PixelArt';
 import { ReviewCard } from './ReviewCard';
 import { RichText } from './RichText';
@@ -29,6 +31,7 @@ interface Quiz {
 
 export function GrimoireScreen() {
   const progress = useProgress();
+  const noir = useNoir();
   const notes = useNotes();
   const { reviewsCorrect } = useStats();
   const learned = learnedSpells(progress);
@@ -49,7 +52,7 @@ export function GrimoireScreen() {
   return (
     <main className="grimoire">
       <header className="grimoire__head">
-        <PixelArt sprite={BOOK} scale={5} />
+        {noir ? <NoirIcon name="book" size={56} /> : <PixelArt sprite={BOOK} scale={5} />}
         <div className="grimoire__title">
           <h1 className="pixel-title">Гримуар</h1>
           <p className="grimoire__count">

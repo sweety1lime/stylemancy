@@ -352,6 +352,92 @@
   display: block;
 }
 
+/* ===== Значки и тропа земли ===== */
+
+.noir-icon,
+.noir-star,
+.noir-medal {
+  display: block;
+  flex: none;
+  overflow: visible;
+}
+
+.look-noir .brand .noir-icon {
+  margin-right: 2px;
+}
+
+.noir-star--on {
+  filter: drop-shadow(0 0 3px rgba(240, 200, 144, 0.55));
+}
+
+/* Земля в шапке тропы — та же диорама, что на карте, со своим светом */
+.trail__land {
+  flex: none;
+  width: 132px;
+}
+
+.trail__land .noir-land {
+  width: 100%;
+  height: auto;
+}
+
+/* Шаги тропы — медальоны: пройденный горит янтарём, текущий дышит лунным светом */
+.look-noir .path__node {
+  border: 1px solid var(--frame);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, #171c2a, #08090f 72%);
+  color: var(--muted);
+  font-size: 24px;
+  box-shadow: none;
+  transition:
+    border-color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.look-noir .path__node:hover {
+  transform: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(224, 160, 96, 0.25);
+}
+
+.look-noir .path__node--done {
+  border-color: rgba(240, 200, 144, 0.7);
+  background: radial-gradient(circle at 50% 38%, rgba(240, 200, 144, 0.3), rgba(224, 160, 96, 0.06) 72%);
+  color: var(--gold-strong);
+  box-shadow: 0 0 16px rgba(224, 160, 96, 0.22);
+}
+
+.look-noir .path__node--current {
+  border-color: rgba(185, 203, 232, 0.85);
+  background: radial-gradient(circle at 50% 38%, rgba(185, 203, 232, 0.32), rgba(159, 180, 216, 0.05) 72%);
+  color: #eef3fb;
+  animation: noir-node 3s ease-in-out infinite alternate;
+}
+
+/* Испытание — двойное кольцо */
+.look-noir .path__node--trial {
+  outline: 1px solid var(--line-strong);
+  outline-offset: 4px;
+}
+
+.look-noir .path__node--trial.path__node--done {
+  outline-color: rgba(240, 200, 144, 0.45);
+}
+
+.look-noir .path__here {
+  color: #b9cbe8;
+}
+
+@keyframes noir-node {
+  from {
+    box-shadow: 0 0 6px rgba(185, 203, 232, 0.12);
+  }
+
+  to {
+    box-shadow: 0 0 22px rgba(185, 203, 232, 0.42);
+  }
+}
+
 /* ===== Карта ===== */
 
 .look-noir .world-map {

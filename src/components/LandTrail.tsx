@@ -6,6 +6,8 @@ import { isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
 import { gateLevel, isRegionOpen, isRegionReached } from '../game/unlock';
 import type { Land } from '../levels';
 import { EMBLEMS } from '../pixel/sprites';
+import { NoirLandArt } from '../noir/NoirLandArt';
+import { useNoir } from '../noir/look';
 import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
 import { Stars } from './Stars';
@@ -27,6 +29,7 @@ function firstUnseenIntro(land: Land, progress: ProgressMap): OpenStory | null {
 export function LandTrail({ land }: { land: Land }) {
   const progress = useProgress();
   const { account } = useAuth();
+  const noir = useNoir();
   const [story, setStory] = useState<OpenStory | null>(() => firstUnseenIntro(land, progress));
 
   function closeStory() {
@@ -37,7 +40,13 @@ export function LandTrail({ land }: { land: Land }) {
   return (
     <main className="trail">
       <header className="trail__head">
-        <PixelArt sprite={EMBLEMS[land.emblem]} scale={land.emblem === 'crystal' ? 3 : 5} />
+        {noir ? (
+          <span className="trail__land">
+            <NoirLandArt emblem={land.emblem} saved />
+          </span>
+        ) : (
+          <PixelArt sprite={EMBLEMS[land.emblem]} scale={land.emblem === 'crystal' ? 3 : 5} />
+        )}
         <div>
           <h1 className="pixel-title">{land.title}</h1>
           <p className="trail__blurb">

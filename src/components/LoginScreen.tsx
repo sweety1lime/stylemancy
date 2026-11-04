@@ -10,8 +10,7 @@ import {
 import { useProgress } from '../game/progress';
 import { navigate } from '../game/router';
 import { currentScope } from '../game/storage';
-import { PORTRAITS } from '../pixel/sprites';
-import { PixelArt } from './PixelArt';
+import { Face } from './Portrait';
 
 type Who = 'student' | 'teacher';
 type Mode = 'signin' | 'signup';
@@ -84,7 +83,7 @@ export function LoginScreen() {
     <main className="login">
       <section className="login__card px-panel">
         <div className="login__head">
-          <PixelArt sprite={PORTRAITS.flex} scale={3} />
+          <Face id="flex" scale={3} />
           <h1 className="pixel-title">Вход в Стилемантию</h1>
         </div>
 

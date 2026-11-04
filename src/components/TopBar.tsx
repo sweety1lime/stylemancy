@@ -8,6 +8,8 @@ import { sfx } from '../game/sound';
 import { useStats } from '../game/stats';
 import { BOOK, EFFECTS_OFF, EFFECTS_ON, GEMS, MEDALS, MOON, SPEAKER_OFF, SPEAKER_ON } from '../pixel/sprites';
 import { AccountDialog } from './AccountDialog';
+import { NoirIcon, NoirMedal } from '../noir/icons';
+import { useNoir } from '../noir/look';
 import { PixelArt } from './PixelArt';
 
 interface TopBarProps {
@@ -17,6 +19,7 @@ interface TopBarProps {
 
 export function TopBar({ back }: TopBarProps) {
   const stats = useStats();
+  const noir = useNoir();
   const { account, ready } = useAuth();
   const xp = totalXp(useProgress(), stats.reviewXp);
   const { rank, next, share } = rankFor(xp);
@@ -28,7 +31,7 @@ export function TopBar({ back }: TopBarProps) {
   return (
     <header className="topbar">
       <a className="brand" href="#/">
-        <PixelArt sprite={GEMS.amethyst.sprite} scale={2} />
+        {noir ? <NoirIcon name="gem" size={24} /> : <PixelArt sprite={GEMS.amethyst.sprite} scale={2} />}
         Стилемантия
       </a>
       {back && (
@@ -38,11 +41,11 @@ export function TopBar({ back }: TopBarProps) {
       )}
       <nav className="topbar__nav" aria-label="Разделы">
         <a className="topbar__link" href="#/grimoire">
-          <PixelArt sprite={BOOK} scale={2} />
+          {noir ? <NoirIcon name="book" /> : <PixelArt sprite={BOOK} scale={2} />}
           Гримуар
         </a>
         <a className="topbar__link" href="#/achievements" aria-label={`Достижения: ${achievementsGot} из ${ACHIEVEMENTS.length}`}>
-          <PixelArt sprite={MEDALS.clean} scale={2} />
+          {noir ? <NoirMedal category="clean" size={24} /> : <PixelArt sprite={MEDALS.clean} scale={2} />}
           {achievementsGot}/{ACHIEVEMENTS.length}
         </a>
       </nav>
@@ -111,7 +114,7 @@ function Toggles() {
           sfx.click();
         }}
       >
-        <PixelArt sprite={sound ? SPEAKER_ON : SPEAKER_OFF} scale={2} />
+        {noir ? <NoirIcon name={sound ? 'sound' : 'mute'} /> : <PixelArt sprite={sound ? SPEAKER_ON : SPEAKER_OFF} scale={2} />}
         <span className="visually-hidden">Звук</span>
       </button>
       <button
@@ -124,7 +127,7 @@ function Toggles() {
           sfx.click();
         }}
       >
-        <PixelArt sprite={full ? EFFECTS_ON : EFFECTS_OFF} scale={2} />
+        {noir ? <NoirIcon name={full ? 'effects' : 'effects-off'} /> : <PixelArt sprite={full ? EFFECTS_ON : EFFECTS_OFF} scale={2} />}
         <span className="visually-hidden">Полные эффекты</span>
       </button>
       <button
@@ -138,9 +141,7 @@ function Toggles() {
         }}
       >
         {noir ? (
-          <svg className="toggle__moon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
-            <path d="M12.5 2.5 A8 8 0 1 0 17.5 14 A6.4 6.4 0 1 1 12.5 2.5 Z" fill="currentColor" />
-          </svg>
+          <NoirIcon name="moon" />
         ) : (
           <PixelArt sprite={MOON} scale={2} />
         )}
