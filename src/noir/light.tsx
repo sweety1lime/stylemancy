@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import type { Figure, Role } from './types';
 import type { Light } from './lights';
 
@@ -6,9 +5,9 @@ import type { Light } from './lights';
 
 export const SIL = '#130a1d';
 
-/** Круг света: яркий центр, мягко гаснет к краю */
+/** Круг света: яркий центр, мягко гаснет к краю. Без режима смешивания: на тёмном фоне он не нужен, а стоит дорого */
 export function Glow({ x, y, r, light, className }: { x: number; y: number; r: number; light: Light; className?: string }) {
-  return <circle className={className} cx={x} cy={y} r={r} fill={`url(#sil-light-${light})`} style={{ mixBlendMode: 'screen' } as CSSProperties} />;
+  return <circle className={className} cx={x} cy={y} r={r} fill={`url(#sil-light-${light})`} />;
 }
 
 interface SilhouetteProps {

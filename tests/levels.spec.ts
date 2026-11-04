@@ -7,6 +7,11 @@ interface LevelReport {
   solutionIssues: string[];
 }
 
+// Здесь проверяется движок, а не картинка: лёгкие эффекты, чтобы фон карты не отнимал время у кода в странице
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light' })));
+});
+
 test('каждый уровень: эталон проходит, стартовый код — нет', async ({ page }) => {
   // Уровней всё больше, а JS-уровни запускают код в фоновых потоках по каждому подземелью
   test.setTimeout(120_000);

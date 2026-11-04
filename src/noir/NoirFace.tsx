@@ -36,7 +36,7 @@ export function NoirBust({ bust, pose }: { bust: Bust; pose?: Pose | null }) {
           <path key={d} d={d} fill={NIGHT} />
         ))}
       </g>
-      {bust.glow && <Glow className="a-pulse" x={bust.glow.x} y={bust.glow.y} r={bust.glow.r} light={bust.glow.light} />}
+      {bust.glow && <Glow x={bust.glow.x} y={bust.glow.y} r={bust.glow.r} light={bust.glow.light} />}
       <g className="noir-bust__lights" filter="url(#sil-glow)">
         {bust.lights.map((lit) => (
           <path key={lit.d} className={lit.className} d={lit.d} fill={lit.color} fillRule="evenodd" opacity={lit.opacity} />

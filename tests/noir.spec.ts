@@ -50,16 +50,21 @@ test('вид «Сумрак» в Крепости Блоков: свой сло�
 });
 
 test('слабый компьютер: игра сама включает лёгкие эффекты и говорит об этом', async ({ page }) => {
-  test.setTimeout(60_000);
-  // Как у живого игрока: без флага автотеста, процессор в двадцать раз медленнее
+  // Как у живого игрока: без флага автотеста. Каждый кадр рисуется 60 мс — меньше 24 кадров в секунду
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => false });
     localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true } }));
+    const raf = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (callback) =>
+      raf((time) => {
+        const end = performance.now() + 60;
+        while (performance.now() < end) {
+          // Тяжёлый кадр: компьютер не успевает
+        }
+        callback(time);
+      });
   });
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 20 });
   await page.goto('/');
-  await expect(page.locator('html')).toHaveClass(/effects-light/, { timeout: 30_000 });
+  await expect(page.locator('html')).toHaveClass(/effects-light/, { timeout: 20_000 });
   await expect(page.getByText('Включены лёгкие эффекты')).toBeVisible();
-  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
 });

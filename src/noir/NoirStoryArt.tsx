@@ -5,13 +5,17 @@ import { Rig } from './rig/Rig';
 import { BUSTS } from './mentors';
 import { NoirBust } from './NoirFace';
 import { NoirStoryScene, ScriptSky } from './NoirStoryScenes';
-import { NIGHT, NOIR_ISLAND, NOIR_OVERLAY, NOIR_SKY, NoirGem } from './scene';
+import { NIGHT, NOIR_ISLAND, NOIR_SKY, NoirGem } from './scene';
+import { GRAIN_SVG, svgUrl } from './scenes/kit';
 
 /*
   Сценки сюжета в «Сумраке». Кадр 16:9 вырезан из сцены 800 × 360 по центру.
   Здесь — пролог островов (королевство, кристаллы рухнули, Лорд Дефолт, наставник, корона победы);
   кадры остальных земель — в NoirStoryScenes. Лорд Дефолт и наставники Скриптории стоят под её бирюзовым небом.
 */
+
+/** Плёнка поверх кадра: зерно и виньетка */
+const FILM = `${svgUrl(GRAIN_SVG)}, radial-gradient(ellipse 80% 75% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.55) 100%)`;
 
 /** Наставники Скриптории: их кадр — под небом Скриптории */
 const SCRIPT_MENTORS = new Set(['oracle', 'typeof', 'if', 'for', 'return', 'push', 'key', 'query', 'click', 'tick']);
@@ -93,8 +97,9 @@ export function NoirStoryArt({ art, speaker, mood = 'laugh' }: { art: string; sp
             ))}
           </>
         )}
-        {NOIR_OVERLAY}
       </svg>
+      {/* Зерно плёнки и виньетка — картинкой поверх кадра: браузер рисует её один раз, а не каждый кадр вместе со сценкой */}
+      <span className="story-art__film" style={{ backgroundImage: FILM }} />
       {(art === 'villain' || art === 'citadel') && (
         <>
           <span className="sa-default-text sa-default-text--1">Times New Roman</span>

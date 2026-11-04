@@ -38,7 +38,8 @@ function sample(done: (median: number | null) => void) {
       return;
     }
     gaps.sort((a, b) => a - b);
-    done(gaps.length > 10 ? gaps[Math.floor(gaps.length / 2)] : null);
+    // Кадров почти не было — значит, каждый рисовался очень долго
+    done(gaps.length > 10 ? gaps[Math.floor(gaps.length / 2)] : Number.POSITIVE_INFINITY);
   };
   frame = requestAnimationFrame(tick);
 }

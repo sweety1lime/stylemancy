@@ -69,6 +69,11 @@ const CASES: Case[] = [
   { code: "let lever = document.querySelector('.lever');\nconst openGate = () => {};\nlever.onclick = openGate();", expect: ['а onclick ждёт сам рецепт'] },
 ];
 
+// Здесь проверяется движок, а не картинка: лёгкие эффекты, чтобы фон карты не отнимал время у кода в странице
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light' })));
+});
+
 test('проверка JS объясняет типичные ошибки до запуска', async ({ page }) => {
   await page.goto('/');
   const results = await page.evaluate(

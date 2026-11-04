@@ -92,7 +92,7 @@ export function NoirGem({ kind }: { kind: GemKind }) {
   const c = GEM_COLORS[kind];
   return (
     <g>
-      <path d="M14 50 L26 50 L44 104 L-4 104 Z" fill={c.main} opacity="0.16" filter="url(#noir-shaft)" style={{ mixBlendMode: 'screen' }} />
+      <path d="M14 50 L26 50 L44 104 L-4 104 Z" fill={c.main} opacity="0.16" filter="url(#noir-shaft)" />
       <Glow className="a-glow" x={20} y={28} r={36} light={kind} />
       <g filter="url(#sil-glow)">
         <path d={GEM.outer} fill={c.dark} />

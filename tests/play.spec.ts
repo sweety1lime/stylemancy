@@ -691,19 +691,20 @@ test.describe('эффекты и звук', () => {
     await expect(page.locator('html')).toHaveClass(/effects-light/);
   });
 
-  test('заклинание сработало: магический круг над сценой, в лёгком режиме — без него', async ({ page }) => {
+  test('заклинание сработало: свет расходится кольцом над сценой, в лёгком режиме — без него', async ({ page }) => {
     await openLevel(page, 1);
     await typeCode(page, '.island {\n  display: flex;\n}\n');
     await expect(page.getByText('На месте: 3 из 3')).toBeVisible();
     await cast(page);
-    await expect(page.locator('.scene__fx .magic-circle')).toHaveCount(1);
+    // В «Сумраке» вместо пиксельного магического круга — тёплое кольцо света
+    await expect(page.locator('.scene__fx .noir-ring')).toHaveCount(1);
 
     await page.getByRole('button', { name: 'Полные эффекты' }).click();
     await openLevel(page, 2);
     await typeCode(page, '.island {\n  display: flex;\n  justify-content: flex-end;\n}\n');
     await cast(page);
     await expect(page.getByText('Заклинание сработало!')).toBeVisible();
-    await expect(page.locator('.scene__fx .magic-circle')).toHaveCount(0);
+    await expect(page.locator('.scene__fx .noir-ring')).toHaveCount(0);
     await expect(page.locator('.spark')).toHaveCount(0);
   });
 

@@ -47,6 +47,11 @@ const CASES: Case[] = [
   { code: '<html><head><h1>Привет</h1></head></html>', document: true, expect: ['<h1> — видимая часть страницы: её пишут в <body>'] },
 ];
 
+// Здесь проверяется движок, а не картинка: лёгкие эффекты, чтобы фон карты не отнимал время у кода в странице
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light' })));
+});
+
 test('проверка HTML объясняет типичные ошибки студентов', async ({ page }) => {
   await page.goto('/');
   const results = await page.evaluate(
