@@ -2,8 +2,9 @@ import { useState, type CSSProperties } from 'react';
 import { faceOf, reactionsOf } from '../pixel/faces';
 import { PORTRAITS } from '../pixel/sprites';
 import type { HeroCue } from './Hero';
+import { hasNoirFace } from '../noir/mentors';
 import { NoirFace } from '../noir/NoirFace';
-import { NOIR_PORTRAITS, useNoir } from '../noir/look';
+import { useNoir } from '../noir/look';
 import { PixelArt } from './PixelArt';
 import { SpriteAnim } from './SpriteAnim';
 
@@ -15,7 +16,7 @@ export function Face({ id, scale = 4, talking = false, className }: { id: string
   const face = faceOf(id);
   // Каждый персонаж моргает в своём ритме
   const [delay] = useState(() => `${(-Math.random() * 4).toFixed(2)}s`);
-  const noir = useNoir() && NOIR_PORTRAITS.has(id);
+  const noir = useNoir() && hasNoirFace(id);
   if (noir) {
     return (
       <span className={['face face--noir', className].filter(Boolean).join(' ')}>
@@ -53,7 +54,7 @@ export function Portrait({ id, scale = 4, talking = false, cue }: PortraitProps)
       setRun((n) => n + 1);
     }
   }
-  const noir = useNoir() && NOIR_PORTRAITS.has(id);
+  const noir = useNoir() && hasNoirFace(id);
   // В «Сумраке» лицо в тени: наставник не гримасничает, у него тлеют глаза
   const current = reaction && !noir ? reactionsOf(id)[reaction] : null;
   return (

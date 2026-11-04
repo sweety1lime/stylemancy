@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { MENTOR_NOIR } from './figures';
 import { sparkle, type GemKind } from './geometry';
-import { Silhouette } from './light';
 import { VILLAIN_RIG } from './rig/villainRig';
 import { Rig } from './rig/Rig';
+import { BUSTS } from './mentors';
+import { NoirBust } from './NoirFace';
 import { NIGHT, NOIR_ISLAND, NOIR_OVERLAY, NOIR_SKY, NoirGem } from './scene';
 
 /*
@@ -38,7 +38,7 @@ function Villain({ mood }: { mood: 'laugh' | 'angry' }) {
   return <Rig key={move} rig={VILLAIN_RIG} kind="villain" move={move} rim="noir-rim" fill={NIGHT} x={280} y={-7} width={240} height={300} viewBox="-30 -30 160 200" />;
 }
 
-export function NoirStoryArt({ art, mood = 'laugh' }: { art: string; mood?: 'laugh' | 'angry' }) {
+export function NoirStoryArt({ art, speaker, mood = 'laugh' }: { art: string; speaker?: string; mood?: 'laugh' | 'angry' }) {
   return (
     <div className={`story-art story-art--noir story-art--${art}`} aria-hidden="true">
       <svg className="story-art__noir noir-art" viewBox="80 0 640 360" preserveAspectRatio="xMidYMid slice">
@@ -69,12 +69,7 @@ export function NoirStoryArt({ art, mood = 'laugh' }: { art: string; mood?: 'lau
         {art === 'mentor' && (
           <>
             <g transform="translate(244 52) scale(2.6)">
-              <Silhouette figure={MENTOR_NOIR} rim="noir-rim" fill={NIGHT} />
-              <g className="a-blink" fill="#ffb067" filter="url(#sil-glow)">
-                {MENTOR_NOIR.dots.map((d) => (
-                  <path key={d} d={d} />
-                ))}
-              </g>
+              <NoirBust bust={BUSTS[speaker ?? 'flex'] ?? BUSTS.flex} />
             </g>
             <path className="a-twinkle" d={`${sparkle(200, 90, 6)} ${sparkle(610, 140, 5)}`} fill="#e6eefc" filter="url(#sil-glow)" />
           </>

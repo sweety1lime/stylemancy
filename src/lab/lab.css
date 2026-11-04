@@ -1591,3 +1591,25 @@ figure {
     animation: none !important;
   }
 }
+
+/* Наставники «Сумрака» */
+.mentors-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.mentors-view__card {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  color: #cfd8e6;
+  font: 14px/1.2 monospace;
+}
+
+.mentors-view__small {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+}

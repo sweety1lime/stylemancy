@@ -24,7 +24,8 @@ import {
   SPRUCE,
   VILLAIN_ANIMATIONS,
 } from '../pixel/sprites';
-import { NOIR_ARTS, NOIR_PORTRAITS, useNoir } from '../noir/look';
+import { NOIR_ARTS, useNoir } from '../noir/look';
+import { hasNoirFace } from '../noir/mentors';
 import { NoirStoryArt } from '../noir/NoirStoryArt';
 import { DungeonView } from './DungeonView';
 import { PixelArt } from './PixelArt';
@@ -142,8 +143,8 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
   }, []);
 
   // В «Сумраке» нарисованы сценки Парящих островов; кадр наставника — только для тех, у кого есть силуэт
-  const noir = useNoir() && NOIR_ARTS.has(art) && (art !== 'mentor' || !speaker || NOIR_PORTRAITS.has(speaker));
-  if (noir) return <NoirStoryArt art={art} mood={villainMood(text)} />;
+  const noir = useNoir() && NOIR_ARTS.has(art) && (art !== 'mentor' || !speaker || hasNoirFace(speaker));
+  if (noir) return <NoirStoryArt art={art} speaker={speaker} mood={villainMood(text)} />;
 
   return (
     <div ref={ref} className={`story-art story-art--${art}`} aria-hidden="true">
