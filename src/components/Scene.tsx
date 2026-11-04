@@ -24,6 +24,7 @@ import {
 import type { CssLevel } from '../engine/types';
 import { fullEffects, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
+import { attachSceneCamera } from '../noir/sceneCamera';
 import { noirSceneCss } from '../noir/sceneCss';
 import { burst, fizzle, glide, isNoir, magic, snapshot } from './sceneFx';
 
@@ -169,6 +170,8 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
   function handlePlayerLoad(index: number, doc: Document) {
     prepareView(doc, level, views[index]);
     doc.documentElement.classList.toggle('effects-light', !fullEffects());
+    // «Сумрак»: планы фона сдвигаются за мышью; предметы стоят на месте
+    attachSceneCamera(doc);
     docsRef.current[index] = doc;
     apply(cssRef.current);
   }

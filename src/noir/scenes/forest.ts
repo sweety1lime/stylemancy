@@ -1,7 +1,7 @@
 import { spruce } from '../geometry';
 import { random } from '../random';
 import { C, E, P, R } from '../shapes';
-import { FILM_CSS, NIGHT, RIM, silSvg, svgUrl } from './kit';
+import { farPlane, FILM_CSS, NIGHT, RIM, silSvg, svgUrl } from './kit';
 
 /*
   Лес Селекторов в «Сумраке»: ельник в лунном тумане. Цвет предмета по-прежнему задаёт код студента —
@@ -172,7 +172,6 @@ html {
 
 body {
   background:
-    ${svgUrl(FOREST_SVG)} center bottom / 900px 220px repeat-x,
     ${svgUrl(GAPS_SVG)} left top / 600px 200px repeat-x,
     radial-gradient(ellipse 50% 60% at 85% 0%, rgba(185, 203, 232, 0.16), transparent),
     linear-gradient(180deg, #010403 0%, #030a07 40%, #08160f 75%, #0c1f17 100%);
@@ -201,15 +200,8 @@ body::after {
   }
 }
 
-/* Лучи луны сквозь кроны — поверх неба, позади предметов */
-html::before {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: ${svgUrl(BEAMS_SVG)} right top / 600px 400px no-repeat;
-  content: "";
-}
+/* Ельник и лучи луны сквозь кроны — дальний план; светлячки ближе и сдвигаются за мышью сильнее */
+${farPlane(`${svgUrl(BEAMS_SVG)} right 24px top 24px / 600px 400px no-repeat, ${svgUrl(FOREST_SVG)} center bottom 24px / 900px 220px repeat-x`)}
 
 ${colorable('.mushroom', BOLETUS)}
 ${colorable('.amanita, .poison', AMANITA)}

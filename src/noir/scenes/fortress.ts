@@ -1,7 +1,7 @@
 import { C, E, P, R } from '../shapes';
 import { bustSvg } from './bust';
 import { motifUrl } from './motifs';
-import { bricksSvg, EMBER_DUST, FILM_CSS, MIST_SVG, nightSky, SHAFTS_SVG, silSvg, svgUrl, type SilFrame } from './kit';
+import { bricksSvg, EMBER_DUST, farPlane, FILM_CSS, MIST_SVG, nightSky, SHAFTS_SVG, silSvg, svgUrl, type SilFrame } from './kit';
 
 /*
   Крепость Блоков в «Сумраке»: тёмный камень, тёплый свет факелов и холодная луна сверху.
@@ -132,9 +132,11 @@ html {
 }
 
 body {
-  background: ${TORCHES}, ${STONE} 0 0 / 48px 24px repeat, #0a090b;
+  background: ${STONE} 0 0 / 48px 24px repeat, #0a090b;
 }
-`;
+
+/* Свет факелов — свой план: за мышью он чуть смещается по камню, и стена обретает глубину */
+${farPlane(TORCHES)}`;
 
 const BARRACKS = `${COMMON}${WALL}${DUST}
 .barracks {
@@ -297,10 +299,11 @@ html {
 
 body {
   --bricks: ${STONE};
-  background:
-    ${svgUrl(RAMPART_SVG)} center bottom / 800px 120px repeat-x,
-    ${nightSky('linear-gradient(180deg, #010207 0%, #060a16 36%, #121a30 66%, #2a2234 100%)')};
+  background: ${nightSky('linear-gradient(180deg, #010207 0%, #060a16 36%, #121a30 66%, #2a2234 100%)')};
 }
+
+/* Стена крепости на горизонте — дальний план */
+${farPlane(`${svgUrl(RAMPART_SVG)} center bottom 24px / 800px 120px repeat-x`)}
 
 /* Звёзды мерцали пиксельными искрами — здесь туман у стены и лучи луны */
 body::before {
@@ -411,7 +414,12 @@ const LEVEL_CSS: Record<string, string> = {
   // Лестница башни: тёмные ступени, фонарь светит сверху
   'pos-05': `
 body {
-  background: ${TORCHES}, var(--bricks) 0 0 / 48px 24px repeat, #0a090b;
+  background: var(--bricks) 0 0 / 48px 24px repeat, #0a090b;
+}
+
+/* Внутри башни вместо стены на горизонте — свет факелов */
+html::before {
+  background: ${TORCHES};
 }
 
 /* Внутри башни нет неба: ни тумана, ни лучей луны */
@@ -439,9 +447,7 @@ body::after {
   // Вершина башни: луна — предмет уровня, на небе её больше нет
   'pos-06': `
 body {
-  background:
-    ${svgUrl(RAMPART_SVG)} center bottom / 800px 120px repeat-x,
-    ${nightSky('linear-gradient(180deg, #010207 0%, #060a16 36%, #121a30 66%, #2a2234 100%)', false)};
+  background: ${nightSky('linear-gradient(180deg, #010207 0%, #060a16 36%, #121a30 66%, #2a2234 100%)', false)};
 }
 
 body::after {

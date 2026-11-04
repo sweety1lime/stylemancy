@@ -1,5 +1,5 @@
 import { cumulus, GEM, GEM_COLORS, ridge, type GemKind, type Puff } from '../geometry';
-import { GRAIN_SVG, LIGHT, MIST_SVG, MOON_SVG, SHAFTS_SVG, STARS_SVG, svgUrl } from './kit';
+import { farPlane, GRAIN_SVG, LIGHT, MIST_SVG, MOON_SVG, SHAFTS_SVG, STARS_SVG, svgUrl } from './kit';
 import { NIGHT, NOIR_ROCK } from '../scene';
 
 /*
@@ -67,12 +67,13 @@ html {
 
 body {
   background:
-    ${svgUrl(SEA_SVG)} center bottom / auto 230px no-repeat,
     ${svgUrl(MOON_SVG)} right top / 560px 340px no-repeat,
     ${svgUrl(STARS_SVG)} left top / 800px 240px repeat-x,
     linear-gradient(180deg, #010207 0%, #050912 30%, #0d1528 58%, #1e2a46 74%, #090d18 100%);
 }
 
+/* Море облаков и хребты — дальний план: камера сдвигает его за мышью */
+${farPlane(`${svgUrl(SEA_SVG)} center bottom 24px / auto 230px no-repeat`)}
 /* Туман плывёт над морем облаков */
 body::before {
   background: ${svgUrl(MIST_SVG)} center bottom 34px / auto 110px no-repeat;

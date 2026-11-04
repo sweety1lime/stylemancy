@@ -165,3 +165,30 @@ export function bricksSvg(w: number, h: number, stone: string, mortar: string, e
 /** Пылинки в свете факела: тёплые точки, медленно плывут вверх. Для body::after; сам слой задаёт район */
 export const EMBER_DUST = `radial-gradient(circle, rgba(255, 196, 130, 0.5) 0 1px, transparent 2px),
     radial-gradient(circle, rgba(255, 176, 103, 0.28) 0 1.5px, transparent 2.5px)`;
+
+/**
+ * Дальний план сцены — отдельный слой (html::before) позади тумана и лучей. Камера сцены (sceneCamera.ts)
+ * сдвигает его чуть-чуть, туман (body::before) — сильнее, лучи (body::after) почти не трогает.
+ * Слой с запасом по краям: при сдвиге край кадра не открывается.
+ */
+export function farPlane(background: string): string {
+  return `
+html::before {
+  position: fixed;
+  inset: -24px;
+  z-index: -1;
+  pointer-events: none;
+  background: ${background};
+  translate: calc(var(--cam-x, 0) * -12px) calc(var(--cam-y, 0) * -5px);
+  content: "";
+}
+
+body::before {
+  translate: calc(var(--cam-x, 0) * -24px) calc(var(--cam-y, 0) * -8px);
+}
+
+body::after {
+  translate: calc(var(--cam-x, 0) * -4px) calc(var(--cam-y, 0) * -2px);
+}
+`;
+}

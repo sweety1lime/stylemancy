@@ -1,6 +1,6 @@
 import { GLASS } from '../../pixel/sprites';
 import { CRYSTALS_CSS, ISLAND_SKY_CSS } from './islands';
-import { bricksSvg, FILM_CSS, svgUrl } from './kit';
+import { bricksSvg, farPlane, FILM_CSS, svgUrl } from './kit';
 import { motifUrl, type Motif } from './motifs';
 
 /*
@@ -43,12 +43,13 @@ html {
 /* Стена обители: холодный камень, сверху лунный свет, у окна — цветные отсветы стёкол */
 body {
   background:
-    radial-gradient(ellipse 45% 30% at 50% 82%, rgba(167, 139, 250, 0.12), transparent),
-    radial-gradient(ellipse 60% 50% at 50% 40%, rgba(96, 165, 250, 0.08), transparent),
     linear-gradient(180deg, rgba(185, 203, 232, 0.06), transparent 40%),
     ${COLD_STONE} 0 0 / 48px 24px repeat,
     #07080c;
 }
+
+/* Цветные отсветы стёкол на камне — свой план, за мышью они чуть смещаются */
+${farPlane('radial-gradient(ellipse 45% 30% at 50% 82%, rgba(167, 139, 250, 0.14), transparent), radial-gradient(ellipse 60% 50% at 50% 40%, rgba(96, 165, 250, 0.09), transparent)')}
 
 /* Окно: за стёклами ночь, рама — тёмный камень с лунной кромкой */
 .window {
@@ -101,11 +102,11 @@ html {
 }
 
 body {
-  background:
-    linear-gradient(180deg, rgba(185, 203, 232, 0.07), transparent 45%),
-    ${COLD_STONE} 0 0 / 48px 24px repeat,
-    #06070a;
+  background: ${COLD_STONE} 0 0 / 48px 24px repeat, #06070a;
 }
+
+/* Холодный свет сверху — свой план */
+${farPlane('radial-gradient(ellipse 70% 50% at 70% 0%, rgba(185, 203, 232, 0.12), transparent), linear-gradient(180deg, rgba(185, 203, 232, 0.05), transparent 45%)')}
 
 .citadel {
   background: rgba(4, 5, 8, 0.7);
