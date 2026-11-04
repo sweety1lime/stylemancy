@@ -751,6 +751,165 @@
   }
 }
 
+/* ===== Живые моменты: заклинание, пшик, победа, проклятие ===== */
+
+/* Огоньки вместо пиксельных искр: круглые, со свечением */
+.spark--noir {
+  border-radius: 50%;
+  box-shadow:
+    0 0 6px 1px currentColor,
+    0 0 14px 3px currentColor;
+}
+
+/* Свет возвращается: тёплое сияние, кольцо и полоса света по сцене */
+.noir-bloom,
+.noir-dim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.noir-bloom {
+  background: radial-gradient(ellipse at 50% 60%, rgba(255, 214, 160, 0.38), rgba(255, 190, 120, 0.1) 45%, transparent 75%);
+  mix-blend-mode: screen;
+}
+
+.noir-ring {
+  position: absolute;
+  border: 1.5px solid rgba(255, 226, 176, 0.9);
+  border-radius: 50%;
+  box-shadow:
+    0 0 18px rgba(240, 200, 144, 0.7),
+    inset 0 0 18px rgba(240, 200, 144, 0.5);
+  pointer-events: none;
+}
+
+.noir-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 236, 200, 0.28) 45%, rgba(255, 246, 225, 0.4) 50%, rgba(255, 236, 200, 0.28) 55%, transparent);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Пшик: свет на миг гаснет, над промахом — холодный дымок */
+.noir-dim {
+  background: radial-gradient(ellipse at 50% 50%, rgba(2, 3, 8, 0.25), rgba(2, 3, 8, 0.6));
+}
+
+.noir-smoke {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(170, 186, 214, 0.6), rgba(120, 136, 166, 0.15) 60%, transparent 72%);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+/* Победа: над экраном встаёт рассвет — проклятие отступает */
+.noir-dawn {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(255, 196, 130, 0.32), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255, 230, 190, 0.25), transparent 70%);
+  mix-blend-mode: screen;
+  animation: noir-dawn 3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes noir-dawn {
+  0% {
+    opacity: 0;
+    transform: translateY(12%);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+/* Звёзды за уровень загораются по одной */
+.look-noir .result--success .noir-star--on {
+  animation: noir-star-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s backwards;
+}
+
+.look-noir .result--success .stars > :nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+.look-noir .result--success .stars > :nth-child(3) {
+  animation-delay: 1.2s;
+}
+
+@keyframes noir-star-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+    filter: drop-shadow(0 0 16px rgba(240, 200, 144, 1));
+  }
+}
+
+/* Проклятие: Лорд Дефолт появляется — свет в кадре гаснет и медленно возвращается */
+.story-art--villain .story-art__noir,
+.story-art--villain-script .story-art__noir,
+.story-art--fallen .story-art__noir {
+  animation: noir-curse 2.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes noir-curse {
+  0% {
+    filter: none;
+  }
+
+  20% {
+    filter: brightness(0.35) saturate(0.3);
+  }
+
+  100% {
+    filter: none;
+  }
+}
+
+/* Спасённая земля в первый раз: столб света поднимается от земли в небо, свет земли вспыхивает */
+.noir-land__beacon {
+  transform-origin: 50% 64%;
+}
+
+.noir-land--dawn .noir-land__beacon {
+  animation: noir-beacon-rise 2.4s cubic-bezier(0.4, 0, 0.2, 1) 0.6s backwards;
+}
+
+.noir-land--dawn .noir-land__glow {
+  animation: noir-land-flare 3s cubic-bezier(0.4, 0, 0.2, 1) 0.6s backwards;
+}
+
+@keyframes noir-beacon-rise {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+}
+
+@keyframes noir-land-flare {
+  0% {
+    opacity: 0.3;
+  }
+
+  40% {
+    opacity: 1;
+    filter: brightness(1.8);
+  }
+}
+
 /* ===== Карта ===== */
 
 .look-noir .world-map {

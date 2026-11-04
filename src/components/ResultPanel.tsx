@@ -1,7 +1,9 @@
 import type { Score } from '../engine/evaluate';
 import type { Problem } from '../engine/lint';
 import type { Achievement } from '../game/achievements';
+import { fullEffects } from '../game/settings';
 import type { Spell } from '../game/spells';
+import { useNoir } from '../noir/look';
 import { Medal } from './Medal';
 import { RichText } from './RichText';
 import { Stars } from './Stars';
@@ -34,9 +36,12 @@ interface ResultPanelProps {
 }
 
 export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, onFinale }: ResultPanelProps) {
+  // В «Сумраке» победа — рассвет над экраном: проклятие отступает
+  const dawn = useNoir() && fullEffects();
   if (outcome.kind === 'success') {
     return (
       <section className="result result--success px-panel" aria-live="polite">
+        {dawn && <div className="noir-dawn" aria-hidden="true" />}
         <div className="result__head">
           <h2 className="result__title">Заклинание сработало!</h2>
           <Stars count={outcome.score.stars} scale={4} />

@@ -25,7 +25,7 @@ import type { CssLevel } from '../engine/types';
 import { fullEffects, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
 import { noirSceneCss } from '../noir/sceneCss';
-import { burst, glide, magic, snapshot } from './sceneFx';
+import { burst, fizzle, glide, isNoir, magic, snapshot } from './sceneFx';
 
 export interface SceneHandle {
   /** Применяет код ко всем зеркалам и сразу сообщает, какие предметы на месте. */
@@ -139,6 +139,12 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
           visible.forEach(({ target, color }, k) =>
             burst(layer, target.x + target.w / 2, target.y + target.h / 2, color, { count: 14, spread: 48, delay: 250 + k * 90 }),
           );
+        } else if (isNoir()) {
+          // Пшик в «Сумраке»: свет гаснет, над промахом — холодный дымок
+          fizzle(
+            layer,
+            visible.filter((status) => !status.inPlace).map(({ target }) => ({ x: target.x + target.w / 2, y: target.y + target.h / 2 })),
+          );
         } else {
           // Пшик: серый дымок над теми, кто не на месте
           visible
@@ -147,9 +153,11 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
         }
       });
       if (!passed) {
+        // Сцену встряхивает: в пиксельном виде — рывками, в «Сумраке» — плавно
+        const smooth = isNoir();
         boxRef.current?.animate(
           [{ transform: 'none' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }],
-          { duration: 360, easing: 'steps(4, end)' },
+          { duration: smooth ? 480 : 360, easing: smooth ? 'ease-in-out' : 'steps(4, end)' },
         );
       }
     },

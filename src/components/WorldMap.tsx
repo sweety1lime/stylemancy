@@ -63,6 +63,8 @@ const PATHS: Record<WorldId, [number, number][]> = {
 
 /** Где герой стоял в прошлый раз — чтобы пройти к новой земле пешком. У каждого мира свой ключ */
 const HERO_KEYS: Record<WorldId, string> = { cascadia: 'cascadia.hero.v1', scriptoria: 'cascadia.hero.scriptoria.v1' };
+/** Земли, над которыми в «Сумраке» уже поднимался столб света: второй раз он просто горит */
+const LIT_KEY = 'cascadia.noir-lit.v1';
 /** Дверь на карте — для героя она такая же остановка, как земля */
 const DOOR = 'door';
 const HERO_SCALE = 2;
@@ -145,6 +147,16 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
     (world === 'cascadia' ? (resumeElsewhere || (allDone && doorOpen) ? DOOR : (nextLand ?? lands[0].id)) : (nextLand ?? DOOR));
   const mapRef = useRef<HTMLDivElement>(null);
   const noir = useNoir();
+  // Земли, чей свет игрок ещё не видел зажжённым: над ними столб света поднимается в первый раз
+  const litKey = scopedKey(LIT_KEY);
+  const [dawn] = useState(() => {
+    const lit = read<string[]>(litKey, []);
+    return new Set(worldLands.filter((land, i) => saved[i] && !lit.includes(land.id)).map((land) => land.id));
+  });
+  useEffect(() => {
+    if (!noir || dawn.size === 0) return;
+    write(litKey, [...new Set([...read<string[]>(litKey, []), ...dawn])]);
+  }, [noir, dawn, litKey]);
 
   // Герой сменил землю — идёт к ней пешком по карте. Новое место запоминаем, когда дошёл
   useLayoutEffect(() => {
@@ -185,7 +197,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
       href: isOpen ? hrefFor({ name: 'land', id: land.id }) : undefined,
       art: noir ? (
         <>
-          <NoirLandArt emblem={land.emblem} saved={saved[i]} fog={!isOpen} />
+          <NoirLandArt emblem={land.emblem} saved={saved[i]} fog={!isOpen} dawn={noir && fullEffects() && dawn.has(land.id)} />
           {heroHere(land.id)}
         </>
       ) : (

@@ -203,19 +203,21 @@ interface NoirLandArtProps {
   saved?: boolean;
   /** Земля в тумане: ещё закрыта */
   fog?: boolean;
+  /** Земля только что спасена: столб света поднимается в первый раз */
+  dawn?: boolean;
 }
 
 /** Облака вокруг основания скалы: остров выплывает из них, как из моря */
 const COLLAR = billows(10, 152, 108, 4, 9, 23, 126);
 
-export function NoirLandArt({ emblem, saved = false, fog = false }: NoirLandArtProps) {
+export function NoirLandArt({ emblem, saved = false, fog = false, dawn = false }: NoirLandArtProps) {
   const color = MOODS[emblem] ?? MOODS.door;
   const { shape, lights } = diorama(emblem, color);
   const id = `land-${emblem}`;
   // Слои: то, что дышит целиком (свет, столб, туман), — отдельные картинки. Их движение делает видеокарта,
   // а неподвижная скала с размытыми облаками не перерисовывается каждый кадр
   return (
-    <span className={`noir-land noir-art${fog ? ' noir-land--fog' : ''}`} aria-hidden="true">
+    <span className={`noir-land noir-art${fog ? ' noir-land--fog' : ''}${dawn ? ' noir-land--dawn' : ''}`} aria-hidden="true">
       <svg className="noir-land__layer" viewBox="0 0 160 124">
       <defs>
         <radialGradient id={`${id}-glow`} cx="0.5" cy="0.5" r="0.5">
@@ -248,9 +250,11 @@ export function NoirLandArt({ emblem, saved = false, fog = false }: NoirLandArtP
         </span>
       )}
       {saved && !fog && (
-        <svg className="noir-land__layer a-breathe" viewBox="0 0 160 124">
-          <path d="M70 80 L60 -30 H104 L94 80 Z" fill={`url(#${id}-beam)`} filter="url(#noir-shaft)" />
-        </svg>
+        <span className="noir-land__layer noir-land__beacon">
+          <svg className="noir-land__layer a-breathe" viewBox="0 0 160 124">
+            <path d="M70 80 L60 -30 H104 L94 80 Z" fill={`url(#${id}-beam)`} filter="url(#noir-shaft)" />
+          </svg>
+        </span>
       )}
       <svg className="noir-land__layer" viewBox="0 0 160 124">
         <g filter="url(#noir-rim)">
