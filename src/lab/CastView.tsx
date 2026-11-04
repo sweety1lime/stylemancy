@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { SpriteAnim } from '../components/SpriteAnim';
 import type { Sprite } from '../pixel/pixelArt';
 import { HERO_ANIMATIONS, VILLAIN_ANIMATIONS } from '../pixel/sprites';
-import { HERO_MOVES, HERO_RIG } from './rig/heroRig';
-import { Rig } from './rig/Rig';
-import type { Move, RigNode } from './rig/rigTypes';
-import { VILLAIN_MOVES, VILLAIN_RIG } from './rig/villainRig';
+import { HERO_MOVES, HERO_RIG } from '../noir/rig/heroRig';
+import { Rig } from '../noir/rig/Rig';
+import type { Move, RigNode } from '../noir/rig/rigTypes';
+import { VILLAIN_MOVES, VILLAIN_RIG } from '../noir/rig/villainRig';
 
 /** Кадров в секунду у нынешних пиксельных анимаций — как в игре */
 const PIXEL_FPS: Record<string, number> = { idle: 2, walk: 8 };

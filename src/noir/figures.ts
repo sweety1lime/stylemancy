@@ -1,4 +1,4 @@
-import type { Figure } from './figures';
+import type { Figure } from './types';
 
 /*
   Персонажи «Сумрака»: взрослые пропорции (голова около 1/8 роста), худые угловатые силуэты.

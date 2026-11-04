@@ -2,7 +2,13 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 // Пиксельный шрифт с правильной русской кириллицей — для заголовков и кнопок
 import '@fontsource/tiny5/400.css'
+// Шрифты вида «Сумрак»: файлы грузятся, только когда вид включён и текст ими набран
+import '@fontsource/cormorant-garamond/600.css'
+import '@fontsource/golos-text/400.css'
+import '@fontsource/golos-text/500.css'
 import './index.css'
+import './noir/noir.css'
+import './noir/rig/rig.css'
 import App from './App.tsx'
 import { CrashScreen, ErrorBoundary } from './components/ErrorBoundary'
 import { spriteCssUrl } from './pixel/pixelArt'

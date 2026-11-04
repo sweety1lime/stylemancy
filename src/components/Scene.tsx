@@ -24,6 +24,7 @@ import {
 import type { CssLevel } from '../engine/types';
 import { fullEffects, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
+import { noirSceneCss } from '../noir/sceneCss';
 import { burst, glide, magic, snapshot } from './sceneFx';
 
 export interface SceneHandle {
@@ -53,7 +54,8 @@ const MIN_ROW_SCALE = 0.45;
 export function Scene({ level, initialCss, celebrate, onStatuses, ref }: SceneProps) {
   const views = useMemo(() => viewsOf(level), [level]);
   const multi = views.length > 1;
-  const srcDoc = useMemo(() => sceneDocument(level), [level]);
+  const { look } = useSettings();
+  const srcDoc = useMemo(() => sceneDocument(level, look === 'noir' ? noirSceneCss(level.regionId) : ''), [level, look]);
   const boxRef = useRef<HTMLDivElement>(null);
   const docsRef = useRef<(Document | undefined)[]>([]);
   const goalsRef = useRef<(ItemBox[] | undefined)[]>([]);

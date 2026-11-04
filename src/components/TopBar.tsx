@@ -6,7 +6,7 @@ import { rankFor, totalXp } from '../game/ranks';
 import { settings, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
 import { useStats } from '../game/stats';
-import { BOOK, EFFECTS_OFF, EFFECTS_ON, GEMS, MEDALS, SPEAKER_OFF, SPEAKER_ON } from '../pixel/sprites';
+import { BOOK, EFFECTS_OFF, EFFECTS_ON, GEMS, MEDALS, MOON, SPEAKER_OFF, SPEAKER_ON } from '../pixel/sprites';
 import { AccountDialog } from './AccountDialog';
 import { PixelArt } from './PixelArt';
 
@@ -94,10 +94,11 @@ export function TopBar({ back }: TopBarProps) {
   );
 }
 
-/** Звук и эффекты: два значка в верхней панели. Настройки — для этого компьютера. */
+/** Звук, эффекты и вид игры: три значка в верхней панели. Настройки — для этого компьютера. */
 function Toggles() {
-  const { sound, effects } = useSettings();
+  const { sound, effects, look } = useSettings();
   const full = effects === 'full';
+  const noir = look === 'noir';
   return (
     <div className="toggles">
       <button
@@ -125,6 +126,25 @@ function Toggles() {
       >
         <PixelArt sprite={full ? EFFECTS_ON : EFFECTS_OFF} scale={2} />
         <span className="visually-hidden">Полные эффекты</span>
+      </button>
+      <button
+        type="button"
+        className="toggle"
+        aria-pressed={noir}
+        title={noir ? 'Вид: «Сумрак» — силуэты в лунном свете' : 'Вид: пиксель-арт'}
+        onClick={() => {
+          settings.update({ look: noir ? 'pixel' : 'noir' });
+          sfx.click();
+        }}
+      >
+        {noir ? (
+          <svg className="toggle__moon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+            <path d="M12.5 2.5 A8 8 0 1 0 17.5 14 A6.4 6.4 0 1 1 12.5 2.5 Z" fill="currentColor" />
+          </svg>
+        ) : (
+          <PixelArt sprite={MOON} scale={2} />
+        )}
+        <span className="visually-hidden">Вид «Сумрак»</span>
       </button>
     </div>
   );

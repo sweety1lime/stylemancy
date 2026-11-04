@@ -1,5 +1,5 @@
-import { Glow } from '../kits/silParts';
-import { sparkle } from '../shapes';
+import { Glow } from '../light';
+import { sparkle } from '../geometry';
 import type { Move, RigNode } from './rigTypes';
 
 /*

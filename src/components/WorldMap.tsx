@@ -31,6 +31,8 @@ import {
   SCRIPT_DOOR_OPEN,
   SKY_SPARK,
 } from '../pixel/sprites';
+import { useNoir } from '../noir/look';
+import { NoirLandArt, NoirMapHero } from '../noir/NoirLandArt';
 import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
 import { SpriteAnim } from './SpriteAnim';
@@ -141,6 +143,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
     resumeHere ??
     (world === 'cascadia' ? (resumeElsewhere || (allDone && doorOpen) ? DOOR : (nextLand ?? lands[0].id)) : (nextLand ?? DOOR));
   const mapRef = useRef<HTMLDivElement>(null);
+  const noir = useNoir();
 
   // Герой сменил землю — идёт к ней пешком по карте. Новое место запоминаем, когда дошёл
   useLayoutEffect(() => {
@@ -150,12 +153,13 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
     const map = mapRef.current;
     const from = was && was !== heroLand ? map?.querySelector(`[data-land="${was}"] .land__art`) : null;
     const hero = map?.querySelector<HTMLElement>(`[data-land="${heroLand}"] .land__hero`);
-    if (!map || !from || !hero || !fullEffects()) {
+    // Пешком идёт пиксельный герой; в «Сумраке» герой просто ждёт у новой земли
+    if (!map || !from || !hero || !fullEffects() || noir) {
       arrive();
       return;
     }
     return walk(map, from, hero, arrive);
-  }, [heroLand, world]);
+  }, [heroLand, world, noir]);
 
   function landStats(list: Land[]) {
     const levels = list.flatMap((land) => land.regions.flatMap((region) => region.levels));
@@ -167,7 +171,8 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
   }
 
   const heroHere = (id: string) =>
-    id === heroLand && <SpriteAnim className="land__hero" frames={HERO_ANIMATIONS.idle} fps={2} scale={HERO_SCALE} />;
+    id === heroLand &&
+    (noir ? <NoirMapHero /> : <SpriteAnim className="land__hero" frames={HERO_ANIMATIONS.idle} fps={2} scale={HERO_SCALE} />);
 
   const landTiles: Tile[] = worldLands.map((land, i) => {
     const stats = landStats([land]);
@@ -177,7 +182,12 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
       key: land.id,
       className: `land land--${i + 1}${isOpen ? '' : ' land--fog'}`,
       href: isOpen ? hrefFor({ name: 'land', id: land.id }) : undefined,
-      art: (
+      art: noir ? (
+        <>
+          <NoirLandArt emblem={land.emblem} saved={saved[i]} fog={!isOpen} />
+          {heroHere(land.id)}
+        </>
+      ) : (
         <>
           <PixelArt className="land__emblem" sprite={EMBLEMS[land.emblem]} scale={EMBLEM_SCALE[land.emblem] ?? 4} />
           <PixelArt className="land__rock" sprite={LAND_ROCKS[land.emblem]} scale={4} />
@@ -204,7 +214,12 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
           key: DOOR,
           className: `land land--door${doorOpen ? '' : ' land--locked'}`,
           href: doorOpen ? hrefFor({ name: 'scriptoria' }) : undefined,
-          art: (
+          art: noir ? (
+            <>
+              <NoirLandArt emblem="door" saved={doorOpen} />
+              {heroHere(DOOR)}
+            </>
+          ) : (
             <>
               <PixelArt className="land__door" sprite={doorOpen ? SCRIPT_DOOR_OPEN : SCRIPT_DOOR} scale={3} />
               <PixelArt className="land__rock" sprite={LAND_ROCKS.door} scale={4} />
@@ -223,7 +238,12 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
           key: DOOR,
           className: 'land land--door',
           href: hrefFor({ name: 'map' }),
-          art: (
+          art: noir ? (
+            <>
+              <NoirLandArt emblem="door" saved />
+              {heroHere(DOOR)}
+            </>
+          ) : (
             <>
               <PixelArt className="land__door" sprite={SCRIPT_DOOR_OPEN} scale={3} />
               <PixelArt className="land__rock" sprite={LAND_ROCKS.door} scale={4} />

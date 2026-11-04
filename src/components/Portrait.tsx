@@ -2,6 +2,8 @@ import { useState, type CSSProperties } from 'react';
 import { faceOf, reactionsOf } from '../pixel/faces';
 import { PORTRAITS } from '../pixel/sprites';
 import type { HeroCue } from './Hero';
+import { NoirFace } from '../noir/NoirFace';
+import { NOIR_PORTRAITS, useNoir } from '../noir/look';
 import { PixelArt } from './PixelArt';
 import { SpriteAnim } from './SpriteAnim';
 
@@ -13,6 +15,14 @@ export function Face({ id, scale = 4, talking = false, className }: { id: string
   const face = faceOf(id);
   // Каждый персонаж моргает в своём ритме
   const [delay] = useState(() => `${(-Math.random() * 4).toFixed(2)}s`);
+  const noir = useNoir() && NOIR_PORTRAITS.has(id);
+  if (noir) {
+    return (
+      <span className={['face face--noir', className].filter(Boolean).join(' ')}>
+        <NoirFace id={id} size={16 * scale} />
+      </span>
+    );
+  }
   return (
     <span className={['face', talking && 'face--talking', className].filter(Boolean).join(' ')} style={{ '--blink-delay': delay } as CSSProperties}>
       <PixelArt sprite={PORTRAITS[id] ?? PORTRAITS.flex} scale={scale} />
@@ -43,9 +53,11 @@ export function Portrait({ id, scale = 4, talking = false, cue }: PortraitProps)
       setRun((n) => n + 1);
     }
   }
-  const current = reaction ? reactionsOf(id)[reaction] : null;
+  const noir = useNoir() && NOIR_PORTRAITS.has(id);
+  // В «Сумраке» лицо в тени: наставник не гримасничает, у него тлеют глаза
+  const current = reaction && !noir ? reactionsOf(id)[reaction] : null;
   return (
-    <span className={reaction ? `portrait portrait--${reaction}` : 'portrait'}>
+    <span className={[reaction && !noir ? `portrait portrait--${reaction}` : 'portrait', noir && 'portrait--noir'].filter(Boolean).join(' ')}>
       {current ? (
         <SpriteAnim
           key={run}

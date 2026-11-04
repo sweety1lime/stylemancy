@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
-import type { Figure, Role } from '../figures';
-import type { Light } from './silLights';
+import type { Figure, Role } from './types';
+import type { Light } from './lights';
 
-/* Детали стиля «Силуэты и свет» */
+/* Свет и силуэты «Сумрака»: тёмная фигура с контровым светом и круги света вокруг огоньков */
 
 export const SIL = '#130a1d';
 

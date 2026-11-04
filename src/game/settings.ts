@@ -7,21 +7,24 @@ export interface Settings {
   sound: boolean;
   /** Полные эффекты или лёгкие — для слабых компьютеров и тех, кому мешает движение */
   effects: 'full' | 'light';
+  /** Вид игры: пиксель-арт или «Сумрак» — силуэты в лунном свете (пока только Парящие острова) */
+  look: 'pixel' | 'noir';
 }
 
 const KEY = 'cascadia.settings.v1';
 
 function defaults(): Settings {
   const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  return { sound: false, effects: reduced ? 'light' : 'full' };
+  return { sound: false, effects: reduced ? 'light' : 'full', look: 'pixel' };
 }
 
 let state: Settings = { ...defaults(), ...read<Partial<Settings>>(KEY, {}) };
 const listeners = new Set<() => void>();
 
-/** Лёгкие эффекты — класс на <html>: по нему CSS выключает фоновые анимации. */
+/** Лёгкие эффекты и вид — классы на <html>: по ним CSS выключает фоновые анимации и включает оформление «Сумрака». */
 function applyEffectsClass() {
   document.documentElement.classList.toggle('effects-light', state.effects === 'light');
+  document.documentElement.classList.toggle('look-noir', state.look === 'noir');
 }
 applyEffectsClass();
 

@@ -1,0 +1,339 @@
+/*
+  Вид «Сумрак»: силуэты в лунном свете. Включается классом look-noir на <html> (переключатель с луной).
+  Здесь — медленное движение рисунков (.noir-art) и оформление интерфейса поверх пиксельного.
+*/
+
+.noir-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ===== Движение рисунков: облака и туман плывут, пыль поднимается, огоньки дышат ===== */
+
+.noir-art .a-twinkle,
+.noir-art .a-glow,
+.noir-art .a-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.noir-art .a-twinkle {
+  animation: noir-twinkle 2.6s ease-in-out infinite;
+}
+
+.noir-art .a-glow {
+  animation: noir-glow 2.2s ease-in-out infinite;
+}
+
+.noir-art .a-blink {
+  animation: noir-blink 4.6s infinite;
+}
+
+.noir-art .a-drift {
+  animation: noir-drift 26s ease-in-out infinite alternate;
+}
+
+.noir-art .a-hover {
+  animation: noir-hover 9s ease-in-out infinite alternate;
+}
+
+.noir-art .a-float {
+  animation: noir-float 6s ease-in-out infinite;
+}
+
+.noir-art .a-rise {
+  animation: noir-rise 11s linear infinite;
+}
+
+.noir-art .a-delay {
+  animation-delay: -1.3s;
+}
+
+@keyframes noir-twinkle {
+  50% {
+    transform: scale(0.45);
+    opacity: 0.35;
+  }
+}
+
+@keyframes noir-glow {
+  50% {
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+}
+
+@keyframes noir-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes noir-drift {
+  from {
+    transform: translateX(-22px);
+  }
+
+  to {
+    transform: translateX(22px);
+  }
+}
+
+@keyframes noir-hover {
+  from {
+    transform: translateY(-3px);
+  }
+
+  to {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes noir-float {
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes noir-rise {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noir-art *,
+  .rig * {
+    animation: none !important;
+  }
+}
+
+/* ===== Интерфейс ===== */
+
+.look-noir {
+  --bg: #07080d;
+  --panel: #0d1018;
+  --panel-2: #121622;
+  --panel-3: #1a1f2e;
+  --ink: #020306;
+  --frame: rgba(228, 220, 205, 0.14);
+  --line: rgba(228, 220, 205, 0.1);
+  --line-strong: rgba(228, 220, 205, 0.22);
+  --text: #e4dccd;
+  --muted: #a39d92;
+  --muted-2: #6f6a62;
+  --gold: #e0a060;
+  --gold-strong: #f0c890;
+  --gold-soft: rgba(224, 160, 96, 0.12);
+  --violet: #9fb4d8;
+  --violet-soft: rgba(159, 180, 216, 0.12);
+  --font-ui: "Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-pixel: "Cormorant Garamond", Georgia, serif;
+}
+
+/* Ночь вместо пиксельных звёзд: холодный свет сверху справа, как от луны */
+.look-noir body {
+  background:
+    radial-gradient(ellipse at 85% -10%, rgba(120, 140, 190, 0.16), transparent 55%),
+    linear-gradient(180deg, #090b12 0%, #05060a 100%) fixed;
+}
+
+.look-noir .topbar {
+  border-bottom: 1px solid var(--frame);
+  background: rgba(9, 11, 18, 0.94);
+  box-shadow: none;
+}
+
+.look-noir .brand {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+
+.look-noir .pixel-title,
+.look-noir .pixel-subtitle {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+
+.look-noir .px-panel {
+  border: 1px solid var(--frame);
+  background: rgba(13, 16, 24, 0.92);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* Кнопки — тонкий контур, буквы с разрядкой; главная — янтарная, как свет магии */
+.look-noir .button {
+  border: 1px solid var(--frame);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: none;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
+}
+
+.look-noir .button:active:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+}
+
+.look-noir .button--cast {
+  border-color: rgba(224, 160, 96, 0.75);
+  background: rgba(224, 160, 96, 0.08);
+  color: var(--gold-strong);
+}
+
+.look-noir .button--cast:hover {
+  background: rgba(224, 160, 96, 0.18);
+  box-shadow: 0 0 26px rgba(224, 160, 96, 0.28);
+}
+
+/* Подсказка клавиш на кнопке: светлая на тёмном, иначе её не видно */
+.look-noir .button kbd {
+  background: rgba(240, 200, 144, 0.12);
+  color: var(--gold-strong);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.look-noir .button--ghost {
+  background: transparent;
+  color: var(--text);
+}
+
+.look-noir .button--ghost:not(:disabled):hover {
+  background: rgba(228, 220, 205, 0.06);
+}
+
+.look-noir .chip,
+.look-noir .tabs,
+.look-noir .rank__bar,
+.look-noir .path__node {
+  border-width: 1px;
+  border-color: var(--frame);
+  box-shadow: none;
+}
+
+.look-noir .chip--on {
+  background: rgba(224, 160, 96, 0.18);
+  color: var(--gold-strong);
+}
+
+.look-noir .toggle {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--frame);
+  color: var(--gold-strong);
+}
+
+.look-noir .toggle:hover,
+.look-noir .toggle:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+.look-noir .portrait {
+  padding: 0;
+  border: 1px solid var(--frame);
+  background: #07090f;
+  box-shadow: none;
+}
+
+.face--noir,
+.noir-face {
+  display: block;
+}
+
+/* ===== Карта ===== */
+
+.look-noir .world-map {
+  border: 1px solid var(--frame);
+  /* Луна за кадром справа сверху: на сетке земель её диску нет свободного места, виден только холодный свет */
+  background:
+    radial-gradient(ellipse at 92% -6%, rgba(185, 203, 232, 0.22), rgba(125, 144, 180, 0.08) 30%, transparent 50%),
+    linear-gradient(180deg, #04060b 0%, #0d1322 55%, #1b2437 100%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* Пиксельные облака и шестерни неба — не в этом виде */
+.look-noir .world-map__sky {
+  display: none;
+}
+
+.noir-land {
+  display: block;
+  overflow: visible;
+}
+
+.noir-land--fog {
+  opacity: 0.6;
+}
+
+.land__hero--noir {
+  bottom: 22px;
+  left: -4px;
+}
+
+/* ===== Сценки сюжета ===== */
+
+.look-noir .story-art--noir {
+  background: #06070c;
+  box-shadow: inset 0 0 0 1px var(--frame);
+}
+
+.story-art__noir {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Скучные «значения по умолчанию» вокруг Лорда Дефолта — бледные, как призраки */
+.look-noir .story-art--noir .sa-default-text {
+  z-index: 1;
+  color: rgba(200, 212, 235, 0.42);
+  text-shadow: 0 0 10px rgba(160, 180, 220, 0.45);
+}
+
+/* ===== Уровень ===== */
+
+/* Тонкая рамка вместо пиксельной: тени не меняют размеры, сцена остаётся ровно своего размера */
+.look-noir .scene__viewport {
+  box-shadow:
+    0 0 0 1px var(--frame),
+    0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.hero--noir {
+  display: inline-block;
+  line-height: 0;
+}
+
+.hero--noir svg {
+  display: block;
+}

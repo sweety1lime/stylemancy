@@ -13,6 +13,8 @@ import { useProgress } from './game/progress';
 import { isRegionOpen } from './game/unlock';
 import { hrefFor, navigate, parseHash, useHash } from './game/router';
 import { findLand, findLevel, isScriptLand, type Land } from './levels';
+import { useNoir } from './noir/look';
+import { NoirDefs } from './noir/NoirDefs';
 import './App.css';
 
 // Уровни с редактором кода и редкие экраны грузятся, когда до них дошли: так карта открывается быстрее
@@ -39,8 +41,10 @@ function Loading() {
 
 /** Каркас экрана: верхняя панель, содержимое и уведомления о достижениях. */
 function Screen({ back, children }: { back?: { href: string; label: string }; children: ReactNode }) {
+  const noir = useNoir();
   return (
     <div className="app">
+      {noir && <NoirDefs />}
       <TopBar back={back} />
       {/* На новом адресе сломанный экран рисуется заново. Адрес без своей подписки: иначе ключ
           сменится раньше, чем App передаст новый экран, и старый экран сломается ещё раз */}

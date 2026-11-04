@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { HERO_ANIMATIONS, type HeroAnimation } from '../pixel/sprites';
+import { HeroNoir } from '../noir/HeroNoir';
+import { useNoir } from '../noir/look';
 import { SpriteAnim } from './SpriteAnim';
 
 /** Как играется каждое движение героя: скорость и сколько раз */
@@ -18,9 +20,13 @@ export interface HeroCue {
 
 /**
  * Герой у кнопки «Сотворить»: дышит, а на каждое заклинание взмахивает посохом —
- * и подпрыгивает от радости или растерянно оглядывается.
+ * и подпрыгивает от радости или растерянно оглядывается. В «Сумраке» — силуэт на шарнирах.
  */
 export function Hero({ cue, scale = 3 }: { cue?: HeroCue | null; scale?: number }) {
+  return useNoir() ? <HeroNoir cue={cue} /> : <PixelHero cue={cue} scale={scale} />;
+}
+
+function PixelHero({ cue, scale }: { cue?: HeroCue | null; scale: number }) {
   const [move, setMove] = useState<HeroAnimation>('idle');
   const [seen, setSeen] = useState(cue);
   const [run, setRun] = useState(0);

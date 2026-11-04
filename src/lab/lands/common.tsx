@@ -1,7 +1,7 @@
-import { HERO_NOIR } from '../figuresNoir';
+import { HERO_NOIR } from '../../noir/figures';
 import { random } from '../voronoi';
-import { Silhouette } from '../kits/silParts';
-import type { Light } from '../kits/silLights';
+import { Silhouette } from '../../noir/light';
+import type { Light } from '../../noir/lights';
 
 /* Общее для сцен «Света земель»: контровой свет нужного цвета, ель, шестерня, герой в кадре */
 

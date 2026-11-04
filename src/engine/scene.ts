@@ -13,11 +13,13 @@ body { display: flex; align-items: center; justify-content: center; font-family:
 /**
  * Документ сцены для iframe. Код студента вставляется потом в <style id="player">
  * через textContent — так он не может сломать разметку. Чары Лорда Дефолта — после него.
+ * lookCss — оформление вида игры («Сумрак»): только картинки, поверх оформления района и до кода студента.
  */
-export function sceneDocument(level: CssLevel): string {
+export function sceneDocument(level: CssLevel, lookCss = ''): string {
   return `<!doctype html><html lang="ru"><head><meta charset="utf-8">
 <style>${BASE_SCENE_CSS}</style>
 <style>${level.sceneCss}</style>
+<style id="look">${lookCss}</style>
 <style id="player"></style>
 <style id="locked">${level.lockedCss ?? ''}</style>
 </head><body>${level.html}</body></html>`;

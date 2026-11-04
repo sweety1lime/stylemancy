@@ -1,0 +1,45 @@
+import { expect, test } from '@playwright/test';
+
+/** Код сцены уровня: оформление вида лежит в <style id="look"> внутри iframe */
+const lookCss = (frame: HTMLIFrameElement) => frame.contentDocument?.getElementById('look')?.textContent ?? '';
+
+test('вид «Сумрак»: переключатель, карта и уровень Парящих островов', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('dialog', { name: 'Пролог: Великий Сброс' }).getByRole('button', { name: 'Пропустить' }).click();
+  await expect(page.locator('html')).not.toHaveClass(/look-noir/);
+
+  await page.getByRole('button', { name: 'Вид «Сумрак»' }).click();
+  await expect(page.locator('html')).toHaveClass(/look-noir/);
+  // Земли на карте — силуэты скал с эмблемами, герой — силуэт на шарнирах
+  await expect(page.locator('.noir-land').first()).toBeVisible();
+  await expect(page.locator('.land__hero--noir')).toBeVisible();
+
+  // Сцена уровня в «Сумраке», а проверка решения работает как обычно: оформление не двигает предметы
+  await page.goto('/#/level/flex-01');
+  await expect(page.getByRole('heading', { name: 'Пробуждение' })).toBeVisible();
+  await expect.poll(() => page.locator('.scene__frame').first().evaluate(lookCss)).toContain('.island');
+  await expect(page.getByText('На месте: 1 из 3')).toBeVisible();
+  await page.keyboard.type('display: flex;');
+  await expect(page.getByText('На месте: 3 из 3')).toBeVisible();
+  await page.getByRole('button', { name: /Сотворить/ }).click();
+  await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  await expect(page.locator('.hero--noir')).toBeVisible();
+
+  // Выбор вида хранится в настройках этого компьютера
+  await page.reload();
+  await expect(page.locator('html')).toHaveClass(/look-noir/);
+  await expect(page.locator('.hero--noir')).toBeVisible();
+});
+
+test('вид «Сумрак» не трогает сцены земель, которые ещё пиксельные', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light', look: 'noir' }));
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true } }));
+  });
+  // Крепость Блоков ещё пиксельная: слой оформления вида в её сцене пустой
+  await page.goto('/#/level/box-01');
+  await expect(page.getByRole('heading', { name: 'Ящик по мерке' })).toBeVisible();
+  await expect(page.locator('html')).toHaveClass(/look-noir/);
+  await expect.poll(() => page.locator('.scene__frame').first().evaluate((frame: HTMLIFrameElement) => frame.contentDocument?.getElementById('look') !== null)).toBe(true);
+  expect(await page.locator('.scene__frame').first().evaluate(lookCss)).toBe('');
+});

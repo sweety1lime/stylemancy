@@ -2,8 +2,7 @@ import { HERO_FIGURE, MENTOR_FIGURE, VILLAIN_FIGURE } from '../figures';
 import { DUNGEON_MAP, GEM, GEM_COLORS, ISLAND, sparkle, TILE } from '../shapes';
 import type { Kit } from '../types';
 import { random } from '../voronoi';
-import { LIGHTS } from './silLights';
-import { Glow, SIL, Silhouette } from './silParts';
+import { Glow, SIL, Silhouette } from '../../noir/light';
 
 /*
   Силуэты и свет: тёмные фигуры против низкой луны на закатном небе, контровой свет по краю,
@@ -46,13 +45,6 @@ const defs = (
       <stop offset="0" stopColor="#1a0c26" stopOpacity="0" />
       <stop offset="1" stopColor="#1a0c26" stopOpacity="0.92" />
     </linearGradient>
-    {Object.entries(LIGHTS).map(([name, color]) => (
-      <radialGradient key={name} id={`sil-light-${name}`} cx="0.5" cy="0.5" r="0.5">
-        <stop offset="0" stopColor={color} stopOpacity="0.85" />
-        <stop offset="0.35" stopColor={color} stopOpacity="0.3" />
-        <stop offset="1" stopColor={color} stopOpacity="0" />
-      </radialGradient>
-    ))}
     {/* Контровой свет: край силуэта сверху и с боков подсвечен тёплым */}
     <filter id="sil-rim" x="-10%" y="-10%" width="120%" height="120%">
       <feMorphology in="SourceAlpha" operator="erode" radius="0.9" result="inner" />
@@ -76,13 +68,6 @@ const defs = (
       <feMerge>
         <feMergeNode in="SourceGraphic" />
         <feMergeNode in="soft" />
-      </feMerge>
-    </filter>
-    <filter id="sil-glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="2.4" result="blur" />
-      <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
   </>

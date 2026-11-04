@@ -1,4 +1,4 @@
-import { sparkle } from '../shapes';
+import { sparkle } from '../geometry';
 import type { Move, RigNode } from './rigTypes';
 
 /*

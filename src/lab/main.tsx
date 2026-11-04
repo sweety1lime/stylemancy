@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/tiny5/400.css';
 import './lab.css';
-import './rig/rig.css';
+import '../noir/rig/rig.css';
 import { spriteCssUrl } from '../pixel/pixelArt';
 import { SKY_TILE } from '../pixel/sprites';
 import { Lab } from './Lab';
