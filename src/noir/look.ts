@@ -7,6 +7,3 @@ export function useNoir(): boolean {
 
 /** Сценки сюжета, нарисованные в «Сумраке»: пролог и победа Парящих островов */
 export const NOIR_ARTS = new Set(['kingdom', 'fallen', 'villain', 'mentor', 'crown']);
-
-/** Районы, чьи сцены уровней уже в «Сумраке» */
-export const NOIR_REGIONS = new Set(['floating-islands']);

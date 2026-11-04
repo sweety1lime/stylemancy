@@ -55,7 +55,7 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
   const views = useMemo(() => viewsOf(level), [level]);
   const multi = views.length > 1;
   const { look } = useSettings();
-  const srcDoc = useMemo(() => sceneDocument(level, look === 'noir' ? noirSceneCss(level.regionId) : ''), [level, look]);
+  const srcDoc = useMemo(() => sceneDocument(level, look === 'noir' ? noirSceneCss(level.regionId, level.id) : ''), [level, look]);
   const boxRef = useRef<HTMLDivElement>(null);
   const docsRef = useRef<(Document | undefined)[]>([]);
   const goalsRef = useRef<(ItemBox[] | undefined)[]>([]);

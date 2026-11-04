@@ -1,6 +1,7 @@
 import { MENTOR_NOIR } from './figures';
-import { circle, ellipse, star } from './geometry';
+import { star } from './geometry';
 import type { Light } from './lights';
+import { C, E, P, R, ring } from './shapes';
 
 /*
   Наставники «Сумрака» погрудно, рамка 120 × 120. Лицо в тени: узнаём по силуэту (шляпа, причёска, вещь в руках)
@@ -25,18 +26,6 @@ export interface Bust {
   /** Круг света вокруг главного огонька */
   glow?: { x: number; y: number; r: number; light: Light };
 }
-
-const C = circle;
-const E = ellipse;
-const R = (x: number, y: number, w: number, h: number) => `M${x} ${y} h${w} v${h} h${-w} Z`;
-/** Многоугольник по парам координат */
-function P(...n: number[]): string {
-  const points: string[] = [];
-  for (let i = 0; i < n.length; i += 2) points.push(`${n[i]} ${n[i + 1]}`);
-  return `M${points.join(' L')} Z`;
-}
-/** Кольцо толщиной w: внутренний круг — дырка при заливке evenodd */
-const ring = (cx: number, cy: number, r: number, w: number) => `${C(cx, cy, r)} ${C(cx, cy, r - w)}`;
 
 const HEAD = E(60, 58, 11, 13.5);
 const NECK = 'M53.5 66 L52.5 84 H67.5 L66.5 66 Z';
