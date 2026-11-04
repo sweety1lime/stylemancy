@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { sparkle, type GemKind } from './geometry';
+import { HERO_RIG } from './rig/heroRig';
 import { VILLAIN_RIG } from './rig/villainRig';
 import { Rig } from './rig/Rig';
-import { BUSTS } from './mentors';
+import { BUSTS, type Pose } from './mentors';
 import { NoirBust } from './NoirFace';
 import { NoirStoryScene, ScriptSky } from './NoirStoryScenes';
 import { NIGHT, NOIR_ISLAND, NOIR_SKY, NoirGem } from './scene';
@@ -50,7 +51,50 @@ function Villain({ mood }: { mood: 'laugh' | 'angry' }) {
   return <Rig key={move} rig={VILLAIN_RIG} kind="villain" move={move} rim="noir-rim" fill={NIGHT} x={280} y={-7} width={240} height={300} viewBox="-30 -30 160 200" />;
 }
 
-export function NoirStoryArt({ art, speaker, mood = 'laugh' }: { art: string; speaker?: string; mood?: 'laugh' | 'angry' }) {
+/** Жест наставника по смыслу реплики: вопрос — подпирает подбородок, похвала — вскидывает руку */
+function mentorPose(text = ''): Pose | null {
+  if (/\?/.test(text)) return 'think';
+  if (/молод|отлич|ура|получил|сработал|спас|побед|вот так|чудесн|прекрасн/i.test(text)) return 'joy';
+  return null;
+}
+
+/** Окно рисунка героя: как у героя у кнопки «Сотворить» */
+const HERO_BOX = '-30 -40 160 190';
+
+/**
+ * Герой в кадре сценки — отдельным слоем поверх картинки: его движение не перерисовывает всю сценку.
+ * В кадре наставника и Лорда Дефолта он на переднем плане, «через плечо», размытый, как в кино;
+ * в победном кадре — на острове: радуется, потом стоит спокойно.
+ */
+function StoryHero({ shot }: { shot: 'shoulder' | 'victory' }) {
+  const [move, setMove] = useState(shot === 'victory' ? 'joy' : 'idle');
+  useEffect(() => {
+    if (move === 'idle') return;
+    const timer = setTimeout(() => setMove('idle'), 2000);
+    return () => clearTimeout(timer);
+  }, [move]);
+  return (
+    <span className={`story-hero story-hero--${shot} noir-art`}>
+      <Rig key={move} rig={HERO_RIG} kind="hero" move={move} rim="noir-rim" fill={NIGHT} x={0} y={0} width={160} height={190} viewBox={HERO_BOX} />
+    </span>
+  );
+}
+
+export function NoirStoryArt({
+  art,
+  speaker,
+  mood = 'laugh',
+  talking = false,
+  text,
+}: {
+  art: string;
+  speaker?: string;
+  mood?: 'laugh' | 'angry';
+  /** Пока печатается реплика — огоньки говорящего дышат чаще */
+  talking?: boolean;
+  text?: string;
+}) {
+  const shoulder = art === 'mentor' || art === 'villain' || art === 'villain-script';
   return (
     <div className={`story-art story-art--noir story-art--${art}`} aria-hidden="true">
       <svg className="story-art__noir noir-art" viewBox="80 0 640 360" preserveAspectRatio="xMidYMid slice">
@@ -81,8 +125,8 @@ export function NoirStoryArt({ art, speaker, mood = 'laugh' }: { art: string; sp
         )}
         {art === 'mentor' && (
           <>
-            <g transform="translate(244 52) scale(2.6)">
-              <NoirBust bust={BUSTS[speaker ?? 'flex'] ?? BUSTS.flex} />
+            <g transform="translate(244 52) scale(2.6)" className={talking ? 'is-talking' : undefined}>
+              <NoirBust key={text} bust={BUSTS[speaker ?? 'flex'] ?? BUSTS.flex} pose={mentorPose(text)} />
             </g>
             <path className="a-twinkle" d={`${sparkle(200, 90, 6)} ${sparkle(610, 140, 5)}`} fill="#e6eefc" filter="url(#sil-glow)" />
           </>
@@ -98,6 +142,8 @@ export function NoirStoryArt({ art, speaker, mood = 'laugh' }: { art: string; sp
           </>
         )}
       </svg>
+      {shoulder && <StoryHero shot="shoulder" />}
+      {art === 'crown' && <StoryHero shot="victory" />}
       {/* Зерно плёнки и виньетка — картинкой поверх кадра: браузер рисует её один раз, а не каждый кадр вместе со сценкой */}
       <span className="story-art__film" style={{ backgroundImage: FILM }} />
       {(art === 'villain' || art === 'citadel') && (

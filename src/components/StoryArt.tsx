@@ -154,7 +154,7 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
       </div>
     );
   }
-  if (noir) return <NoirStoryArt art={art} speaker={speaker} mood={villainMood(text)} />;
+  if (noir) return <NoirStoryArt art={art} speaker={speaker} mood={villainMood(text)} talking={talking} text={text} />;
 
   return (
     <div ref={ref} className={`story-art story-art--${art}`} aria-hidden="true">
