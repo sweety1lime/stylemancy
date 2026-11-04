@@ -89,9 +89,12 @@ function lantern(k: number): SilFrame {
   };
 }
 
-const LANTERN_SHEET = silSvg(32, 48, [lantern(0), lantern(1)], {
-  extraDefs: `<radialGradient id="lg"><stop offset="0" stop-color="#ffb35c" stop-opacity="0.6"/><stop offset="1" stop-color="#ffb35c" stop-opacity="0"/></radialGradient>`,
-});
+const LANTERN_GLOW = `<radialGradient id="lg"><stop offset="0" stop-color="#ffb35c" stop-opacity="0.6"/><stop offset="1" stop-color="#ffb35c" stop-opacity="0"/></radialGradient>`;
+
+const LANTERN_SHEET = silSvg(32, 48, [lantern(0), lantern(1)], { extraDefs: LANTERN_GLOW });
+
+/** Фонарь одним кадром — для страниц Города Механизмов */
+export const LANTERN_SVG = silSvg(32, 48, lantern(0), { extraDefs: LANTERN_GLOW });
 
 /** Камень крепости: тёмная кладка с тёплыми кромками от факелов */
 const STONE = svgUrl(bricksSvg(48, 24, '#1b1819', '#0a090b', '#352d30'));

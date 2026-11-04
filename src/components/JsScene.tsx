@@ -5,6 +5,9 @@ import type { Flask as FlaskValue, OutputLine, ValueType } from '../engine/jsRun
 import type { JsLevel } from '../engine/types';
 import { recolor, type Sprite } from '../pixel/pixelArt';
 import { POTION } from '../pixel/sprites';
+import { useNoir } from '../noir/look';
+import { NOIR_LIQUID } from '../noir/liquid';
+import { NoirFlask } from '../noir/NoirFlask';
 import { GoalList } from './GoalList';
 import { PixelArt } from './PixelArt';
 
@@ -79,10 +82,11 @@ function Flask({ status }: { status: FlaskStatus }) {
   const type: ValueType = flask?.declared ? (flask.type ?? 'undefined') : 'undefined';
   const state = ok ? 'flask--ok' : target?.declared ? 'flask--goal' : '';
   const wide = Boolean(flask?.declared && isStructured(flask));
+  const noir = useNoir();
   return (
     <figure className={`flask ${state}`}>
       <span className="flask__name">{name}</span>
-      <PixelArt className="flask__art" sprite={flaskSprite(type)} scale={4} />
+      {noir ? <NoirFlask className="flask__art" type={type} size={64} /> : <PixelArt className="flask__art" sprite={flaskSprite(type)} scale={4} />}
       <figcaption className={wide ? 'flask__value flask__value--wide' : 'flask__value'}>
         {flask?.declared ? <ValueView value={flask} /> : 'нет колбы'}
       </figcaption>
@@ -96,10 +100,11 @@ function CallFlask({ status }: { status: CallStatus }) {
   const { call, actual, target, ok } = status;
   const type: ValueType = actual?.declared ? (actual.type ?? 'undefined') : 'undefined';
   const state = !actual ? '' : ok ? ' call--ok' : ' call--wrong';
+  const noir = useNoir();
   return (
     <figure className={`call${state}`}>
       <code className="call__label">{call}</code>
-      <PixelArt className="call__art" sprite={flaskSprite(type)} scale={3} />
+      {noir ? <NoirFlask className="call__art" type={type} size={48} /> : <PixelArt className="call__art" sprite={flaskSprite(type)} scale={3} />}
       <figcaption className="call__value">
         {actual?.error ? '✖ ошибка' : actual?.declared ? <ValueView value={actual} /> : '…'}
       </figcaption>
@@ -145,6 +150,7 @@ export interface JsSceneProps<E = JsEvaluation> {
  */
 export function JsScene({ level, code, evaluation, busy, celebrate }: JsSceneProps) {
   const [selected, setSelected] = useState(0);
+  const noirLegend = useNoir();
   const runs = evaluation?.runs ?? [];
   const status: RunStatus | undefined = runs[Math.min(selected, runs.length - 1)];
   const syntax = evaluation?.errors.find((problem) => problem.kind !== 'required' && problem.kind !== 'runtime');
@@ -235,7 +241,7 @@ export function JsScene({ level, code, evaluation, busy, celebrate }: JsScenePro
             <ul className="flask-legend" aria-label="Цвет — тип значения">
               {LEGEND.filter((type) => types.has(type)).map((type) => (
                 <li key={type}>
-                  <i style={{ background: LIQUID[type].r }} /> {TYPE_NAMES[type]}
+                  <i style={{ background: (noirLegend && NOIR_LIQUID[type]) || LIQUID[type].r }} /> {TYPE_NAMES[type]}
                 </li>
               ))}
             </ul>

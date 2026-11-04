@@ -4,6 +4,8 @@ import type { OutputLine } from '../engine/jsRun';
 import { LOOP_MESSAGE, RELOAD_MESSAGE, type PageEvaluation } from '../engine/pageCheck';
 import { pageDocument } from '../engine/pageHarness';
 import { levelPage, type PageError } from '../engine/pageRun';
+import { useSettings } from '../game/settings';
+import { noirSceneCss } from '../noir/sceneCss';
 import { GoalList } from './GoalList';
 import { OracleLine, type JsSceneProps } from './JsScene';
 import { RichText } from './RichText';
@@ -32,7 +34,13 @@ function fingerprint(text: string): string {
  * по кнопкам можно щёлкать, в поля писать. Страница отделена от игры: sandbox без allow-same-origin.
  */
 export function PageScene({ level, code, evaluation, busy, celebrate }: JsSceneProps<PageEvaluation>) {
-  const page = useMemo(() => levelPage(level), [level]);
+  // В «Сумраке» к оформлению страницы добавляется его слой: только цвета и картинки
+  const { look } = useSettings();
+  const page = useMemo(() => {
+    const base = levelPage(level);
+    return look === 'noir' ? { ...base, css: `${base.css ?? ''}
+${noirSceneCss(level.regionId, level.id)}` } : base;
+  }, [level, look]);
   const syntax = evaluation?.errors.find((problem) => problem.kind !== 'required' && problem.kind !== 'runtime');
   // Код с ошибкой разбора на страницу не попадает: она остаётся как есть
   const liveCode = syntax ? '' : code;

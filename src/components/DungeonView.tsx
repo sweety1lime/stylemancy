@@ -16,6 +16,9 @@ import {
   HERO_ANIMATIONS,
   type HeroAnimation,
 } from '../pixel/sprites';
+import { useNoir } from '../noir/look';
+import { NoirBug, NoirDungeonGem, NoirDungeonHero, NoirExit, NoirTorch } from '../noir/NoirDungeon';
+import { NOIR_TILES } from '../noir/scenes/dungeon';
 import { PixelArt } from './PixelArt';
 import { SpriteAnim } from './SpriteAnim';
 
@@ -135,12 +138,13 @@ export function DungeonView({ dungeon, report, success = false, compact = false,
   const failure = finished ? report?.failure : undefined;
   const move: HeroAnimation = !finished ? 'walk' : failure ? 'oops' : report && success ? 'joy' : 'idle';
   const place = (x: number, y: number) => ({ '--x': x, '--y': y }) as CSSProperties;
+  const noir = useNoir();
 
   return (
     <>
       <div
         className={compact ? 'dungeon dungeon--compact' : 'dungeon'}
-        style={{ ...TILES, '--w': start.width, '--h': start.height, '--step': `${tick}ms` } as CSSProperties}
+        style={{ ...(noir ? NOIR_TILES : TILES), '--w': start.width, '--h': start.height, '--step': `${tick}ms` } as CSSProperties}
         aria-hidden="true"
       >
         {state.cells.map((row, y) =>
@@ -158,10 +162,10 @@ export function DungeonView({ dungeon, report, success = false, compact = false,
             ];
             return (
               <span key={key} className={classes.filter(Boolean).join(' ')}>
-                {decor.torches.has(key) && <SpriteAnim frames={DUNGEON_TORCH_FRAMES} fps={6} fluid className="dungeon__torch" />}
-                {kind === 'gem' && <PixelArt sprite={GEMS.emerald.sprite} scale={2} />}
-                {kind === 'bug' && <PixelArt sprite={DUNGEON_BUG} scale={3} />}
-                {kind === 'exit' && <PixelArt sprite={DUNGEON_EXIT} scale={3} />}
+                {decor.torches.has(key) && (noir ? <NoirTorch /> : <SpriteAnim frames={DUNGEON_TORCH_FRAMES} fps={6} fluid className="dungeon__torch" />)}
+                {kind === 'gem' && (noir ? <NoirDungeonGem /> : <PixelArt sprite={GEMS.emerald.sprite} scale={2} />)}
+                {kind === 'bug' && (noir ? <NoirBug /> : <PixelArt sprite={DUNGEON_BUG} scale={3} />)}
+                {kind === 'exit' && (noir ? <NoirExit /> : <PixelArt sprite={DUNGEON_EXIT} scale={3} />)}
                 {kind === 'sign' && <span className="dungeon__sign">{cell}</span>}
               </span>
             );
@@ -169,6 +173,9 @@ export function DungeonView({ dungeon, report, success = false, compact = false,
         )}
         {failure && <span className="dungeon__bonk" style={place(failure.x, failure.y)} />}
         <span className={`dungeon__hero dungeon__hero--${FACING[state.hero.dir]}`} style={place(state.hero.x, state.hero.y)}>
+          {noir ? (
+            <NoirDungeonHero move={move} />
+          ) : (
           <SpriteAnim
             key={move}
             frames={HERO_ANIMATIONS[move]}
@@ -176,6 +183,7 @@ export function DungeonView({ dungeon, report, success = false, compact = false,
             repeat={move === 'joy' || move === 'oops' ? 2 : undefined}
             fluid
           />
+          )}
         </span>
       </div>
       {finished && caption}

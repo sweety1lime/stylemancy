@@ -513,6 +513,184 @@
   }
 }
 
+/* ===== Скриптория: свиток Оракула, полка колб, конвейер ===== */
+
+.look-noir .js-scene {
+  background-color: #05080a;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(143, 240, 224, 0.08), transparent),
+    radial-gradient(ellipse 90% 80% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.4));
+}
+
+.look-noir .js-scene--celebrate {
+  animation: noir-celebrate 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.look-noir .oracle-scroll,
+.look-noir .flask-shelf,
+.look-noir .conveyor {
+  background: rgba(7, 11, 15, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(143, 240, 224, 0.22),
+    inset 0 1px 0 1px rgba(185, 203, 232, 0.05);
+}
+
+.look-noir .oracle-scroll__title,
+.look-noir .flask-shelf__title,
+.look-noir .conveyor__title {
+  color: #8ff0e0;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 12px rgba(143, 240, 224, 0.3);
+}
+
+/* Полка — тёмная доска с лунной кромкой */
+.look-noir .flask-shelf__row {
+  border-bottom: 3px solid #1c140d;
+  box-shadow: 0 1px 0 0 rgba(185, 203, 232, 0.16);
+}
+
+.look-noir .flask__name {
+  background: #1a140e;
+  color: #f0c890;
+  box-shadow: inset 0 0 0 1px rgba(240, 200, 144, 0.28);
+}
+
+.look-noir .flask--ok .flask__art {
+  filter: drop-shadow(0 0 8px rgba(240, 200, 144, 0.6));
+}
+
+.noir-flask {
+  display: block;
+  overflow: visible;
+}
+
+.look-noir .flask-legend i {
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.look-noir .wagon {
+  background: #1d140c;
+  box-shadow: inset 0 0 0 1px #3a2a1a;
+  color: #f0dcc0;
+}
+
+.look-noir .wagon__index {
+  background: #0c0805;
+  color: #f0c890;
+}
+
+.look-noir .card-value {
+  background: #1a140e;
+  box-shadow: inset 0 0 0 1px rgba(240, 200, 144, 0.28);
+  color: #e4dccd;
+}
+
+.look-noir .card-value__key {
+  color: #f0c890;
+}
+
+.look-noir .conveyor__belt {
+  border-bottom: 3px solid #1f222a;
+  background-image: repeating-linear-gradient(90deg, transparent 0 18px, rgba(185, 203, 232, 0.05) 18px 22px);
+  box-shadow: 0 1px 0 0 rgba(185, 203, 232, 0.14);
+}
+
+.look-noir .call {
+  background: rgba(7, 11, 16, 0.8);
+  box-shadow: inset 0 0 0 1px rgba(185, 203, 232, 0.14);
+}
+
+.look-noir .call--ok {
+  box-shadow:
+    inset 0 0 0 1px var(--gold),
+    0 0 14px rgba(224, 160, 96, 0.2);
+}
+
+/* ===== Подземелье Лабиринта Решений ===== */
+
+.look-noir .dungeon-scene {
+  background-color: #05060a;
+}
+
+.look-noir .dungeon {
+  box-shadow:
+    0 0 0 1px rgba(185, 203, 232, 0.22),
+    0 0 0 4px #040508;
+}
+
+.look-noir .dungeon__cell--lit::before {
+  background: radial-gradient(circle at 50% 0, rgba(255, 179, 92, 0.2), rgba(255, 179, 92, 0.06) 55%, transparent 75%);
+  animation: noir-torch-light 3s ease-in-out infinite alternate;
+}
+
+@keyframes noir-torch-light {
+  to {
+    opacity: 0.6;
+  }
+}
+
+.look-noir .dungeon__torch {
+  filter: none;
+}
+
+.dungeon__item {
+  position: relative;
+  z-index: 1;
+  width: 70%;
+  height: auto;
+  overflow: visible;
+}
+
+.dungeon__item--exit {
+  width: 84%;
+}
+
+.look-noir .dungeon__cell--trail::after {
+  border-radius: 50%;
+  background: rgba(240, 200, 144, 0.5);
+  box-shadow: 0 0 6px rgba(240, 200, 144, 0.6);
+}
+
+.look-noir .dungeon__sign {
+  background: #1a120b;
+  box-shadow:
+    inset 0 0 0 1px rgba(240, 200, 144, 0.35),
+    0 2px 0 0 #050406;
+  color: #f0c890;
+  text-shadow: 0 0 8px rgba(240, 200, 144, 0.5);
+}
+
+.dungeon__noir-hero {
+  display: block;
+  width: 86%;
+}
+
+.dungeon__noir-hero .rig {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.look-noir .dungeon__hero--left .dungeon__noir-hero {
+  transform: scaleX(-1);
+}
+
+.look-noir .dungeon__bonk {
+  animation: noir-bonk 0.6s ease-out 2;
+}
+
+@keyframes noir-bonk {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 /* ===== Карта ===== */
 
 .look-noir .world-map {
