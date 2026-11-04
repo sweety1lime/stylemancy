@@ -363,13 +363,152 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
-/* Панорама неба под землями: тянется на всю карту, по краям обрезается */
-.noir-map-sky {
+/*
+  Панорама карты — планы-слои (.nl). Каждый слой двигается целиком: камера за мышью (сдвиг по глубине data-depth),
+  дрейф облаков, дыхание лучей. Это работа видеокарты; фильтры внутри слоя рисуются один раз.
+  Язык движения «Сумрака»: спокойно и мягко, без отскоков; фоновые циклы кратны 6 с, переходы — 0,6 с.
+*/
+.noir-map-sky,
+.noir-map-front {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.noir-map-front {
+  z-index: 2;
+}
+
+/* Виньетка и тёмные поля сверху и снизу — как кадр в кино; лежит под землями, чтобы не гасить подписи */
+.noir-map-sky::after {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 75% 70% at 50% 46%, transparent 55%, rgba(0, 0, 0, 0.6) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 14%, transparent 86%, rgba(0, 0, 0, 0.5));
+  content: "";
+}
+
+.nl {
+  position: absolute;
+  inset: -24px;
+}
+
+.nl__inner,
+.nl svg {
   position: absolute;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.noir-cam .nl {
+  will-change: transform;
+}
+
+/* Лучи луны дышат по очереди: по ним будто проходят облака */
+.nl--shafts-a .nl__inner {
+  animation: nl-shaft 12s ease-in-out infinite alternate;
+}
+
+.nl--shafts-b .nl__inner {
+  animation: nl-shaft 12s ease-in-out -6s infinite alternate;
+}
+
+/* Море облаков: дальние валы и ближние плывут навстречу друг другу */
+.nl--sea-back .nl__inner {
+  animation: nl-drift 48s ease-in-out infinite alternate;
+}
+
+.nl--sea-front .nl__inner {
+  animation: nl-drift 36s ease-in-out infinite alternate-reverse;
+}
+
+.nl--bokeh .nl__inner {
+  animation: nl-float 24s ease-in-out infinite alternate;
+}
+
+@keyframes nl-shaft {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nl-drift {
+  from {
+    transform: translateX(-18px);
+  }
+
+  to {
+    transform: translateX(18px);
+  }
+}
+
+@keyframes nl-float {
+  from {
+    transform: translate(-8px, 5px);
+  }
+
+  to {
+    transform: translate(8px, -5px);
+  }
+}
+
+/* Первый взгляд на карту: кадр проявляется из темноты, план за планом — от неба к переднему краю */
+.noir-map-sky--reveal .nl,
+.noir-map-front--reveal .nl {
+  animation: nl-reveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--order) * 120ms) both;
+}
+
+@keyframes nl-reveal {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Зерно плёнки: картинка шума рисуется один раз и повторяется плиткой */
+.nl-grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 0.95 0 0 0 0.9 -0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  opacity: 0.22;
+}
+
+/* Телефон: земли в столбик. Небо с луной — сверху, море облаков — снизу, скала переднего плана не нужна */
+@media (max-width: 760px) {
+  .nl--sky,
+  .nl--shafts-a,
+  .nl--shafts-b,
+  .nl--far {
+    inset: 0 0 auto;
+    height: auto;
+    aspect-ratio: 10 / 7;
+  }
+
+  .nl--sea-back,
+  .nl--sea-front {
+    inset: auto 0 0;
+    height: auto;
+    aspect-ratio: 10 / 7;
+  }
+
+  .nl--fg,
+  .nl--far {
+    display: none;
+  }
+
+  /* Небо с луной растворяется книзу — дальше ночь до самого моря облаков */
+  .nl--sky,
+  .nl--shafts-a,
+  .nl--shafts-b {
+    mask-image: linear-gradient(180deg, #000 50%, transparent 78%);
+  }
 }
 
 /* Тропа в «Сумраке»: пройденное горит тёплым светом, к следующей земле бегут огоньки, дальше — холодный пунктир */
@@ -395,8 +534,42 @@
   overflow: visible;
 }
 
+/* Облака у подножия земель — в цвет ночи своего мира */
+.world-map--scriptoria {
+  --noir-collar: #1f4644;
+  --noir-collar-shade: #0b1f1f;
+}
+
 .noir-land--fog {
   opacity: 0.6;
+}
+
+/* Свет открытой земли приглушён; наведёшь — разгорается в полную силу */
+.noir-land__glow {
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.noir-land__glow--dim {
+  opacity: 0.55;
+}
+
+.look-noir a.land:hover .noir-land__glow {
+  opacity: 1;
+}
+
+/* Земли парят медленнее и подлетают плавно — в ритме «Сумрака» */
+.look-noir .land__art {
+  animation-duration: 6s;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Подписи земель — как титры: мягкая тень вместо пиксельной, читаются поверх облаков */
+.look-noir .land__title,
+.look-noir .land__topic,
+.look-noir .land__status {
+  text-shadow:
+    0 0 14px rgba(0, 0, 0, 0.95),
+    0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .land__hero--noir {

@@ -33,7 +33,7 @@ import {
 } from '../pixel/sprites';
 import { useNoir } from '../noir/look';
 import { NoirLandArt, NoirMapHero } from '../noir/NoirLandArt';
-import { NoirMapSky } from '../noir/NoirMapSky';
+import { NoirMapFront, NoirMapSky } from '../noir/NoirMapSky';
 import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
 import { SpriteAnim } from './SpriteAnim';
@@ -351,6 +351,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
             </div>
           );
         })}
+        {noir && <NoirMapFront world={world} />}
       </div>
 
       {prologue && (

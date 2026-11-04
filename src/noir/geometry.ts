@@ -72,6 +72,62 @@ export function spruce(x: number, base: number, h: number, w: number, seed = 1):
   return `M${x} ${top.toFixed(1)} ${right.join(' ')} L${x} ${(base - h * 0.04).toFixed(1)} ${left.join(' ')} Z ${trunk}`;
 }
 
+/**
+ * Облачный вал: верх из круглых клубов от x0 до x1 вдоль линии base, снизу закрыт на bottom.
+ * rMin–rMax — размер клубов, seed — свой узор. Клубы соседей сходятся острыми впадинами, как у кучевых облаков.
+ */
+export function billows(x0: number, x1: number, base: number, rMin: number, rMax: number, seed: number, bottom: number): string {
+  const next = random(seed);
+  let x = x0;
+  let d = `M${x0} ${bottom} L${x0} ${base}`;
+  while (x < x1) {
+    const r = rMin + next() * (rMax - rMin);
+    const nx = x + r * 1.9;
+    const ny = base + (next() - 0.5) * r * 0.5;
+    d += ` A${r.toFixed(1)} ${r.toFixed(1)} 0 0 1 ${nx.toFixed(1)} ${ny.toFixed(1)}`;
+    x = nx;
+  }
+  return `${d} L${x.toFixed(1)} ${bottom} Z`;
+}
+
+/** Клуб облака: центр и радиус */
+export type Puff = [number, number, number];
+
+/**
+ * Кучевой вал моря облаков: клубы разного размера вдоль линии base от x0 до x1, крупные редки.
+ * Снизу их подпирает сплошная тень — её рисует тот, кто рисует вал.
+ */
+export function cumulus(seed: number, base: number, rMin: number, rMax: number, x0 = -100, x1 = 1100): Puff[] {
+  const next = random(seed);
+  const puffs: Puff[] = [];
+  for (let x = x0; x < x1; ) {
+    const r = rMin + next() ** 2 * (rMax - rMin);
+    puffs.push([x, base + r * 0.4 + (next() - 0.5) * r * 0.5, r]);
+    x += r * (0.6 + next() * 0.6);
+  }
+  return puffs;
+}
+
+/** Горный хребет вдали: вершины разной высоты, у каждой — отроги по склонам. Снизу закрыт на bottom */
+export function ridge(seed: number, base: number, height: number, x0 = -60, x1 = 1060, bottom = 760): string {
+  const next = random(seed);
+  let x = x0;
+  let d = `M${x0} ${bottom} L${x0} ${base}`;
+  const at = (px: number, py: number) => ` L${px.toFixed(1)} ${py.toFixed(1)}`;
+  while (x < x1) {
+    const w = 50 + next() ** 1.5 * 220;
+    const h = height * (0.25 + next() ** 1.3 * 0.75);
+    d += at(x + w * 0.25, base - h * (0.3 + next() * 0.2));
+    d += at(x + w * 0.42, base - h * (0.7 + next() * 0.15));
+    d += at(x + w * 0.5, base - h);
+    d += at(x + w * 0.63, base - h * (0.72 + next() * 0.12));
+    d += at(x + w * 0.8, base - h * (0.3 + next() * 0.2));
+    d += at(x + w, base - next() * height * 0.12);
+    x += w;
+  }
+  return `${d} L${x.toFixed(1)} ${bottom} Z`;
+}
+
 /** Шестерня: зубцы по кругу и отверстие (заливка evenodd) */
 export function gear(cx: number, cy: number, r: number, teeth: number): string {
   const points: string[] = [];

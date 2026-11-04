@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { gear, spruce, type GemKind } from './geometry';
+import { billows, gear, spruce, type GemKind } from './geometry';
 import { HERO_RIG } from './rig/heroRig';
 import { Rig } from './rig/Rig';
 import { NIGHT, NOIR_ROCK, NoirGem } from './scene';
@@ -205,23 +205,45 @@ interface NoirLandArtProps {
   fog?: boolean;
 }
 
+/** Облака вокруг основания скалы: остров выплывает из них, как из моря */
+const COLLAR = billows(10, 152, 108, 4, 9, 23, 126);
+
 export function NoirLandArt({ emblem, saved = false, fog = false }: NoirLandArtProps) {
   const color = MOODS[emblem] ?? MOODS.door;
   const { shape, lights } = diorama(emblem, color);
-  const glow = `land-glow-${emblem}`;
+  const id = `land-${emblem}`;
   return (
     <svg className={`noir-land noir-art${fog ? ' noir-land--fog' : ''}`} viewBox="0 0 160 124" width="184" height="143" aria-hidden="true">
       <defs>
-        <radialGradient id={glow} cx="0.5" cy="0.5" r="0.5">
+        <radialGradient id={`${id}-glow`} cx="0.5" cy="0.5" r="0.5">
           <stop offset="0" stopColor={color} stopOpacity="0.85" />
           <stop offset="0.4" stopColor={color} stopOpacity="0.3" />
           <stop offset="1" stopColor={color} stopOpacity="0" />
         </radialGradient>
+        {/* Столб света спасённой земли: ярче у земли, гаснет в небе */}
+        <linearGradient id={`${id}-beam`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={color} stopOpacity="0" />
+          <stop offset="0.45" stopColor={color} stopOpacity="0.35" />
+          <stop offset="1" stopColor={color} stopOpacity="0.75" />
+        </linearGradient>
+        <linearGradient id={`${id}-collar`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style={{ stopColor: 'var(--noir-collar, #2c3750)' }} />
+          <stop offset="0.5" style={{ stopColor: 'var(--noir-collar-shade, #141b2b)' }} stopOpacity="0.9" />
+          <stop offset="1" stopColor="#0b0f19" stopOpacity="0" />
+        </linearGradient>
+        <clipPath id={`${id}-clip`}>
+          <path d={COLLAR} />
+        </clipPath>
       </defs>
       {/* Свет земли: у спасённой — в полную силу, у открытой — вполовину; медленно дышит */}
       {!fog && (
-        <g opacity={saved ? 1 : 0.55}>
-          <circle className="a-pulse" cx="82" cy="58" r="72" fill={`url(#${glow})`} />
+        <g className={`noir-land__glow${saved ? '' : ' noir-land__glow--dim'}`}>
+          <circle className="a-pulse" cx="82" cy="58" r="72" fill={`url(#${id}-glow)`} />
+        </g>
+      )}
+      {saved && !fog && (
+        <g className="a-breathe">
+          <path d="M70 80 L60 -30 H104 L94 80 Z" fill={`url(#${id}-beam)`} filter="url(#noir-shaft)" />
         </g>
       )}
       <g filter="url(#noir-rim)">
@@ -232,6 +254,11 @@ export function NoirLandArt({ emblem, saved = false, fog = false }: NoirLandArtP
         </g>
       </g>
       {!fog && lights}
+      {/* Облака у подножия, сверху на них падает свет земли */}
+      <g filter="url(#noir-cloud)" opacity={fog ? 0.6 : 1}>
+        <path d={COLLAR} fill={`url(#${id}-collar)`} />
+        {!fog && <ellipse cx="82" cy="108" rx="46" ry="8" fill={color} opacity={saved ? 0.3 : 0.16} clipPath={`url(#${id}-clip)`} />}
+      </g>
       {fog && (
         <g className="a-drift" filter="url(#noir-mist)">
           <ellipse cx="60" cy="58" rx="56" ry="12" fill="#3a4560" opacity="0.6" />
