@@ -76,26 +76,27 @@ function memberCompletions(context: CompletionContext): CompletionResult | null 
   };
 }
 
+/** Цвета кода — переменные: у вида «Сумрак» своя палитра (noir.css), здесь — пиксельная */
 const highlight = HighlightStyle.define([
-  { tag: [t.className, t.tagName, t.labelName], color: '#f4c76b' },
-  { tag: t.propertyName, color: '#9cc9ff' },
-  { tag: [t.atom, t.keyword], color: '#c9b8ff' },
-  { tag: [t.number, t.unit], color: '#ffb4a8' },
-  { tag: [t.color, t.string], color: '#8ce9bd' },
-  { tag: t.blockComment, color: '#7e75a6', fontStyle: 'italic' },
-  { tag: [t.definitionKeyword, t.modifier], color: '#f0abfc' },
-  { tag: [t.brace, t.separator, t.punctuation], color: '#b8b0dc' },
+  { tag: [t.className, t.tagName, t.labelName], color: 'var(--code-name, #f4c76b)' },
+  { tag: t.propertyName, color: 'var(--code-prop, #9cc9ff)' },
+  { tag: [t.atom, t.keyword], color: 'var(--code-key, #c9b8ff)' },
+  { tag: [t.number, t.unit], color: 'var(--code-num, #ffb4a8)' },
+  { tag: [t.color, t.string], color: 'var(--code-str, #8ce9bd)' },
+  { tag: t.blockComment, color: 'var(--code-comment, #7e75a6)', fontStyle: 'italic' },
+  { tag: [t.definitionKeyword, t.modifier], color: 'var(--code-def, #f0abfc)' },
+  { tag: [t.brace, t.separator, t.punctuation], color: 'var(--code-punct, #b8b0dc)' },
   // HTML
-  { tag: t.attributeName, color: '#9cc9ff' },
-  { tag: t.attributeValue, color: '#8ce9bd' },
-  { tag: t.angleBracket, color: '#b8b0dc' },
-  { tag: t.comment, color: '#7e75a6', fontStyle: 'italic' },
-  { tag: t.documentMeta, color: '#f0abfc' },
+  { tag: t.attributeName, color: 'var(--code-prop, #9cc9ff)' },
+  { tag: t.attributeValue, color: 'var(--code-str, #8ce9bd)' },
+  { tag: t.angleBracket, color: 'var(--code-punct, #b8b0dc)' },
+  { tag: t.comment, color: 'var(--code-comment, #7e75a6)', fontStyle: 'italic' },
+  { tag: t.documentMeta, color: 'var(--code-def, #f0abfc)' },
   // JavaScript: новые колбы — золотом, команды — голубым
-  { tag: t.definition(t.variableName), color: '#f4c76b' },
-  { tag: [t.function(t.variableName), t.function(t.propertyName)], color: '#9cc9ff' },
-  { tag: [t.bool, t.null], color: '#c9b8ff' },
-  { tag: t.operator, color: '#b8b0dc' },
+  { tag: t.definition(t.variableName), color: 'var(--code-name, #f4c76b)' },
+  { tag: [t.function(t.variableName), t.function(t.propertyName)], color: 'var(--code-prop, #9cc9ff)' },
+  { tag: [t.bool, t.null], color: 'var(--code-key, #c9b8ff)' },
+  { tag: t.operator, color: 'var(--code-punct, #b8b0dc)' },
 ]);
 
 const theme = EditorView.theme(
@@ -109,10 +110,10 @@ const theme = EditorView.theme(
     '.cm-activeLine': { backgroundColor: 'rgba(255, 255, 255, 0.04)' },
     '.cm-activeLineGutter': { backgroundColor: 'transparent', color: 'var(--gold)' },
     '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground': {
-      backgroundColor: 'rgba(167, 139, 250, 0.32)',
+      backgroundColor: 'var(--code-selection, rgba(167, 139, 250, 0.32))',
     },
     '.cm-tooltip': { backgroundColor: 'var(--panel-3)', border: '1px solid var(--line-strong)', color: 'var(--text)' },
-    '.cm-tooltip-autocomplete > ul > li[aria-selected]': { backgroundColor: 'rgba(167, 139, 250, 0.4)', color: 'var(--text)' },
+    '.cm-tooltip-autocomplete > ul > li[aria-selected]': { backgroundColor: 'var(--code-selection, rgba(167, 139, 250, 0.4))', color: 'var(--text)' },
     '.cm-diagnostic': { padding: '6px 10px', fontFamily: 'var(--font-ui)', fontSize: '14px', maxWidth: '420px' },
     '.cm-diagnostic-error': { borderLeft: '4px solid var(--danger)' },
     '.cm-diagnostic-warning': { borderLeft: '4px solid var(--gold)' },
