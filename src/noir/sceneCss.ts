@@ -1,4 +1,5 @@
 import { cumulus, GEM, GEM_COLORS, ridge, type GemKind, type Puff } from './geometry';
+import { FOREST_SCENES } from './scenes/forest';
 import { FORTRESS_LEVELS, FORTRESS_SCENES } from './scenes/fortress';
 import { GRAIN_SVG, LIGHT, MIST_SVG, MOON_SVG, SHAFTS_SVG, STARS_SVG, svgUrl } from './scenes/kit';
 import { NIGHT, NOIR_ROCK } from './scene';
@@ -166,6 +167,7 @@ ${(Object.keys(GEM_COLORS) as GemKind[]).map((kind) => `.${kind} { --sprite: ${s
 const SCENES: Record<string, string> = {
   'floating-islands': ISLANDS_CSS,
   ...FORTRESS_SCENES,
+  ...FOREST_SCENES,
 };
 
 /** Добавки для отдельных уровней: у них свои предметы и фон поверх оформления района */
