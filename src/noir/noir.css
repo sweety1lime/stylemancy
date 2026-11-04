@@ -438,6 +438,81 @@
   }
 }
 
+/* ===== Рамка «браузера» у страниц ===== */
+
+.look-noir .browser {
+  background: #08090d;
+  box-shadow:
+    0 0 0 1px var(--frame),
+    0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.look-noir .browser--celebrate {
+  animation: noir-celebrate 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.look-noir .browser__bar,
+.look-noir .browser__status {
+  background: #0d1018;
+}
+
+.look-noir .browser__bar {
+  border-bottom: 1px solid var(--line);
+}
+
+.look-noir .browser__dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(228, 220, 205, 0.18);
+}
+
+.look-noir .browser__dots i:first-child {
+  background: rgba(255, 123, 152, 0.55);
+}
+
+.look-noir .browser__dots i:nth-child(2) {
+  background: rgba(240, 200, 144, 0.55);
+}
+
+.look-noir .browser__dots i:last-child {
+  background: rgba(143, 240, 200, 0.5);
+}
+
+.look-noir .browser__tab {
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  background: #0e0c0a;
+  color: var(--gold-strong);
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
+
+.look-noir .browser__page {
+  background: #0e0c0a;
+}
+
+.look-noir .page-scene__restart {
+  border: 1px solid var(--frame);
+  background: transparent;
+  box-shadow: none;
+}
+
+.look-noir .page-scene__restart:hover {
+  border-color: var(--gold);
+  background: rgba(224, 160, 96, 0.08);
+}
+
+/* Заклинание сработало: рамка вспыхивает янтарём и гаснет */
+@keyframes noir-celebrate {
+  30% {
+    box-shadow:
+      0 0 0 1px var(--gold),
+      0 0 36px rgba(224, 160, 96, 0.45);
+  }
+}
+
 /* ===== Карта ===== */
 
 .look-noir .world-map {

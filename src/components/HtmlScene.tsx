@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { htmlPage } from '../engine/htmlCheck';
 import type { HtmlLevel } from '../engine/types';
+import { useSettings } from '../game/settings';
+import { noirSceneCss } from '../noir/sceneCss';
 
 interface HtmlSceneProps {
   level: HtmlLevel;
@@ -21,7 +23,9 @@ function showBody(frame: HTMLIFrameElement | null, body: string) {
  * Ссылки и формы никуда не уводят: строка состояния рассказывает, куда бы они вели.
  */
 export function HtmlScene({ level, code, images, celebrate }: HtmlSceneProps) {
-  const page = useMemo(() => htmlPage(level, code, images), [level, code, images]);
+  const { look } = useSettings();
+  const lookCss = look === 'noir' ? noirSceneCss(level.regionId, level.id) : '';
+  const page = useMemo(() => htmlPage(level, code, images, lookCss), [level, code, images, lookCss]);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const pageRef = useRef(page);
   // Документ для первой загрузки; дальше содержимое страницы меняется на месте

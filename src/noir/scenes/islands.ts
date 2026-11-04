@@ -12,7 +12,7 @@ import { NIGHT, NOIR_ROCK } from '../scene';
 */
 
 /** Кристалл: тёмная грань, светлая середина, белый блик и цветное свечение вокруг */
-function gemSvg(kind: GemKind): string {
+export function gemSvg(kind: GemKind): string {
   const c = GEM_COLORS[kind];
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -14 68 90">
 <defs><radialGradient id="g"><stop offset="0" stop-color="${c.light}" stop-opacity="0.75"/><stop offset="0.45" stop-color="${c.main}" stop-opacity="0.25"/><stop offset="1" stop-color="${c.main}" stop-opacity="0"/></radialGradient></defs>

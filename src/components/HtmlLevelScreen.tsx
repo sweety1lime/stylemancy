@@ -5,6 +5,8 @@ import { lintHtml } from '../engine/htmlLint';
 import type { HtmlLevel } from '../engine/types';
 import { sfx } from '../game/sound';
 import { IMAGE_LIBRARY } from '../levels/shared/images';
+import { useNoir } from '../noir/look';
+import { NOIR_IMAGE_LIBRARY } from '../noir/scenes/pages';
 import type { CodeEditorHandle } from './CodeEditor';
 import { GoalList } from './GoalList';
 import { HtmlScene } from './HtmlScene';
@@ -23,6 +25,7 @@ interface HtmlLevelScreenProps {
 /** HTML-уровень: студент пишет или чинит разметку, справа — страница и цели, которые загораются. */
 export function HtmlLevelScreen({ level, number, region, trailHref, onNext }: HtmlLevelScreenProps) {
   const flow = useLevelFlow(level, region, level.starterHtml);
+  const noir = useNoir();
   const editorRef = useRef<CodeEditorHandle>(null);
   // Страница и цели обновляются, когда студент перестаёт печатать
   const [liveCode, setLiveCode] = useState(flow.code);
@@ -58,7 +61,7 @@ export function HtmlLevelScreen({ level, number, region, trailHref, onNext }: Ht
       <LevelBrief level={level} number={number} cue={flow.outcome} />
 
       <section className="stage" aria-label="Страница">
-        <HtmlScene level={level} code={liveCode} images={IMAGE_LIBRARY} celebrate={flow.outcome?.kind === 'success'} />
+        <HtmlScene level={level} code={liveCode} images={noir ? NOIR_IMAGE_LIBRARY : IMAGE_LIBRARY} celebrate={flow.outcome?.kind === 'success'} />
         <GoalList goals={goals} />
       </section>
 

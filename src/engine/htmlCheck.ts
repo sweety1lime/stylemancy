@@ -117,11 +117,12 @@ export interface HtmlPage {
 }
 
 /** Страница-сцена: разметка студента в оформлении района. */
-export function htmlPage(level: HtmlLevel, code: string, images: Record<string, string> = {}): HtmlPage {
+/** lookCss — оформление вида игры («Сумрак»): после оформления района, картинки и цвета */
+export function htmlPage(level: HtmlLevel, code: string, images: Record<string, string> = {}, lookCss = ''): HtmlPage {
   const doc = parseMarkup(code, level.document);
   resolveImages(doc, images);
   doc.querySelectorAll('script').forEach((script) => script.remove());
-  const styles = `<style>${BASE_PAGE_CSS}${level.sceneCss}</style>`;
+  const styles = `<style>${BASE_PAGE_CSS}${level.sceneCss}${lookCss}</style>`;
   const head = level.document ? doc.head.innerHTML : '<meta charset="utf-8">';
   const lang = doc.documentElement.getAttribute('lang') ?? 'ru';
   return {

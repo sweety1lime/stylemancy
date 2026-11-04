@@ -2,6 +2,7 @@ import { FLOATING_SCENES } from './scenes/floating';
 import { FOREST_SCENES } from './scenes/forest';
 import { FORTRESS_LEVELS, FORTRESS_SCENES } from './scenes/fortress';
 import { ISLANDS_SCENES } from './scenes/islands';
+import { PAGE_SCENES } from './scenes/pages';
 
 /*
   «Сумрак» для сцен уровней. Подключается после оформления района и до кода студента,
@@ -15,6 +16,7 @@ const SCENES: Record<string, string> = {
   ...FORTRESS_SCENES,
   ...FOREST_SCENES,
   ...FLOATING_SCENES,
+  ...PAGE_SCENES,
 };
 
 /** Добавки для отдельных уровней: у них свои предметы и фон поверх оформления района */
