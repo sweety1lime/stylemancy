@@ -47,8 +47,92 @@
   animation: noir-rise 11s linear infinite;
 }
 
+.noir-art .a-pulse {
+  animation: noir-pulse 5s ease-in-out infinite alternate;
+}
+
+@keyframes noir-pulse {
+  from {
+    opacity: 0.75;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.noir-art .a-breathe {
+  animation: noir-breathe 7s ease-in-out infinite alternate;
+}
+
+/* Шестерни Скриптории: вокруг своего центра (transform-origin задан в разметке) */
+.noir-art .a-spin {
+  animation: noir-spin 40s linear infinite;
+}
+
+.noir-art .a-reverse {
+  animation-direction: reverse;
+}
+
+/* Светлячки блуждают и мерцают, пламя факелов дрожит */
+.noir-art .a-firefly {
+  animation: noir-firefly 7s ease-in-out infinite;
+}
+
+.noir-art .a-flicker {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: noir-flicker 0.45s ease-in-out infinite alternate;
+}
+
 .noir-art .a-delay {
   animation-delay: -1.3s;
+}
+
+@keyframes noir-firefly {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.25;
+  }
+
+  30% {
+    transform: translate(4px, -3px);
+    opacity: 1;
+  }
+
+  60% {
+    transform: translate(-3px, -6px);
+    opacity: 0.5;
+  }
+}
+
+@keyframes noir-flicker {
+  from {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+
+  to {
+    transform: scale(0.85, 1.15);
+    opacity: 0.75;
+  }
+}
+
+@keyframes noir-breathe {
+  from {
+    opacity: 0.3;
+  }
+
+  to {
+    opacity: 0.6;
+  }
+}
+
+@keyframes noir-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes noir-twinkle {
@@ -279,9 +363,31 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
-/* Пиксельные облака и шестерни неба — не в этом виде */
-.look-noir .world-map__sky {
-  display: none;
+/* Панорама неба под землями: тянется на всю карту, по краям обрезается */
+.noir-map-sky {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Тропа в «Сумраке»: пройденное горит тёплым светом, к следующей земле бегут огоньки, дальше — холодный пунктир */
+.look-noir .path--walked {
+  stroke: #ffcf8a;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 4px rgba(255, 190, 120, 0.9));
+}
+
+.look-noir .path--open {
+  stroke: rgba(255, 207, 138, 0.85);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 3px rgba(255, 190, 120, 0.6));
+}
+
+.look-noir .path--dim {
+  stroke: rgba(185, 203, 232, 0.28);
+  stroke-width: 2;
 }
 
 .noir-land {
@@ -294,8 +400,8 @@
 }
 
 .land__hero--noir {
-  bottom: 22px;
-  left: -4px;
+  bottom: 30px;
+  left: 0;
 }
 
 /* ===== Сценки сюжета ===== */

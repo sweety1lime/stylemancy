@@ -74,6 +74,23 @@ export const NOIR_DEFS = (
       <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" />
       <feColorMatrix type="matrix" values="0 0 0 0 0.85  0 0 0 0 0.85  0 0 0 0 0.9  0.7 0 0 0 -0.32" />
     </filter>
+    {/* Карта Скриптории: бирюзовая ночь и луна с зеленцой */}
+    <linearGradient id="noir-sky-script" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#020607" />
+      <stop offset="0.5" stopColor="#061518" />
+      <stop offset="0.8" stopColor="#0b2628" />
+      <stop offset="1" stopColor="#123a3a" />
+    </linearGradient>
+    <radialGradient id="noir-moon-script" cx="0.4" cy="0.38" r="0.65">
+      <stop offset="0" stopColor="#effbf8" />
+      <stop offset="0.7" stopColor="#c6e6e0" />
+      <stop offset="1" stopColor="#9cc4bd" />
+    </radialGradient>
+    {/* Лучи низкой луны вбок, через всю карту */}
+    <linearGradient id="noir-beam-side" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stopColor="#dfe8f5" stopOpacity="0.22" />
+      <stop offset="1" stopColor="#dfe8f5" stopOpacity="0" />
+    </linearGradient>
     {/* Проклятие гасит цвет: кристаллы под ним серые и тусклые */}
     <filter id="noir-cursed" x="-20%" y="-20%" width="140%" height="140%">
       <feColorMatrix type="saturate" values="0.12" />

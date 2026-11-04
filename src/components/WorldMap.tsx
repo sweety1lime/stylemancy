@@ -33,6 +33,7 @@ import {
 } from '../pixel/sprites';
 import { useNoir } from '../noir/look';
 import { NoirLandArt, NoirMapHero } from '../noir/NoirLandArt';
+import { NoirMapSky } from '../noir/NoirMapSky';
 import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
 import { SpriteAnim } from './SpriteAnim';
@@ -307,7 +308,9 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
 
       <div className={`world-map world-map--${world}`} ref={mapRef}>
         <div className="world-map__sky" aria-hidden="true">
-          {world === 'cascadia' ? (
+          {noir ? (
+            <NoirMapSky world={world} />
+          ) : world === 'cascadia' ? (
             <>
               <PixelArt className="cloud cloud--1" sprite={CLOUD} scale={5} />
               <PixelArt className="cloud cloud--2" sprite={CLOUD} scale={4} />
