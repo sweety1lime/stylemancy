@@ -1,3 +1,4 @@
+import { useEffect, useRef, type RefObject } from 'react';
 import type { Score } from '../engine/evaluate';
 import type { Problem } from '../engine/lint';
 import type { Achievement } from '../game/achievements';
@@ -35,12 +36,28 @@ interface ResultPanelProps {
   onFinale?: () => void;
 }
 
+/**
+ * Панель подъезжает в поле зрения: на невысоком экране она иначе остаётся за нижним краем.
+ * Только когда колонка со сценой липкая (от 1081 px): на узком экране сцена стоит выше редактора, и прокрутка увела бы её за край.
+ */
+function useScrollIntoView(ref: RefObject<HTMLElement | null>, delay: number) {
+  useEffect(() => {
+    if (!matchMedia('(min-width: 1081px)').matches) return;
+    const smooth = fullEffects() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timer = setTimeout(() => ref.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest' }), delay);
+    return () => clearTimeout(timer);
+  }, [ref, delay]);
+}
+
 export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, onFinale }: ResultPanelProps) {
   // В «Сумраке» победа — рассвет над экраном: проклятие отступает
   const dawn = useNoir() && fullEffects();
+  const panel = useRef<HTMLElement>(null);
+  // Победная панель проявляется не сразу (после вспышки), а о промахе говорит сразу
+  useScrollIntoView(panel, dawn && outcome.kind === 'success' ? 450 : 0);
   if (outcome.kind === 'success') {
     return (
-      <section className="result result--success px-panel" aria-live="polite">
+      <section ref={panel} className="result result--success px-panel" aria-live="polite">
         {dawn && <div className="noir-dawn" aria-hidden="true" />}
         <div className="result__head">
           <h2 className="result__title">Заклинание сработало!</h2>
@@ -98,7 +115,7 @@ export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, o
 
   const { errors, misses } = outcome;
   return (
-    <section className="result result--fail px-panel" aria-live="polite">
+    <section ref={panel} className="result result--fail px-panel" aria-live="polite">
       <h2 className="result__title">Заклинание не сработало</h2>
       {errors.length > 0 ? (
         <>

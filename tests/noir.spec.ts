@@ -332,3 +332,54 @@ test('Скриптория: в лёгком режиме строки свитк
   await page.setViewportSize({ width: 900, height: 900 });
   await expect(page.locator('.oracle-keeper')).toBeHidden();
 });
+
+test('отклики: тост въезжает и уходит плавно, число «На месте» и точки анимируются, панель результата на виду', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  // Уход тоста длится 300 мс и проскочил бы между проверками, поэтому за ним следит наблюдатель
+  await page.addInitScript(() => {
+    const seen = { name: '' };
+    (window as unknown as { __leaving: typeof seen }).__leaving = seen;
+    new MutationObserver(() => {
+      const el = document.querySelector('.toast--leaving');
+      if (el) seen.name = getComputedStyle(el).animationName;
+    }).observe(document, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  });
+  await winFirstLevel(page, 'full');
+
+  // Панель результата подъехала в поле зрения: раньше на 768 px она оставалась за нижним краем
+  await expect.poll(() => page.locator('.result').evaluate((el) => el.getBoundingClientRect().bottom)).toBeLessThanOrEqual(768);
+
+  // Число в «На месте» и точки — анимированные, а текст остался прежним
+  await expect(page.locator('.stage__status')).toContainText('На месте: 3 из 3');
+  expect(await page.locator('.placed-count').evaluate((el) => getComputedStyle(el).animationName)).toBe('noir-tick');
+  expect(await page.locator('.dot--on').first().evaluate((el) => getComputedStyle(el).animationName)).toBe('noir-dot-on');
+
+  // Тост достижения въезжает, а перед удалением получает флаг ухода
+  const toast = page.locator('.toast').first();
+  await expect(toast).toBeVisible();
+  expect(await toast.evaluate((el) => getComputedStyle(el).animationName)).toBe('noir-toast-in');
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as { __leaving: { name: string } }).__leaving.name), { timeout: 8000 })
+    .toBe('noir-toast-out');
+  await expect(page.locator('.toast')).toHaveCount(0, { timeout: 3000 });
+});
+
+test('отклики: отметка цели вспыхивает, кнопка вдавливается, земля на карте приближается при наведении', async ({ page }) => {
+  await openJsLevel(page, 'js-01', "console.log('Привет, Скриптория!');");
+  await expect(page.locator('.goal--done .goal__mark')).toHaveCount(1);
+  expect(await page.locator('.goal--done .goal__mark').evaluate((el) => getComputedStyle(el).animationName)).toBe('noir-goal-on');
+
+  // Под пальцем кнопка слегка уменьшается; уводим курсор до отпускания, чтобы не сотворить заклинание
+  const cast = page.getByRole('button', { name: /Сотворить/ });
+  await cast.hover();
+  await page.mouse.down();
+  await expect.poll(() => cast.evaluate((el) => getComputedStyle(el).transform)).toMatch(/^matrix\(0\.97/);
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
+  const land = page.locator('a.land').first();
+  await land.hover();
+  await expect.poll(() => land.locator('.noir-land').evaluate((el) => getComputedStyle(el).transform)).toMatch(/^matrix\(1\.0[1-9]/);
+});

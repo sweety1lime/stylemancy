@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { GoalStatus } from '../engine/htmlCheck';
 import { RichText } from './RichText';
 
@@ -15,7 +16,8 @@ export function GoalList({ goals }: { goals: GoalStatus[] }) {
       <ul className="goals__list">
         {/* Одинаковые цели бывают: Оракул может сказать «Помешиваю!» трижды */}
         {goals.map((goal, i) => (
-          <li key={`${i}:${goal.label}`} className={goal.done ? 'goal goal--done' : 'goal'}>
+          // Номер цели: когда одним набором зажигаются сразу несколько, отметки вспыхивают по очереди
+          <li key={`${i}:${goal.label}`} className={goal.done ? 'goal goal--done' : 'goal'} style={{ '--i': i } as CSSProperties}>
             <span className="goal__mark" aria-hidden="true">
               {goal.done ? '✦' : '○'}
             </span>

@@ -71,7 +71,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
         {statuses.length > 0 && (
           <div className="stage__status">
             <span>
-              На месте: {placed} из {statuses.length}
+              На месте: <span key={placed} className="placed-count">{placed}</span> из {statuses.length}
             </span>
             {groupByMirror(statuses).map(({ tag, items }) => (
               <span key={tag ?? 'scene'} className="stage__dots">
