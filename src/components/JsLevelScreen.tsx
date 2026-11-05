@@ -8,7 +8,7 @@ import type { CodeEditorHandle } from './CodeEditor';
 import { DungeonScene } from './DungeonScene';
 import { JsScene } from './JsScene';
 import { PageScene } from './PageScene';
-import { EditorCard, LevelBrief, Workbench } from './LevelParts';
+import { EditorCard, LevelBrief, LevelResult, Workbench } from './LevelParts';
 import type { RegionStats } from './ResultPanel';
 import { useLevelFlow } from './useLevelFlow';
 
@@ -65,6 +65,9 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
     }
   }
 
+  // Итог попытки — в конце колонки со сценой, какая бы сцена ни стояла
+  const result = <LevelResult flow={flow} level={level} region={region} trailHref={trailHref} onNext={onNext} />;
+
   return (
     <main className="level level--js">
       <LevelBrief level={level} number={number} cue={flow.outcome} />
@@ -76,7 +79,9 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
           evaluation={checked && 'page' in checked.evaluation ? checked.evaluation : null}
           busy={busy}
           celebrate={flow.outcome?.kind === 'success'}
-        />
+        >
+          {result}
+        </PageScene>
       ) : level.dungeons?.length ? (
         <DungeonScene
           level={level}
@@ -84,7 +89,9 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
           evaluation={checked?.evaluation ?? null}
           busy={busy}
           celebrate={flow.outcome?.kind === 'success'}
-        />
+        >
+          {result}
+        </DungeonScene>
       ) : (
         <JsScene
           level={level}
@@ -93,15 +100,14 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
           busy={busy}
           celebrate={flow.outcome?.kind === 'success'}
           cue={flow.outcome}
-        />
+        >
+          {result}
+        </JsScene>
       )}
 
       <Workbench
         flow={flow}
         level={level}
-        region={region}
-        trailHref={trailHref}
-        onNext={onNext}
         onCast={(viaKeyboard) => void cast(viaKeyboard)}
         editor={
           <EditorCard

@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { TYPE_NAMES, type CallStatus, type FlaskStatus, type JsEvaluation, type RunStatus } from '../engine/jsCheck';
 import { runtimeProblem } from '../engine/jsLint';
 import type { Flask as FlaskValue, OutputLine, ValueType } from '../engine/jsRun';
@@ -147,13 +147,15 @@ export interface JsSceneProps<E = JsEvaluation> {
   /** Код ещё проверяется после последнего изменения */
   busy: boolean;
   celebrate: boolean;
+  /** Что поставить в конец колонки со сценой — итог попытки */
+  children?: ReactNode;
 }
 
 /**
  * Сцена JS-уровня: свиток Оракула (всё, что вывел код) и полка с колбами (переменные).
  * Если запусков несколько — вкладки, как зеркала в адаптиве.
  */
-export function JsScene({ level, code, evaluation, busy, celebrate, cue }: JsSceneProps & { cue?: HeroCue | null }) {
+export function JsScene({ level, code, evaluation, busy, celebrate, cue, children }: JsSceneProps & { cue?: HeroCue | null }) {
   const [selected, setSelected] = useState(0);
   const noirLegend = useNoir();
   const runs = evaluation?.runs ?? [];
@@ -260,6 +262,7 @@ export function JsScene({ level, code, evaluation, busy, celebrate, cue }: JsSce
       {noirLegend && level.npc.portrait in BUSTS && (
         <OracleKeeper id={level.npc.portrait} name={level.npc.name} cue={cue} said={output.map((line) => line.text).join('\n')} />
       )}
+      {children}
     </section>
   );
 }

@@ -37,12 +37,12 @@ interface ResultPanelProps {
 }
 
 /**
- * Панель подъезжает в поле зрения: на невысоком экране она иначе остаётся за нижним краем.
- * Только когда колонка со сценой липкая (от 1081 px): на узком экране сцена стоит выше редактора, и прокрутка увела бы её за край.
+ * Панель подъезжает в поле зрения, только если не видна целиком: на невысоком экране она иначе остаётся за нижним краем.
+ * Итог стоит под сценой, в правой колонке, а на узком экране (одна колонка) — над редактором, где игрок только что нажал «Сотворить»:
+ * без прокрутки он бы не заметил, что заклинание отработало.
  */
 function useScrollIntoView(ref: RefObject<HTMLElement | null>, delay: number) {
   useEffect(() => {
-    if (!matchMedia('(min-width: 1081px)').matches) return;
     const smooth = fullEffects() && !matchMedia('(prefers-reduced-motion: reduce)').matches;
     const timer = setTimeout(() => ref.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest' }), delay);
     return () => clearTimeout(timer);

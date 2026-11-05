@@ -15,7 +15,7 @@ function runPassed(status: RunStatus | undefined): boolean {
  * Сцена «Пути героя»: подземелья — вкладками, как зеркала в адаптиве. Код ведёт героя по каждому,
  * поэтому маршрут не заучить — нужен алгоритм.
  */
-export function DungeonScene({ level, code, evaluation, busy, celebrate }: JsSceneProps) {
+export function DungeonScene({ level, code, evaluation, busy, celebrate, children }: JsSceneProps) {
   const dungeons = level.dungeons ?? [];
   const [selected, setSelected] = useState(0);
   const index = Math.min(selected, dungeons.length - 1);
@@ -78,6 +78,7 @@ export function DungeonScene({ level, code, evaluation, busy, celebrate }: JsSce
       </div>
 
       {evaluation && <GoalList goals={evaluation.goals} />}
+      {children}
     </section>
   );
 }

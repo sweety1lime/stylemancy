@@ -33,7 +33,7 @@ function fingerprint(text: string): string {
  * Сцена Города Механизмов: живая страница в рамке «браузера». Код студента работает прямо в ней —
  * по кнопкам можно щёлкать, в поля писать. Страница отделена от игры: sandbox без allow-same-origin.
  */
-export function PageScene({ level, code, evaluation, busy, celebrate }: JsSceneProps<PageEvaluation>) {
+export function PageScene({ level, code, evaluation, busy, celebrate, children }: JsSceneProps<PageEvaluation>) {
   // В «Сумраке» к оформлению страницы добавляется его слой: только цвета и картинки
   const { look } = useSettings();
   const page = useMemo(() => {
@@ -153,6 +153,7 @@ ${noirSceneCss(level.regionId, level.id)}` } : base;
       )}
 
       {evaluation && <GoalList goals={evaluation.goals} />}
+      {children}
     </section>
   );
 }

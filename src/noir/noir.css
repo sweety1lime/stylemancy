@@ -328,23 +328,34 @@
   box-shadow: none;
 }
 
+/* Главная кнопка — единственная залитая: янтарь оставлен магии, наградам и активному состоянию */
 .look-noir .button--cast {
-  border-color: rgba(224, 160, 96, 0.75);
-  background: rgba(224, 160, 96, 0.08);
-  color: var(--gold-strong);
+  border-color: transparent;
+  background: linear-gradient(180deg, #f3cf98, #d9974f);
+  color: #1c1207;
+  box-shadow:
+    0 0 28px rgba(224, 160, 96, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .look-noir .button--cast:hover {
-  background: rgba(224, 160, 96, 0.18);
-  box-shadow: 0 0 26px rgba(224, 160, 96, 0.28);
+  background: linear-gradient(180deg, #f7dcb0, #e2a462);
+  box-shadow:
+    0 0 36px rgba(224, 160, 96, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* Подсказка клавиш на кнопке: светлая на тёмном, иначе её не видно */
+/* Подсказка клавиш на кнопке: светлая на тёмном, иначе её не видно; на залитой «Сотворить» — тёмная */
 .look-noir .button kbd {
   background: rgba(240, 200, 144, 0.12);
   color: var(--gold-strong);
   letter-spacing: 0.04em;
   text-transform: none;
+}
+
+.look-noir .button--cast kbd {
+  background: rgba(28, 18, 7, 0.14);
+  color: #4a3015;
 }
 
 .look-noir .button--ghost {

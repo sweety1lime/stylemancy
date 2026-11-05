@@ -892,6 +892,11 @@ a.land:hover .land__art {
   gap: 12px;
 }
 
+/* Пока виден итог попытки, колонка не липкая: иначе на невысоком экране низ панели недостижим */
+.stage:has(.result) {
+  position: static;
+}
+
 .workbench {
   grid-area: work;
   display: grid;

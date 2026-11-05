@@ -97,17 +97,37 @@ export function EditorCard({ flow, fileName, language, label, starter, lint, onC
 interface WorkbenchProps {
   flow: LevelFlow;
   level: Level;
-  region: RegionStats;
-  trailHref: string;
-  onNext?: () => void;
   onCast: (viaKeyboard: boolean) => void;
   editor: ReactNode;
 }
 
-/** Правая колонка уровня: редактор, подсказки, итог попытки, вопрос на повторение и сценки. */
-export function Workbench({ flow, level, region, trailHref, onNext, onCast, editor }: WorkbenchProps) {
+interface LevelResultProps {
+  flow: LevelFlow;
+  level: Level;
+  region: RegionStats;
+  trailHref: string;
+  onNext?: () => void;
+}
+
+/** Итог попытки: ставится в конец колонки со сценой, после статуса и целей — игрок видит его рядом с картинкой. */
+export function LevelResult({ flow, level, region, trailHref, onNext }: LevelResultProps) {
+  if (!flow.outcome) return null;
+  return (
+    <ResultPanel
+      outcome={flow.outcome}
+      code={flow.code}
+      spell={level.learns ? SPELLS[level.learns] : undefined}
+      region={region}
+      trailHref={trailHref}
+      onNext={onNext}
+      onFinale={flow.outro ? () => flow.showStory(flow.outro) : undefined}
+    />
+  );
+}
+
+/** Левая колонка уровня: редактор, подсказки, вопрос на повторение и сценки. Итог попытки — под сценой, в LevelResult. */
+export function Workbench({ flow, level, onCast, editor }: WorkbenchProps) {
   const { account } = useAuth();
-  const spell = level.learns ? SPELLS[level.learns] : undefined;
   return (
     <section className="workbench" aria-label="Код">
       {editor}
@@ -131,18 +151,6 @@ export function Workbench({ flow, level, region, trailHref, onNext, onCast, edit
             </li>
           ))}
         </ol>
-      )}
-
-      {flow.outcome && (
-        <ResultPanel
-          outcome={flow.outcome}
-          code={flow.code}
-          spell={spell}
-          region={region}
-          trailHref={trailHref}
-          onNext={onNext}
-          onFinale={flow.outro ? () => flow.showStory(flow.outro) : undefined}
-        />
       )}
 
       {flow.outcome?.kind === 'success' && flow.outcome.newRank && <RankUp title={flow.outcome.newRank} />}

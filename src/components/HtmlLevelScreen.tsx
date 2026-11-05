@@ -10,7 +10,7 @@ import { NOIR_IMAGE_LIBRARY } from '../noir/scenes/pages';
 import type { CodeEditorHandle } from './CodeEditor';
 import { GoalList } from './GoalList';
 import { HtmlScene } from './HtmlScene';
-import { EditorCard, LevelBrief, Workbench } from './LevelParts';
+import { EditorCard, LevelBrief, LevelResult, Workbench } from './LevelParts';
 import type { RegionStats } from './ResultPanel';
 import { useLevelFlow } from './useLevelFlow';
 
@@ -63,14 +63,12 @@ export function HtmlLevelScreen({ level, number, region, trailHref, onNext }: Ht
       <section className="stage" aria-label="Страница">
         <HtmlScene level={level} code={liveCode} images={noir ? NOIR_IMAGE_LIBRARY : IMAGE_LIBRARY} celebrate={flow.outcome?.kind === 'success'} />
         <GoalList goals={goals} />
+        <LevelResult flow={flow} level={level} region={region} trailHref={trailHref} onNext={onNext} />
       </section>
 
       <Workbench
         flow={flow}
         level={level}
-        region={region}
-        trailHref={trailHref}
-        onNext={onNext}
         onCast={cast}
         editor={
           <EditorCard

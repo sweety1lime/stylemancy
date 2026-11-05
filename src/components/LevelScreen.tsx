@@ -5,7 +5,7 @@ import { summarizeMisses, viewsOf, type ItemStatus } from '../engine/scene';
 import type { CssLevel } from '../engine/types';
 import { sfx } from '../game/sound';
 import type { CodeEditorHandle } from './CodeEditor';
-import { EditorCard, LevelBrief, Workbench } from './LevelParts';
+import { EditorCard, LevelBrief, LevelResult, Workbench } from './LevelParts';
 import type { RegionStats } from './ResultPanel';
 import { Scene, type SceneHandle } from './Scene';
 import { useLevelFlow } from './useLevelFlow';
@@ -88,14 +88,12 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
             ))}
           </div>
         )}
+        <LevelResult flow={flow} level={level} region={region} trailHref={trailHref} onNext={onNext} />
       </section>
 
       <Workbench
         flow={flow}
         level={level}
-        region={region}
-        trailHref={trailHref}
-        onNext={onNext}
         onCast={cast}
         editor={
           <EditorCard
