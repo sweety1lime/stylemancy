@@ -1,0 +1,100 @@
+/*
+  Шрифты «Сумрака». Подключается после level.css.
+  Cormorant Garamond (--font-display) — только крупные заголовки, от 20 px: при 15 px у него строчные ниже 6 px.
+  Подписи и ярлыки — Golos Text (--font-pixel здесь указывает на него, поэтому остальные 60 мест из App.css,
+  где в пиксельном виде стоит Tiny5, набраны Golos сами). Старинные цифры отключены на .look-noir (noir.css).
+  Заголовки внутри страниц сцен (scenes/pages.ts) и надписи в SVG-сценках остаются на Cormorant: они крупные.
+*/
+
+/* ===== Крупные заголовки: Cormorant ===== */
+
+.look-noir :is(
+    .brand,
+    .pixel-title,
+    .pixel-subtitle,
+    .brief__title,
+    .story__titlecard,
+    .rankup__title,
+    .result__title,
+    .result__xp,
+    .land__title,
+    .path__node,
+    .badge__title,
+    .toast__title,
+    .certificate__title,
+    .certificate__name,
+    .certificate__academy
+  ) {
+  font-family: var(--font-display);
+}
+
+/* В грамоте строка академии была мельче 20 px — как и остальные заголовки Cormorant, она теперь от 20 px */
+.look-noir .certificate__academy {
+  font-size: 20px;
+}
+
+/* ===== Ярлыки: Golos 500, капсом, с широкой разрядкой ===== */
+
+.look-noir :is(
+    .brief__eyebrow,
+    .task__label,
+    .goals__head,
+    .hint__label,
+    .spell__label,
+    .review__label,
+    .teacher__label,
+    .mirror__label,
+    .toast__label,
+    .story__title,
+    .oracle-scroll__title,
+    .flask-shelf__title,
+    .conveyor__title
+  ) {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+/* Цвет ярлыка тихий; свой цвет оставлен там, где он что-то значит: бирюза у Скриптории (noir.css),
+   лунная полоса у «Задачи» (level.css), янтарь у награды в тосте */
+.look-noir :is(.brief__eyebrow, .goals__head, .hint__label, .spell__label, .review__label, .teacher__label, .mirror__label, .story__title) {
+  color: var(--muted);
+}
+
+.look-noir .toast__label {
+  color: var(--gold);
+}
+
+/* ===== Подписи: Golos 14–15 px, без разрядки ===== */
+
+.look-noir :is(
+    .topbar__back,
+    .topbar__link,
+    .dialog__name,
+    .tab,
+    .field,
+    .land__status,
+    .stage__status,
+    .text-button,
+    .markup summary,
+    .path__title,
+    .district__lock,
+    .result__achievements
+  ) {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+/* Полоса ранга и пометка «ты здесь» теснее: они стоят в шапке и на тропе рядом с другими подписями */
+.look-noir :is(.rank, .rank__title, .rank__xp, .path__here) {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.look-noir .dialog__name {
+  font-weight: 500;
+}

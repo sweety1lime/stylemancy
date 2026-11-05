@@ -245,7 +245,11 @@
   --violet: #9fb4d8;
   --violet-soft: rgba(159, 180, 216, 0.12);
   --font-ui: "Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-pixel: "Cormorant Garamond", Georgia, serif;
+  /* Два токена вместо одного: --font-pixel в «Сумраке» — шрифт подписей (Golos), Cormorant только у крупных заголовков (type.css).
+     Cormorant при 15 px мелок и с «старинными» цифрами («0 из 28» читалось как «о из 28») */
+  --font-pixel: var(--font-ui);
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  font-variant-numeric: lining-nums;
   /* Подсветка кода: имена — янтарь, свойства — лунный голубой, строки — бирюза; знаки препинания тихие */
   --code-name: #f0c890;
   --code-prop: #9fc4e8;
@@ -585,8 +589,8 @@
   background: #0e0c0a;
   color: var(--gold-strong);
   font-family: var(--font-pixel);
-  font-size: 15px;
-  letter-spacing: 0.04em;
+  font-size: 14px;
+  letter-spacing: 0;
 }
 
 .look-noir .browser__page {
@@ -684,9 +688,8 @@
 .oracle-keeper figcaption {
   color: var(--muted);
   font-family: var(--font-pixel);
-  font-size: 13px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0;
 }
 
 /* Колонка уходит под редактор или окно низкое — наставнику места нет */
