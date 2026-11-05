@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { StoryFrame } from '../engine/types';
+import { startAmbience, stopAmbience } from '../game/ambience';
 import { useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
 import { Portrait } from './Portrait';
@@ -93,6 +94,12 @@ export function StoryScene({ title, frames, finishLabel, onClose }: StoryScenePr
   useEffect(() => {
     nextRef.current?.focus({ preventScroll: true });
   }, [index]);
+
+  useEffect(() => {
+    if (!cinema) return;
+    startAmbience();
+    return stopAmbience;
+  }, [cinema]);
 
   useEffect(() => {
     if (shots.length < 2) return;

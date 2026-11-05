@@ -84,7 +84,10 @@ async function openPrologue(page: Page, effects: 'full' | 'light', sound = false
 const cameraAnimation = (dialog: Locator) => dialog.locator('.story-art__cam').evaluate((el) => getComputedStyle(el).animationName);
 
 test('сценка в «Сумраке»: шторки, титр, камера, кадры перетекают друг в друга', async ({ page }) => {
+  // Часы стоят: старый кадр живёт меньше секунды, и на занятой машине проверка опоздала бы
+  await page.clock.install();
   const dialog = await openPrologue(page, 'full');
+  await page.clock.pauseAt(Date.now() + 1000);
   await expect(dialog.locator('.story__bar')).toHaveCount(2);
   await expect(dialog.locator('.story__titlecard')).toHaveText('Пролог: Великий Сброс');
   // Камера движется: на слое с рисунком идёт медленный наезд
@@ -94,7 +97,9 @@ test('сценка в «Сумраке»: шторки, титр, камера, 
   // Прошлый кадр остаётся под новым, пока тот проявляется, а потом уходит. Титр был только на первом кадре
   await expect(dialog.locator('.story__shot--out')).toHaveCount(1);
   await expect(dialog.locator('.story__titlecard')).toHaveCount(0);
+  await page.clock.runFor(1000);
   await expect(dialog.locator('.story__shot')).toHaveCount(1);
+  await expect(dialog.locator('.story__shot--out')).toHaveCount(0);
   await expect(dialog.locator('.story__caption--villain')).toBeVisible();
 });
 
@@ -116,4 +121,27 @@ test('сценка со звуком: у реплик есть голоса, о�
   // Реплика Лорда Дефолта печатается медленнее остальных, но до конца доходит
   await expect(dialog.locator('.story__text')).toContainText('блоки друг под другом!', { timeout: 15_000 });
   expect(errors).toEqual([]);
+});
+
+/** Сколько раз за звуком фона сходили на сервер; модуль с адресом файла Vite отдаёт сразу, его не считаем */
+function watchAmbience(page: Page): string[] {
+  const requested: string[] = [];
+  page.on('request', (request) => {
+    if (request.resourceType() === 'fetch' && request.url().includes('dark_place')) requested.push(request.url());
+  });
+  return requested;
+}
+
+test('фон под сценкой: пока звук выключен, файл не скачивается', async ({ page }) => {
+  const requested = watchAmbience(page);
+  const dialog = await openPrologue(page, 'full', false);
+  await expect(dialog.locator('.story__titlecard')).toBeVisible();
+  await page.waitForTimeout(1000);
+  expect(requested).toEqual([]);
+});
+
+test('фон под сценкой: со звуком файл скачивается', async ({ page }) => {
+  const requested = watchAmbience(page);
+  await openPrologue(page, 'full', true);
+  await expect.poll(() => requested.length, { timeout: 10_000 }).toBeGreaterThan(0);
 });

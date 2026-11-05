@@ -16,6 +16,9 @@ function audio(): AudioContext | null {
   return context;
 }
 
+/** Контекст звука для тех, кто играет файлы: null, пока звук выключен */
+export { audio as soundContext };
+
 /** Одна нота: частота (Гц), начало и длительность (с), форма волны и громкость. */
 function tone(frequency: number, start: number, duration: number, type: OscillatorType = 'square', volume = 0.05) {
   const ctx = audio();
