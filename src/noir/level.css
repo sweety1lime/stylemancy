@@ -150,3 +150,31 @@
     animation: none;
   }
 }
+
+/* ===== Школьный экран 1280×720: «Подсказка» и «Сотворить» видны без прокрутки ===== */
+
+/* Редактор ниже: в App.css он 170px, а коду на этих уровнях хватает строк пяти */
+.look-noir .code-editor .cm-editor {
+  min-height: 132px;
+}
+
+.look-noir .markup summary {
+  padding: 8px 16px;
+}
+
+/* Подсказка клавиш на кнопке съедает ширину ряда: на узком окне её нет, Ctrl+Enter работает всё равно */
+@media (max-width: 1360px) {
+  .look-noir .actions .button kbd {
+    display: none;
+  }
+}
+
+@media (max-height: 760px) {
+  .look-noir .brief__title {
+    font-size: 30px;
+  }
+
+  .look-noir .dialog__line {
+    font-size: 15px;
+  }
+}
