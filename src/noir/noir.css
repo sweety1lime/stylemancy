@@ -598,6 +598,83 @@
   animation: noir-celebrate 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Строки на свитке проступают слева направо, одна за другой, и светятся, пока пишутся */
+.look-noir .oracle-scroll__lines .oracle-line {
+  animation: noir-rune-in 0.55s cubic-bezier(0.4, 0, 0.2, 1) calc(var(--i, 0) * 140ms) backwards;
+}
+
+@keyframes noir-rune-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    text-shadow: 0 0 14px rgba(143, 240, 224, 0.9);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* «Оракул молчит…» — тихо дышит, как будто прислушивается */
+.look-noir .oracle-scroll__lines .oracle-line--empty {
+  animation:
+    noir-rune-in 0.55s cubic-bezier(0.4, 0, 0.2, 1) backwards,
+    noir-murmur 3.2s ease-in-out 0.55s infinite alternate;
+}
+
+@keyframes noir-murmur {
+  from {
+    opacity: 0.45;
+  }
+}
+
+/* Наставник крупно под сценой: заполняет пустую часть колонки, говорит над свитком и откликается на победу */
+.oracle-keeper {
+  display: none;
+}
+
+.look-noir .oracle-keeper {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin: 0;
+}
+
+.oracle-keeper svg {
+  display: block;
+  width: min(100%, 260px);
+  height: auto;
+  overflow: visible;
+}
+
+/* Когда на сцене полка колб или конвейер, места мало: наставник меньше */
+.look-noir .stage--js:has(.flask-shelf, .conveyor) .oracle-keeper svg {
+  width: 120px;
+}
+
+.oracle-keeper figcaption {
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Колонка уходит под редактор или окно низкое — наставнику места нет */
+@media (max-width: 1080px), (max-height: 640px) {
+  .look-noir .oracle-keeper {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .look-noir .oracle-scroll__lines .oracle-line,
+  .look-noir .oracle-scroll__lines .oracle-line--empty {
+    animation: none;
+  }
+}
+
 .look-noir .oracle-scroll,
 .look-noir .flask-shelf,
 .look-noir .conveyor {
@@ -1560,7 +1637,8 @@
 }
 
 /* Наставник говорит — его огоньки дышат чаще */
-.story-art .is-talking .noir-bust__lights {
+.story-art .is-talking .noir-bust__lights,
+.oracle-keeper .is-talking .noir-bust__lights {
   animation: noir-talk 0.6s ease-in-out infinite alternate;
 }
 

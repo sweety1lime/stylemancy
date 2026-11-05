@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { TYPE_NAMES, type CallStatus, type FlaskStatus, type JsEvaluation, type RunStatus } from '../engine/jsCheck';
 import { runtimeProblem } from '../engine/jsLint';
 import type { Flask as FlaskValue, OutputLine, ValueType } from '../engine/jsRun';
@@ -6,9 +6,12 @@ import type { JsLevel } from '../engine/types';
 import { recolor, type Sprite } from '../pixel/pixelArt';
 import { POTION } from '../pixel/sprites';
 import { useNoir } from '../noir/look';
+import { BUSTS } from '../noir/mentors';
 import { NOIR_LIQUID } from '../noir/liquid';
 import { NoirFlask } from '../noir/NoirFlask';
 import { GoalList } from './GoalList';
+import type { HeroCue } from './Hero';
+import { OracleKeeper } from './OracleKeeper';
 import { PixelArt } from './PixelArt';
 
 /** Цвет жидкости в колбе — по типу значения: видно, что '5' и 5 — разные вещи. */
@@ -114,11 +117,13 @@ function CallFlask({ status }: { status: CallStatus }) {
 }
 
 /** Строка свитка: слова Оракула, окно alert или вопрос prompt вместе с ответом. */
-export function OracleLine({ line, ok = false }: { line: OutputLine; ok?: boolean }) {
+export function OracleLine({ line, ok = false, index }: { line: OutputLine; ok?: boolean; index?: number }) {
   const mark = ok ? <span className="oracle-line__mark">✦</span> : null;
+  // Порядковый номер строки: в «Сумраке» строки свитка проступают по очереди
+  const style = index === undefined ? undefined : ({ '--i': index } as CSSProperties);
   if (line.kind === 'prompt') {
     return (
-      <li className="oracle-line oracle-line--prompt">
+      <li className="oracle-line oracle-line--prompt" style={style}>
         <span className="oracle-line__question">? {line.text}</span>
         <span className="oracle-line__answer">→ {line.answer === null ? 'нет ответа' : line.answer}</span>
         {mark}
@@ -126,7 +131,7 @@ export function OracleLine({ line, ok = false }: { line: OutputLine; ok?: boolea
     );
   }
   return (
-    <li className={`oracle-line oracle-line--${line.kind}${ok ? ' oracle-line--ok' : ''}`}>
+    <li className={`oracle-line oracle-line--${line.kind}${ok ? ' oracle-line--ok' : ''}`} style={style}>
       {line.kind === 'alert' && <span className="oracle-line__badge">alert</span>}
       <span className="oracle-line__text">{line.text === '' ? ' ' : line.text}</span>
       {mark}
@@ -148,7 +153,7 @@ export interface JsSceneProps<E = JsEvaluation> {
  * Сцена JS-уровня: свиток Оракула (всё, что вывел код) и полка с колбами (переменные).
  * Если запусков несколько — вкладки, как зеркала в адаптиве.
  */
-export function JsScene({ level, code, evaluation, busy, celebrate }: JsSceneProps) {
+export function JsScene({ level, code, evaluation, busy, celebrate, cue }: JsSceneProps & { cue?: HeroCue | null }) {
   const [selected, setSelected] = useState(0);
   const noirLegend = useNoir();
   const runs = evaluation?.runs ?? [];
@@ -205,7 +210,8 @@ export function JsScene({ level, code, evaluation, busy, celebrate }: JsScenePro
             <p className="oracle-scroll__title">Свиток Оракула</p>
             <ol className="oracle-scroll__lines" aria-live="polite">
               {output.map((line, i) => (
-                <OracleLine key={i} line={line} ok={Boolean(status?.lineOk[i])} />
+                // Изменившаяся строка пишется заново, а прежние остаются на месте
+                <OracleLine key={`${i}:${line.text}`} line={line} ok={Boolean(status?.lineOk[i])} index={i} />
               ))}
               {syntax && (
                 <li className="oracle-line oracle-line--error">
@@ -250,6 +256,10 @@ export function JsScene({ level, code, evaluation, busy, celebrate }: JsScenePro
       </div>
 
       {evaluation && <GoalList goals={evaluation.goals} />}
+
+      {noirLegend && level.npc.portrait in BUSTS && (
+        <OracleKeeper id={level.npc.portrait} name={level.npc.name} cue={cue} said={output.map((line) => line.text).join('\n')} />
+      )}
     </section>
   );
 }

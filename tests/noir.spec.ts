@@ -272,3 +272,63 @@ test('победа в лёгком режиме: ни вдоха, ни коль�
   expect(await seen()).toEqual({ dim: false, rings: 0 });
   expect(await page.locator('.scene').evaluate((el) => el.getAnimations().length)).toBe(0);
 });
+
+/** Открыть JS-уровень и заменить код в редакторе */
+async function openJsLevel(page: Page, level: string, code: string, effects: 'full' | 'light' = 'full') {
+  await page.addInitScript((fx) => {
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: fx, look: 'noir', effectsChosen: true }));
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true, 'prologue:scriptoria': true, 'intro:oracle-hall': true } }));
+  }, effects);
+  await page.goto(`/#/level/${level}`);
+  await expect(page.locator('.oracle-scroll')).toBeVisible();
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.insertText(code);
+}
+
+test('Скриптория: Оракул крупно рядом со свитком, строки свитка проступают по очереди', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await openJsLevel(page, 'js-01', "console.log('Привет, Скриптория!');\nconsole.log('Раз');");
+  const lines = page.locator('.oracle-scroll__lines .oracle-line');
+  await expect(lines).toHaveCount(2);
+  // Строки светятся и проступают с задержкой по номеру: вторая позже первой
+  expect(await lines.nth(1).getAttribute('style')).toContain('--i: 1');
+  expect(await lines.nth(1).evaluate((el) => getComputedStyle(el).animationName)).toBe('noir-rune-in');
+  // Пустая часть колонки занята наставником: на коротком уровне он большой
+  const keeper = page.locator('.oracle-keeper');
+  await expect(keeper).toBeVisible();
+  expect((await keeper.boundingBox())?.height).toBeGreaterThan(200);
+  // На уровне с полкой колб места меньше — наставник компактный
+  await page.goto('/#/level/js-03');
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.insertText('let gems = 5;\nconsole.log(gems);\n');
+  await expect(page.locator('.flask-shelf')).toBeVisible();
+  expect((await keeper.boundingBox())?.height).toBeLessThan(180);
+});
+
+test('Скриптория: наставник радуется победе и задумывается над промахом', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await openJsLevel(page, 'js-01', "console.log('не то');");
+  await expect(page.locator('.oracle-keeper .noir-bust__pose')).toHaveCount(0);
+  await page.getByRole('button', { name: /Сотворить/ }).click();
+  await expect(page.locator('.oracle-keeper .noir-bust__pose')).toHaveCount(1);
+
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.insertText("console.log('Привет, Скриптория!');");
+  await page.getByRole('button', { name: /Сотворить/ }).click();
+  await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  await expect(page.locator('.oracle-keeper .noir-bust__pose')).toHaveCount(1);
+});
+
+test('Скриптория: в лёгком режиме строки свитка без движения, на узком экране наставника нет', async ({ page }) => {
+  await openJsLevel(page, 'js-01', "console.log('Привет, Скриптория!');", 'light');
+  const line = page.locator('.oracle-scroll__lines .oracle-line').first();
+  await expect(line).toBeVisible();
+  expect(await line.evaluate((el) => getComputedStyle(el).animationDuration)).toBe('0s');
+
+  // Колонка уходит под редактор — наставник убирается, чтобы не удлинять страницу
+  await page.setViewportSize({ width: 900, height: 900 });
+  await expect(page.locator('.oracle-keeper')).toBeHidden();
+});

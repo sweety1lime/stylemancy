@@ -92,6 +92,7 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
           evaluation={checked?.evaluation ?? null}
           busy={busy}
           celebrate={flow.outcome?.kind === 'success'}
+          cue={flow.outcome}
         />
       )}
 
