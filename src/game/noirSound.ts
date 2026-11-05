@@ -128,13 +128,13 @@ export const noirSfx = {
     breath(ctx, 0.05, 0.6, 900, 180, 0.06, 'lowpass');
     voice(ctx, 147, 0.05, 0.6, { glide: 98, volume: 0.025, attack: 0.03, space: 0.3 });
   },
-  /** Буквы в сценке: едва слышное мягкое касание. У каждого говорящего свой тон, у Лорда Дефолта — низкий и глухой */
+  /** Буквы в сценке: мягкое касание, слышное поверх фона. У каждого говорящего свой тон, у Лорда Дефолта — низкий и глухой */
   blip(ctx: AudioContext, speaker?: string) {
     if (speaker === 'default') {
-      voice(ctx, (400 + Math.random() * 80) * 0.45, 0, 0.09, { type: 'triangle', volume: 0.012, attack: 0.008, space: 0.3 });
+      voice(ctx, (400 + Math.random() * 80) * 0.45, 0, 0.09, { type: 'triangle', volume: 0.024, attack: 0.008, space: 0.3 });
       return;
     }
-    voice(ctx, (400 + Math.random() * 80) * pitchOf(speaker), 0, 0.06, { volume: 0.006, attack: 0.005, space: 0 });
+    voice(ctx, (400 + Math.random() * 80) * pitchOf(speaker), 0, 0.06, { volume: 0.014, attack: 0.005, space: 0 });
   },
   /** Достижение: три тихих колокольчика в зале */
   achievement(ctx: AudioContext) {

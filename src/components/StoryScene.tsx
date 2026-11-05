@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import type { StoryFrame } from '../engine/types';
 import { startAmbience, stopAmbience } from '../game/ambience';
-import { useSettings } from '../game/settings';
+import { settings, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
+import { NoirIcon } from '../noir/icons';
 import { Portrait } from './Portrait';
 import { StoryArt } from './StoryArt';
 
@@ -56,10 +57,13 @@ function Typewriter({ text, speaker, cinema, onTyping }: TypewriterProps) {
   }, [shown, text, speaker, cinema]);
 
   return (
-    <p className="story__text" onClick={() => setShown(text.length)}>
-      {text.slice(0, shown)}
-      {/* Скринридер сразу получает весь текст */}
-      <span className="visually-hidden">{text.slice(shown)}</span>
+    // data-text держит место под весь текст, пока он печатается: окно не растёт строка за строкой и не дрожит
+    <p className="story__text" data-text={text} onClick={() => setShown(text.length)}>
+      <span className="story__typed">
+        {text.slice(0, shown)}
+        {/* Скринридер сразу получает весь текст */}
+        <span className="visually-hidden">{text.slice(shown)}</span>
+      </span>
     </p>
   );
 }
@@ -73,7 +77,7 @@ interface StorySceneProps {
 
 /** Сценка из нескольких кадров в окне поверх игры. В «Сумраке» — кинозал: шторки, камера, кадры перетекают друг в друга. */
 export function StoryScene({ title, frames, finishLabel, onClose }: StorySceneProps) {
-  const { look, effects } = useSettings();
+  const { look, effects, sound } = useSettings();
   const cinema = look === 'noir';
   // Кадры перетекают, только если движение уместно: полные эффекты и игроку оно не мешает
   const motion = cinema && effects === 'full' && !reducedMotion();
@@ -124,9 +128,27 @@ export function StoryScene({ title, frames, finishLabel, onClose }: StoryScenePr
   return (
     <div className="story" role="dialog" aria-modal="true" aria-label={title}>
       <div className="story__window px-panel">
-        <p className="story__title">
-          {title} · {index + 1} из {frames.length}
-        </p>
+        <div className="story__head">
+          <p className="story__title">
+            {title} · {index + 1} из {frames.length}
+          </p>
+          {/* Верхняя панель закрыта сценкой, а звук по умолчанию выключен: включить его нужно прямо здесь */}
+          {cinema && (
+            <button
+              type="button"
+              className="toggle story__sound"
+              aria-pressed={sound}
+              title={sound ? 'Звук включён' : 'Звук выключен'}
+              onClick={() => {
+                settings.update({ sound: !sound });
+                sfx.click();
+              }}
+            >
+              <NoirIcon name={sound ? 'sound' : 'mute'} />
+              <span className="visually-hidden">Звук</span>
+            </button>
+          )}
+        </div>
         <div className="story__stage">
           {shots.map((i) => (
             <div key={i} className={['story__shot', motion && 'story__shot--fade', i !== index && 'story__shot--out'].filter(Boolean).join(' ')}>

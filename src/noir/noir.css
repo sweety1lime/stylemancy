@@ -1215,12 +1215,17 @@
 /* ===== Кинозал: сценка на весь экран, шторки, камера, кадры перетекают друг в друга ===== */
 
 .look-noir .story {
+  padding: 12px;
   background: #000;
 }
 
+/* Окно всегда помещается в экран: кадр занимает остаток высоты за вычетом заголовка, подписи и кнопок.
+   Иначе на невысоком окне браузера появляется полоса прокрутки, и текст перестраивается при каждой новой строке */
 .look-noir .story__window {
   gap: 12px;
-  width: min(1000px, 100%, calc((100vh - 230px) * 16 / 9));
+  width: min(1000px, 100%, calc((100vh - 274px) * 16 / 9));
+  width: min(1000px, 100%, calc((100dvh - 274px) * 16 / 9));
+  max-height: calc(100dvh - 24px);
   padding: 0;
   border: 0;
   background: none;
@@ -1429,9 +1434,38 @@
   }
 }
 
+.look-noir .story__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.look-noir .story__sound {
+  flex: none;
+}
+
+/* Подпись держит высоту под имя и четыре строки, поэтому кадры не прыгают при смене реплики */
+.look-noir .story__caption {
+  min-height: 126px;
+}
+
+/* Место под весь текст занимает невидимая копия, а напечатанное лежит поверх неё: высота не меняется, пока идёт печать */
 .look-noir .story__text {
-  font-size: 18px;
-  line-height: 1.55;
+  position: relative;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.look-noir .story__text::before {
+  content: attr(data-text);
+  display: block;
+  visibility: hidden;
+}
+
+.look-noir .story__typed {
+  position: absolute;
+  inset: 0;
 }
 
 /* Лёгкие эффекты и «уменьшить движение»: кадры стоят спокойно, без камеры и титра */

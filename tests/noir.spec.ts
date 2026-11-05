@@ -145,3 +145,31 @@ test('фон под сценкой: со звуком файл скачивае�
   await openPrologue(page, 'full', true);
   await expect.poll(() => requested.length, { timeout: 10_000 }).toBeGreaterThan(0);
 });
+
+test('окно сценки не дрожит: на невысоком экране нет прокрутки, высота текста не меняется при печати', async ({ page }) => {
+  // Типичный ноутбук: окно браузера низкое, и окно сценки должно уместиться без прокрутки
+  await page.setViewportSize({ width: 1366, height: 768 });
+  const dialog = await openPrologue(page, 'full');
+  const window_ = dialog.locator('.story__window');
+  const textHeight = () => dialog.locator('.story__text').evaluate((el) => el.getBoundingClientRect().height);
+  const fits = () => window_.evaluate((el) => el.scrollHeight <= el.clientHeight);
+
+  for (let i = 0; i < 4; i++) {
+    expect(await fits()).toBe(true);
+    // Реплика только начала печататься, и её высота уже такая же, как у целой
+    const typing = await textHeight();
+    await dialog.locator('.story__text').click();
+    expect(await textHeight()).toBe(typing);
+    expect(await fits()).toBe(true);
+    await dialog.getByRole('button', { name: /Дальше →|К карте/ }).click();
+  }
+});
+
+test('звук включается прямо в сценке: верхняя панель под ней закрыта', async ({ page }) => {
+  const dialog = await openPrologue(page, 'full', false);
+  const toggle = dialog.getByRole('button', { name: 'Звук' });
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('cascadia.settings.v1') ?? '{}').sound)).toBe(true);
+});

@@ -7,7 +7,8 @@ import { soundContext } from './sound';
   Файл скачивается, только когда звук включён и открыта сценка. Громкость тихая: игра идёт на уроке.
 */
 
-const VOLUME = 0.12;
+/** У файла громкий уровень (RMS около 0,1), поэтому усиление небольшое: фон тихий, но слышный поверх голосов */
+const VOLUME = 0.25;
 const FADE_IN = 1.5;
 const FADE_OUT = 1;
 
@@ -54,6 +55,12 @@ async function play() {
   source.connect(gain).connect(ctx.destination);
   source.start();
   playing = { source, gain };
+  // Браузер не пускает звук, пока игрок ничего не коснулся; на первом касании или клавише контекст просыпается
+  if (ctx.state === 'suspended') {
+    const wake = () => void soundContext();
+    addEventListener('pointerdown', wake, { once: true });
+    addEventListener('keydown', wake, { once: true });
+  }
 }
 
 /** Сценка открылась: если звук включён, начинает играть фон */
