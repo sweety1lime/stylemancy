@@ -1368,6 +1368,118 @@
 
 /* ===== Карта ===== */
 
+/*
+  Шапка в одну строку: заголовок и слоган слева, кнопки справа, без портрета, рамки и фона — земли начинаются выше.
+  «О королевстве» стоит в строке слогана, а раскрытый текст ложится поверх карты, а не сдвигает её вниз.
+*/
+.look-noir .world__intro.px-panel {
+  padding: 2px 0 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.look-noir .world__intro .portrait {
+  display: none;
+}
+
+.look-noir .world__intro-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 24px;
+  align-items: center;
+}
+
+/* Заголовок и кнопки — прямые ячейки сетки шапки */
+.look-noir .world__intro-top {
+  display: contents;
+}
+
+.look-noir .world__intro .pixel-title {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.look-noir .world__actions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-content: flex-end;
+}
+
+.look-noir .world__sub {
+  position: relative;
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+}
+
+.look-noir .world__intro .world__tagline {
+  margin-top: 2px;
+}
+
+.look-noir .world__more {
+  margin-top: 0;
+}
+
+.look-noir .world__more summary {
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+}
+
+.look-noir .world__more[open] > p {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 6;
+  width: min(480px, 92vw);
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--frame);
+  background: rgba(9, 11, 18, 0.97);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 760px) {
+  .look-noir .world__intro-body {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
+  }
+
+  .look-noir .world__actions {
+    grid-column: 1;
+    grid-row: 3;
+    justify-content: flex-start;
+  }
+}
+
+/* Гость: короткая подпись рядом с «Войти»; полное объяснение — на экране входа. На узком окне не помещается */
+.look-noir .topbar__guest {
+  margin-right: 14px;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+@media (max-width: 900px) {
+  .look-noir .topbar__guest {
+    display: none;
+  }
+}
+
+.look-noir .login__guest {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .look-noir .world-map {
   border: 1px solid var(--frame);
   /* Луна за кадром справа сверху: на сетке земель её диску нет свободного места, виден только холодный свет */

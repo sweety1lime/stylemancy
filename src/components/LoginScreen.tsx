@@ -10,6 +10,7 @@ import {
 import { useProgress } from '../game/progress';
 import { navigate } from '../game/router';
 import { currentScope } from '../game/storage';
+import { useNoir } from '../noir/look';
 import { Face } from './Portrait';
 
 type Who = 'student' | 'teacher';
@@ -45,6 +46,7 @@ export function LoginScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const className = useClassName(who === 'student' ? classCode : '');
+  const noir = useNoir();
   // Прогресс, набранный без входа, можно унести в новый аккаунт
   const guestProgress = useProgress();
   const guestLevels = currentScope() ? 0 : Object.values(guestProgress).filter((item) => item.completed).length;
@@ -86,6 +88,14 @@ export function LoginScreen() {
           <Face id="flex" scale={3} />
           <h1 className="pixel-title">Вход в Стилемантию</h1>
         </div>
+
+        {/* В «Сумраке» на карте у гостя одна короткая подпись, а полное объяснение — здесь */}
+        {noir && (
+          <p className="login__guest">
+            Без входа игра идёт как у гостя: прогресс хранится только в этом браузере. Войди по коду класса, чтобы учитель видел
+            твои успехи, а прогресс сохранялся на любом компьютере.
+          </p>
+        )}
 
         <div className="tabs" role="tablist">
           <button type="button" role="tab" aria-selected={who === 'student'} className="tab" onClick={() => switchTo('student')}>

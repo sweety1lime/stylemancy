@@ -91,9 +91,12 @@ export function TopBar({ back }: TopBarProps) {
           </>
         ) : (
           ready && (
-            <a className="button button--small" href="#/login">
-              Войти
-            </a>
+            <>
+              {noir && <span className="topbar__guest">Ты играешь как гость</span>}
+              <a className="button button--small" href="#/login">
+                Войти
+              </a>
+            </>
           )
         )}
       </div>
