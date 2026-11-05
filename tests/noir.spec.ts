@@ -231,3 +231,44 @@ test('переходы: в лёгком режиме экраны меняютс
   await expect(page.getByRole('heading', { name: 'Парящие острова' })).toBeVisible();
   expect((await spy()).started).toBe(0);
 });
+
+/** Победа на первом уровне: решение введено, «Сотворить» нажато. Вдох живёт 340 мс, поэтому за слоем эффектов следит наблюдатель */
+async function winFirstLevel(page: Page, effects: 'full' | 'light') {
+  await page.addInitScript((fx) => {
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: fx, look: 'noir', effectsChosen: true }));
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true, 'intro:floating-lands': true } }));
+    const seen = { dim: false, rings: 0 };
+    (window as unknown as { __fx: typeof seen }).__fx = seen;
+    new MutationObserver((records) => {
+      for (const node of records.flatMap((record) => [...record.addedNodes])) {
+        if (!(node instanceof HTMLElement)) continue;
+        if (node.classList.contains('noir-dim')) seen.dim = true;
+        if (node.classList.contains('noir-ring')) seen.rings++;
+      }
+    }).observe(document, { childList: true, subtree: true });
+  }, effects);
+  await page.goto('/#/level/flex-01');
+  await expect(page.getByText('На месте: 1 из 3')).toBeVisible();
+  await page.keyboard.type('display: flex;');
+  await expect(page.getByText('На месте: 3 из 3')).toBeVisible();
+  await page.getByRole('button', { name: /Сотворить/ }).click();
+  await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  return () => page.evaluate(() => (window as unknown as { __fx: { dim: boolean; rings: number } }).__fx);
+}
+
+test('победа в «Сумраке»: свет сначала гаснет и возвращается, камера подаётся вперёд, панель проявляется', async ({ page }) => {
+  const seen = await winFirstLevel(page, 'full');
+  // Вдох перед вспышкой и ровно одно кольцо света
+  expect(await seen()).toEqual({ dim: true, rings: 1 });
+  // Сцена наезжает, а панель результата проявляется плавно
+  await expect
+    .poll(() => page.locator('.scene').evaluate((el) => el.getAnimations().some((a) => JSON.stringify((a.effect as KeyframeEffect).getKeyframes()).includes('scale(1.025)'))))
+    .toBe(true);
+  expect(await page.locator('.result--success').evaluate((el) => getComputedStyle(el).animationName)).toBe('noir-result-in');
+});
+
+test('победа в лёгком режиме: ни вдоха, ни кольца, панель без движения', async ({ page }) => {
+  const seen = await winFirstLevel(page, 'light');
+  expect(await seen()).toEqual({ dim: false, rings: 0 });
+  expect(await page.locator('.scene').evaluate((el) => el.getAnimations().length)).toBe(0);
+});

@@ -142,13 +142,17 @@ function fx(layer: HTMLElement, className: string, style: Partial<CSSStyleDeclar
 /** Язык движения «Сумрака»: мягко, без отскоков */
 const NOIR_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)';
 
+/** Вдох перед вспышкой: свет на миг гаснет, и тем ярче он возвращается (мс) */
+export const INHALE = 220;
+
 /**
- * Заклинание сработало — в «Сумраке» свет возвращается: тёплое кольцо расходится от середины,
- * по сцене проходит полоса света, на миг всё теплеет.
+ * Заклинание сработало — в «Сумраке» свет возвращается: сначала на миг гаснет, потом тёплое кольцо
+ * расходится от середины, по сцене проходит полоса света, и всё теплеет.
  */
 function noirMagic(layer: HTMLElement, width: number, height: number) {
   const size = Math.max(width, height) * 1.1;
-  fx(layer, 'noir-bloom', {}, [{ opacity: 0 }, { opacity: 1, offset: 0.3 }, { opacity: 0 }], { duration: 1600, easing: NOIR_EASE });
+  fx(layer, 'noir-dim', {}, [{ opacity: 0 }, { opacity: 1, offset: 0.7 }, { opacity: 0 }], { duration: INHALE + 120, easing: NOIR_EASE });
+  fx(layer, 'noir-bloom', {}, [{ opacity: 0 }, { opacity: 1, offset: 0.3 }, { opacity: 0 }], { duration: 1600, delay: INHALE, easing: NOIR_EASE });
   fx(
     layer,
     'noir-ring',
@@ -158,11 +162,11 @@ function noirMagic(layer: HTMLElement, width: number, height: number) {
       { transform: 'translate(-50%, -50%) scale(0.35)', opacity: 1, offset: 0.25 },
       { transform: 'translate(-50%, -50%) scale(1)', opacity: 0 },
     ],
-    { duration: 1400, easing: NOIR_EASE },
+    { duration: 1400, delay: INHALE, easing: NOIR_EASE },
   );
   fx(layer, 'noir-sweep', {}, [{ transform: 'translateX(-60%)', opacity: 0 }, { opacity: 1, offset: 0.3 }, { transform: 'translateX(260%)', opacity: 0 }], {
     duration: 1300,
-    delay: 150,
+    delay: INHALE + 150,
     easing: NOIR_EASE,
   });
 }

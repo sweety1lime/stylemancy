@@ -26,7 +26,7 @@ import { fullEffects, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
 import { attachSceneCamera } from '../noir/sceneCamera';
 import { noirSceneCss } from '../noir/sceneCss';
-import { burst, fizzle, glide, isNoir, magic, snapshot } from './sceneFx';
+import { burst, fizzle, glide, INHALE, isNoir, magic, snapshot } from './sceneFx';
 
 export interface SceneHandle {
   /** Применяет код ко всем зеркалам и сразу сообщает, какие предметы на месте. */
@@ -153,11 +153,26 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
             .forEach(({ target }) => burst(layer, target.x + target.w / 2, target.y + target.h / 2, '#6b7280', { count: 6, spread: 22 }));
         }
       });
+      if (passed && isNoir()) {
+        // Камера чуть подаётся вперёд, пока свет возвращается
+        boxRef.current?.animate([{ transform: 'none' }, { transform: 'scale(1.025)', offset: 0.35 }, { transform: 'none' }], {
+          duration: 1600,
+          delay: INHALE,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        });
+      }
       if (!passed) {
-        // Сцену встряхивает: в пиксельном виде — рывками, в «Сумраке» — плавно
+        // Сцену встряхивает: в пиксельном виде — рывками, в «Сумраке» — плавно и с отдачей назад
         const smooth = isNoir();
+        const recoil = smooth ? ' scale(0.985)' : '';
         boxRef.current?.animate(
-          [{ transform: 'none' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }],
+          [
+            { transform: 'none' },
+            { transform: `translateX(-6px)${recoil}` },
+            { transform: `translateX(6px)${recoil}` },
+            { transform: `translateX(-3px)${recoil}` },
+            { transform: 'none' },
+          ],
           { duration: smooth ? 480 : 360, easing: smooth ? 'ease-in-out' : 'steps(4, end)' },
         );
       }
