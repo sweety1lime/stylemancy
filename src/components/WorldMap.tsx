@@ -35,6 +35,8 @@ import {
 import { useNoir } from '../noir/look';
 import { NoirLandArt, NoirMapHero } from '../noir/NoirLandArt';
 import { NoirMapFront, NoirMapSky } from '../noir/NoirMapSky';
+import { NoirTrail, NoirWalker } from '../noir/NoirWalker';
+import { planWalk, type Journey } from '../noir/walkPlan';
 import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
 import { SpriteAnim } from './SpriteAnim';
@@ -165,6 +167,8 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
     if (fullEffects()) sfx.beacon();
   }, [noir, dawn, litKey]);
 
+  // Герой в «Сумраке» идёт по тропе: пока идёт, настоящий герой спрятан у новой земли
+  const [journey, setJourney] = useState<Journey | null>(null);
   // Герой сменил землю — идёт к ней пешком по карте. Новое место запоминаем, когда дошёл
   useLayoutEffect(() => {
     const key = scopedKey(HERO_KEYS[world]);
@@ -173,12 +177,38 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
     const map = mapRef.current;
     const from = was && was !== heroLand ? map?.querySelector(`[data-land="${was}"] .land__art`) : null;
     const hero = map?.querySelector<HTMLElement>(`[data-land="${heroLand}"] .land__hero`);
-    // Пешком идёт пиксельный герой; в «Сумраке» герой просто ждёт у новой земли
-    if (!map || !from || !hero || !fullEffects() || noir) {
+    if (!map || !from || !hero || !fullEffects()) {
       arrive();
       return;
     }
-    return walk(map, from, hero, arrive);
+    if (!noir) return walk(map, from, hero, arrive);
+
+    // «Сумрак»: по тропе, через центры земель. Не идёт на узком экране, при «уменьшить движение» и в автотестах
+    const ids = (world === 'cascadia' ? lands : scriptLands).map((land) => land.id);
+    const order = world === 'cascadia' ? [...ids, DOOR] : [DOOR, ...ids];
+    const plan = was ? planWalk(map, hero, order, PATHS[world], was, heroLand) : null;
+    if (!plan) {
+      arrive();
+      return;
+    }
+    let fade: ReturnType<typeof setTimeout> | undefined;
+    hero.style.visibility = 'hidden';
+    setJourney({
+      ...plan,
+      over: false,
+      done: () => {
+        hero.style.visibility = '';
+        arrive();
+        // Герой дошёл, а световой след ещё гаснет
+        setJourney((current) => (current ? { ...current, over: true } : current));
+        fade = setTimeout(() => setJourney(null), 900);
+      },
+    });
+    return () => {
+      clearTimeout(fade);
+      hero.style.visibility = '';
+      setJourney(null);
+    };
   }, [heroLand, world, noir]);
 
   function landStats(list: Land[]) {
@@ -361,6 +391,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
             return <line key={k} className={`path path--${state}`} x1={x1} y1={y1} x2={x2} y2={y2} />;
           })}
         </svg>
+        {journey && <NoirTrail journey={journey} />}
         {tiles.map((tile) => {
           const body = (
             <>
@@ -380,6 +411,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
             </div>
           );
         })}
+        {journey && !journey.over && <NoirWalker journey={journey} />}
         {noir && <NoirMapFront world={world} />}
       </div>
 

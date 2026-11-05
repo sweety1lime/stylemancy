@@ -284,10 +284,10 @@ export function NoirLandArt({ emblem, saved = false, fog = false, dawn = false }
 }
 
 /** Герой на карте: маленький силуэт в покое, кристалл на посохе светится */
-export function NoirMapHero({ width = 52 }: { width?: number }) {
+export function NoirMapHero({ width = 52, move = 'idle' }: { width?: number; move?: string }) {
   return (
     <span className="land__hero land__hero--noir noir-art">
-      <Rig rig={HERO_RIG} kind="hero" move="idle" rim="noir-rim" fill={NIGHT} x={0} y={0} width={width} height={(width * 190) / 160} viewBox="-30 -40 160 190" />
+      <Rig rig={HERO_RIG} kind="hero" move={move} rim="noir-rim" fill={NIGHT} x={0} y={0} width={width} height={(width * 190) / 160} viewBox="-30 -40 160 190" />
     </span>
   );
 }

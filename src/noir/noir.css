@@ -1089,6 +1089,59 @@
   }
 }
 
+/* ===== Герой идёт по тропе: световой след рисуется за ним и потом гаснет ===== */
+
+/* Ходок лежит поверх карты и стоит там, где в конце встанет настоящий герой; двигает его WAAPI */
+.look-noir .land__walker .land__hero {
+  position: static;
+}
+
+.land__walker-face {
+  display: block;
+}
+
+.world-map__trail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Толщина в долях карты, а не в px: так длина следа по pathLength совпадает с тем, что видно */
+.look-noir .path--trail {
+  stroke: #ffd9a0;
+  stroke-width: 0.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 5px rgba(255, 200, 130, 0.9));
+  animation: noir-trail var(--walk-ms) ease-in-out var(--walk-delay) forwards;
+}
+
+.look-noir .path--trail-out {
+  stroke-dashoffset: 0;
+  animation: noir-trail-out 0.9s ease-out forwards;
+}
+
+@keyframes noir-trail {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes noir-trail-out {
+  to {
+    opacity: 0;
+  }
+}
+
 /* ===== Новый ранг: шторки и титр поверх экрана, как в кино; ничего не перехватывает ===== */
 
 .rankup {

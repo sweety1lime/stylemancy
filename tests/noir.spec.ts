@@ -424,3 +424,47 @@ test('новый ранг в лёгком режиме: без титра и б�
   await expect(page.locator('.rankup')).toHaveCount(0);
   expect(await page.evaluate(() => [...(window as unknown as { __xp: Set<string> }).__xp])).toEqual(['125 XP', '150 XP']);
 });
+
+/** Карта, на которой герой в прошлый раз стоял у Леса Селекторов, а сейчас должен стоять у Долины Тегов */
+async function openMapWithHeroElsewhere(page: Page, effects: 'full' | 'light') {
+  await page.addInitScript((fx) => {
+    // Как у живого игрока: без флага автотеста
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: fx, look: 'noir', effectsChosen: true }));
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true } }));
+    if (!localStorage.getItem('cascadia.hero.v1')) localStorage.setItem('cascadia.hero.v1', JSON.stringify('selector-forest'));
+  }, effects);
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
+}
+
+const savedHeroPlace = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getItem('cascadia.hero.v1') ?? 'null'));
+
+test('герой идёт по карте: ходок в пути, световой след за ним, потом герой встаёт у новой земли', async ({ page }) => {
+  await openMapWithHeroElsewhere(page, 'full');
+  // В пути: настоящий герой спрятан, вместо него идёт ходок, а по тропе ложится след
+  await expect(page.locator('.land__walker--noir')).toHaveCount(1);
+  await expect(page.locator('.path--trail')).toHaveCount(1);
+  await expect(page.locator('[data-land="tags-valley"] .land__hero')).toHaveCSS('visibility', 'hidden');
+  expect(await savedHeroPlace(page)).toBe('selector-forest');
+  // Дошёл: ходока нет, герой виден у Долины Тегов, место запомнено, след погас
+  await expect(page.locator('.land__walker--noir')).toHaveCount(0);
+  await expect(page.locator('[data-land="tags-valley"] .land__hero')).toHaveCSS('visibility', 'visible');
+  expect(await savedHeroPlace(page)).toBe('tags-valley');
+  await expect(page.locator('.path--trail')).toHaveCount(0);
+});
+
+test('герой на карте в лёгком режиме и на узком экране не ходит, а сразу встаёт у новой земли', async ({ page }) => {
+  await openMapWithHeroElsewhere(page, 'light');
+  await expect(page.locator('[data-land="tags-valley"] .land__hero')).toBeVisible();
+  await expect(page.locator('.land__walker--noir')).toHaveCount(0);
+  expect(await savedHeroPlace(page)).toBe('tags-valley');
+});
+
+test('герой на карте на телефоне не ходит: там тропа скрыта', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 780 });
+  await openMapWithHeroElsewhere(page, 'full');
+  await expect(page.locator('[data-land="tags-valley"] .land__hero')).toBeVisible();
+  await expect(page.locator('.land__walker--noir')).toHaveCount(0);
+  expect(await savedHeroPlace(page)).toBe('tags-valley');
+});
