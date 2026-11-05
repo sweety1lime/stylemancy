@@ -1089,6 +1089,128 @@
   }
 }
 
+/* ===== Новый ранг: шторки и титр поверх экрана, как в кино; ничего не перехватывает ===== */
+
+.rankup {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.rankup::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.6), transparent 70%);
+  animation: rankup-veil 3.6s ease-in-out 0.5s both;
+}
+
+.rankup__bar {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 11%;
+  background: #000;
+}
+
+.rankup__bar--top {
+  top: 0;
+  animation: rankup-bar-top 3.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
+}
+
+.rankup__bar--bottom {
+  bottom: 0;
+  animation: rankup-bar-bottom 3.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
+}
+
+.rankup__card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  margin: 0;
+  text-shadow: 0 2px 24px #000;
+  animation: rankup-card 3.6s ease-in-out 0.5s both;
+}
+
+.rankup__caption {
+  color: var(--violet);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.rankup__title {
+  color: var(--gold-strong);
+  font-family: var(--font-pixel);
+  font-size: clamp(34px, 6vw, 64px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  animation: rankup-title 3.6s linear 0.5s both;
+}
+
+@keyframes rankup-veil {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  20%,
+  75% {
+    opacity: 1;
+  }
+}
+
+@keyframes rankup-bar-top {
+  0%,
+  100% {
+    transform: translateY(-100%);
+  }
+
+  14%,
+  86% {
+    transform: none;
+  }
+}
+
+@keyframes rankup-bar-bottom {
+  0%,
+  100% {
+    transform: translateY(100%);
+  }
+
+  14%,
+  86% {
+    transform: none;
+  }
+}
+
+@keyframes rankup-card {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  20%,
+  72% {
+    opacity: 1;
+  }
+}
+
+@keyframes rankup-title {
+  from {
+    letter-spacing: 0.14em;
+  }
+
+  to {
+    letter-spacing: 0.28em;
+  }
+}
+
 /* Звёзды за уровень загораются по одной */
 .look-noir .result--success .noir-star--on {
   animation: noir-star-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s backwards;

@@ -383,3 +383,44 @@ test('отклики: отметка цели вспыхивает, кнопка
   await land.hover();
   await expect.poll(() => land.locator('.noir-land').evaluate((el) => getComputedStyle(el).transform)).toMatch(/^matrix\(1\.0[1-9]/);
 });
+
+/** Прогресс, при котором победа на первом уровне даёт ровно 150 XP — порог ранга «Звезда»: пять уровней по 25 XP уже пройдены */
+async function seedRankEdge(page: Page) {
+  await page.addInitScript(() => {
+    if (localStorage.getItem('cascadia.progress.v1')) return;
+    const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+    const levels = ['flex-02', 'flex-03', 'flex-04', 'flex-05', 'flex-06'];
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(levels.map((id) => [id, done]))));
+    // Какие числа опыта успел показать верхний блок: при счёте вверх между 125 и 150 их несколько
+    const values = new Set<string>();
+    (window as unknown as { __xp: Set<string> }).__xp = values;
+    new MutationObserver(() => {
+      const text = document.querySelector('.rank__xp')?.textContent;
+      if (text) values.add(text);
+    }).observe(document, { subtree: true, childList: true, characterData: true });
+  });
+}
+
+test('новый ранг: опыт набегает, поверх экрана титр с названием, клики и диалоги не заняты', async ({ page }) => {
+  await seedRankEdge(page);
+  await winFirstLevel(page, 'full');
+  const card = page.locator('.rankup');
+  await expect(card).toContainText('Ранг повышен');
+  await expect(card).toContainText('Звезда');
+  expect(await card.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe('none');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  // Число опыта добежало до настоящего значения, а по дороге показало промежуточные
+  await expect(page.locator('.rank__xp')).toHaveText('150 XP');
+  await expect(page.locator('.rank__title')).toHaveText('Звезда');
+  const shown = await page.evaluate(() => [...(window as unknown as { __xp: Set<string> }).__xp]);
+  expect(shown.length).toBeGreaterThan(3);
+  await expect(card).toHaveCount(0, { timeout: 8000 });
+});
+
+test('новый ранг в лёгком режиме: без титра и без счёта, опыт сразу настоящий', async ({ page }) => {
+  await seedRankEdge(page);
+  await winFirstLevel(page, 'light');
+  await expect(page.locator('.rank__xp')).toHaveText('150 XP');
+  await expect(page.locator('.rankup')).toHaveCount(0);
+  expect(await page.evaluate(() => [...(window as unknown as { __xp: Set<string> }).__xp])).toEqual(['125 XP', '150 XP']);
+});

@@ -7,6 +7,7 @@ import { CodeEditor, type CodeEditorHandle, type EditorLanguage } from './CodeEd
 import { FeedbackDialog } from './FeedbackDialog';
 import { Hero, type HeroCue } from './Hero';
 import { Portrait } from './Portrait';
+import { RankUp } from './RankUp';
 import { ResultPanel, type RegionStats } from './ResultPanel';
 import { ReviewCard } from './ReviewCard';
 import { RichText } from './RichText';
@@ -143,6 +144,8 @@ export function Workbench({ flow, level, region, trailHref, onNext, onCast, edit
           onFinale={flow.outro ? () => flow.showStory(flow.outro) : undefined}
         />
       )}
+
+      {flow.outcome?.kind === 'success' && flow.outcome.newRank && <RankUp title={flow.outcome.newRank} />}
 
       {flow.review && (
         <ReviewCard

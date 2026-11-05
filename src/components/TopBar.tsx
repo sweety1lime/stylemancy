@@ -6,6 +6,7 @@ import { rankFor, totalXp } from '../game/ranks';
 import { settings, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
 import { useStats } from '../game/stats';
+import { useCountUp } from '../game/useCountUp';
 import { BOOK, EFFECTS_OFF, EFFECTS_ON, GEMS, MEDALS, MOON, SPEAKER_OFF, SPEAKER_ON } from '../pixel/sprites';
 import { AccountDialog } from './AccountDialog';
 import { NoirIcon, NoirMedal } from '../noir/icons';
@@ -22,7 +23,11 @@ export function TopBar({ back }: TopBarProps) {
   const noir = useNoir();
   const { account, ready } = useAuth();
   const xp = totalXp(useProgress(), stats.reviewXp);
-  const { rank, next, share } = rankFor(xp);
+  const { effects } = useSettings();
+  // Опыт «набегает»: число, название ранга и полоска считаются от показанного значения, подсказка — от настоящего
+  const shown = useCountUp(xp, noir && effects === 'full');
+  const { rank, share } = rankFor(shown);
+  const { next } = rankFor(xp);
   const hint = next ? `До ранга «${next.title}» — ${next.xp - xp} XP` : 'Высший ранг';
   const achievementsGot = ACHIEVEMENTS.filter((item) => stats.achievements[item.id]).length;
   // Окно держит аккаунт, с которым открылось: после удаления оно ещё показывает итог
@@ -55,7 +60,7 @@ export function TopBar({ back }: TopBarProps) {
         <span className="rank__bar" aria-hidden="true">
           <span className="rank__fill" style={{ width: `${Math.round(share * 100)}%` }} />
         </span>
-        <span className="rank__xp">{xp} XP</span>
+        <span className="rank__xp">{shown} XP</span>
         <span className="visually-hidden">{hint}</span>
       </div>
       <div className="account">
