@@ -173,3 +173,18 @@ test('звук включается прямо в сценке: верхняя �
   await expect(toggle).toHaveAttribute('aria-pressed', 'true');
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('cascadia.settings.v1') ?? '{}').sound)).toBe(true);
 });
+
+test('карта: панорама видна на первом экране ноутбука, подробный абзац свёрнут', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.addInitScript(() => localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true } })));
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Карта Каскадии' })).toBeVisible();
+  // Раньше карта начиналась на y≈485 и была видна на треть; гостю шапка и плашка занимают меньше трети экрана
+  const top = await page.locator('.world-map').evaluate((el) => el.getBoundingClientRect().top);
+  expect(top).toBeLessThan(300);
+  await expect(page.getByRole('link', { name: 'Летопись героя' })).toBeVisible();
+  // Длинный рассказ про Лорда Дефолта и дверь <script> лежит под спойлером
+  await expect(page.getByText('загадочная дверь')).toBeHidden();
+  await page.locator('.world__more summary').click();
+  await expect(page.getByText('загадочная дверь')).toBeVisible();
+});

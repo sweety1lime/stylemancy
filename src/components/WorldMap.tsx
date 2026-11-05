@@ -279,32 +279,42 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
   return (
     <main className={`world world--${world}`}>
       <section className="world__intro px-panel">
-        <Portrait id={world === 'cascadia' ? 'default' : 'oracle'} />
-        <div>
-          <h1 className="pixel-title">{world === 'cascadia' ? 'Карта Каскадии' : 'Карта Скриптории'}</h1>
-          {world === 'cascadia' ? (
-            <p>
-              Лорд Дефолт проклял королевство: он хочет, чтобы всё снова выглядело как страница без стилей: Times New
-              Roman и синие ссылки. Каждая земля — тема вёрстки. Освой её магию и сними проклятие. А в углу карты стоит
-              загадочная дверь <code>&lt;script&gt;</code> — за ней начинается совсем другая магия.
-            </p>
-          ) : (
-            <p>
-              За дверью <code>&lt;script&gt;</code> всё движется само. Лорд Дефолт хочет всё обнулить: опустошить
-              колбы-переменные и остановить кнопки. Каждая земля — тема JavaScript: освой её приказы и догони злодея.
-            </p>
-          )}
-          {account?.classInfo && <p className="world__class">Класс «{account.classInfo.name}»</p>}
-          <div className="world__actions">
-            {resume && (
-              <a className="button button--cast" href={hrefFor({ name: 'level', id: resume.level.id })}>
-                Продолжить: {resume.level.title}
+        <Portrait id={world === 'cascadia' ? 'default' : 'oracle'} scale={3} />
+        <div className="world__intro-body">
+          <div className="world__intro-top">
+            <h1 className="pixel-title">{world === 'cascadia' ? 'Карта Каскадии' : 'Карта Скриптории'}</h1>
+            <div className="world__actions">
+              {resume && (
+                <a className="button button--cast" href={hrefFor({ name: 'level', id: resume.level.id })}>
+                  Продолжить: {resume.level.title}
+                </a>
+              )}
+              <a className="button button--ghost" href={hrefFor({ name: 'chronicle' })}>
+                Летопись героя
               </a>
-            )}
-            <a className="button button--ghost" href={hrefFor({ name: 'chronicle' })}>
-              Летопись героя
-            </a>
+            </div>
           </div>
+          <p className="world__tagline">
+            {world === 'cascadia'
+              ? 'Лорд Дефолт проклял королевство. Освой магию каждой земли и сними проклятие.'
+              : 'Лорд Дефолт хочет всё обнулить. Освой приказы каждой земли и догони злодея.'}
+            {account?.classInfo && <span className="world__class"> Класс «{account.classInfo.name}»</span>}
+          </p>
+          <details className="world__more">
+            <summary>{world === 'cascadia' ? 'О королевстве' : 'О Скриптории'}</summary>
+            {world === 'cascadia' ? (
+              <p>
+                Лорд Дефолт проклял королевство: он хочет, чтобы всё снова выглядело как страница без стилей: Times New
+                Roman и синие ссылки. Каждая земля — тема вёрстки. Освой её магию и сними проклятие. А в углу карты стоит
+                загадочная дверь <code>&lt;script&gt;</code> — за ней начинается совсем другая магия.
+              </p>
+            ) : (
+              <p>
+                За дверью <code>&lt;script&gt;</code> всё движется само. Лорд Дефолт хочет всё обнулить: опустошить
+                колбы-переменные и остановить кнопки. Каждая земля — тема JavaScript: освой её приказы и догони злодея.
+              </p>
+            )}
+          </details>
         </div>
       </section>
 
