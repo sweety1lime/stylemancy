@@ -124,10 +124,10 @@ test('сценка со звуком: у реплик есть голоса, о�
 });
 
 /** Сколько раз за звуком фона сходили на сервер; модуль с адресом файла Vite отдаёт сразу, его не считаем */
-function watchAmbience(page: Page): string[] {
+function watchAmbience(page: Page, file = 'dark_place'): string[] {
   const requested: string[] = [];
   page.on('request', (request) => {
-    if (request.resourceType() === 'fetch' && request.url().includes('dark_place')) requested.push(request.url());
+    if (request.resourceType() === 'fetch' && request.url().includes(file)) requested.push(request.url());
   });
   return requested;
 }
@@ -467,4 +467,42 @@ test('герой на карте на телефоне не ходит: там �
   await expect(page.locator('[data-land="tags-valley"] .land__hero')).toBeVisible();
   await expect(page.locator('.land__walker--noir')).toHaveCount(0);
   expect(await savedHeroPlace(page)).toBe('tags-valley');
+});
+
+/** Открыть экран игры: звук включён или выключен, прологи просмотрены, чтобы сценка не открылась поверх */
+async function openWithSound(page: Page, hash: string, sound: boolean) {
+  await page.addInitScript((on) => {
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: on, effects: 'full', look: 'noir', effectsChosen: true }));
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true, 'prologue:scriptoria': true, 'intro:oracle-hall': true } }));
+  }, sound);
+  await page.goto(hash);
+}
+
+test('фон по экранам: на карте Каскадии играет её дорожка, в Скриптории — своя', async ({ page }) => {
+  const cascadia = watchAmbience(page, 'dark_place');
+  const scriptoria = watchAmbience(page, 'dark_cavern');
+  await openWithSound(page, '/', true);
+  await expect.poll(() => cascadia.length, { timeout: 20_000 }).toBeGreaterThan(0);
+  expect(scriptoria).toEqual([]);
+
+  // Игрок прошёл за дверь <script>: фон перетекает на дорожку Скриптории
+  await page.evaluate(() => (location.hash = '#/scriptoria'));
+  await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
+  await expect.poll(() => scriptoria.length, { timeout: 20_000 }).toBeGreaterThan(0);
+});
+
+test('фон по экранам: JS-уровень сразу играет дорожку Скриптории', async ({ page }) => {
+  const cascadia = watchAmbience(page, 'dark_place');
+  const scriptoria = watchAmbience(page, 'dark_cavern');
+  await openWithSound(page, '/#/level/js-01', true);
+  await expect.poll(() => scriptoria.length, { timeout: 20_000 }).toBeGreaterThan(0);
+  expect(cascadia).toEqual([]);
+});
+
+test('фон по экранам: пока звук выключен, ни одна дорожка не скачивается', async ({ page }) => {
+  const any = watchAmbience(page, 'dark_');
+  await openWithSound(page, '/#/scriptoria', false);
+  await expect(page.getByRole('heading', { name: 'Карта Скриптории' })).toBeVisible();
+  await page.waitForTimeout(1000);
+  expect(any).toEqual([]);
 });

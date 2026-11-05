@@ -8,10 +8,11 @@ import { TopBar } from './components/TopBar';
 import { WorldMap } from './components/WorldMap';
 import { isHtmlLevel, isJsLevel } from './engine/types';
 import { canEnterLand, isScriptoriaOpen } from './game/access';
+import { setScreenTrack, type Track } from './game/ambience';
 import { useAuth } from './game/auth';
 import { useProgress } from './game/progress';
 import { isRegionOpen } from './game/unlock';
-import { hrefFor, navigate, parseHash, useHash } from './game/router';
+import { hrefFor, navigate, parseHash, useHash, type Route } from './game/router';
 import { findLand, findLevel, isScriptLand, type Land } from './levels';
 import { useNoir } from './noir/look';
 import { NoirDefs } from './noir/NoirDefs';
@@ -61,6 +62,14 @@ function mapOf(land: Land): { href: string; label: string } {
   return isScriptLand(land) ? { href: hrefFor({ name: 'scriptoria' }), label: 'Скриптория' } : { href: hrefFor({ name: 'map' }), label: 'Карта' };
 }
 
+/** Какая фоновая дорожка играет на экране: у Каскадии одна, у Скриптории другая. null — экран оставляет прежнюю (гримуар, вход и другие) */
+function trackFor(route: Route): Track | null {
+  const land = route.name === 'land' ? findLand(route.id) : route.name === 'level' ? findLevel(route.id)?.land : undefined;
+  if (land) return isScriptLand(land) ? 'scriptoria' : 'cascadia';
+  if (route.name === 'scriptoria') return 'scriptoria';
+  return route.name === 'map' ? 'cascadia' : null;
+}
+
 export default function App() {
   const hash = useHash();
   const route = parseHash(hash);
@@ -70,6 +79,12 @@ export default function App() {
   // Каждый экран открывается с начала страницы; до отрисовки, чтобы новый экран попал в снимок перехода уже наверху
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
+  }, [hash]);
+
+  // Фон перетекает на дорожку земли, куда пришёл игрок
+  useEffect(() => {
+    const track = trackFor(parseHash(hash));
+    if (track) setScreenTrack(track);
   }, [hash]);
 
   // Уровни открывают чаще всего: их код подгружаем заранее, когда первый экран уже нарисован

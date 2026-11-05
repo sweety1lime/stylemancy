@@ -1,60 +1,87 @@
-import dark from '../assets/audio/dark_place.ogg?url';
+import cascadia from '../assets/audio/dark_place.ogg?url';
+import scriptoria from '../assets/audio/dark_cavern_ambient_002.ogg?url';
 import { settings } from './settings';
 import { soundContext } from './sound';
 
 /*
-  Фон под сценками в «Сумраке»: тёмная петля из файла, она плавно появляется и затихает.
-  Файл скачивается, только когда звук включён и открыта сценка. Громкость тихая: игра идёт на уроке.
+  Фон в «Сумраке»: тёмная петля из файла. У Каскадии и Скриптории свои дорожки, они плавно перетекают друг в друга.
+  Под картой и уроком фон совсем тихий, под сценкой громче. Файл скачивается, только когда звук включён
+  и игрок пришёл на экран с этой дорожкой.
 */
 
-/** У файла громкий уровень (RMS около 0,1), поэтому усиление небольшое: фон тихий, но слышный поверх голосов */
-const VOLUME = 0.25;
+export type Track = 'cascadia' | 'scriptoria';
+
+const FILES: Record<Track, string> = { cascadia, scriptoria };
+
+/** У файлов громкий уровень (RMS около 0,1), поэтому усиление небольшое: под уроком фон едва слышен, под сценкой слышнее */
+const SCREEN = 0.1;
+const SCENE = 0.25;
 const FADE_IN = 1.5;
 const FADE_OUT = 1;
 
-let loading: Promise<AudioBuffer | null> | undefined;
-let playing: { source: AudioBufferSourceNode; gain: GainNode } | undefined;
-/** Открыта ли сейчас сценка, которой нужен фон */
-let wanted = false;
+const loading = new Map<Track, Promise<AudioBuffer | null>>();
+const playing = new Map<Track, { source: AudioBufferSourceNode; gain: GainNode }>();
+/** Дорожка экрана, на котором игрок сейчас, и открыта ли сценка поверх него */
+let screen: Track | null = null;
+let scene = false;
 
-function load(ctx: AudioContext): Promise<AudioBuffer | null> {
-  loading ??= fetch(dark)
-    .then((response) => response.arrayBuffer())
-    .then((bytes) => ctx.decodeAudioData(bytes))
-    // Фон — украшение: если файл не скачался или браузер его не знает, сценка идёт и без него; скачать можно будет в следующий раз
-    .catch(() => {
-      loading = undefined;
-      return null;
-    });
-  return loading;
+function load(track: Track, ctx: AudioContext): Promise<AudioBuffer | null> {
+  let buffer = loading.get(track);
+  if (!buffer) {
+    buffer = fetch(FILES[track])
+      .then((response) => response.arrayBuffer())
+      .then((bytes) => ctx.decodeAudioData(bytes))
+      // Фон — украшение: если файл не скачался или браузер его не знает, игра идёт и без него; скачать можно будет в следующий раз
+      .catch(() => {
+        loading.delete(track);
+        return null;
+      });
+    loading.set(track, buffer);
+  }
+  return buffer;
 }
 
-function fadeOut() {
-  if (!playing) return;
-  const { source, gain } = playing;
-  const ctx = gain.context;
-  gain.gain.cancelScheduledValues(ctx.currentTime);
-  gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + FADE_OUT);
-  source.stop(ctx.currentTime + FADE_OUT + 0.05);
-  playing = undefined;
+/** Плавно довести громкость дорожки до level за seconds секунд */
+function ramp(gain: GainNode, level: number, seconds: number) {
+  const now = gain.context.currentTime;
+  gain.gain.cancelScheduledValues(now);
+  gain.gain.setValueAtTime(gain.gain.value, now);
+  gain.gain.linearRampToValueAtTime(level, now + seconds);
 }
 
-async function play() {
+function fadeOut(track: Track) {
+  const item = playing.get(track);
+  if (!item) return;
+  ramp(item.gain, 0, FADE_OUT);
+  item.source.stop(item.gain.context.currentTime + FADE_OUT + 0.05);
+  playing.delete(track);
+}
+
+/** Привести звук в соответствие с тем, где игрок и что открыто: нужная дорожка играет, остальные затихают */
+async function apply() {
   const ctx = soundContext();
-  if (!ctx || playing || settings.get().look !== 'noir') return;
-  const buffer = await load(ctx);
-  // Пока файл грузился, сценку могли закрыть, а звук выключить
-  if (!buffer || !wanted || playing || !soundContext()) return;
+  // Сценка на экране без дорожки (например, летопись) идёт под дорожкой Каскадии
+  const track = ctx && settings.get().look === 'noir' ? (screen ?? (scene ? 'cascadia' : null)) : null;
+  for (const other of [...playing.keys()]) if (other !== track) fadeOut(other);
+  if (!ctx || !track) return;
+
+  const current = playing.get(track);
+  if (current) {
+    ramp(current.gain, scene ? SCENE : SCREEN, FADE_OUT);
+    return;
+  }
+  const buffer = await load(track, ctx);
+  // Пока файл грузился, игрок мог уйти на другой экран, а звук — выключиться
+  if (!buffer || playing.has(track) || screen !== track || !soundContext()) return;
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   source.loop = true;
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(VOLUME, ctx.currentTime + FADE_IN);
+  gain.gain.linearRampToValueAtTime(scene ? SCENE : SCREEN, ctx.currentTime + FADE_IN);
   source.connect(gain).connect(ctx.destination);
   source.start();
-  playing = { source, gain };
+  playing.set(track, { source, gain });
   // Браузер не пускает звук, пока игрок ничего не коснулся; на первом касании или клавише контекст просыпается
   if (ctx.state === 'suspended') {
     const wake = () => void soundContext();
@@ -63,21 +90,23 @@ async function play() {
   }
 }
 
-/** Сценка открылась: если звук включён, начинает играть фон */
+/** Игрок перешёл на экран с дорожкой (или с него ушёл, null): фон перетекает на неё */
+export function setScreenTrack(track: Track | null) {
+  screen = track;
+  void apply();
+}
+
+/** Сценка открылась: если звук включён, фон становится громче */
 export function startAmbience() {
-  wanted = true;
-  void play();
+  scene = true;
+  void apply();
 }
 
-/** Сценка закрылась: фон затихает */
+/** Сценка закрылась: фон снова тихий */
 export function stopAmbience() {
-  wanted = false;
-  fadeOut();
+  scene = false;
+  void apply();
 }
 
-// Звук включили или выключили, пока идёт сценка
-settings.subscribe(() => {
-  if (!wanted) return;
-  if (soundContext() && settings.get().look === 'noir') void play();
-  else fadeOut();
-});
+// Звук включили или выключили, вид сменили
+settings.subscribe(() => void apply());
