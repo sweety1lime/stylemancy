@@ -10,6 +10,8 @@ interface HtmlSceneProps {
   /** Картинки по именам: src="potion.png" → спрайт */
   images: Record<string, string>;
   celebrate?: boolean;
+  /** Цели ещё не выполнены: в «Сумраке» страница — белый лист Лорда Дефолта, а не ночная рукопись */
+  cursed?: boolean;
 }
 
 /** Показать новое содержимое страницы на месте — без перезагрузки iframe и мигания. */
@@ -22,10 +24,14 @@ function showBody(frame: HTMLIFrameElement | null, body: string) {
  * Страница студента в рамке «браузера»: на вкладке — <title>, внизу — строка состояния.
  * Ссылки и формы никуда не уводят: строка состояния рассказывает, куда бы они вели.
  */
-export function HtmlScene({ level, code, images, celebrate }: HtmlSceneProps) {
-  const { look } = useSettings();
-  const lookCss = look === 'noir' ? noirSceneCss(level.regionId, level.id) : '';
-  const page = useMemo(() => htmlPage(level, code, images, lookCss), [level, code, images, lookCss]);
+export function HtmlScene({ level, code, images, celebrate, cursed }: HtmlSceneProps) {
+  const { look, effects } = useSettings();
+  const noir = look === 'noir';
+  const lookCss = noir ? noirSceneCss(level.regionId, level.id) : '';
+  const isCursed = noir && Boolean(cursed);
+  // Классы на <html> страницы: сразу в документе, чтобы при загрузке не мигала ночная рукопись, и потом на месте
+  const rootClass = [isCursed && 'cursed', noir && effects === 'light' && 'effects-light'].filter(Boolean).join(' ');
+  const page = useMemo(() => htmlPage(level, code, images, lookCss, rootClass), [level, code, images, lookCss, rootClass]);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const pageRef = useRef(page);
   // Документ для первой загрузки; дальше содержимое страницы меняется на месте
@@ -42,6 +48,24 @@ export function HtmlScene({ level, code, images, celebrate }: HtmlSceneProps) {
     pageRef.current = page;
     if (!level.document) showBody(frameRef.current, page.body);
   }, [page, level.document]);
+
+  // Проклятие снято (или вернулось): страница плавно переходит на месте, без перезагрузки; fade — только на время перехода,
+  // чтобы наведение на ссылки не тянулось 0,8 с
+  const wasCursed = useRef(isCursed);
+  useEffect(() => {
+    const root = frameRef.current?.contentDocument?.documentElement;
+    if (!root) return;
+    root.classList.toggle('cursed', isCursed);
+    root.classList.toggle('effects-light', noir && effects === 'light');
+    if (wasCursed.current === isCursed) return;
+    wasCursed.current = isCursed;
+    root.classList.add('cursed-fade');
+    const timer = setTimeout(() => root.classList.remove('cursed-fade'), 900);
+    return () => {
+      clearTimeout(timer);
+      root.classList.remove('cursed-fade');
+    };
+  }, [isCursed, noir, effects]);
 
   function handleLoad() {
     const frame = frameRef.current;
@@ -79,7 +103,7 @@ export function HtmlScene({ level, code, images, celebrate }: HtmlSceneProps) {
 
   const title = page.title || (level.document ? 'Без названия' : level.regionTitle);
   return (
-    <div className={celebrate ? 'browser browser--celebrate' : 'browser'}>
+    <div className={`browser${celebrate ? ' browser--celebrate' : ''}${isCursed ? ' browser--cursed' : ''}`}>
       <div className="browser__bar">
         <span className="browser__dots" aria-hidden="true">
           <i />

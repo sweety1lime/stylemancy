@@ -56,12 +56,21 @@ export function HtmlLevelScreen({ level, number, region, trailHref, onNext }: Ht
     }
   }
 
+  // Пока цели не выполнены, страница в «Сумраке» — белый лист Лорда Дефолта; снято проклятие — ночная рукопись
+  const cursed = !goals.every((goal) => goal.done);
+
   return (
     <main className="level level--html">
       <LevelBrief level={level} number={number} cue={flow.outcome} />
 
       <section className="stage" aria-label="Страница">
-        <HtmlScene level={level} code={liveCode} images={noir ? NOIR_IMAGE_LIBRARY : IMAGE_LIBRARY} celebrate={flow.outcome?.kind === 'success'} />
+        <HtmlScene
+          level={level}
+          code={liveCode}
+          images={noir ? NOIR_IMAGE_LIBRARY : IMAGE_LIBRARY}
+          celebrate={flow.outcome?.kind === 'success'}
+          cursed={cursed}
+        />
         <GoalList goals={goals} />
         <LevelResult flow={flow} level={level} region={region} trailHref={trailHref} onNext={onNext} />
       </section>

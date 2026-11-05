@@ -271,11 +271,83 @@ button {
 }
 `;
 
+/**
+ * Проклятие Лорда Дефолта. Пока цели уровня не выполнены, игра ставит на <html> страницы класс cursed,
+ * и страница — настоящая страница браузера по умолчанию: белый лист, чёрный Times New Roman, синие ссылки.
+ * Когда все цели выполнены, класс снимается и страница ~0,8 с переходит в ночную рукопись (cursed-fade — на время перехода,
+ * чтобы наведение на ссылки не тянулось). Правила стоят в конце оформления района и перекрывают его добавки.
+ * Под лёгкими эффектами (effects-light) и при «уменьшить движение» переход мгновенный.
+ */
+const CURSED = `
+html:not(.effects-light).cursed-fade,
+html:not(.effects-light).cursed-fade body,
+html:not(.effects-light).cursed-fade body * {
+  transition:
+    color 0.8s ease,
+    background-color 0.8s ease,
+    text-shadow 0.8s ease,
+    box-shadow 0.8s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.cursed-fade,
+  html.cursed-fade body,
+  html.cursed-fade body * {
+    transition: none;
+  }
+}
+
+html.cursed {
+  color-scheme: light;
+  background-color: #fff;
+  background-image: none;
+}
+
+html.cursed body,
+html.cursed body * {
+  color: #000;
+  font-family: "Times New Roman", Times, serif;
+  text-shadow: none;
+}
+
+html.cursed body * {
+  background-image: none;
+  box-shadow: none;
+}
+
+html.cursed body *:not(input, select, textarea, button, option) {
+  background-color: transparent;
+}
+
+html.cursed body :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: bold;
+  letter-spacing: normal;
+}
+
+html.cursed body a {
+  color: #0000ee;
+}
+
+html.cursed li::marker {
+  color: #000;
+}
+
+html.cursed input,
+html.cursed select,
+html.cursed textarea {
+  background: #fff;
+}
+
+html.cursed button {
+  background: #efefef;
+}
+`;
+
 export const PAGE_SCENES: Record<string, string> = {
-  'tag-village': VILLAGE,
-  'link-fair': FAIR,
-  'semantic-city': CITY,
-  'form-forge': FORGE,
+  'tag-village': VILLAGE + CURSED,
+  'link-fair': FAIR + CURSED,
+  'semantic-city': CITY + CURSED,
+  'form-forge': FORGE + CURSED,
 };
 
 /* Картинки для <img>: те же имена и размеры, что у пиксельных, рисунки — «Сумрака» */

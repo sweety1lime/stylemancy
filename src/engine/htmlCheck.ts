@@ -117,8 +117,11 @@ export interface HtmlPage {
 }
 
 /** Страница-сцена: разметка студента в оформлении района. */
-/** lookCss — оформление вида игры («Сумрак»): после оформления района, картинки и цвета */
-export function htmlPage(level: HtmlLevel, code: string, images: Record<string, string> = {}, lookCss = ''): HtmlPage {
+/**
+ * lookCss — оформление вида игры («Сумрак»): после оформления района, картинки и цвета.
+ * rootClass — классы на <html> страницы: по ним оформление «Сумрака» узнаёт, что страница проклята (cursed) или эффекты лёгкие.
+ */
+export function htmlPage(level: HtmlLevel, code: string, images: Record<string, string> = {}, lookCss = '', rootClass = ''): HtmlPage {
   const doc = parseMarkup(code, level.document);
   resolveImages(doc, images);
   doc.querySelectorAll('script').forEach((script) => script.remove());
@@ -126,7 +129,7 @@ export function htmlPage(level: HtmlLevel, code: string, images: Record<string, 
   const head = level.document ? doc.head.innerHTML : '<meta charset="utf-8">';
   const lang = doc.documentElement.getAttribute('lang') ?? 'ru';
   return {
-    html: `<!doctype html><html lang="${lang}"><head>${styles}${head}</head><body>${doc.body.innerHTML}</body></html>`,
+    html: `<!doctype html><html lang="${lang}"${rootClass ? ` class="${rootClass}"` : ''}><head>${styles}${head}</head><body>${doc.body.innerHTML}</body></html>`,
     body: doc.body.innerHTML,
     title: doc.title.trim(),
   };

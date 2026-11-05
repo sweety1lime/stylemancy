@@ -597,6 +597,63 @@
   background: #0e0c0a;
 }
 
+/* Страница проклята — в ночном интерфейсе лежит белый лист Лорда Дефолта: вкладка и рамка светлые, лист слегка светится.
+   Когда проклятие снято, они ~0,8 с темнеют вместе со страницей */
+.look-noir .browser,
+.look-noir .browser__bar,
+.look-noir .browser__tab,
+.look-noir .browser__status,
+.look-noir .browser__page {
+  transition:
+    background-color 0.8s ease,
+    color 0.8s ease,
+    border-color 0.8s ease,
+    box-shadow 0.8s ease;
+}
+
+.look-noir .browser--cursed {
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 70px rgba(220, 230, 255, 0.18);
+}
+
+.look-noir .browser--cursed .browser__bar,
+.look-noir .browser--cursed .browser__status {
+  border-color: #c9ccd2;
+  background: #dee1e6;
+  color: #3c4043;
+}
+
+.look-noir .browser--cursed .browser__tab {
+  border-color: #c9ccd2;
+  background: #fff;
+  color: #000;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.look-noir .browser--cursed .browser__page {
+  background: #fff;
+}
+
+.look-noir.effects-light .browser,
+.look-noir.effects-light .browser__bar,
+.look-noir.effects-light .browser__tab,
+.look-noir.effects-light .browser__status,
+.look-noir.effects-light .browser__page {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .look-noir .browser,
+  .look-noir .browser__bar,
+  .look-noir .browser__tab,
+  .look-noir .browser__status,
+  .look-noir .browser__page {
+    transition: none;
+  }
+}
+
 .look-noir .page-scene__restart {
   border: 1px solid var(--frame);
   background: transparent;
