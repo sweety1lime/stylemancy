@@ -1,18 +1,20 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useContext, type CSSProperties, type ReactNode } from 'react';
 import { gear, spruce, type GemKind } from './geometry';
 import { Glow } from './light';
 import type { Light } from './lights';
 import { HERO_RIG } from './rig/heroRig';
 import { Rig } from './rig/Rig';
 import { VILLAIN_RIG } from './rig/villainRig';
-import { NIGHT, NOIR_ISLAND, NOIR_SKY, NoirGem } from './scene';
+import { NIGHT, NOIR_ISLAND, NOIR_SKY, NOIR_SKY_DAWN, NOIR_SKY_EMBER, NoirGem } from './scene';
+import { RimContext, useRim } from './sceneLight';
 import { C, E, P, R } from './shapes';
 
 /*
   Сценки сюжета в «Сумраке» для всех земель, кроме пролога островов (он в NoirStoryArt).
   Кадр — сцена 800 × 360, видна середина 640 × 360. Небо Каскадии — с Академией вдали,
   у Скриптории — бирюзовая ночь с шестернями на горизонте, в помещениях — темнота и тёплый свет.
-  Силуэты с лунной кромкой (noir-rim), светятся только огонь, магия и надписи-заклинания.
+  Силуэты с контровым светом своей земли (RimContext: у луны noir-rim, у рассвета, зарева и леса — направленные кромки),
+  светятся только огонь, магия и надписи-заклинания.
 */
 
 const MONO = 'ui-monospace, "Cascadia Mono", Consolas, monospace';
@@ -54,9 +56,10 @@ function Glyph({ x, y, children, color = AMBER, size = 22, mono = false, classNa
   );
 }
 
-/** Тёмный силуэт с лунной кромкой */
+/** Тёмный силуэт с контровым светом сценки: кромку задаёт RimContext */
 function Sil({ d, className, style }: { d: string; className?: string; style?: CSSProperties }) {
-  return <path d={d} fill={NIGHT} filter="url(#noir-rim)" className={className} style={style} />;
+  const rim = useContext(RimContext);
+  return <path d={d} fill={NIGHT} filter={`url(#${rim})`} className={className} style={style} />;
 }
 
 /** Ночь Скриптории: бирюзовое небо, луна с зеленцой, шестерни на горизонте */
@@ -155,8 +158,9 @@ function Flask({ x, y, s = 1, type }: { x: number; y: number; s?: number; type: 
 
 /** Шестерня, которая медленно крутится */
 function Gear({ x, y, r, teeth, reverse = false, fill = NIGHT }: { x: number; y: number; r: number; teeth: number; reverse?: boolean; fill?: string }) {
+  const rim = useContext(RimContext);
   return (
-    <g filter="url(#noir-rim)">
+    <g filter={`url(#${rim})`}>
       <path d={gear(x, y, r, teeth)} fill={fill} fillRule="evenodd" className={reverse ? 'a-spin a-reverse' : 'a-spin'} style={{ transformOrigin: `${x}px ${y}px` }} />
     </g>
   );
@@ -228,7 +232,7 @@ type SceneProps = { mood?: 'laugh' | 'angry' };
 
 const VILLAGE = (
   <>
-    {NOIR_SKY}
+    {NOIR_SKY_DAWN}
     <House x={210} w={110} h={100} label="<p>" />
     <House x={345} w={120} h={150} label="<h1>" tower />
     <House x={490} w={110} h={96} label="<em>" />
@@ -270,7 +274,7 @@ function Stall({ x, label, blue = false }: { x: number; label: string; blue?: bo
 
 const FAIR = (
   <>
-    {NOIR_SKY}
+    {NOIR_SKY_DAWN}
     <path d="M150 150 Q400 200 650 150" fill="none" stroke="#0a0b10" strokeWidth="1.6" />
     {[190, 250, 310, 370, 430, 490, 550, 610].map((x, i) => (
       <circle key={x} className={i % 2 ? 'a-twinkle' : undefined} cx={x} cy={150 + Math.sin(((x - 150) / 500) * Math.PI) * 25} r="3.4" fill={WINDOW} filter="url(#sil-glow)" />
@@ -283,7 +287,7 @@ const FAIR = (
 
 const CITY = (
   <>
-    {NOIR_SKY}
+    {NOIR_SKY_DAWN}
     <House x={200} w={110} h={170} label="<header>" tower />
     <House x={330} w={170} h={120} label="<main>" />
     <House x={520} w={100} h={110} label="<aside>" />
@@ -365,17 +369,31 @@ function Chaos() {
   );
 }
 
+/** Три луча луны сквозь кроны: у каждого своя яркость */
+const FOREST_RAYS = ['M596 100 L606 104 L360 330 L300 330 Z', 'M604 108 L614 110 L500 330 L462 330 Z', 'M612 112 L620 112 L620 330 L596 330 Z'];
+const FOREST_RAY_OPACITY = [1, 0.7, 0.5];
+
+/** Кряжистый дуб с неровной кроной: корни не круглые, а ствол толстый */
+const OAK =
+  'M304 208 Q277.7 198.2 290 178 Q270.0 162.5 298 148 Q290.1 129.2 324 124 Q321.2 98.2 358 106 Q370.8 80.2 398 96 Q425.6 75.4 440 101 Q475.5 90.2 474 116 Q507.2 119.4 500 140 Q529.9 151.5 512 168 Q528.3 184.5 505 195 Q512.8 212.0 480 212 Q480.9 219.6 452 207 Q449.1 222.1 428 216 L434 220 Q418 232 416 258 Q414 290 424 312 L376 312 Q386 290 385 258 Q384 236 368 222 Q350 226 336 216 Q320 222 304 208 Z M478 206 L506 222 L503 226 L474 212 Z M318 214 L292 230 L290 226 L314 210 Z';
+
 const FOREST = (
   <>
     <rect width="800" height="360" fill="url(#noir-sky)" />
     <circle cx="610" cy="80" r="200" fill="url(#noir-halo)" />
     <circle cx="610" cy="80" r="34" fill="url(#noir-moon)" />
+    {/* Лучи мягкие и неподвижные; под лёгкими эффектами остаются, но без размытия (класс noir-rays в noir.css) */}
+    <g className="noir-rays" filter="url(#noir-ray-soft)" opacity="0.22">
+      {FOREST_RAYS.map((d, i) => (
+        <path key={i} d={d} fill="url(#noir-ray-moon)" opacity={FOREST_RAY_OPACITY[i]} />
+      ))}
+    </g>
     <path d={[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => spruce(90 + i * 80, 300, 120 + (i % 3) * 30, 60, i + 3)).join(' ')} fill="#0b1712" />
     <g filter="url(#noir-mist)">
       <ellipse cx="400" cy="280" rx="380" ry="20" fill="#3a5a52" opacity="0.4" />
     </g>
     <Sil d={`${spruce(200, 312, 220, 110, 2)} ${spruce(600, 312, 240, 120, 5)}`} />
-    <Sil d={`${C(400, 150, 60)} ${C(350, 180, 40)} ${C(450, 180, 40)} ${R(388, 190, 24, 122)}`} />
+    <Sil d={OAK} />
     <path d="M0 312 H800 V360 H0 Z" fill="#030605" />
     {/* Светящиеся грибы и светлячки */}
     <g filter="url(#sil-glow)">
@@ -426,7 +444,7 @@ function Castle({ cursed = false }: { cursed?: boolean }) {
 
 const FORTRESS = (
   <>
-    {NOIR_SKY}
+    {NOIR_SKY_EMBER}
     <Castle />
     <Sil d={R(398, 70, 3, 60)} />
     <path className="a-drift" d="M401 72 Q420 66 440 74 Q458 82 470 76 L470 100 Q456 106 440 98 Q420 90 401 96 Z" fill="#4a141c" stroke="#d6a0a8" strokeOpacity="0.3" />
@@ -598,10 +616,10 @@ const GHOST = (
   </>
 );
 
-/** Обоз: вагоны с грузом и номерами с нуля */
+/** Обоз: вагоны с грузом и номерами с нуля. Он в Скриптории, где живёт Возница Пуш, — и небо у него её */
 const TRAIN = (
   <>
-    {NOIR_SKY}
+    <ScriptSky />
     {['уголь', 'руда', 'мёд', 'кристаллы'].map((cargo, i) => (
       <g key={cargo}>
         <Sil d={`${R(140 + i * 140, 220, 120, 60)} ${C(165 + i * 140, 286, 12)} ${C(235 + i * 140, 286, 12)}`} />
@@ -877,6 +895,7 @@ const SCENES: Record<string, (props: SceneProps) => ReactNode> = {
 
 /** Сценка «Сумрака» по имени кадра; у пролога островов и Лорда Дефолта своя отрисовка — в NoirStoryArt */
 export function NoirStoryScene({ art, mood }: { art: string; mood?: 'laugh' | 'angry' }) {
+  const rim = useRim(art);
   const scene = SCENES[art];
-  return scene ? <>{scene({ mood })}</> : null;
+  return scene ? <RimContext.Provider value={rim}>{scene({ mood })}</RimContext.Provider> : null;
 }

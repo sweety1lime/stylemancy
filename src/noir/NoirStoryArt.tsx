@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { sfx } from '../game/sound';
 import { sparkle, type GemKind } from './geometry';
 import { HERO_RIG } from './rig/heroRig';
@@ -8,6 +8,7 @@ import { BUSTS, type Pose } from './mentors';
 import { NoirBust } from './NoirFace';
 import { NoirStoryScene, ScriptSky } from './NoirStoryScenes';
 import { NIGHT, NOIR_ISLAND, NOIR_SKY, NoirGem } from './scene';
+import { RimContext, useRim } from './sceneLight';
 import { GRAIN_SVG, svgUrl } from './scenes/kit';
 
 /*
@@ -43,13 +44,14 @@ function Gem({ kind, x, y, delay = 0, cursed = false }: { kind: GemKind; x: numb
 
 /** Лорд Дефолт во весь рост на острове: сначала хохочет или злится, потом ухмыляется */
 function Villain({ mood }: { mood: 'laugh' | 'angry' }) {
+  const rim = useContext(RimContext);
   const [calm, setCalm] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setCalm(true), 2600);
     return () => clearTimeout(timer);
   }, []);
   const move = calm ? 'idle' : mood;
-  return <Rig key={move} rig={VILLAIN_RIG} kind="villain" move={move} rim="noir-rim" fill={NIGHT} x={280} y={-7} width={240} height={300} viewBox="-30 -30 160 200" />;
+  return <Rig key={move} rig={VILLAIN_RIG} kind="villain" move={move} rim={rim} fill={NIGHT} x={280} y={-7} width={240} height={300} viewBox="-30 -30 160 200" />;
 }
 
 /** Жест наставника по смыслу реплики: вопрос — подпирает подбородок, похвала — вскидывает руку */
@@ -68,6 +70,7 @@ const HERO_BOX = '-30 -40 160 190';
  * в победном кадре — на острове: радуется, потом стоит спокойно.
  */
 function StoryHero({ shot }: { shot: 'shoulder' | 'victory' }) {
+  const rim = useContext(RimContext);
   const [move, setMove] = useState(shot === 'victory' ? 'joy' : 'idle');
   useEffect(() => {
     if (move === 'idle') return;
@@ -76,7 +79,7 @@ function StoryHero({ shot }: { shot: 'shoulder' | 'victory' }) {
   }, [move]);
   return (
     <span className={`story-hero story-hero--${shot} noir-art`}>
-      <Rig key={move} rig={HERO_RIG} kind="hero" move={move} rim="noir-rim" fill={NIGHT} x={0} y={0} width={160} height={190} viewBox={HERO_BOX} />
+      <Rig key={move} rig={HERO_RIG} kind="hero" move={move} rim={rim} fill={NIGHT} x={0} y={0} width={160} height={190} viewBox={HERO_BOX} />
     </span>
   );
 }
@@ -95,6 +98,7 @@ export function NoirStoryArt({
   talking?: boolean;
   text?: string;
 }) {
+  const rim = useRim(art);
   const shoulder = art === 'mentor' || art === 'villain' || art === 'villain-script';
   // Лорд Дефолт входит в кадр — низкий гул проклятия
   const cursed = art === 'villain' || art === 'villain-script' || art === 'fallen';
@@ -102,73 +106,75 @@ export function NoirStoryArt({
     if (cursed) sfx.curse();
   }, [cursed]);
   return (
-    <div className={`story-art story-art--noir story-art--${art}`} aria-hidden="true">
-      <div className="story-art__cam">
-        <svg className="story-art__noir noir-art" viewBox="80 0 640 360" preserveAspectRatio="xMidYMid slice">
-          {OWN.has(art) && (art === 'villain-script' || (art === 'mentor' && SCRIPT_MENTORS.has(speaker ?? '')) ? <ScriptSky /> : NOIR_SKY)}
-          {!OWN.has(art) && <NoirStoryScene art={art} mood={mood} />}
-          {art === 'kingdom' && (
-            <>
-              {island}
-              {ROW.map((kind, i) => (
-                <Gem key={kind} kind={kind} x={335 + i * 45} y={150} delay={i * -0.7} />
-              ))}
-            </>
-          )}
-          {/* Проклятие: кристаллы рухнули друг на друга и потухли, остров накренился */}
-          {art === 'fallen' && (
-            <>
-              <g transform="rotate(6 400 300)">{island}</g>
-              {ROW.map((kind, i) => (
-                <Gem key={kind} kind={kind} x={380} y={86 + i * 52} cursed />
-              ))}
-            </>
-          )}
-          {(art === 'villain' || art === 'villain-script') && (
-            <>
-              {island}
-              <Villain mood={mood} />
-            </>
-          )}
-          {art === 'mentor' && (
-            <>
-              <g transform="translate(244 52) scale(2.6)" className={talking ? 'is-talking' : undefined}>
-                <NoirBust key={text} bust={BUSTS[speaker ?? 'flex'] ?? BUSTS.flex} pose={mentorPose(text)} />
-              </g>
-              <path className="a-twinkle" d={`${sparkle(200, 90, 6)} ${sparkle(610, 140, 5)}`} fill="#e6eefc" filter="url(#sil-glow)" />
-            </>
-          )}
-          {/* Победа: кристаллы снова горят — корона над островом, свет льётся вниз */}
-          {art === 'crown' && (
-            <>
-              <circle cx="400" cy="170" r="200" fill="url(#noir-halo)" />
-              {island}
-              {CROWN.map((kind, i) => (
-                <Gem key={kind} kind={kind} x={300 + i * 45} y={128 + Math.abs(i - 2) * 16} delay={i * -0.5} />
-              ))}
-            </>
-          )}
-        </svg>
-        {art === 'crown' && <StoryHero shot="victory" />}
+    <RimContext.Provider value={rim}>
+      <div className={`story-art story-art--noir story-art--${art}`} aria-hidden="true">
+        <div className="story-art__cam">
+          <svg className="story-art__noir noir-art" viewBox="80 0 640 360" preserveAspectRatio="xMidYMid slice">
+            {OWN.has(art) && (art === 'villain-script' || (art === 'mentor' && SCRIPT_MENTORS.has(speaker ?? '')) ? <ScriptSky /> : NOIR_SKY)}
+            {!OWN.has(art) && <NoirStoryScene art={art} mood={mood} />}
+            {art === 'kingdom' && (
+              <>
+                {island}
+                {ROW.map((kind, i) => (
+                  <Gem key={kind} kind={kind} x={335 + i * 45} y={150} delay={i * -0.7} />
+                ))}
+              </>
+            )}
+            {/* Проклятие: кристаллы рухнули друг на друга и потухли, остров накренился */}
+            {art === 'fallen' && (
+              <>
+                <g transform="rotate(6 400 300)">{island}</g>
+                {ROW.map((kind, i) => (
+                  <Gem key={kind} kind={kind} x={380} y={86 + i * 52} cursed />
+                ))}
+              </>
+            )}
+            {(art === 'villain' || art === 'villain-script') && (
+              <>
+                {island}
+                <Villain mood={mood} />
+              </>
+            )}
+            {art === 'mentor' && (
+              <>
+                <g transform="translate(244 52) scale(2.6)" className={talking ? 'is-talking' : undefined}>
+                  <NoirBust key={text} bust={BUSTS[speaker ?? 'flex'] ?? BUSTS.flex} pose={mentorPose(text)} />
+                </g>
+                <path className="a-twinkle" d={`${sparkle(200, 90, 6)} ${sparkle(610, 140, 5)}`} fill="#e6eefc" filter="url(#sil-glow)" />
+              </>
+            )}
+            {/* Победа: кристаллы снова горят — корона над островом, свет льётся вниз */}
+            {art === 'crown' && (
+              <>
+                <circle cx="400" cy="170" r="200" fill="url(#noir-halo)" />
+                {island}
+                {CROWN.map((kind, i) => (
+                  <Gem key={kind} kind={kind} x={300 + i * 45} y={128 + Math.abs(i - 2) * 16} delay={i * -0.5} />
+                ))}
+              </>
+            )}
+          </svg>
+          {art === 'crown' && <StoryHero shot="victory" />}
+        </div>
+        {shoulder && <StoryHero shot="shoulder" />}
+        {/* Зерно плёнки и виньетка — картинкой поверх кадра: браузер рисует её один раз, а не каждый кадр вместе со сценкой */}
+        <span className="story-art__film" style={{ backgroundImage: FILM }} />
+        {(art === 'villain' || art === 'citadel') && (
+          <>
+            <span className="sa-default-text sa-default-text--1">Times New Roman</span>
+            <span className="sa-default-text sa-default-text--2">синяя ссылка</span>
+            {art === 'villain' && <span className="sa-default-text sa-default-text--3">&lt;div&gt;&lt;div&gt;&lt;div&gt;</span>}
+          </>
+        )}
+        {/* В Скриптории вокруг Лорда Дефолта — значения по умолчанию из JavaScript */}
+        {art === 'villain-script' && (
+          <>
+            <span className="sa-default-text sa-default-text--1 sa-default-text--script">undefined</span>
+            <span className="sa-default-text sa-default-text--2 sa-default-text--script">NaN</span>
+            <span className="sa-default-text sa-default-text--3 sa-default-text--script">null</span>
+          </>
+        )}
       </div>
-      {shoulder && <StoryHero shot="shoulder" />}
-      {/* Зерно плёнки и виньетка — картинкой поверх кадра: браузер рисует её один раз, а не каждый кадр вместе со сценкой */}
-      <span className="story-art__film" style={{ backgroundImage: FILM }} />
-      {(art === 'villain' || art === 'citadel') && (
-        <>
-          <span className="sa-default-text sa-default-text--1">Times New Roman</span>
-          <span className="sa-default-text sa-default-text--2">синяя ссылка</span>
-          {art === 'villain' && <span className="sa-default-text sa-default-text--3">&lt;div&gt;&lt;div&gt;&lt;div&gt;</span>}
-        </>
-      )}
-      {/* В Скриптории вокруг Лорда Дефолта — значения по умолчанию из JavaScript */}
-      {art === 'villain-script' && (
-        <>
-          <span className="sa-default-text sa-default-text--1 sa-default-text--script">undefined</span>
-          <span className="sa-default-text sa-default-text--2 sa-default-text--script">NaN</span>
-          <span className="sa-default-text sa-default-text--3 sa-default-text--script">null</span>
-        </>
-      )}
-    </div>
+    </RimContext.Provider>
   );
 }

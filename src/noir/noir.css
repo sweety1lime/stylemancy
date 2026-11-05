@@ -210,6 +210,21 @@
   }
 }
 
+/* Свет земель в сценках. Лёгкие эффекты (их же включает prefers-reduced-motion): без ореола пожара и размытия дыма и лучей.
+   Сами лучи и кромка силуэтов остаются; у зарева кромка переключается на вариант без ореола (rimOf в sceneLight.ts) */
+.effects-light .noir-art .noir-fire {
+  display: none;
+}
+
+.effects-light .noir-art .noir-smoke {
+  filter: none;
+  opacity: 0.4;
+}
+
+.effects-light .noir-art .noir-rays {
+  filter: none;
+}
+
 /* ===== Интерфейс ===== */
 
 .look-noir {

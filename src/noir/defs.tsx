@@ -60,6 +60,101 @@ export const NOIR_DEFS = (
         <feMergeNode in="soft" />
       </feMerge>
     </filter>
+    {/*
+      Направленный контровой свет сценок: без erode, край виден только со стороны источника.
+      Сдвиг dx/dy направлен от света: свет справа — dx отрицательный. Палитры — с доски «Свет земель» в примерочной.
+    */}
+    <filter id="noir-rim-dawn" x="-25%" y="-25%" width="150%" height="150%">
+      <feOffset in="SourceAlpha" dx="-1.8" dy="0.35" result="shifted" />
+      <feComposite in="SourceAlpha" in2="shifted" operator="out" result="edge" />
+      <feFlood floodColor="#ffd4a0" floodOpacity="0.95" />
+      <feComposite in2="edge" operator="in" result="rim" />
+      <feGaussianBlur in="rim" stdDeviation="0.45" result="soft" />
+      <feMerge>
+        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="soft" />
+      </feMerge>
+    </filter>
+    {/* Зарево: оранжевый ореол за силуэтом и тёплая кромка. Под лёгкими эффектами — вариант без ореола */}
+    <filter id="noir-rim-ember" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="7" result="haloBlur" />
+      <feFlood floodColor="#ff6a2a" floodOpacity="0.45" />
+      <feComposite in2="haloBlur" operator="in" result="haloFill" />
+      <feComposite in="haloFill" in2="SourceAlpha" operator="out" result="halo" />
+      <feOffset in="SourceAlpha" dx="0" dy="1.8" result="shifted" />
+      <feComposite in="SourceAlpha" in2="shifted" operator="out" result="edge" />
+      <feFlood floodColor="#ffb070" floodOpacity="0.95" />
+      <feComposite in2="edge" operator="in" result="rim" />
+      <feGaussianBlur in="rim" stdDeviation="0.5" result="soft" />
+      <feMerge>
+        <feMergeNode in="halo" />
+        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="soft" />
+      </feMerge>
+    </filter>
+    <filter id="noir-rim-ember-lite" x="-25%" y="-25%" width="150%" height="150%">
+      <feOffset in="SourceAlpha" dx="0" dy="1.8" result="shifted" />
+      <feComposite in="SourceAlpha" in2="shifted" operator="out" result="edge" />
+      <feFlood floodColor="#ffb070" floodOpacity="0.95" />
+      <feComposite in2="edge" operator="in" result="rim" />
+      <feGaussianBlur in="rim" stdDeviation="0.5" result="soft" />
+      <feMerge>
+        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="soft" />
+      </feMerge>
+    </filter>
+    <filter id="noir-rim-moon" x="-25%" y="-25%" width="150%" height="150%">
+      <feOffset in="SourceAlpha" dx="-1.3" dy="1.3" result="shifted" />
+      <feComposite in="SourceAlpha" in2="shifted" operator="out" result="edge" />
+      <feFlood floodColor="#c9d8f0" floodOpacity="0.8" />
+      <feComposite in2="edge" operator="in" result="rim" />
+      <feGaussianBlur in="rim" stdDeviation="0.4" result="soft" />
+      <feMerge>
+        <feMergeNode in="SourceGraphic" />
+        <feMergeNode in="soft" />
+      </feMerge>
+    </filter>
+    {/* Рассвет Долины Тегов: небо, низкое солнце, его свечение и лёгкие лучи */}
+    <linearGradient id="noir-sky-dawn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#0c1322" />
+      <stop offset="0.4" stopColor="#27314a" />
+      <stop offset="0.66" stopColor="#6c6577" />
+      <stop offset="0.84" stopColor="#c4967a" />
+      <stop offset="1" stopColor="#f2c48c" />
+    </linearGradient>
+    <radialGradient id="noir-sun-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stopColor="#ffe2b0" stopOpacity="0.75" />
+      <stop offset="0.35" stopColor="#f2a870" stopOpacity="0.28" />
+      <stop offset="1" stopColor="#f2a870" stopOpacity="0" />
+    </radialGradient>
+    <linearGradient id="noir-beam-dawn" x1="1" y1="1" x2="0" y2="0">
+      <stop offset="0" stopColor="#ffe0b0" stopOpacity="0.5" />
+      <stop offset="1" stopColor="#ffe0b0" stopOpacity="0" />
+    </linearGradient>
+    {/* Зарево Крепости Блоков: небо в багровом свете, пожар за стенами, дым */}
+    <linearGradient id="noir-sky-ember" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#080406" />
+      <stop offset="0.35" stopColor="#1d0b0c" />
+      <stop offset="0.62" stopColor="#4a1712" />
+      <stop offset="0.84" stopColor="#9a3416" />
+      <stop offset="1" stopColor="#e0702c" />
+    </linearGradient>
+    <radialGradient id="noir-fire" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stopColor="#ffb060" stopOpacity="0.7" />
+      <stop offset="0.4" stopColor="#d0501c" stopOpacity="0.3" />
+      <stop offset="1" stopColor="#d0501c" stopOpacity="0" />
+    </radialGradient>
+    <filter id="noir-smoke" x="-60%" y="-30%" width="220%" height="160%">
+      <feGaussianBlur stdDeviation="9" />
+    </filter>
+    {/* Лес Селекторов: мягкие лучи луны сквозь кроны */}
+    <linearGradient id="noir-ray-moon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#dfe9fb" stopOpacity="0.8" />
+      <stop offset="1" stopColor="#dfe9fb" stopOpacity="0.05" />
+    </linearGradient>
+    <filter id="noir-ray-soft" x="-20%" y="-10%" width="140%" height="120%">
+      <feGaussianBlur stdDeviation="7" />
+    </filter>
     <filter id="noir-cloud" x="-10%" y="-60%" width="120%" height="220%">
       <feGaussianBlur stdDeviation="2.2" />
     </filter>

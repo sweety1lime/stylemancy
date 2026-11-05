@@ -72,6 +72,82 @@ export const NOIR_SKY = (
   </g>
 );
 
+/** Звёзды неба: fade — насколько они гаснут в свете зари или пожара */
+const stars = (fade: number) =>
+  STARS.map(([x, y, r], i) => <circle key={i} className={i % 6 ? undefined : 'a-twinkle'} cx={x} cy={y} r={r} fill="#dfe7f4" opacity={(0.7 - y / 260) * fade} />);
+
+/** Пылинки в воздухе; цвет — от света земли */
+const dustIn = (color: string) => DUST.map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill={color} opacity="0.5" />);
+
+/** Академия и островок вдали, дальняя скала цвета far; цепи под ней — chain */
+const farPlane = (far: string, chain: string) => (
+  <>
+    <g>
+      <path d="M118 226 V262 M190 220 V250" stroke={chain} strokeWidth="1.4" strokeDasharray="2.5 2" />
+      <path d={`${ACADEMY_ROCK} ${ACADEMY_TOWERS}`} fill={far} />
+      {WINDOWS.map(([x, y], i) => (
+        <rect key={i} className={i === 2 ? 'a-twinkle' : undefined} x={x} y={y} width="2.4" height="4" fill="#ffc77a" />
+      ))}
+    </g>
+    <g>
+      <path d="M686 214 Q722 206 770 214 Q756 230 734 238 Q704 232 686 214 Z M700 214 L704 196 L708 214 Z M744 213 L747 200 L750 213 Z" fill={far} />
+    </g>
+  </>
+);
+
+/**
+  Рассвет Долины Тегов: низкое солнце справа за домами, тёплая дымка, звёзды почти погасли.
+  Луны нет. Всё неподвижно, как и в лунном небе: движение внутри картинки перерисовывало бы небо.
+*/
+const SUN = { x: 600, y: 300 };
+
+export const NOIR_SKY_DAWN = (
+  <g>
+    <rect width="800" height="360" fill="url(#noir-sky-dawn)" />
+    {stars(0.15)}
+    <circle cx={SUN.x} cy={SUN.y} r="330" fill="url(#noir-sun-glow)" />
+    <path d={`M${SUN.x - 4} ${SUN.y - 8} L150 50 L238 28 Z M${SUN.x - 2} ${SUN.y - 10} L330 18 L412 12 Z M${SUN.x - 6} ${SUN.y - 4} L30 160 L30 214 Z`} fill="url(#noir-beam-dawn)" opacity="0.18" />
+    <circle cx={SUN.x} cy={SUN.y} r="38" fill="#fff0d2" />
+    {farPlane('#4a3c4e', '#3a2f3d')}
+    <path d="M0 300 Q120 286 260 298 Q420 284 560 298 Q690 288 800 296 V360 H0 Z" fill="#120f16" />
+    <g filter="url(#noir-mist)">
+      <ellipse cx="160" cy="290" rx="190" ry="14" fill="#f0b088" opacity="0.32" />
+      <ellipse cx="620" cy="300" rx="220" ry="16" fill="#f0b088" opacity="0.32" />
+    </g>
+    {dustIn('#ffe2b8')}
+  </g>
+);
+
+/** Искры над крепостью: восемь штук, одинаковые при каждом показе */
+const sparkRandom = random(53);
+const SPARKS = Array.from({ length: 8 }, () => [180 + sparkRandom() * 440, 70 + sparkRandom() * 190, 1 + sparkRandom()] as const);
+
+/**
+  Зарево Крепости Блоков: за стенами горит, небо багровое, к нему тянутся два столба дыма.
+  Пожар и размытие дыма гаснут под лёгкими эффектами (классы noir-fire и noir-smoke в noir.css).
+*/
+export const NOIR_SKY_EMBER = (
+  <g>
+    <rect width="800" height="360" fill="url(#noir-sky-ember)" />
+    {stars(0.35)}
+    <ellipse className="noir-fire" cx="400" cy="300" rx="460" ry="220" fill="url(#noir-fire)" />
+    <g className="noir-smoke" filter="url(#noir-smoke)" opacity="0.7">
+      <path d="M250 260 Q236 200 262 150 Q284 108 250 50 Q310 104 298 158 Q288 210 312 260 Z" fill="#1a0c0c" />
+      <path d="M520 260 Q540 190 512 136 Q492 90 528 30 Q566 98 552 150 Q540 206 570 260 Z" fill="#1a0c0c" />
+    </g>
+    {farPlane('#2a1012', '#1c0b0c')}
+    <path d="M0 300 Q120 286 260 298 Q420 284 560 298 Q690 288 800 296 V360 H0 Z" fill="#0c0505" />
+    <g filter="url(#noir-mist)">
+      <ellipse cx="160" cy="290" rx="190" ry="14" fill="#c0502a" opacity="0.3" />
+      <ellipse cx="620" cy="300" rx="220" ry="16" fill="#c0502a" opacity="0.3" />
+    </g>
+    {SPARKS.map(([x, y, r], i) => (
+      <circle key={i} cx={x} cy={y} r={r} fill="#ffc080" opacity="0.8" />
+    ))}
+    {dustIn('#ffb070')}
+  </g>
+);
+
 /** Ближний остров: зубчатая скала, обломок колонны и мёртвое дерево */
 export const NOIR_ROCK =
   'M10 30 L40 26 L80 28 L130 24 L210 26 L290 23 L350 27 L410 30 L396 44 L372 56 L356 74 L330 86 L306 104 L282 112 L262 130 L236 136 L214 152 L198 136 L176 128 L150 112 L126 102 L104 84 L80 70 L56 58 L30 44 Z';
