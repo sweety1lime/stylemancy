@@ -70,6 +70,11 @@ const LIT_KEY = 'cascadia.noir-lit.v1';
 const DOOR = 'door';
 const HERO_SCALE = 2;
 
+/** Остров, на который нажали, получает имя: при переходе на тропу он плавно превращается в её шапку (см. noir.css) */
+function markFlight(tile: HTMLElement) {
+  if (tile.getAttribute('href')?.startsWith('#/land/')) tile.querySelector<HTMLElement>('.land__art')?.style.setProperty('view-transition-name', 'land-art');
+}
+
 /** Герой идёт от одной земли к другой: шагает в четыре кадра, а настоящий герой ждёт на месте. onArrive — когда дошёл. */
 function walk(map: HTMLElement, from: Element, hero: HTMLElement, onArrive: () => void): () => void {
   const start = from.getBoundingClientRect();
@@ -366,7 +371,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
             </>
           );
           return tile.href ? (
-            <a key={tile.key} className={tile.className} data-land={tile.key} href={tile.href}>
+            <a key={tile.key} className={tile.className} data-land={tile.key} href={tile.href} onClick={(event) => markFlight(event.currentTarget)}>
               {body}
             </a>
           ) : (

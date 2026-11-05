@@ -188,3 +188,46 @@ test('карта: панорама видна на первом экране н�
   await page.locator('.world__more summary').click();
   await expect(page.getByText('загадочная дверь')).toBeVisible();
 });
+
+/** Следим за переходами между экранами: сколько раз начались, было ли у острова имя для «влёта» и не отменил ли их браузер */
+async function spyOnTransitions(page: Page, effects: 'full' | 'light') {
+  await page.addInitScript((fx) => {
+    // Как у живого игрока: без флага автотеста
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: fx, look: 'noir', effectsChosen: true }));
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true, 'intro:floating-lands': true } }));
+    const spy = { started: 0, named: false, ready: null as boolean | null };
+    (window as unknown as { __vt: typeof spy }).__vt = spy;
+    if (!document.startViewTransition) return;
+    const start = document.startViewTransition.bind(document);
+    document.startViewTransition = (callback) => {
+      spy.started++;
+      spy.named = Boolean(document.querySelector('[style*="land-art"]'));
+      const transition = start(callback);
+      transition.ready.then(
+        () => (spy.ready = true),
+        () => (spy.ready = false),
+      );
+      return transition;
+    };
+  }, effects);
+  return () => page.evaluate(() => (window as unknown as { __vt: { started: number; named: boolean; ready: boolean | null } }).__vt);
+}
+
+test('переходы: клик по земле начинает один «влёт», в лёгком режиме экраны меняются сразу', async ({ page }) => {
+  const spy = await spyOnTransitions(page, 'full');
+  await page.goto('/');
+  await page.getByRole('link', { name: /Парящие земли/ }).click();
+  await expect(page.getByRole('heading', { name: 'Парящие острова' })).toBeVisible();
+  await expect.poll(async () => (await spy()).ready).toBe(true);
+  // Один переход на два подписчика адреса, и остров, на который нажали, был назван для «влёта»
+  expect(await spy()).toMatchObject({ started: 1, named: true, ready: true });
+});
+
+test('переходы: в лёгком режиме экраны меняются сразу, без снимков страницы', async ({ page }) => {
+  const spy = await spyOnTransitions(page, 'light');
+  await page.goto('/');
+  await page.getByRole('link', { name: /Парящие земли/ }).click();
+  await expect(page.getByRole('heading', { name: 'Парящие острова' })).toBeVisible();
+  expect((await spy()).started).toBe(0);
+});

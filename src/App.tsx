@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, type ReactNode } from 'react';
 import { CrashScreen, ErrorBoundary } from './components/ErrorBoundary';
 import { LoginScreen } from './components/LoginScreen';
 import { LandTrail } from './components/LandTrail';
@@ -67,8 +67,8 @@ export default function App() {
   const progress = useProgress();
   const { account } = useAuth();
 
-  // Каждый экран открывается с начала страницы
-  useEffect(() => {
+  // Каждый экран открывается с начала страницы; до отрисовки, чтобы новый экран попал в снимок перехода уже наверху
+  useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, [hash]);
 

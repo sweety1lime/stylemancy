@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from 'react';
+import { flushSync } from 'react-dom';
+import { fullEffects, settings } from './settings';
 
 /**
  * Экраны игры. Адрес хранится после «#» — так ссылки работают на любом
@@ -59,9 +61,33 @@ export function navigate(route: Route): void {
   window.location.hash = hrefFor(route).slice(1);
 }
 
+/** Плавная смена экранов — только в «Сумраке» с полными эффектами. В автотестах браузер рисует без видеокарты: снимки страниц тормозили бы проверки */
+function transitionsOn(): boolean {
+  return (
+    typeof document.startViewTransition === 'function' &&
+    settings.get().look === 'noir' &&
+    fullEffects() &&
+    !navigator.webdriver &&
+    !matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
+const listeners = new Set<() => void>();
+
+// Подписчиков несколько (экран и экран сбоя), а переход должен начаться один раз: адрес слушает один обработчик
+function onHashChange() {
+  const notify = () => listeners.forEach((listener) => listener());
+  if (transitionsOn()) document.startViewTransition(() => flushSync(notify));
+  else notify();
+}
+
 function subscribe(onChange: () => void) {
-  window.addEventListener('hashchange', onChange);
-  return () => window.removeEventListener('hashchange', onChange);
+  if (listeners.size === 0) window.addEventListener('hashchange', onHashChange);
+  listeners.add(onChange);
+  return () => {
+    listeners.delete(onChange);
+    if (listeners.size === 0) window.removeEventListener('hashchange', onHashChange);
+  };
 }
 
 /** Текущий адрес после «#»; компонент перерисуется при переходе. */

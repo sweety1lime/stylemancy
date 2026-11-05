@@ -849,6 +849,38 @@
   }
 }
 
+/* ===== Смена экранов: ночь на миг сгущается и расступается; остров, на который нажали, перелетает в шапку тропы ===== */
+
+/* Попарное наложение по умолчанию складывает яркость, поэтому при задержке новый экран появляется из тьмы */
+::view-transition-old(root) {
+  animation: 0.22s ease-in both vt-out;
+}
+
+::view-transition-new(root) {
+  animation: 0.4s ease-out 0.1s both vt-in;
+}
+
+::view-transition-group(land-art) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.look-noir .trail__land {
+  view-transition-name: land-art;
+}
+
 /* Звёзды за уровень загораются по одной */
 .look-noir .result--success .noir-star--on {
   animation: noir-star-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s backwards;
