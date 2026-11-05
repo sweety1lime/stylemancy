@@ -103,53 +103,55 @@ export function NoirStoryArt({
   }, [cursed]);
   return (
     <div className={`story-art story-art--noir story-art--${art}`} aria-hidden="true">
-      <svg className="story-art__noir noir-art" viewBox="80 0 640 360" preserveAspectRatio="xMidYMid slice">
-        {OWN.has(art) && (art === 'villain-script' || (art === 'mentor' && SCRIPT_MENTORS.has(speaker ?? '')) ? <ScriptSky /> : NOIR_SKY)}
-        {!OWN.has(art) && <NoirStoryScene art={art} mood={mood} />}
-        {art === 'kingdom' && (
-          <>
-            {island}
-            {ROW.map((kind, i) => (
-              <Gem key={kind} kind={kind} x={335 + i * 45} y={150} delay={i * -0.7} />
-            ))}
-          </>
-        )}
-        {/* Проклятие: кристаллы рухнули друг на друга и потухли, остров накренился */}
-        {art === 'fallen' && (
-          <>
-            <g transform="rotate(6 400 300)">{island}</g>
-            {ROW.map((kind, i) => (
-              <Gem key={kind} kind={kind} x={380} y={86 + i * 52} cursed />
-            ))}
-          </>
-        )}
-        {(art === 'villain' || art === 'villain-script') && (
-          <>
-            {island}
-            <Villain mood={mood} />
-          </>
-        )}
-        {art === 'mentor' && (
-          <>
-            <g transform="translate(244 52) scale(2.6)" className={talking ? 'is-talking' : undefined}>
-              <NoirBust key={text} bust={BUSTS[speaker ?? 'flex'] ?? BUSTS.flex} pose={mentorPose(text)} />
-            </g>
-            <path className="a-twinkle" d={`${sparkle(200, 90, 6)} ${sparkle(610, 140, 5)}`} fill="#e6eefc" filter="url(#sil-glow)" />
-          </>
-        )}
-        {/* Победа: кристаллы снова горят — корона над островом, свет льётся вниз */}
-        {art === 'crown' && (
-          <>
-            <circle cx="400" cy="170" r="200" fill="url(#noir-halo)" />
-            {island}
-            {CROWN.map((kind, i) => (
-              <Gem key={kind} kind={kind} x={300 + i * 45} y={128 + Math.abs(i - 2) * 16} delay={i * -0.5} />
-            ))}
-          </>
-        )}
-      </svg>
+      <div className="story-art__cam">
+        <svg className="story-art__noir noir-art" viewBox="80 0 640 360" preserveAspectRatio="xMidYMid slice">
+          {OWN.has(art) && (art === 'villain-script' || (art === 'mentor' && SCRIPT_MENTORS.has(speaker ?? '')) ? <ScriptSky /> : NOIR_SKY)}
+          {!OWN.has(art) && <NoirStoryScene art={art} mood={mood} />}
+          {art === 'kingdom' && (
+            <>
+              {island}
+              {ROW.map((kind, i) => (
+                <Gem key={kind} kind={kind} x={335 + i * 45} y={150} delay={i * -0.7} />
+              ))}
+            </>
+          )}
+          {/* Проклятие: кристаллы рухнули друг на друга и потухли, остров накренился */}
+          {art === 'fallen' && (
+            <>
+              <g transform="rotate(6 400 300)">{island}</g>
+              {ROW.map((kind, i) => (
+                <Gem key={kind} kind={kind} x={380} y={86 + i * 52} cursed />
+              ))}
+            </>
+          )}
+          {(art === 'villain' || art === 'villain-script') && (
+            <>
+              {island}
+              <Villain mood={mood} />
+            </>
+          )}
+          {art === 'mentor' && (
+            <>
+              <g transform="translate(244 52) scale(2.6)" className={talking ? 'is-talking' : undefined}>
+                <NoirBust key={text} bust={BUSTS[speaker ?? 'flex'] ?? BUSTS.flex} pose={mentorPose(text)} />
+              </g>
+              <path className="a-twinkle" d={`${sparkle(200, 90, 6)} ${sparkle(610, 140, 5)}`} fill="#e6eefc" filter="url(#sil-glow)" />
+            </>
+          )}
+          {/* Победа: кристаллы снова горят — корона над островом, свет льётся вниз */}
+          {art === 'crown' && (
+            <>
+              <circle cx="400" cy="170" r="200" fill="url(#noir-halo)" />
+              {island}
+              {CROWN.map((kind, i) => (
+                <Gem key={kind} kind={kind} x={300 + i * 45} y={128 + Math.abs(i - 2) * 16} delay={i * -0.5} />
+              ))}
+            </>
+          )}
+        </svg>
+        {art === 'crown' && <StoryHero shot="victory" />}
+      </div>
       {shoulder && <StoryHero shot="shoulder" />}
-      {art === 'crown' && <StoryHero shot="victory" />}
       {/* Зерно плёнки и виньетка — картинкой поверх кадра: браузер рисует её один раз, а не каждый кадр вместе со сценкой */}
       <span className="story-art__film" style={{ backgroundImage: FILM }} />
       {(art === 'villain' || art === 'citadel') && (

@@ -92,9 +92,9 @@ export const sfx = {
     slide(330, 110, 0.1, 0.35, 'sawtooth', 0.03);
   },
   /** Буквы в сценке — едва слышное «бормотание» */
-  blip() {
+  blip(speaker?: string) {
     const ctx = noir();
-    if (ctx) return noirSfx.blip(ctx);
+    if (ctx) return noirSfx.blip(ctx, speaker);
     tone(560 + Math.random() * 120, 0, 0.03, 'square', 0.012);
   },
   /** Достижение: колокольчик */

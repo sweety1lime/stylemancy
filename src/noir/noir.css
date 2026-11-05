@@ -1212,6 +1212,253 @@
   width: 12.5%;
 }
 
+/* ===== Кинозал: сценка на весь экран, шторки, камера, кадры перетекают друг в друга ===== */
+
+.look-noir .story {
+  background: #000;
+}
+
+.look-noir .story__window {
+  gap: 12px;
+  width: min(1000px, 100%, calc((100vh - 230px) * 16 / 9));
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+}
+
+.look-noir .story__stage {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 80px rgba(60, 80, 130, 0.12);
+}
+
+.look-noir .story__shot {
+  position: relative;
+  z-index: 1;
+}
+
+/* Прошлый кадр стоит под новым, пока тот проявляется */
+.look-noir .story__shot--out {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.look-noir .story__shot--fade {
+  animation: story-fade 0.7s ease-out both;
+}
+
+@keyframes story-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Чёрные шторки сверху и снизу — широкий кадр. Въезжают при открытии сценки */
+.story__bar {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  height: 4%;
+  background: #000;
+  pointer-events: none;
+}
+
+.story__bar--top {
+  top: 0;
+  animation: story-bar-top 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.story__bar--bottom {
+  bottom: 0;
+  animation: story-bar-bottom 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes story-bar-top {
+  from {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes story-bar-bottom {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+/* Название сценки на первом кадре: проявляется и гаснет, как титр в начале фильма */
+.story__titlecard {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  margin: 0;
+  padding: 13% 8% 0;
+  color: var(--gold-strong);
+  font-family: var(--font-pixel);
+  font-size: clamp(18px, 3vw, 34px);
+  letter-spacing: 0.28em;
+  text-align: center;
+  text-shadow: 0 2px 24px #000;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: story-titlecard 3.6s ease-in-out both;
+}
+
+@keyframes story-titlecard {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.2em;
+  }
+
+  22%,
+  68% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    letter-spacing: 0.3em;
+  }
+}
+
+/* Камера: кадр медленно наезжает или плывёт. Двигается весь слой с рисунком, зерно и виньетка стоят на месте.
+   Движение каждого кадра — переменные: масштаб, сдвиг и точка, к которой наезжает камера */
+.story-art__cam {
+  position: absolute;
+  inset: 0;
+}
+
+.look-noir .story-art--noir {
+  --s0: 1.02;
+  --s1: 1.07;
+  --x0: 0%;
+  --x1: 0%;
+  --y0: 0%;
+  --y1: 0%;
+  --origin: 50% 55%;
+}
+
+/* Королевство: панорама слева направо */
+.look-noir .story-art--kingdom {
+  --s0: 1.08;
+  --s1: 1.08;
+  --x0: -3%;
+  --x1: 3%;
+}
+
+/* Лорд Дефолт: камера наезжает на него */
+.look-noir .story-art--villain,
+.look-noir .story-art--villain-script {
+  --s0: 1.02;
+  --s1: 1.08;
+  --origin: 50% 38%;
+}
+
+/* Проклятие: кадр оседает вместе с островом */
+.look-noir .story-art--fallen {
+  --s0: 1.07;
+  --s1: 1.07;
+  --y0: -2.5%;
+  --y1: 1%;
+}
+
+/* Академия: камера поднимается к окнам */
+.look-noir .story-art--academy {
+  --s0: 1.04;
+  --s1: 1.07;
+  --y0: 2%;
+  --y1: 0%;
+  --origin: 50% 40%;
+}
+
+.look-noir .story-art__cam {
+  transform-origin: var(--origin);
+  will-change: transform;
+  animation: story-cam 14s cubic-bezier(0.3, 0, 0.5, 1) both;
+}
+
+@keyframes story-cam {
+  from {
+    transform: translate(var(--x0), var(--y0)) scale(var(--s0));
+  }
+
+  to {
+    transform: translate(var(--x1), var(--y1)) scale(var(--s1));
+  }
+}
+
+/* Передний план едет быстрее заднего — так появляется глубина */
+.look-noir .story-hero--shoulder {
+  transform-origin: 20% 100%;
+  animation: story-foreground 14s cubic-bezier(0.3, 0, 0.5, 1) both;
+}
+
+@keyframes story-foreground {
+  from {
+    transform: translate(2%, 0) scale(1);
+  }
+
+  to {
+    transform: translate(-6%, 0) scale(1.08);
+  }
+}
+
+/* Реплики Лорда Дефолта холоднее и тяжелее, имя едва заметно мерцает */
+.look-noir .story__caption--villain .story__text {
+  color: #b9c9e6;
+}
+
+.look-noir .story__caption--villain .story__name {
+  color: var(--violet);
+  animation: story-name-flicker 3.4s ease-in-out infinite alternate;
+}
+
+@keyframes story-name-flicker {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.7;
+  }
+}
+
+.look-noir .story__text {
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+/* Лёгкие эффекты и «уменьшить движение»: кадры стоят спокойно, без камеры и титра */
+.effects-light .story-art__cam,
+.effects-light .story-hero--shoulder,
+.effects-light .story__caption--villain .story__name {
+  animation: none;
+}
+
+.effects-light .story__titlecard {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .look-noir .story-art__cam,
+  .look-noir .story-hero--shoulder,
+  .look-noir .story__caption--villain .story__name,
+  .look-noir .story__bar,
+  .look-noir .story__shot--fade {
+    animation: none;
+  }
+
+  .story__titlecard {
+    display: none;
+  }
+}
+
 /* Наставник говорит — его огоньки дышат чаще */
 .story-art .is-talking .noir-bust__lights {
   animation: noir-talk 0.6s ease-in-out infinite alternate;

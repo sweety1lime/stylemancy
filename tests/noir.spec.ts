@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 /** Код сцены уровня: оформление вида лежит в <style id="look"> внутри iframe */
 const lookCss = (frame: HTMLIFrameElement) => frame.contentDocument?.getElementById('look')?.textContent ?? '';
@@ -67,4 +67,53 @@ test('слабый компьютер: игра сама включает лёг
   await page.goto('/');
   await expect(page.locator('html')).toHaveClass(/effects-light/, { timeout: 20_000 });
   await expect(page.getByText('Включены лёгкие эффекты')).toBeVisible();
+});
+
+/** Настройки до загрузки страницы: вид «Сумрак» и нужные эффекты */
+async function openPrologue(page: Page, effects: 'full' | 'light', sound = false) {
+  await page.addInitScript(
+    ([fx, snd]) => localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: snd, effects: fx, look: 'noir' })),
+    [effects, sound] as const,
+  );
+  await page.goto('/');
+  const dialog = page.getByRole('dialog', { name: 'Пролог: Великий Сброс' });
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+const cameraAnimation = (dialog: Locator) => dialog.locator('.story-art__cam').evaluate((el) => getComputedStyle(el).animationName);
+
+test('сценка в «Сумраке»: шторки, титр, камера, кадры перетекают друг в друга', async ({ page }) => {
+  const dialog = await openPrologue(page, 'full');
+  await expect(dialog.locator('.story__bar')).toHaveCount(2);
+  await expect(dialog.locator('.story__titlecard')).toHaveText('Пролог: Великий Сброс');
+  // Камера движется: на слое с рисунком идёт медленный наезд
+  expect(await cameraAnimation(dialog)).toBe('story-cam');
+
+  await dialog.getByRole('button', { name: 'Дальше →' }).click();
+  // Прошлый кадр остаётся под новым, пока тот проявляется, а потом уходит. Титр был только на первом кадре
+  await expect(dialog.locator('.story__shot--out')).toHaveCount(1);
+  await expect(dialog.locator('.story__titlecard')).toHaveCount(0);
+  await expect(dialog.locator('.story__shot')).toHaveCount(1);
+  await expect(dialog.locator('.story__caption--villain')).toBeVisible();
+});
+
+test('сценка в лёгком режиме: без камеры и титра, кадры сменяются склейкой', async ({ page }) => {
+  const dialog = await openPrologue(page, 'light');
+  await expect(dialog.locator('.story__titlecard')).toBeHidden();
+  expect(await cameraAnimation(dialog)).toBe('none');
+
+  await dialog.getByRole('button', { name: 'Дальше →' }).click();
+  await expect(dialog.locator('.story__shot')).toHaveCount(1);
+  await expect(dialog.locator('.story__shot--out')).toHaveCount(0);
+});
+
+test('сценка со звуком: у реплик есть голоса, ошибок нет', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const dialog = await openPrologue(page, 'full', true);
+  await dialog.getByRole('button', { name: 'Дальше →' }).click();
+  // Реплика Лорда Дефолта печатается медленнее остальных, но до конца доходит
+  await expect(dialog.locator('.story__text')).toContainText('блоки друг под другом!', { timeout: 15_000 });
+  expect(errors).toEqual([]);
 });
