@@ -89,3 +89,38 @@ test('лупа мага: в заказе жителя кнопки называ�
   await items.getByRole('button', { name: 'Меню' }).click();
   await expect(page.locator('.lens').getByRole('heading', { name: /Меню/ })).toBeVisible();
 });
+
+/** Три «дела» Древа Каскада: виновник спрятан в оформлении сцены, и без лупы его не найти */
+for (const { id, title, victim, culprit } of [
+  { id: 'cas-07', title: 'Дело первое: Тусклые светлячки', victim: 'Светлячок 1', culprit: ['#night .firefly', 'оформление сцены', 'сила 1,1,0'] },
+  { id: 'cas-08', title: 'Дело второе: Упрямый мухомор', victim: 'Мухомор', culprit: ['color: gray !important', 'оформление сцены'] },
+  { id: 'cas-09', title: 'Дело третье: Пропавшее наследство', victim: 'Лист 1', culprit: ['.tree .leaf', 'оформление сцены', 'сила 0,2,0'] },
+]) {
+  test(`расследование ${id}: лупа называет скрытого виновника, и после правки заклинание срабатывает`, async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light', look: 'noir' }));
+      localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true, 'intro:cascade-tree': true } }));
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(['sel-10', 'ps-06'].map((key) => [key, done]))));
+    });
+    await page.goto(`/#/level/${id}`);
+    await expect(page.getByRole('heading', { name: title })).toBeVisible();
+    const solution = await page.evaluate<string>(`import('/src/levels/index.ts').then((m) => m.allLevels.find((item) => item.id === '${id}').solutionCss)`);
+
+    // Код студента верен на вид, но заклинание не срабатывает
+    await page.getByRole('button', { name: /Сотворить/ }).click();
+    await expect(page.getByText('Заклинание не сработало')).toBeVisible();
+
+    // Лупа называет, кто побеждает и откуда он: из кода студента этого не узнать
+    await page.getByRole('button', { name: 'Лупа' }).click();
+    await page.getByRole('group', { name: 'Выбрать предмет' }).getByRole('button', { name: victim }).click();
+    const winner = page.locator('.lens__win');
+    for (const part of culprit) await expect(winner).toContainText(part);
+
+    await page.locator('.cm-content').click();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.insertText(solution);
+    await page.getByRole('button', { name: /Сотворить/ }).click();
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+  });
+}

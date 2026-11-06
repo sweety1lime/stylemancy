@@ -125,7 +125,8 @@ export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, 
     const pick = pickRef.current;
     if (!pick?.el.isConnected) return;
     const css = { scene: level.sceneCss, player: cssForView(cssRef.current, views[pick.index]), locked: level.lockedCss ?? '' };
-    onInspectRef.current?.(inspectElement(pick.el, css));
+    // Проверяемое свойство лупа показывает всегда: в уровнях про селекторы это color
+    onInspectRef.current?.(inspectElement(pick.el, css, level.check.style ? [level.check.style] : []));
     const box = pick.el.getBoundingClientRect();
     setPickRects((list) => {
       const next = [...list];

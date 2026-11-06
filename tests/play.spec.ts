@@ -831,7 +831,7 @@ test.describe('общий сюжет', () => {
     await page.addInitScript(() => {
       if (localStorage.getItem('cascadia.progress.v1')) return;
       const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
-      const ids = ['form-06', 'pos-06', 'citadel-02', 'sel-10', 'ps-06', 'cas-01', 'cas-02', 'cas-03', 'cas-04', 'cas-05'];
+      const ids = ['form-06', 'pos-06', 'citadel-02', 'sel-10', 'ps-06', 'cas-01', 'cas-02', 'cas-03', 'cas-04', 'cas-05', 'cas-07', 'cas-08', 'cas-09'];
       localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(ids.map((id) => [id, done]))));
     });
     await page.goto('/#/level/cas-06');

@@ -189,8 +189,12 @@ function declarationsFor(el: Element, source: RuleSource, css: string, from: num
   return result;
 }
 
-/** Решение каскада по каждому свойству, к которому прикасался студент или Лорд Дефолт */
-export function resolveCascade(el: Element, css: Record<RuleSource, string>): Verdict[] {
+/**
+ * Решение каскада по каждому свойству, к которому прикасался студент или Лорд Дефолт.
+ * watched — свойства, которые показываются всегда: то, что проверяет уровень. Иначе правило оформления сцены, перебивающее
+ * студента там, где он ничего не писал (лист, у которого свой цвет, а студент покрасил только дуб), осталось бы невидимым.
+ */
+export function resolveCascade(el: Element, css: Record<RuleSource, string>, watched: string[] = []): Verdict[] {
   const all: Declaration[] = [];
   for (const source of ['scene', 'player', 'locked'] as RuleSource[]) {
     all.push(...declarationsFor(el, source, css[source], all.length));
@@ -199,8 +203,8 @@ export function resolveCascade(el: Element, css: Record<RuleSource, string>): Ve
   for (const declaration of all) byProp.set(declaration.prop, [...(byProp.get(declaration.prop) ?? []), declaration]);
   const verdicts: Verdict[] = [];
   for (const [prop, list] of byProp) {
-    // Оформление района без участия студента не интересно: смотрим свойства, где есть его код или чары Лорда Дефолта
-    if (!list.some((item) => item.source !== 'scene')) continue;
+    // Оформление района без участия студента не интересно: смотрим свойства, где есть его код или чары Лорда Дефолта, и проверяемое
+    if (!watched.includes(prop) && !list.some((item) => item.source !== 'scene')) continue;
     const ranked = [...list].sort(
       (a, b) => Number(a.important) - Number(b.important) || compareSpecificity(a.specificity, b.specificity) || a.order - b.order,
     );
@@ -217,7 +221,7 @@ function labelOf(el: Element): string {
 }
 
 /** Всё, что показывает лупа про предмет: размеры, коробка и кто победил по каждому свойству */
-export function inspectElement(el: Element, css: Record<RuleSource, string>): Inspection {
+export function inspectElement(el: Element, css: Record<RuleSource, string>, watched: string[] = []): Inspection {
   const win = el.ownerDocument.defaultView as Window;
   const style = win.getComputedStyle(el);
   const rect = el.getBoundingClientRect();
@@ -231,6 +235,6 @@ export function inspectElement(el: Element, css: Record<RuleSource, string>): In
     padding: sides(style, 'padding'),
     display: style.display,
     position: style.position,
-    verdicts: resolveCascade(el, css),
+    verdicts: resolveCascade(el, css, watched),
   };
 }

@@ -7,6 +7,9 @@ import cas03 from './cas-03';
 import cas04 from './cas-04';
 import cas05 from './cas-05';
 import cas06 from './cas-06';
+import cas07 from './cas-07';
+import cas08 from './cas-08';
+import cas09 from './cas-09';
 import sceneCss from './scene.css?raw';
 
 export const cascadeTree = defineRegion({
@@ -71,5 +74,6 @@ export const cascadeTree = defineRegion({
       },
     ],
   },
-  levels: [cas01, cas02, cas03, cas04, cas05, cas06],
+  // Три «дела» с лупой идут перед испытанием (cas-06), которое остаётся последним уровнем района
+  levels: [cas01, cas02, cas03, cas04, cas05, cas07, cas08, cas09, cas06],
 });
