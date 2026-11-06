@@ -4,6 +4,10 @@ import order01 from './order-01';
 import order02 from './order-02';
 import order03 from './order-03';
 import order04 from './order-04';
+import order05 from './order-05';
+import order06 from './order-06';
+import order07 from './order-07';
+import order08 from './order-08';
 import sceneCss from './scene.css?raw';
 
 /**
@@ -41,5 +45,6 @@ export const market = defineRegion({
       },
     ],
   },
-  levels: [order01, order02, order03, order04],
+  // Шапка лавки (order-04) — испытание района, поэтому стоит последней, хотя номер у неё меньше новых заказов
+  levels: [order01, order02, order03, order05, order06, order07, order08, order04],
 });

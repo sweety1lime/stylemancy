@@ -156,3 +156,41 @@ test.describe('Лавка заказов', () => {
     await expect(page.getByText(/по желанию/)).toBeVisible();
   });
 });
+
+test('новые заказы: любое решение, выполняющее условия, принимается, а похожее на него — нет', async ({ page }) => {
+  await page.goto('/');
+  const r = await page.evaluate<Record<string, { passed: boolean; errors: string[]; misses: string[] }>>(`Promise.all([import('/src/engine/evaluate.ts'), import('/src/levels/index.ts')]).then(async ([evaluate, levels]) => {
+    const run = async (id, css) => {
+      const level = levels.allLevels.find((item) => item.id === id);
+      const outcome = await evaluate.checkLevelCss(level, css);
+      return { passed: outcome.passed, errors: outcome.errors.map((error) => error.message), misses: outcome.items.filter((item) => !item.inPlace).map((item) => item.name) };
+    };
+    return {
+      // Подвал: колонки поровну или «вокруг» — одно и то же, а «поровну, считая края» — уже другое
+      footerGrid: await run('order-05', levels.allLevels.find((item) => item.id === 'order-05').solutionCss),
+      footerAround: await run('order-05', '.board { display: flex; justify-content: space-around; align-items: center; }'),
+      footerEvenly: await run('order-05', '.board { display: flex; justify-content: space-evenly; align-items: center; }'),
+      // Полка: без переноса плитки сжимаются, а нижняя полка не появляется
+      shelfNoWrap: await run('order-06', '.board { display: flex; gap: 8px; }'),
+      shelfWrap: await run('order-06', '.board { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }'),
+      // Окно: рамку можно собрать и флексом; position в Лавке не разрешён
+      windowFlex: await run('order-07', '.board { display: flex; justify-content: center; align-items: center; } .card { display: flex; justify-content: flex-end; align-items: flex-start; }'),
+      windowAbsolute: await run('order-07', '.board { display: grid; place-content: center; } .cart { position: absolute; top: 0; right: 0; }'),
+      // Лента: пустой просвет только у растянутого меню, а раздвинутые края оставляют дыры
+      menuBetween: await run('order-08', '.header { display: flex; justify-content: space-between; align-items: center; }'),
+      menuFlex: await run('order-08', '.header { display: flex; align-items: center; } .menu { flex: 1; }'),
+    };
+  })`);
+  for (const good of ['footerGrid', 'footerAround', 'shelfWrap', 'windowFlex', 'menuFlex']) {
+    expect.soft(r[good], `${good}: принимается`).toMatchObject({ passed: true, misses: [] });
+  }
+  expect(r.footerEvenly.passed).toBe(false);
+  expect(r.footerEvenly.misses).toContain('Левая плитка — в 39px от левого края доски');
+  expect(r.shelfNoWrap.passed).toBe(false);
+  expect(r.shelfNoWrap.misses).toContain('«Карта» стоит под «Лампой»');
+  expect(r.shelfNoWrap.misses).toContain('Плитки не сжались: «Лампа» осталась 96×64');
+  expect(r.windowAbsolute.passed).toBe(false);
+  expect(r.windowAbsolute.errors.join(' ')).toContain('Flexbox и Grid');
+  expect(r.menuBetween.passed).toBe(false);
+  expect(r.menuBetween.misses).toContain('Между логотипом и меню нет просвета');
+});
