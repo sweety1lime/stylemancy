@@ -25,6 +25,7 @@ import { BOOK } from '../pixel/sprites';
 import { NoirIcon } from '../noir/icons';
 import { useNoir } from '../noir/look';
 import { PixelArt } from './PixelArt';
+import { StaffPicker } from './StaffPicker';
 import { StoryScene } from './StoryScene';
 
 /** Летопись героя: вся история по главам — пересмотреть сценки и забрать грамоты. */
@@ -103,6 +104,8 @@ export function ChronicleScreen() {
           {teacher && <p className="chronicle__teacher">Учителю открыты все сценки и образцы грамот — можно вычитать сюжет целиком.</p>}
         </div>
       </header>
+
+      {noir && <StaffPicker />}
 
       <ol className="chronicle__chapters">
         <li className="chronicle__chapter px-panel">

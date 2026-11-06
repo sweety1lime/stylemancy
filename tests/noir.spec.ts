@@ -506,3 +506,29 @@ test('фон по экранам: пока звук выключен, ни од�
   await page.waitForTimeout(1000);
   expect(any).toEqual([]);
 });
+
+test('свет посоха: цвет открывается за спасённую землю, выбирается в Летописи и светит у героя', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light', look: 'noir' }));
+    // Только при первой загрузке: после перезагрузки выбранный цвет не должен затираться
+    if (localStorage.getItem('cascadia.stats.v1')) return;
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true } }));
+    // Последний уровень Долины Тегов пройден: земля спасена, открыт янтарный свет
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'form-06': { completed: true, stars: 3, attempts: 1, hintsUsed: 0 } }));
+  });
+  await page.goto('/#/chronicle');
+  const picker = page.getByRole('region', { name: 'Свет посоха' });
+  await expect(picker.getByRole('button', { name: /Лунный/ })).toHaveAttribute('aria-pressed', 'true');
+  // Янтарный открыт, а изумрудный ждёт Лес Селекторов
+  await expect(picker.getByRole('button', { name: /Янтарный/ })).toBeEnabled();
+  await expect(picker.getByRole('button', { name: /Изумрудный/ })).toBeDisabled();
+  await expect(picker.getByText('спаси «Лес Селекторов»')).toBeVisible();
+  await picker.getByRole('button', { name: /Янтарный/ }).click();
+  await expect(picker.getByRole('button', { name: /Янтарный/ })).toHaveAttribute('aria-pressed', 'true');
+
+  // У героя у кнопки «Сотворить» светит выбранный цвет и после перезагрузки тоже
+  await page.goto('/#/level/flex-01');
+  await page.reload();
+  const glow = page.locator('.hero--noir .rig-glow').first();
+  await expect(glow).toHaveAttribute('fill', 'url(#sil-light-amber)');
+});

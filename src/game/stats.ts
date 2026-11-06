@@ -21,6 +21,8 @@ export interface Stats {
   experiments: string[];
   /** Просмотренные сценки: 'intro:floating-islands' */
   seen: Record<string, boolean>;
+  /** Цвет света на посохе героя (id из noir/staffLight.tsx) */
+  staff: string;
 }
 
 // Ключи хранят рабочее название проекта: не переименовывать — у всех сбросится прогресс
@@ -36,6 +38,7 @@ const INITIAL: Stats = {
   lastReviewAt: 0,
   experiments: [],
   seen: {},
+  staff: 'ice',
 };
 
 const load = (): Stats => ({ ...INITIAL, ...read<Partial<Stats>>(scopedKey(STATS_KEY), {}) });
@@ -75,6 +78,8 @@ export function mergeStats(a: Partial<Stats>, b: Partial<Stats>): Stats {
     lastReviewAt: Math.max(x.lastReviewAt, y.lastReviewAt),
     experiments: [...new Set([...x.experiments, ...y.experiments])],
     seen: { ...y.seen, ...x.seen },
+    // Выбранный цвет: свой, если он не по умолчанию, иначе тот, что пришёл с сервера
+    staff: x.staff !== INITIAL.staff ? x.staff : y.staff,
   };
 }
 

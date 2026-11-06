@@ -1,5 +1,5 @@
-import { Glow } from '../light';
 import { sparkle } from '../geometry';
+import { StaffLight } from '../NoirStaffLight';
 import type { Move, RigNode } from './rigTypes';
 
 /*
@@ -61,18 +61,8 @@ export const HERO_RIG: RigNode = {
                 CRYSTAL,
                 'M64 79.5 a2.6 2.6 0 1 0 5.2 0 a2.6 2.6 0 1 0 -5.2 0 Z',
               ],
-              light: (
-                <>
-                  <Glow className="rig-glow" x={70.4} y={1} r={22} light="ice" />
-                  <path className="rig-core" d={CRYSTAL} fill="#eef8ff" filter="url(#sil-glow)" />
-                  <circle className="rig-burst" cx="70.4" cy="1" r="10" fill="none" stroke="#cfe9ff" strokeWidth="1.4" />
-                  <g className="rig-smoke" fill="#8a93a6">
-                    <circle cx="70" cy="-6" r="3" />
-                    <circle cx="73" cy="-10" r="2.4" />
-                    <circle cx="68" cy="-12" r="2" />
-                  </g>
-                </>
-              ),
+              // Цвет огонька выбирает игрок («Свет посоха» в Летописи), поэтому свет — отдельный компонент
+              light: <StaffLight />,
             },
           ],
         },

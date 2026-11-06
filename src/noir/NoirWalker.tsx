@@ -1,12 +1,20 @@
 import { useLayoutEffect, useRef, type CSSProperties } from 'react';
 import { NoirMapHero } from './NoirLandArt';
+import { useStaffLight } from './staffLights';
 import { dist, type Journey } from './walkPlan';
 
 /* Герой идёт по тропе карты в «Сумраке»: световой след (NoirTrail) и сам ходок (NoirWalker). Маршрут считает walkPlan.ts */
 
 /** Световой след по тропе: рисуется за героем и потом гаснет */
 export function NoirTrail({ journey }: { journey: Journey }) {
-  const style = { '--walk-ms': `${journey.duration}ms`, '--walk-delay': `${journey.delay}ms` } as CSSProperties;
+  const staff = useStaffLight();
+  // След светится цветом, который игрок выбрал для посоха
+  const style = {
+    '--walk-ms': `${journey.duration}ms`,
+    '--walk-delay': `${journey.delay}ms`,
+    '--staff-trail': staff.trail,
+    '--staff-trail-glow': staff.trailGlow,
+  } as CSSProperties;
   return (
     <svg className="world-map__trail" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       <polyline

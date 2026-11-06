@@ -4,9 +4,11 @@ import type { Problem } from '../engine/lint';
 import type { Level } from '../engine/types';
 import { recordCast } from '../game/achievements';
 import { recordSuccess } from '../game/levelAchievements';
+import { notify } from '../game/notices';
 import { currentLevel, drafts, progress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { learnedSpells, pickQuestion, reviewIsDue, skipReview, type ReviewQuestion } from '../game/review';
+import { settings } from '../game/settings';
 import { sfx } from '../game/sound';
 import { stats } from '../game/stats';
 import {
@@ -22,6 +24,7 @@ import {
   type OpenStory,
 } from '../game/story';
 import { findLevel } from '../levels';
+import { STAFF_LIGHTS, unlockedStaffLights } from '../noir/staffLights';
 import type { Outcome, RegionStats } from './ResultPanel';
 
 /** Итог проверки: прошло — со звёздами, нет — с ошибками в коде и тем, что ещё не так. */
@@ -76,8 +79,17 @@ export function useLevelFlow(level: Level, region: RegionStats, starter: string)
     const firstTime = !progress.get(level.id).completed;
     const xp = () => totalXp(progress.snapshot(), stats.get().reviewXp);
     const xpBefore = xp();
+    const lightsBefore = unlockedStaffLights(progress.snapshot());
     progress.complete(level.id, score.stars, current);
     found.push(...recordSuccess({ level, code: current, hintsUsed, firstTime }));
+    // Спасённая земля открывает цвет света на посохе — только в «Сумраке», где герой его показывает
+    if (settings.get().look === 'noir') {
+      for (const option of STAFF_LIGHTS) {
+        if (!lightsBefore.has(option.id) && unlockedStaffLights(progress.snapshot()).has(option.id)) {
+          notify({ title: 'Новый свет посоха', text: `${option.name}. Выбери его в Летописи героя.` });
+        }
+      }
+    }
     // Последний уровень района пройден — победная сцена (один раз сама, потом по кнопке)
     const queue: OpenStory[] = [];
     const finale = place && place.region.levels.every((item) => progress.get(item.id).completed) ? storyOf(place.region, 'outro') : null;
