@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { evaluate, lintOptionsFor, scoreSolution, solutionDeclCount } from '../engine/evaluate';
+import type { Inspection } from '../engine/inspect';
 import { lintCss } from '../engine/lint';
 import { summarizeMisses, viewsOf, type ItemStatus } from '../engine/scene';
 import type { CssLevel } from '../engine/types';
 import { sfx } from '../game/sound';
 import type { CodeEditorHandle } from './CodeEditor';
+import { LensPanel } from './LensPanel';
 import { EditorCard, LevelBrief, LevelResult, Workbench } from './LevelParts';
 import type { RegionStats } from './ResultPanel';
 import { Scene, type SceneHandle } from './Scene';
@@ -23,6 +25,9 @@ interface LevelScreenProps {
 export function LevelScreen({ level, number, region, trailHref, onNext }: LevelScreenProps) {
   const flow = useLevelFlow(level, region, level.starterCss);
   const [statuses, setStatuses] = useState<ItemStatus[]>([]);
+  // «Лупа мага»: включена ли и что показывает про выбранный предмет
+  const [lens, setLens] = useState(false);
+  const [inspection, setInspection] = useState<Inspection | null>(null);
   const editorRef = useRef<CodeEditorHandle>(null);
   const sceneRef = useRef<SceneHandle>(null);
   const lintOptions = useMemo(() => lintOptionsFor(level), [level]);
@@ -67,6 +72,8 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
           initialCss={flow.code}
           celebrate={flow.outcome?.kind === 'success'}
           onStatuses={setStatuses}
+          lens={lens}
+          onInspect={setInspection}
         />
         {statuses.length > 0 && (
           <div className="stage__status">
@@ -86,8 +93,12 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
                 ))}
               </span>
             ))}
+            <button type="button" className="text-button lens-toggle" aria-pressed={lens} onClick={() => setLens(!lens)}>
+              Лупа
+            </button>
           </div>
         )}
+        {lens && <LensPanel inspection={inspection} />}
         <LevelResult flow={flow} level={level} region={region} trailHref={trailHref} onNext={onNext} />
       </section>
 

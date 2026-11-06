@@ -5602,3 +5602,197 @@ a.land--door .land__door {
     opacity: 0.7;
   }
 }
+
+/* «Лупа мага»: выбор предмета в сцене и разбор его коробки и правил */
+
+.scene__lens {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+.scene__mark {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.scene__mark--hover {
+  outline: 2px dashed var(--gold);
+  outline-offset: 2px;
+  background: rgba(255, 190, 90, 0.1);
+}
+
+.scene__mark--pick {
+  outline: 2px solid var(--gold-strong);
+  outline-offset: 2px;
+  box-shadow: 0 0 18px rgba(255, 210, 140, 0.55);
+}
+
+.lens-toggle[aria-pressed="true"] {
+  color: var(--gold-strong);
+  text-decoration: underline;
+}
+
+.stage__status .lens-toggle {
+  margin-left: auto;
+}
+
+.lens {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px 16px;
+}
+
+.lens__label {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.lens__title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.lens__title code {
+  color: var(--gold-strong);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.lens__facts,
+.lens__hint {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.lens__sub {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lens__rules {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lens__win,
+.lens__lose {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.lens__win code {
+  color: var(--gold-strong);
+}
+
+.lens__lose {
+  color: var(--muted);
+  padding-left: 14px;
+}
+
+.lens__lose s {
+  text-decoration-color: rgba(255, 123, 152, 0.8);
+}
+
+/* Коробка слоями, как в инструментах разработчика: у каждого слоя свой оттенок и числа по сторонам */
+.lens-box {
+  position: relative;
+  display: grid;
+  grid-template: auto 1fr auto / minmax(14px, auto) 1fr minmax(14px, auto);
+  grid-template-areas:
+    ". top ."
+    "left inner right"
+    ". bottom .";
+  align-items: center;
+  justify-items: center;
+  padding: 16px 3px 3px;
+  border: 1px dashed rgba(228, 220, 205, 0.3);
+  font-size: 12px;
+}
+
+.lens-box--margin {
+  background: rgba(255, 170, 100, 0.14);
+}
+
+.lens-box--border {
+  grid-area: inner;
+  width: 100%;
+  background: rgba(240, 200, 120, 0.2);
+  border-style: solid;
+}
+
+.lens-box--padding {
+  grid-area: inner;
+  width: 100%;
+  background: rgba(120, 200, 140, 0.18);
+}
+
+.lens-box__name {
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.lens-box__side--top {
+  grid-area: top;
+}
+
+.lens-box__side--right {
+  grid-area: right;
+}
+
+.lens-box__side--bottom {
+  grid-area: bottom;
+}
+
+.lens-box__side--left {
+  grid-area: left;
+}
+
+.lens-box__content {
+  grid-area: inner;
+  width: 100%;
+  padding: 8px 2px;
+  background: rgba(120, 160, 230, 0.22);
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Коробка слева, правила справа: на узкой колонке — друг под другом */
+.lens__body {
+  display: grid;
+  grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+  gap: 6px 16px;
+  align-items: start;
+}
+
+.lens__verdicts {
+  display: grid;
+  gap: 6px;
+}
+
+.lens__verdicts .lens__sub {
+  margin-top: 0;
+}
+
+@media (max-width: 560px) {
+  .lens__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -7,12 +7,15 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent,
   type Ref,
   type SyntheticEvent,
 } from 'react';
+import { inspectElement, type Inspection } from '../engine/inspect';
 import {
   applyToView,
   compareItems,
+  cssForView,
   markInPlace,
   measureTargets,
   prepareView,
@@ -40,8 +43,21 @@ interface SceneProps {
   initialCss: string;
   celebrate?: boolean;
   onStatuses?: (statuses: ItemStatus[]) => void;
+  /** «Лупа мага»: пока включена, предметы сцены выбираются нажатием, а onInspect получает разбор выбранного (null — выбор снят) */
+  lens?: boolean;
+  onInspect?: (inspection: Inspection | null) => void;
   ref?: Ref<SceneHandle>;
 }
+
+/** Прямоугольник предмета в координатах сцены */
+interface LensRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+const rectStyle = ({ x, y, w, h }: LensRect): CSSProperties => ({ left: x, top: y, width: w, height: h });
 
 /** Промежуток между зеркалами: в него помещается рамка с тенью */
 const MIRROR_GAP = 36;
@@ -52,7 +68,7 @@ const MIN_ROW_SCALE = 0.45;
  * Сцена уровня. В каждом «зеркале» (ширине экрана или «под мышкой») — видимый iframe с кодом студента
  * и скрытый с эталоном; из эталона берутся светящиеся контуры целей.
  */
-export function Scene({ level, initialCss, celebrate, onStatuses, ref }: SceneProps) {
+export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, onInspect, ref }: SceneProps) {
   const views = useMemo(() => viewsOf(level), [level]);
   const multi = views.length > 1;
   const { look } = useSettings();
@@ -74,6 +90,15 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
     onStatusesRef.current = onStatuses;
   });
 
+  // Лупа: выбранный предмет (зеркало и сам элемент в iframe), его рамка и рамка под мышью
+  const onInspectRef = useRef(onInspect);
+  const pickRef = useRef<{ index: number; el: Element } | null>(null);
+  const [pickRects, setPickRects] = useState<(LensRect | null)[]>([]);
+  const [hoverRects, setHoverRects] = useState<(LensRect | null)[]>([]);
+  useEffect(() => {
+    onInspectRef.current = onInspect;
+  });
+
   // Лёгкие эффекты — и внутри сцены: фон перестаёт двигаться
   const { effects } = useSettings();
   useEffect(() => {
@@ -89,6 +114,58 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
     observer.observe(box);
     return () => observer.disconnect();
   }, []);
+
+  /** Пересчитать разбор выбранного предмета: код изменился — правила и размеры другие */
+  const inspectPicked = useCallback(() => {
+    const pick = pickRef.current;
+    if (!pick?.el.isConnected) return;
+    const css = { scene: level.sceneCss, player: cssForView(cssRef.current, views[pick.index]), locked: level.lockedCss ?? '' };
+    onInspectRef.current?.(inspectElement(pick.el, css));
+    const box = pick.el.getBoundingClientRect();
+    setPickRects((list) => {
+      const next = [...list];
+      next[pick.index] = { x: box.left, y: box.top, w: box.width, h: box.height };
+      return next;
+    });
+  }, [level, views]);
+
+  // Лупу выключили — выбор снимается: рамки сбрасываются при смене пропса, а сам выбор и разбор — в эффекте
+  const [lensWas, setLensWas] = useState(lens);
+  if (lensWas !== lens) {
+    setLensWas(lens);
+    if (!lens) {
+      setPickRects([]);
+      setHoverRects([]);
+    }
+  }
+  useEffect(() => {
+    if (lens) return;
+    pickRef.current = null;
+    onInspectRef.current?.(null);
+  }, [lens]);
+
+  /** Предмет под мышью в зеркале index: подсветка при наведении, а нажатие выбирает его для разбора */
+  const lensAt = (index: number, event: MouseEvent<HTMLDivElement>, choose: boolean) => {
+    const doc = docsRef.current[index];
+    if (!doc) return;
+    // Сцена уменьшена на узком экране: координаты экрана переводим в координаты сцены
+    const area = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - area.left) * views[index].width) / area.width;
+    const y = ((event.clientY - area.top) * level.scene.height) / area.height;
+    const el = doc.elementFromPoint(x, y);
+    if (!el) return;
+    if (choose) {
+      pickRef.current = { index, el };
+      inspectPicked();
+      return;
+    }
+    const box = el.getBoundingClientRect();
+    setHoverRects((list) => {
+      const next = [...list];
+      next[index] = { x: box.left, y: box.top, w: box.width, h: box.height };
+      return next;
+    });
+  };
 
   const apply = useCallback(
     (css: string): ItemStatus[] => {
@@ -121,9 +198,10 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
       setStatuses(perMirror);
       const all = perMirror.flat();
       onStatusesRef.current?.(all);
+      inspectPicked();
       return all;
     },
-    [level, views, multi],
+    [level, views, multi, inspectPicked],
   );
 
   const cast = useCallback(
@@ -220,6 +298,11 @@ export function Scene({ level, initialCss, celebrate, onStatuses, ref }: ScenePr
       label={view.label}
       targets={targets[i] ?? []}
       statuses={statuses[i] ?? []}
+      lens={lens}
+      pick={pickRects[i] ?? null}
+      hover={hoverRects[i] ?? null}
+      onLens={(event, choose) => lensAt(i, event, choose)}
+      onLensLeave={() => setHoverRects([])}
       fxRef={(layer) => {
         fxRef.current[i] = layer;
       }}
@@ -243,6 +326,12 @@ interface MirrorProps {
   label?: string;
   targets: ItemBox[];
   statuses: ItemStatus[];
+  /** Лупа включена: поверх сцены лежит слой, ловящий мышь; pick и hover — рамки выбранного предмета и предмета под мышью */
+  lens: boolean;
+  pick: LensRect | null;
+  hover: LensRect | null;
+  onLens: (event: MouseEvent<HTMLDivElement>, choose: boolean) => void;
+  onLensLeave: () => void;
   /** Слой для искр и магического круга — поверх сцены */
   fxRef: (layer: HTMLDivElement | null) => void;
   onPlayerLoad: (doc: Document) => void;
@@ -250,7 +339,7 @@ interface MirrorProps {
 }
 
 /** Одно зеркало: сцена заданной ширины, контуры целей и скрытый эталон. */
-function Mirror({ width, height, scale, srcDoc, label, targets, statuses, fxRef, onPlayerLoad, onTargetLoad }: MirrorProps) {
+function Mirror({ width, height, scale, srcDoc, label, targets, statuses, lens, pick, hover, onLens, onLensLeave, fxRef, onPlayerLoad, onTargetLoad }: MirrorProps) {
   const loaded = (handler: (doc: Document) => void) => (event: SyntheticEvent<HTMLIFrameElement>) => {
     const doc = event.currentTarget.contentDocument;
     if (doc) handler(doc);
@@ -289,6 +378,9 @@ function Mirror({ width, height, scale, srcDoc, label, targets, statuses, fxRef,
           )}
         </div>
         <div className="scene__fx" ref={fxRef} aria-hidden="true" />
+        {lens && hover && <div className="scene__mark scene__mark--hover" style={rectStyle(hover)} aria-hidden="true" />}
+        {lens && pick && <div className="scene__mark scene__mark--pick" style={rectStyle(pick)} aria-hidden="true" />}
+        {lens && <div className="scene__lens" onMouseMove={(event) => onLens(event, false)} onMouseLeave={onLensLeave} onClick={(event) => onLens(event, true)} />}
       </div>
     </div>
   );
