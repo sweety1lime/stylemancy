@@ -110,9 +110,10 @@ test('чужая магия запрещена, подсказки снимаю�
 
 test('порядок в строю: нужен order, разворот ряда запрещён', async ({ page }) => {
   await openLevel(page, 10);
-  // Разворот ряда даёт ту же картинку, но уровень учит order
+  // Разворот ряда даёт ту же картинку в обычной сцене (3 из 3), но шторм с пятью кристаллами его выдаёт: там на месте один из пяти.
+  // Счётчик общий: 3 + 1 из 3 + 5. А ещё уровень учит order и разворот запрещает
   await typeCode(page, '.island {\n  display: flex;\n  flex-direction: row-reverse;\n  justify-content: center;\n  align-items: center;\n}\n');
-  await expect(page.getByText('На месте: 3 из 3')).toBeVisible();
+  await expect(page.getByText('На месте: 4 из 8')).toBeVisible();
   await cast(page);
   await expect(page.getByText('В этом испытании нельзя использовать flex-direction.')).toBeVisible();
 
