@@ -6,12 +6,12 @@ import { GoalList } from './GoalList';
 
 interface LandTasksProps {
   results: Record<string, CheckResult[]> | null;
-  /** Земля — заготовка без правок: задание на ней не засчитывается */
-  untouched: boolean;
+  /** Земля почти не отличается от заготовки (меньше MIN_CHANGE знаков своего): задание на ней не засчитывается */
+  nearTemplate: boolean;
 }
 
 /** Творческие задания «Моей земли»: условия загораются, пока игрок строит страницу. Необязательные, награда — опыт и свет посоха */
-export function LandTasks({ results, untouched }: LandTasksProps) {
+export function LandTasks({ results, nearTemplate }: LandTasksProps) {
   const { landTasks } = useStats();
   // Показывается первое невыполненное задание, а дальше выбор не прыгает: выполненное задание остаётся на виду вместе с отметкой «опыт получен»
   const [picked, setPicked] = useState(() => (LAND_TASKS.find((task) => !landTasks.includes(task.id)) ?? LAND_TASKS[0]).id);
@@ -51,9 +51,9 @@ export function LandTasks({ results, untouched }: LandTasksProps) {
           Задание выполнено, опыт получен.
         </p>
       )}
-      {!rewarded && finished && untouched && (
+      {!rewarded && finished && nearTemplate && (
         <p className="land-tasks__hint" role="status">
-          Это заготовка без единой правки. Поменяй в ней что-нибудь своё, и задание засчитается.
+          Это почти заготовка. Добавь или поменяй хотя бы пару своих строк, и задание засчитается.
         </p>
       )}
       {!finished && next?.hint && <p className="land-tasks__hint">Подсказка: {next.hint}</p>}

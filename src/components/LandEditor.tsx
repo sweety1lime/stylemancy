@@ -12,7 +12,7 @@ import { saveLand, useLands, type SaveResult } from '../land/lands';
 import { LAND_LIMITS, landSize, type Land } from '../land/model';
 import { renderLand } from '../land/sanitize';
 import { cleanLine } from '../land/share';
-import { isUntouchedTemplate } from '../land/templates';
+import { isNearTemplate } from '../land/templates';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { LandFrame } from './LandFrame';
 import { LandPalette } from './LandPalette';
@@ -195,7 +195,7 @@ function LandEditor({ land }: { land: Land }) {
             </ul>
           </section>
         )}
-        <LandTasks results={taskResults} untouched={isUntouchedTemplate(live)} />
+        <LandTasks results={taskResults} nearTemplate={isNearTemplate(live)} />
       </section>
 
       {sharing && <ShareDialog land={shared} images={images} onClose={() => setSharing(false)} />}

@@ -129,20 +129,26 @@ test('задание выполнено: условия загораются, о
   await page.waitForTimeout(600);
   expect(await page.evaluate(`import('/src/game/stats.ts').then((m) => [m.stats.get().reviewXp, m.stats.get().landTasks])`)).toEqual([10, ['tavern']]);
 
-  // Заготовка «Ночное небо» сама выполняет третье задание, но без единой правки оно не засчитывается
+  // Заготовка «Ночное небо» сама выполняет третье задание, но пока она заготовка, оно не засчитывается
   await page.getByRole('link', { name: '← Мои земли' }).click();
   await page.getByLabel('Ячейка 2: пусто').getByRole('button', { name: 'Ночное небо' }).click();
   await tasks.getByRole('button', { name: 'Ночное небо' }).click();
   await expect(tasks.getByText('4 из 4')).toBeVisible();
-  await expect(tasks.getByText('Это заготовка без единой правки')).toBeVisible();
+  await expect(tasks.getByText('Это почти заготовка')).toBeVisible();
   await page.waitForTimeout(600);
   expect(await page.evaluate(`import('/src/game/stats.ts').then((m) => m.stats.get().landTasks)`)).toEqual(['tavern']);
 
-  // Поменял что-нибудь своё, и задание засчитано. Заодно страница законно выполняет «Деревню в ряд»: три картинки в ряду
+  // Одна короткая строка поверх заготовки не в счёт: подсказка остаётся, награды нет
   const html = page.locator('.cm-content[aria-label="Редактор HTML"]');
   await html.click();
   await page.keyboard.press('ControlOrMeta+End');
   await page.keyboard.insertText('\n<p>Моя приписка.</p>');
+  await expect(tasks.getByText('Это почти заготовка')).toBeVisible();
+  await page.waitForTimeout(600);
+  expect(await page.evaluate(`import('/src/game/stats.ts').then((m) => m.stats.get().landTasks)`)).toEqual(['tavern']);
+
+  // Своего набралось на пару строк, и задание засчитано. Заодно страница законно выполняет «Деревню в ряд»: три картинки в ряду
+  await page.keyboard.insertText('\n<p>А здесь живёт мой друг, звездочёт.</p>');
   await expect(tasks.getByText('Задание выполнено, опыт получен.')).toBeVisible();
   expect(await page.evaluate(`import('/src/game/stats.ts').then((m) => [m.stats.get().reviewXp, m.stats.get().landTasks])`)).toEqual([40, ['tavern', 'street', 'sky']]);
 });
@@ -178,4 +184,37 @@ test('на телефоне панель заданий не шире экран
   await page.getByLabel('Ячейка 1: пусто').getByRole('button', { name: 'Чистый лист' }).click();
   await expect(page.getByRole('region', { name: 'Творческие задания' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+});
+
+test('«почти заготовка»: считаются знаки в новых и пропавших строках, а отступы и порядок строк не в счёт', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate<Record<string, number | boolean>>(`import('/src/land/templates.ts').then((m) => {
+    const nl = String.fromCharCode(10);
+    const village = m.LAND_TEMPLATES.find((item) => item.id === 'village');
+    const change = (html) => m.changeFromTemplates({ html, css: village.css });
+    const short = village.html + '<p>Моя приписка.</p>';
+    const two = short + nl + '<p>А здесь живёт мой друг, звездочёт.</p>';
+    return {
+      same: change(village.html),
+      reindented: change(village.html.split(nl).map((line) => line.trim()).join(nl)),
+      reordered: change(village.html.split(nl).reverse().join(nl)),
+      oneShortLine: change(short),
+      twoLines: change(two),
+      nearOne: m.isNearTemplate({ html: short, css: village.css }),
+      nearTwo: m.isNearTemplate({ html: two, css: village.css }),
+      fromScratch: m.isNearTemplate({ html: '<h1>Таверна</h1><p>Суп.</p>', css: '' }),
+      limit: m.MIN_CHANGE,
+    };
+  })`);
+  expect(result).toEqual({
+    same: 0,
+    reindented: 0,
+    reordered: 0,
+    oneShortLine: 20,
+    twoLines: 61,
+    nearOne: true,
+    nearTwo: false,
+    fromScratch: false,
+    limit: 40,
+  });
 });

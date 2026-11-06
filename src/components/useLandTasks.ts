@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { evaluateTasks } from '../land/probe';
 import { awardTask, finishedTasks } from '../land/rewards';
 import type { CheckResult } from '../land/tasks';
-import { isUntouchedTemplate } from '../land/templates';
+import { isNearTemplate } from '../land/templates';
 
 /** Итог проверки вместе с кодом, для которого он посчитан: награда выдаётся по нему, а не по тому, что набрано сейчас */
 interface Evaluated {
@@ -32,7 +32,7 @@ export function useLandTasks(page: string, html: string, css: string): Record<st
   }, [page, html, css]);
 
   useEffect(() => {
-    if (!evaluated || isUntouchedTemplate(evaluated)) return;
+    if (!evaluated || isNearTemplate(evaluated)) return;
     for (const task of finishedTasks(evaluated.results)) awardTask(task);
   }, [evaluated]);
 

@@ -217,7 +217,38 @@ h1 {
   },
 ];
 
-/** Земля, в которой после заготовки ничего не поменяли. За такую награду не даём, иначе опыт собирался бы одним щелчком */
-export function isUntouchedTemplate(source: { html: string; css: string }): boolean {
-  return LAND_TEMPLATES.some((template) => template.html === source.html && template.css === source.css);
+/** Сколько знаков своего нужно добавить или поменять поверх заготовки, чтобы земля считалась уже своей, а не заготовкой */
+export const MIN_CHANGE = 40;
+
+/** Строки без пробелов по краям и без пустых: сколько раз встречается каждая */
+function lineBag(text: string): Map<string, number> {
+  const bag = new Map<string, number>();
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed) bag.set(trimmed, (bag.get(trimmed) ?? 0) + 1);
+  }
+  return bag;
+}
+
+/** Сколько знаков в строках, которых нет в другом тексте: и новых, и пропавших. Отступы и порядок строк не в счёт */
+function lineDifference(a: string, b: string): number {
+  const first = lineBag(a);
+  const second = lineBag(b);
+  let sum = 0;
+  for (const [line, count] of first) sum += Math.max(0, count - (second.get(line) ?? 0)) * line.length;
+  for (const [line, count] of second) sum += Math.max(0, count - (first.get(line) ?? 0)) * line.length;
+  return sum;
+}
+
+/** На сколько знаков земля ушла от самой похожей заготовки */
+export function changeFromTemplates(source: { html: string; css: string }): number {
+  return Math.min(...LAND_TEMPLATES.map((template) => lineDifference(template.html, source.html) + lineDifference(template.css, source.css)));
+}
+
+/**
+ * Земля, которая почти не отличается от заготовки. За такую награду не даём, иначе опыт собирался бы одним щелчком:
+ * выбрал «Деревню», дописал строку, получил задание. Нужно добавить или поменять хотя бы пару своих строк.
+ */
+export function isNearTemplate(source: { html: string; css: string }): boolean {
+  return changeFromTemplates(source) < MIN_CHANGE;
 }
