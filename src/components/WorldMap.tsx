@@ -18,6 +18,7 @@ import {
   scriptoriaPrologue,
   type OpenStory,
 } from '../game/story';
+import { canBuildLands, unlockLandTitle } from '../land/access';
 import { findLevel, isScriptLand, lands, scriptLands, type Land } from '../levels';
 import { spriteAnimElement } from '../pixel/sheet';
 import {
@@ -330,6 +331,20 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
               <a className="button button--ghost" href={hrefFor({ name: 'chronicle' })}>
                 Летопись героя
               </a>
+              {canBuildLands(account, progress) ? (
+                <a className="button button--ghost" href={hrefFor({ name: 'myland' })}>
+                  Моя земля
+                </a>
+              ) : (
+                <span
+                  className="button button--ghost button--locked"
+                  aria-disabled="true"
+                  title={`Своя земля откроется, когда ты спасёшь землю «${unlockLandTitle()}»`}
+                >
+                  Моя земля
+                  <small className="button__note">после «{unlockLandTitle()}»</small>
+                </span>
+              )}
             </div>
           </div>
           <div className="world__sub">

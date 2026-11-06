@@ -408,6 +408,23 @@
   padding: 0 16px;
 }
 
+/* Закрытая кнопка на карте: мелкая строка под названием говорит, что нужно сделать */
+.button--locked {
+  flex-direction: column;
+  gap: 0;
+  opacity: 0.55;
+  line-height: 1.1;
+  cursor: not-allowed;
+}
+
+.button__note {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .world-map {
   position: relative;
   display: grid;

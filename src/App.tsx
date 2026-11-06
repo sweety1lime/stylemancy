@@ -29,6 +29,9 @@ const GrimoireScreen = lazy(() => import('./components/GrimoireScreen').then((m)
 const AchievementsScreen = lazy(() => import('./components/AchievementsScreen').then((m) => ({ default: m.AchievementsScreen })));
 const ChronicleScreen = lazy(() => import('./components/ChronicleScreen').then((m) => ({ default: m.ChronicleScreen })));
 const DailyScreen = lazy(() => import('./components/DailyScreen').then((m) => ({ default: m.DailyScreen })));
+const MyLandScreen = lazy(() => import('./components/MyLandScreen').then((m) => ({ default: m.MyLandScreen })));
+const LandEditorScreen = lazy(() => import('./components/LandEditor').then((m) => ({ default: m.LandEditorScreen })));
+const SharedLandScreen = lazy(() => import('./components/SharedLandScreen').then((m) => ({ default: m.SharedLandScreen })));
 const CertificateScreen = lazy(() => import('./components/CertificateScreen').then((m) => ({ default: m.CertificateScreen })));
 const TeacherScreen = lazy(() => import('./components/TeacherScreen').then((m) => ({ default: m.TeacherScreen })));
 
@@ -188,6 +191,23 @@ export default function App() {
     return (
       <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
         <DailyScreen />
+      </Screen>
+    );
+  }
+
+  if (route.name === 'myland') {
+    const { slot } = route;
+    return (
+      <Screen back={slot === undefined ? { href: hrefFor({ name: 'map' }), label: 'Карта' } : { href: hrefFor({ name: 'myland' }), label: 'Мои земли' }}>
+        {slot === undefined ? <MyLandScreen /> : <LandEditorScreen key={slot} slot={slot} />}
+      </Screen>
+    );
+  }
+
+  if (route.name === 'shared') {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+        <SharedLandScreen key={route.code} code={route.code} />
       </Screen>
     );
   }
