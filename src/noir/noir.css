@@ -2291,3 +2291,13 @@
   background: #2a2f3a;
   box-shadow: none;
 }
+
+/* Слепая магия: поле предсказания в «Сумраке» — тонкая линия и тёмное поле, как у остальных */
+.look-noir .predict__guess textarea {
+  border: 1px solid var(--line-strong);
+  background: #07090e;
+}
+
+.look-noir .predict__guess textarea:focus {
+  border-color: var(--gold);
+}

@@ -53,6 +53,8 @@ export interface Stats {
   daily: DailyState;
   /** Уровни, где побеждён реванш Лорда Дефолта: опыт за победу — один раз */
   rematches: string[];
+  /** JS-уровни, где студент верно предсказал вывод Оракула в «слепой магии»: опыт за это — один раз */
+  predictions: string[];
 }
 
 // Ключи хранят рабочее название проекта: не переименовывать — у всех сбросится прогресс
@@ -71,6 +73,7 @@ const INITIAL: Stats = {
   staff: 'ice',
   daily: NO_DAILY,
   rematches: [],
+  predictions: [],
 };
 
 const load = (): Stats => ({ ...INITIAL, ...read<Partial<Stats>>(scopedKey(STATS_KEY), {}) });
@@ -114,6 +117,7 @@ export function mergeStats(a: Partial<Stats>, b: Partial<Stats>): Stats {
     staff: x.staff !== INITIAL.staff ? x.staff : y.staff,
     daily: mergeDaily(x.daily, y.daily),
     rematches: [...new Set([...x.rematches, ...y.rematches])],
+    predictions: [...new Set([...x.predictions, ...y.predictions])],
   };
 }
 

@@ -3,12 +3,14 @@ import { evaluateJs, scoreJs, type JsEvaluation } from '../engine/jsCheck';
 import { lintJs } from '../engine/jsLint';
 import { evaluatePage, type PageEvaluation } from '../engine/pageCheck';
 import type { JsLevel } from '../engine/types';
+import { judgePrediction, type Verdict } from '../game/predict';
 import { sfx } from '../game/sound';
 import type { CodeEditorHandle } from './CodeEditor';
 import { DungeonScene } from './DungeonScene';
 import { JsScene } from './JsScene';
 import { PageScene } from './PageScene';
 import { EditorCard, LevelBrief, LevelResult, Workbench } from './LevelParts';
+import { PredictPanel } from './PredictPanel';
 import type { RegionStats } from './ResultPanel';
 import { useLevelFlow } from './useLevelFlow';
 
@@ -39,6 +41,15 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
   const ticket = useRef(0);
   const lintCode = useCallback((text: string) => lintJs(text).problems, []);
 
+  // «Слепая магия»: только там, где Оракул что-то говорит, и не в подземельях и страницах
+  const canPredict = Boolean(level.check.output) && !level.page && !level.dungeons?.length;
+  const [blind, setBlind] = useState(false);
+  const [guess, setGuess] = useState('');
+  const [verdict, setVerdict] = useState<Verdict | null>(null);
+  // Код, на котором заклинание сотворено: пока он не изменился, свиток открыт и вердикт виден
+  const [revealedFor, setRevealedFor] = useState<string | null>(null);
+  const revealed = revealedFor === flow.code;
+
   // Свиток и колбы обновляются, когда студент перестаёт печатать
   useEffect(() => {
     const id = ++ticket.current;
@@ -58,6 +69,12 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
     sfx.cast();
     const result = await evaluate(level, current, true);
     if (ticket.current === id) setChecked({ code: current, evaluation: result });
+    if (canPredict && blind) {
+      // Свиток открывается, а предсказание сверяется с тем, что Оракул сказал при первом запуске
+      setRevealedFor(current);
+      const said = 'runs' in result ? (result.runs[0]?.result.output.map((line) => line.text).join('\n') ?? '') : '';
+      setVerdict(guess.trim() ? judgePrediction(level.id, guess, said) : null);
+    }
     if (result.passed) {
       flow.finish({ passed: true, score: scoreJs(level, current, flow.hintsUsed) }, viaKeyboard);
     } else {
@@ -66,7 +83,25 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
   }
 
   // Итог попытки — в конце колонки со сценой, какая бы сцена ни стояла
-  const result = <LevelResult flow={flow} level={level} region={region} trailHref={trailHref} onNext={onNext} />;
+  const result = (
+    <>
+      {canPredict && (
+        <PredictPanel
+          blind={blind}
+          onToggle={() => {
+            setBlind(!blind);
+            setRevealedFor(null);
+            setVerdict(null);
+          }}
+          guess={guess}
+          onGuess={setGuess}
+          revealed={revealed}
+          verdict={revealed ? verdict : null}
+        />
+      )}
+      <LevelResult flow={flow} level={level} region={region} trailHref={trailHref} onNext={onNext} />
+    </>
+  );
 
   return (
     <main className="level level--js">
@@ -96,7 +131,7 @@ export function JsLevelScreen({ level, number, region, trailHref, onNext }: JsLe
         <JsScene
           level={level}
           code={checked?.code ?? flow.code}
-          evaluation={checked?.evaluation ?? null}
+          evaluation={blind && !revealed ? null : (checked?.evaluation ?? null)}
           busy={busy}
           celebrate={flow.outcome?.kind === 'success'}
           cue={flow.outcome}

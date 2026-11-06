@@ -6017,3 +6017,64 @@ a.land--door .land__door {
     transition: none;
   }
 }
+
+/* «Слепая магия»: Оракул молчит до заклинания, а студент записывает, что он скажет */
+
+.predict {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+}
+
+.predict__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.predict__head .button[aria-pressed="true"] {
+  border-color: var(--gold);
+  color: var(--gold-strong);
+}
+
+.predict__lead {
+  flex: 1 1 240px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.predict__guess textarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 8px 12px;
+  border: 3px solid var(--frame);
+  background: #120b2e;
+  color: var(--text);
+  font: 15px/1.5 var(--font-mono);
+  resize: vertical;
+}
+
+.predict__guess textarea:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.predict__verdict {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.predict__right {
+  color: var(--success, #6ee7a8);
+}
+
+.predict__wrong {
+  color: var(--danger, #ff7b98);
+}
+
+.predict__diff code {
+  color: var(--gold-strong);
+  white-space: pre-wrap;
+}
