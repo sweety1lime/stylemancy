@@ -4,7 +4,7 @@ import { signOut, useAuth, type Account } from '../game/auth';
 import { activeStreak, dayKey } from '../game/daily';
 import { useProgress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
-import { settings, useSettings } from '../game/settings';
+import { PIXEL_LOOK_AVAILABLE, settings, useSettings } from '../game/settings';
 import { sfx } from '../game/sound';
 import { useStats } from '../game/stats';
 import { useCountUp } from '../game/useCountUp';
@@ -153,23 +153,21 @@ function Toggles() {
         {noir ? <NoirIcon name={full ? 'effects' : 'effects-off'} /> : <PixelArt sprite={full ? EFFECTS_ON : EFFECTS_OFF} scale={2} />}
         <span className="visually-hidden">Полные эффекты</span>
       </button>
-      <button
-        type="button"
-        className="toggle"
-        aria-pressed={noir}
-        title={noir ? 'Вид: «Сумрак» — силуэты в лунном свете' : 'Вид: пиксель-арт'}
-        onClick={() => {
-          settings.update({ look: noir ? 'pixel' : 'noir' });
-          sfx.click();
-        }}
-      >
-        {noir ? (
-          <NoirIcon name="moon" />
-        ) : (
-          <PixelArt sprite={MOON} scale={2} />
-        )}
-        <span className="visually-hidden">Вид «Сумрак»</span>
-      </button>
+      {PIXEL_LOOK_AVAILABLE && (
+        <button
+          type="button"
+          className="toggle"
+          aria-pressed={noir}
+          title={noir ? 'Вид: «Сумрак» — силуэты в лунном свете' : 'Вид: пиксель-арт'}
+          onClick={() => {
+            settings.update({ look: noir ? 'pixel' : 'noir' });
+            sfx.click();
+          }}
+        >
+          {noir ? <NoirIcon name="moon" /> : <PixelArt sprite={MOON} scale={2} />}
+          <span className="visually-hidden">Вид «Сумрак»</span>
+        </button>
+      )}
     </div>
   );
 }
