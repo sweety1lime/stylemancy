@@ -24,7 +24,8 @@ export const SCRIPTORIA_FINALE_KEY = 'finale:scriptoria';
  */
 export function isLandDone(land: Land, map: ProgressMap = progress.snapshot()): boolean {
   if (land.upcoming.length > 0) return false;
-  const lastRegion = land.regions[land.regions.length - 1];
+  // Бонусные районы «по желанию» землю не спасают: считается последний обязательный
+  const lastRegion = land.regions.findLast((region) => !region.optional);
   const finalLevel = lastRegion?.levels[lastRegion.levels.length - 1];
   return Boolean(finalLevel && map[finalLevel.id]?.completed);
 }

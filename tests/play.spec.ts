@@ -366,7 +366,8 @@ test('районы открываются по порядку: следующи�
   await expect(page.getByRole('heading', { name: 'Парящие земли' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByText('Откроется после испытания «Звёздная корона» в районе «Парящие острова».')).toBeVisible();
-  await expect(page.getByText('Откроется после уровня «Бесконечная галерея» в районе «Зеркальная башня».')).toBeVisible();
+  // После Зеркальной башни открываются два района: необязательная Лавка заказов и Цитадель, и у обоих замок с этим текстом
+  await expect(page.getByText('Откроется после уровня «Бесконечная галерея» в районе «Зеркальная башня».')).toHaveCount(2);
   await expect(page.getByRole('link', { name: 'Уровень 1: Первые створки' })).toHaveCount(0);
 
   // Испытание пройдено — район открыт, о нём говорят сразу после победы

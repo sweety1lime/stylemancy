@@ -8,6 +8,7 @@ import type { CssLevel } from '../engine/types';
 import { sfx } from '../game/sound';
 import { stats } from '../game/stats';
 import type { CodeEditorHandle } from './CodeEditor';
+import { GoalList } from './GoalList';
 import { LensPanel } from './LensPanel';
 import { EditorCard, LevelBrief, LevelResult, Workbench } from './LevelParts';
 import { RematchBar, RematchPanel } from './Rematch';
@@ -43,6 +44,8 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   const editorRef = useRef<CodeEditorHandle>(null);
   const sceneRef = useRef<SceneHandle>(null);
   const lintOptions = useMemo(() => lintOptionsFor(active), [active]);
+  // Заказ жителя: сцена принимается по условиям, а не по контурам целей
+  const isOrder = Boolean(active.check.order);
   // Обязательный приём проверяется только по «Сотворить»: пока код пишется, его ещё и не должно быть
   const lintCode = useCallback(
     (text: string) => lintCss(text, lintOptions).problems.filter((problem) => problem.kind !== 'required'),
@@ -52,6 +55,12 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   function handleChange(next: string) {
     flow.change(next);
     sceneRef.current?.apply(next);
+  }
+
+  /** Что не так на сцене: у обычного уровня — какие предметы не на месте, у заказа — какие условия не выполнены */
+  function missesOf(items: ItemStatus[]): string[] {
+    if (isOrder) return items.filter((item) => !item.inPlace).map((item) => `${item.name}: ${item.message ?? 'не выполнено'}`);
+    return summarizeMisses(items, active.check.groupName, active.check.tolerance);
   }
 
   /** viaKeyboard — сотворили через Ctrl+Enter (для секретного достижения) */
@@ -73,7 +82,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
         }
       } else {
         sfx.fail();
-        const misses = summarizeMisses(evaluation.items, active.check.groupName, active.check.tolerance);
+        const misses = missesOf(evaluation.items);
         const errors = misses.length ? evaluation.errors.filter((problem) => problem.kind !== 'required') : evaluation.errors;
         flow.report({ kind: 'fail', errors, misses });
       }
@@ -82,7 +91,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
     if (evaluation.passed) {
       flow.finish({ passed: true, score: scoreSolution(flow.hintsUsed, evaluation.declCount, solutionDeclCount(level)) }, viaKeyboard);
     } else {
-      const misses = summarizeMisses(evaluation.items, level.check.groupName, level.check.tolerance);
+      const misses = missesOf(evaluation.items);
       // Обязательный приём — когда сцена уже сложилась. Пока предметы не на местах, важнее подсказать, куда их двигать
       const errors = misses.length ? evaluation.errors.filter((problem) => problem.kind !== 'required') : evaluation.errors;
       flow.finish({ passed: false, errors, misses }, viaKeyboard);
@@ -135,10 +144,12 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
         />
         {statuses.length > 0 && (
           <div className="stage__status">
-            <span>
-              На месте: <span key={placed} className="placed-count">{placed}</span> из {statuses.length}
-            </span>
-            {groupByMirror(statuses).map(({ tag, items }) => (
+            {!isOrder && (
+              <span>
+                На месте: <span key={placed} className="placed-count">{placed}</span> из {statuses.length}
+              </span>
+            )}
+            {!isOrder && groupByMirror(statuses).map(({ tag, items }) => (
               <span key={tag ?? 'scene'} className="stage__dots">
                 {tag !== undefined && <span className="stage__mirror">{tag}</span>}
                 {items.map((s, i) => (
@@ -155,6 +166,9 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
               Лупа
             </button>
           </div>
+        )}
+        {isOrder && statuses.length > 0 && (
+          <GoalList title="Заказчик хочет" goals={statuses.map((status) => ({ label: status.name, done: status.inPlace, detail: status.message }))} />
         )}
         {lens && <LensPanel inspection={inspection} />}
         {stage && rematch && cleared && <RematchPanel rematch={rematch} stage={fight} award={award} trailHref={trailHref} onNext={nextStage} />}

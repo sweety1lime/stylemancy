@@ -2,13 +2,13 @@ import type { CSSProperties } from 'react';
 import type { GoalStatus } from '../engine/htmlCheck';
 import { RichText } from './RichText';
 
-/** Цели HTML-уровня: загораются, как только разметка их выполняет. */
-export function GoalList({ goals }: { goals: GoalStatus[] }) {
+/** Цели HTML-уровня: загораются, как только разметка их выполняет. У заказа жителя тот же список зовётся «Заказчик хочет». */
+export function GoalList({ goals, title = 'Цели' }: { goals: GoalStatus[]; title?: string }) {
   const done = goals.filter((goal) => goal.done).length;
   return (
-    <section className="goals px-panel" aria-label="Цели">
+    <section className="goals px-panel" aria-label={title}>
       <p className="goals__head">
-        <span>Цели</span>
+        <span>{title}</span>
         <span>
           {done} из {goals.length}
         </span>

@@ -1,0 +1,125 @@
+/*
+  Лавка заказов — оформление сцен: доска или шапка и простые коробки-предметы с подписью из data-name.
+  Студент этот код не видит. Размеры у всех предметов заданы жёстко, чтобы раскладка зависела только от его кода.
+  Контуров целей здесь нет: заказ принимается по условиям (check.order).
+*/
+
+html {
+  background: #120b2e;
+}
+
+/* Доска заказа и шапка лавки — контейнеры, в которых студент расставляет предметы */
+.board,
+.header {
+  position: relative;
+  box-sizing: border-box;
+  padding: 16px;
+  background-color: rgba(124, 77, 255, 0.12);
+  box-shadow:
+    0 0 0 4px #4c2aa8,
+    0 0 0 8px #1a1030,
+    inset 0 0 0 4px rgba(167, 139, 250, 0.22);
+}
+
+.board {
+  width: 456px;
+  height: 196px;
+}
+
+.header {
+  width: 520px;
+  height: 72px;
+}
+
+/* Предметы: коробка с рамкой и подписью по центру. Подпись — в ::before и размеров не меняет */
+.card,
+.tile,
+.photo,
+.name,
+.price,
+.buy,
+.logo,
+.menu,
+.cart {
+  position: relative;
+  box-sizing: border-box;
+  border: 3px solid var(--edge, #f4c76b);
+  background: var(--fill, rgba(244, 199, 107, 0.16));
+}
+
+.card::before,
+.tile::before,
+.photo::before,
+.name::before,
+.price::before,
+.buy::before,
+.logo::before,
+.menu::before,
+.cart::before {
+  content: attr(data-name);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff3d0;
+  font: 600 12px/1 system-ui, sans-serif;
+}
+
+.card {
+  --edge: #8fc0ff;
+  --fill: rgba(143, 192, 255, 0.14);
+  width: 120px;
+  height: 132px;
+}
+
+.tile {
+  --edge: #5dffb0;
+  --fill: rgba(93, 255, 176, 0.12);
+  width: 96px;
+  height: 64px;
+}
+
+.photo {
+  --edge: #c9a2ff;
+  --fill: rgba(201, 162, 255, 0.16);
+  width: 96px;
+  height: 96px;
+}
+
+.name {
+  width: 168px;
+  height: 28px;
+}
+
+.price {
+  --edge: #ff9a5a;
+  --fill: rgba(255, 154, 90, 0.16);
+  width: 80px;
+  height: 28px;
+}
+
+.buy {
+  --edge: #ffd36b;
+  --fill: rgba(255, 211, 107, 0.2);
+  width: 120px;
+  height: 40px;
+}
+
+.logo {
+  --edge: #c9a2ff;
+  --fill: rgba(201, 162, 255, 0.16);
+  width: 96px;
+  height: 32px;
+}
+
+.menu {
+  width: 200px;
+  height: 32px;
+}
+
+.cart {
+  --edge: #5dffb0;
+  --fill: rgba(93, 255, 176, 0.12);
+  width: 64px;
+  height: 32px;
+}

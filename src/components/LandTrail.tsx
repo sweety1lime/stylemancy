@@ -3,7 +3,7 @@ import { useAuth } from '../game/auth';
 import { useProgress, type ProgressMap } from '../game/progress';
 import { hrefFor } from '../game/router';
 import { isSeen, markSeen, storyOf, type OpenStory } from '../game/story';
-import { gateLevel, isRegionOpen, isRegionReached } from '../game/unlock';
+import { gateLevel, isRegionOpen, isRegionReached, previousRequired } from '../game/unlock';
 import type { Land } from '../levels';
 import { EMBLEMS } from '../pixel/sprites';
 import { NoirLandArt } from '../noir/NoirLandArt';
@@ -61,7 +61,8 @@ export function LandTrail({ land }: { land: Land }) {
         const intro = open ? storyOf(region, 'intro') : null;
         const outro = firstUnsolved === -1 ? storyOf(region, 'outro') : null;
         const stars = region.levels.reduce((sum, level) => sum + (progress[level.id]?.stars ?? 0), 0);
-        const previous = land.regions[regionIndex - 1];
+        // Бонусный район «по желанию» перешагивается: дорога дальше открывается после обязательного
+        const previous = previousRequired(land, regionIndex);
         const gate = previous && gateLevel(previous);
         // «Испытание: Звёздная корона» → «Звёздная корона»: слово «испытание» уже есть в подписи
         const gateName = gate?.title.replace(/^Испытание:\s*/, '');
@@ -73,6 +74,7 @@ export function LandTrail({ land }: { land: Land }) {
                 <h2 className="pixel-subtitle">{region.title}</h2>
                 <p className="district__meta">
                   {region.topic} · {region.npc.name} · {open ? `★ ${stars} из ${region.levels.length * 3}` : 'закрыто'}
+                  {region.optional && ' · по желанию'}
                 </p>
               </div>
               <div className="district__story">

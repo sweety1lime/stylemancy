@@ -15,6 +15,7 @@ import { gameWorkshop } from './game-workshop';
 import { leverWorks } from './lever-works';
 import { linkFair } from './link-fair';
 import { mazeHeart } from './maze-heart';
+import { market } from './market';
 import { mirrorTower } from './mirror-tower';
 import { mushroomGlades } from './mushroom-glades';
 import { oracleHall } from './oracle-hall';
@@ -80,7 +81,7 @@ export const lands: Land[] = [
     blurb: 'Раскладки, которые подчиняются магии',
     emblem: 'crystal',
     where: 'в Парящих землях',
-    regions: [floatingIslands, stainedAbbey, mirrorTower, defaultCitadel],
+    regions: [floatingIslands, stainedAbbey, mirrorTower, market, defaultCitadel],
     upcoming: [],
   },
 ];

@@ -1,5 +1,6 @@
 import { plural } from '../lib/plural';
 import { lintCss, type LintOptions, type LintResult, type Problem } from './lint';
+import { applyOrder } from './order';
 import {
   applyToView,
   compareItems,
@@ -82,6 +83,17 @@ export function solutionDeclCount(level: CssLevel): number {
 /** Сравнение в одном зеркале: эталон и код студента в невидимых iframe. */
 async function compareInView(level: CssLevel, css: string, view: SceneView): Promise<ItemStatus[]> {
   const height = level.scene.height;
+  // Заказ жителя принимается по условиям: эталонная сцена не нужна, проверяется только сцена студента
+  if (level.check.order) {
+    const frame = createHiddenFrame(view.width, height);
+    try {
+      const doc = await loadFrame(frame, sceneDocument(level));
+      prepareView(doc, level, view);
+      return applyOrder(doc, level, view, css);
+    } finally {
+      frame.remove();
+    }
+  }
   const targetFrame = createHiddenFrame(view.width, height);
   const playerFrame = createHiddenFrame(view.width, height);
   try {

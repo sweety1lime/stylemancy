@@ -2,6 +2,7 @@ import { FLOATING_SCENES } from './scenes/floating';
 import { FOREST_SCENES } from './scenes/forest';
 import { FORTRESS_LEVELS, FORTRESS_SCENES } from './scenes/fortress';
 import { ISLANDS_SCENES } from './scenes/islands';
+import { MARKET_SCENES } from './scenes/market';
 import { MECHANISM_SCENES } from './scenes/mechanism';
 import { PAGE_SCENES } from './scenes/pages';
 
@@ -17,6 +18,7 @@ const SCENES: Record<string, string> = {
   ...FORTRESS_SCENES,
   ...FOREST_SCENES,
   ...FLOATING_SCENES,
+  ...MARKET_SCENES,
   ...PAGE_SCENES,
   ...MECHANISM_SCENES,
 };

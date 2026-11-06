@@ -12,6 +12,7 @@ import {
   type SyntheticEvent,
 } from 'react';
 import { inspectElement, type Inspection } from '../engine/inspect';
+import { applyOrder } from '../engine/order';
 import {
   applyToView,
   compareItems,
@@ -172,7 +173,9 @@ export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, 
       cssRef.current = css;
       const docs = docsRef.current;
       const goals = goalsRef.current;
-      if (views.some((_, i) => !docs[i] || !goals[i])) return [];
+      // Заказ жителя принимается по условиям: эталонной сцены и контуров целей нет
+      const order = Boolean(level.check.order);
+      if (views.some((_, i) => !docs[i] || (!order && !goals[i]))) return [];
       const effects = fullEffects();
       let placed = false;
       const perMirror = views.map((view, i) => {
@@ -181,8 +184,8 @@ export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, 
         // Где предметы видны сейчас — с них начнётся перелёт. Прошлые перелёты останавливаем: проверка мерит без них
         const before = effects && prev ? snapshot(doc, level.check.items, level.check.style) : null;
         glidesRef.current[i]?.forEach((animation) => animation.cancel());
-        const result = compareItems(applyToView(doc, level, view, css), goals[i] as ItemBox[], level.check.tolerance);
-        markInPlace(doc, level, result);
+        const result = order ? applyOrder(doc, level, view, css) : compareItems(applyToView(doc, level, view, css), goals[i] as ItemBox[], level.check.tolerance);
+        if (!order) markInPlace(doc, level, result);
         glidesRef.current[i] = before ? glide(doc, level.check.items, before, level.check.style) : [];
         // Кто только что встал на место — тому искры
         const newly = prev ? result.filter((status, k) => status.inPlace && prev[k] && !prev[k].inPlace) : [];
@@ -299,6 +302,7 @@ export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, 
       srcDoc={srcDoc}
       label={view.label}
       storm={view.html !== undefined}
+      hasReference={!level.check.order}
       targets={targets[i] ?? []}
       statuses={statuses[i] ?? []}
       lens={lens}
@@ -329,6 +333,8 @@ interface MirrorProps {
   label?: string;
   /** Это шторм Хаос-теста: подпись и рамка у него свои */
   storm: boolean;
+  /** Скрытая сцена с эталоном для контуров целей; у заказа жителя её нет */
+  hasReference: boolean;
   targets: ItemBox[];
   statuses: ItemStatus[];
   /** Лупа включена: поверх сцены лежит слой, ловящий мышь; pick и hover — рамки выбранного предмета и предмета под мышью */
@@ -344,7 +350,7 @@ interface MirrorProps {
 }
 
 /** Одно зеркало: сцена заданной ширины, контуры целей и скрытый эталон. */
-function Mirror({ width, height, scale, srcDoc, label, storm, targets, statuses, lens, pick, hover, onLens, onLensLeave, fxRef, onPlayerLoad, onTargetLoad }: MirrorProps) {
+function Mirror({ width, height, scale, srcDoc, label, storm, hasReference, targets, statuses, lens, pick, hover, onLens, onLensLeave, fxRef, onPlayerLoad, onTargetLoad }: MirrorProps) {
   const loaded = (handler: (doc: Document) => void) => (event: SyntheticEvent<HTMLIFrameElement>) => {
     const doc = event.currentTarget.contentDocument;
     if (doc) handler(doc);
@@ -390,7 +396,7 @@ function Mirror({ width, height, scale, srcDoc, label, storm, targets, statuses,
     </div>
   );
 
-  const reference = (
+  const reference = hasReference && (
     <iframe
       className="scene__reference"
       title="Эталон"
