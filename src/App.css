@@ -5875,3 +5875,145 @@ a.land--door .land__door {
 .mirror--storm .mirror__label {
   color: #ff9fb3;
 }
+
+/* Маяки класса: общая карта для проектора, огни зажигаются, когда уровень прошла половина класса */
+
+.beacons {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px 18px;
+}
+
+.beacons__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.beacons__map {
+  display: grid;
+  gap: 14px;
+}
+
+.beacons__total {
+  display: grid;
+  gap: 6px;
+}
+
+.beacons__total strong {
+  color: var(--gold-strong);
+  font-size: 1.2em;
+}
+
+.beacons__bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.beacons__bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #d9974f, #f3cf98);
+  box-shadow: 0 0 12px rgba(240, 200, 144, 0.5);
+  transition: width 0.6s;
+}
+
+.beacons__land-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.beacons__land-title span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.beacons__regions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.beacons__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.beacon {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(228, 220, 205, 0.32);
+  border-radius: 50%;
+  background: transparent;
+}
+
+/* Кто-то уже прошёл уровень, но половины класса ещё нет: огонёк тлеет */
+.beacon--spark {
+  border-color: rgba(240, 200, 144, 0.6);
+  background: rgba(240, 200, 144, 0.16);
+}
+
+.beacon--lit {
+  border-color: #ffe2b0;
+  background: radial-gradient(circle at 40% 35%, #fff6dc, #ffb067 70%);
+  box-shadow: 0 0 10px 2px rgba(255, 176, 103, 0.6);
+}
+
+.beacons-projector {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  padding: 48px 6vw;
+  overflow: auto;
+  background: #05060a;
+  color: var(--text);
+}
+
+.beacons-projector__title {
+  font-family: var(--font-display, var(--font-pixel));
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 600;
+}
+
+.beacons-projector__close {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+}
+
+.beacons-projector .beacon {
+  width: 24px;
+  height: 24px;
+}
+
+.beacons-projector .beacons__land-title {
+  font-size: clamp(18px, 2vw, 26px);
+}
+
+.beacons-projector .beacons__total {
+  font-size: clamp(18px, 2vw, 26px);
+}
+
+.beacons-projector .beacons__bar {
+  height: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beacons__bar span {
+    transition: none;
+  }
+}
