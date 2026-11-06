@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { mergeLands, type Land } from '../land/model';
 import { onScopeChange, read, scopedKey, write } from './storage';
 
 /** «Свиток дня» (game/daily.ts): вопросы дня, ответы и серия дней подряд */
@@ -55,6 +56,10 @@ export interface Stats {
   rematches: string[];
   /** JS-уровни, где студент верно предсказал вывод Оракула в «слепой магии»: опыт за это — один раз */
   predictions: string[];
+  /** «Моя земля» (land/): до трёх страниц игрока. Удалённая остаётся записью с gone, чтобы удаление дошло до других компьютеров */
+  lands: Land[];
+  /** Творческие задания «Моей земли», за которые опыт уже получен: за каждое — один раз */
+  landTasks: string[];
 }
 
 // Ключи хранят рабочее название проекта: не переименовывать — у всех сбросится прогресс
@@ -74,6 +79,8 @@ const INITIAL: Stats = {
   daily: NO_DAILY,
   rematches: [],
   predictions: [],
+  lands: [],
+  landTasks: [],
 };
 
 const load = (): Stats => ({ ...INITIAL, ...read<Partial<Stats>>(scopedKey(STATS_KEY), {}) });
@@ -118,6 +125,8 @@ export function mergeStats(a: Partial<Stats>, b: Partial<Stats>): Stats {
     daily: mergeDaily(x.daily, y.daily),
     rematches: [...new Set([...x.rematches, ...y.rematches])],
     predictions: [...new Set([...x.predictions, ...y.predictions])],
+    lands: mergeLands(x.lands, y.lands),
+    landTasks: [...new Set([...x.landTasks, ...y.landTasks])],
   };
 }
 
