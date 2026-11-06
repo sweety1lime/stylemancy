@@ -27,6 +27,8 @@ export interface Account {
   nickname: string;
   email?: string;
   classInfo?: ClassInfo;
+  /** Суперадмин: учитель с правом видеть и менять всех учителей, классы и студентов (миграция admin, game/admin.ts) */
+  isAdmin?: boolean;
 }
 
 interface AuthState {
@@ -66,6 +68,12 @@ export function isLandOpen(account: Account | null, landId: string): boolean {
   return !account?.classInfo || account.classInfo.openLands.includes(landId);
 }
 
+/** Админ ли этот учитель. Пока в базе нет миграции с админом, функции нет, и тогда ответ «нет», а не ошибка на сайте */
+async function checkAdmin(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('is_admin');
+  return !error && data === true;
+}
+
 async function loadAccount(session: Session): Promise<Account> {
   const { user } = session;
   const meta = user.user_metadata ?? {};
@@ -84,11 +92,13 @@ async function loadAccount(session: Session): Promise<Account> {
   const klass = (Array.isArray(data.classes) ? data.classes[0] : data.classes) as
     | { id: string; name: string; code: string; open_lands: string[] }
     | null;
+  const isAdmin = data.role === 'teacher' && (await checkAdmin());
   return {
     ...fallback,
     role: data.role,
     nickname: data.nickname,
     ...(klass && { classInfo: { id: klass.id, name: klass.name, code: klass.code, openLands: klass.open_lands } }),
+    ...(isAdmin ? { isAdmin: true } : {}),
   };
 }
 

@@ -34,6 +34,7 @@ const LandEditorScreen = lazy(() => import('./components/LandEditor').then((m) =
 const SharedLandScreen = lazy(() => import('./components/SharedLandScreen').then((m) => ({ default: m.SharedLandScreen })));
 const CertificateScreen = lazy(() => import('./components/CertificateScreen').then((m) => ({ default: m.CertificateScreen })));
 const TeacherScreen = lazy(() => import('./components/TeacherScreen').then((m) => ({ default: m.TeacherScreen })));
+const AdminScreen = lazy(() => import('./components/AdminScreen').then((m) => ({ default: m.AdminScreen })));
 
 /** Пока подгружается код экрана: на медленной сети это заметно, на быстрой надпись не успевает появиться. */
 function Loading() {
@@ -175,6 +176,14 @@ export default function App() {
     return (
       <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
         <TeacherScreen />
+      </Screen>
+    );
+  }
+
+  if (route.name === 'admin') {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+        <AdminScreen />
       </Screen>
     );
   }

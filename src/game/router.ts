@@ -15,6 +15,8 @@ export type Route =
   | { name: 'achievements' }
   | { name: 'login' }
   | { name: 'teacher' }
+  /** Админка суперадмина: все учителя, классы и студенты */
+  | { name: 'admin' }
   | { name: 'chronicle' }
   | { name: 'daily' }
   /** «Моя земля»: без номера — три ячейки, с номером — редактор земли в этой ячейке */
@@ -32,6 +34,7 @@ export function parseHash(hash: string): Route {
   if (kind === 'achievements') return { name: 'achievements' };
   if (kind === 'login') return { name: 'login' };
   if (kind === 'teacher') return { name: 'teacher' };
+  if (kind === 'admin') return { name: 'admin' };
   if (kind === 'chronicle') return { name: 'chronicle' };
   if (kind === 'daily') return { name: 'daily' };
   if (kind === 'my-land') {
@@ -62,6 +65,8 @@ export function hrefFor(route: Route): string {
       return '#/login';
     case 'teacher':
       return '#/teacher';
+    case 'admin':
+      return '#/admin';
     case 'chronicle':
       return '#/chronicle';
     case 'daily':

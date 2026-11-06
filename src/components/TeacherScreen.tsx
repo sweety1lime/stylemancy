@@ -233,7 +233,8 @@ function studentSummary(rows: Record<string, ProgressRow>, reviewXp: number) {
   };
 }
 
-function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (updated: ClassRow) => void }) {
+/** Класс целиком: код, земли, таблица прогресса. Его же показывает админка, когда админ открывает чужой класс */
+export function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (updated: ClassRow) => void }) {
   const [roster, setRoster] = useState<Roster | null>(null);
   const [error, setError] = useState('');
   const [reload, setReload] = useState(0);

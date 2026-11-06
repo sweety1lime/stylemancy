@@ -3379,6 +3379,126 @@ a.land:hover .land__art {
     6px 6px 0 0 rgba(0, 0, 0, 0.45);
 }
 
+/* Админка суперадмина */
+
+/* Колонка страницы не шире экрана: широкие таблицы листаются внутри своих рамок, а не растягивают страницу */
+.teacher.admin {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.admin__totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.admin__total {
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px;
+}
+
+.admin__total strong {
+  font-family: var(--font-pixel);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.admin__total span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.admin__search {
+  max-width: 460px;
+}
+
+.admin__panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  padding: 16px;
+}
+
+.admin-table__wrap {
+  /* position: невидимые подписи заголовков (visually-hidden) абсолютные и без неё вылезали бы из рамки, растягивая страницу */
+  position: relative;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  /* Уже не сжимается: на телефоне таблица листается внутри рамки, а не ломает строки */
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--frame);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-table thead th {
+  color: var(--muted);
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.admin-table tbody th {
+  color: var(--text);
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.admin-table td code {
+  color: var(--muted);
+}
+
+.admin-table__num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.admin-table__row--on > * {
+  background: rgba(246, 196, 83, 0.1);
+}
+
+.admin-table__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.admin__badge {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin__confirm {
+  display: grid;
+  gap: 14px;
+  max-width: 52ch;
+}
+
+.admin__confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
 .progress-table__wrap {
   overflow-x: auto;
   padding: 6px;

@@ -86,6 +86,11 @@ export function TopBar({ back }: TopBarProps) {
                 Панель учителя
               </a>
             )}
+            {account.isAdmin && (
+              <a className="topbar__link" href="#/admin">
+                Админка
+              </a>
+            )}
             {account.role === 'student' ? (
               <button
                 type="button"
