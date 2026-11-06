@@ -505,8 +505,13 @@ function withPictures(html: string, images: LandImages): string {
   const doc = new DOMParser().parseFromString(`<!doctype html><html><head></head><body>${html}`, 'text/html');
   doc.querySelectorAll('img').forEach((picture) => {
     const name = picture.getAttribute('src') ?? '';
-    if (has(images, name)) picture.setAttribute('src', images[name]);
-    else picture.removeAttribute('src');
+    if (has(images, name)) {
+      // Имя файла остаётся в data-picture: по нему задания «Моей земли» узнают, какая это картинка
+      picture.setAttribute('data-picture', name);
+      picture.setAttribute('src', images[name]);
+    } else {
+      picture.removeAttribute('src');
+    }
   });
   return doc.body.innerHTML;
 }

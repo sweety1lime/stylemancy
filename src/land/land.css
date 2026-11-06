@@ -141,8 +141,6 @@
 }
 
 .land-editor__stage {
-  position: sticky;
-  top: 16px;
   display: grid;
   gap: 12px;
 }
@@ -209,10 +207,6 @@
   .land-editor {
     grid-template-columns: minmax(0, 1fr);
   }
-
-  .land-editor__stage {
-    position: static;
-  }
 }
 
 /* ===== Панель «Блоки и картинки» ===== */
@@ -240,8 +234,10 @@
 .land-palette__blocks {
   display: grid;
   gap: 8px;
+  max-height: 340px;
   margin: 0;
-  padding: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
   list-style: none;
 }
 
@@ -307,6 +303,49 @@
 .land-block span {
   color: var(--muted);
   font-size: 13px;
+}
+
+/* ===== Творческие задания ===== */
+
+.land-tasks {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.land-tasks__lead,
+.land-tasks__brief,
+.land-tasks__hint,
+.land-tasks__done {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.land-tasks__brief {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.land-tasks__xp {
+  margin-left: 6px;
+  color: var(--gold-strong);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.land-tasks__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.land-tasks__done {
+  color: var(--gold-strong);
+}
+
+.land-tasks .goals {
+  margin-top: 0;
 }
 
 /* ===== Окно «Поделиться» ===== */

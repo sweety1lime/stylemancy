@@ -13,6 +13,7 @@ export const LIGHTS = {
   topaz: '#ffd36b',
   ice: '#bfe3ff',
   ember: '#ffb067',
+  rose: '#ff9ec7',
 };
 
 export type Light = keyof typeof LIGHTS;

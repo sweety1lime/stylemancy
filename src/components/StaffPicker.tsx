@@ -1,18 +1,21 @@
 import { useProgress } from '../game/progress';
+import { useStats } from '../game/stats';
 import { allLands } from '../levels';
+import { plural } from '../lib/plural';
 import { chooseStaffLight, STAFF_LIGHTS, unlockedStaffLights, useStaffLight } from '../noir/staffLights';
 
-/** «Свет посоха»: выбор цвета огонька на посохе героя. Цвета открываются за спасённые земли. */
+/** «Свет посоха»: выбор цвета огонька на посохе героя. Цвета открываются за спасённые земли и за задания «Моей земли». */
 export function StaffPicker() {
   const progress = useProgress();
   const current = useStaffLight();
-  const open = unlockedStaffLights(progress);
+  const { landTasks } = useStats();
+  const open = unlockedStaffLights(progress, landTasks.length);
   return (
     <section className="staff-picker px-panel" aria-labelledby="staff-title">
       <h2 id="staff-title" className="pixel-subtitle">
         Свет посоха
       </h2>
-      <p className="staff-picker__lead">Каждая спасённая земля открывает свой цвет. Выбранный светит на посохе героя везде, а на карте красит след от шагов.</p>
+      <p className="staff-picker__lead">Каждая спасённая земля открывает свой цвет, а ещё один даёт «Моя земля» за творческие задания. Выбранный светит на посохе героя везде, а на карте красит след от шагов.</p>
       <ul className="staff-picker__list">
         {STAFF_LIGHTS.map((option) => {
           const unlocked = open.has(option.id);
@@ -30,6 +33,11 @@ export function StaffPicker() {
                 <span className="staff-swatch__dot" aria-hidden="true" />
                 <span className="staff-swatch__name">{option.name}</span>
                 {!unlocked && land && <span className="staff-swatch__lock">спаси «{land.title}»</span>}
+                {!unlocked && option.tasks !== undefined && (
+                  <span className="staff-swatch__lock">
+                    выполни {option.tasks} {plural(option.tasks, 'задание', 'задания', 'заданий')} в «Моей земле»
+                  </span>
+                )}
               </button>
             </li>
           );

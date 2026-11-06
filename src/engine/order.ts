@@ -1,6 +1,9 @@
 import { cssForView, setPlayerCss, type ItemBox, type ItemStatus, type SceneView } from './scene';
 import type { CssLevel, OrderItem, OrderRule } from './types';
 
+/** Что нужно проверке от уровня: условия, допуск и как называть предметы. Заказ жителя и творческое задание «Моей земли» передают только это */
+export type OrderSpec = Pick<CssLevel['check'], 'order' | 'tolerance' | 'itemLabel'>;
+
 /*
   Заказ жителя принимается по условиям, а не по контурам: «товары в один ряд», «промежутки поровну», «цена справа».
   Условия проверяются по настоящим размерам предметов в сцене студента, поэтому решений бывает много.
@@ -34,7 +37,8 @@ const quoted = (parts: Part[]) => parts.map((part) => `«${part.name}»`).join('
 function partOf(el: HTMLElement, label: string | undefined, index: number): Part {
   const rect = el.getBoundingClientRect();
   return {
-    name: el.dataset.name ?? `${label ?? 'Предмет'} ${index + 1}`,
+    // Предметы сцены названы через data-name; на странице игрока подпись берётся из alt картинки
+    name: el.dataset.name ?? (el.getAttribute('alt')?.trim() || `${label ?? 'Предмет'} ${index + 1}`),
     x: rect.left,
     y: rect.top,
     w: rect.width,
@@ -88,7 +92,7 @@ function groupOf(parts: Part[]): Part {
 const SIDE_NAMES = { left: 'левого', right: 'правого', top: 'верхнего', bottom: 'нижнего' } as const;
 
 /** Проверка одного условия по сцене: ok и, если нет, что не так — простыми словами и с числами */
-function judge(doc: Document, level: CssLevel, rule: OrderRule): Verdict {
+function judge(doc: Document, level: { check: OrderSpec }, rule: OrderRule): Verdict {
   const tol = level.check.tolerance ?? 2;
   const label = level.check.itemLabel;
   const fail = (involved: Part[], message: string): Verdict => ({ ok: false, message, involved });
@@ -245,7 +249,7 @@ function boxAround(item: OrderItem, parts: Part[]): ItemBox {
 }
 
 /** Все условия заказа по сцене: по одному ItemStatus на пункт; пункт выполнен — «на месте» */
-export function evaluateOrder(doc: Document, level: CssLevel): ItemStatus[] {
+export function evaluateOrder(doc: Document, level: { check: OrderSpec }): ItemStatus[] {
   return (level.check.order ?? []).map((item): ItemStatus => {
     const verdict = judge(doc, level, item.rule);
     return {

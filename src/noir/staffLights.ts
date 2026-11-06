@@ -23,6 +23,8 @@ export interface StaffLightOption {
   trailGlow: string;
   /** Земля, за спасение которой открывается цвет; у цвета по умолчанию её нет */
   land?: string;
+  /** Сколько творческих заданий «Моей земли» нужно выполнить, чтобы открылся цвет */
+  tasks?: number;
 }
 
 export const STAFF_LIGHTS: StaffLightOption[] = [
@@ -35,26 +37,31 @@ export const STAFF_LIGHTS: StaffLightOption[] = [
   { id: 'sapphire', name: 'Сапфировый', light: 'sapphire', core: '#eef5ff', burst: '#b5d2ff', trail: '#a8c8ff', trailGlow: 'rgba(143, 192, 255, 0.85)', land: 'decision-maze' },
   { id: 'topaz', name: 'Топазовый', light: 'topaz', core: '#fffbe0', burst: '#ffe89a', trail: '#ffe07a', trailGlow: 'rgba(255, 211, 107, 0.85)', land: 'recipe-workshop' },
   { id: 'gold', name: 'Золотой', light: 'gold', core: '#fffaf0', burst: '#ffe2a0', trail: '#ffd27a', trailGlow: 'rgba(255, 210, 122, 0.9)', land: 'mechanism-city' },
+  { id: 'dawn', name: 'Рассветный', light: 'rose', core: '#fff1f7', burst: '#ffc3dd', trail: '#ffb4d6', trailGlow: 'rgba(255, 150, 200, 0.85)', tasks: 3 },
 ];
 
 const DEFAULT = STAFF_LIGHTS[0];
 
-/** Какие цвета открыты: цвет по умолчанию и по одному за каждую спасённую землю */
-export function unlockedStaffLights(progress: ProgressMap): Set<string> {
+/**
+ * Какие цвета открыты: цвет по умолчанию, по одному за каждую спасённую землю и один за творческие задания «Моей земли».
+ * Число выполненных заданий по умолчанию берётся из статистики; хуки передают его сами, чтобы экран обновлялся.
+ */
+export function unlockedStaffLights(progress: ProgressMap, landTasks: number = stats.get().landTasks.length): Set<string> {
   const open = new Set<string>([DEFAULT.id]);
   for (const option of STAFF_LIGHTS) {
     const land = option.land && allLands.find((item) => item.id === option.land);
     if (land && isLandDone(land, progress)) open.add(option.id);
+    if (option.tasks !== undefined && landTasks >= option.tasks) open.add(option.id);
   }
   return open;
 }
 
 /** Выбранный цвет; закрытый или неизвестный (например, из старого сохранения) заменяется цветом по умолчанию */
 export function useStaffLight(): StaffLightOption {
-  const { staff } = useStats();
+  const { staff, landTasks } = useStats();
   const progress = useProgress();
   const option = STAFF_LIGHTS.find((item) => item.id === staff);
-  return option && unlockedStaffLights(progress).has(option.id) ? option : DEFAULT;
+  return option && unlockedStaffLights(progress, landTasks.length).has(option.id) ? option : DEFAULT;
 }
 
 export function chooseStaffLight(id: string): void {

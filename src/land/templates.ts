@@ -216,3 +216,8 @@ h1 {
 `,
   },
 ];
+
+/** Земля, в которой после заготовки ничего не поменяли. За такую награду не даём, иначе опыт собирался бы одним щелчком */
+export function isUntouchedTemplate(source: { html: string; css: string }): boolean {
+  return LAND_TEMPLATES.some((template) => template.html === source.html && template.css === source.css);
+}
