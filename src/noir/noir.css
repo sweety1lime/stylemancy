@@ -1928,6 +1928,14 @@
   animation: story-titlecard 3.6s ease-in-out both;
 }
 
+/* Титр лежит внизу кадра, на тёмной земле, и не закрывает луну, кроны и шестерни; анимация появления прежняя */
+.look-noir .story__titlecard {
+  align-content: end;
+  padding: 0 8% 4%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent 30%);
+  font-size: clamp(18px, 2.6vw, 30px);
+}
+
 @keyframes story-titlecard {
   0% {
     opacity: 0;
