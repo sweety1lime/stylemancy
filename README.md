@@ -31,6 +31,13 @@ npm run lint
 
 Автотесты аккаунтов работают с настоящей базой Supabase: создают учителя, класс и студента и в конце удаляют их. Без интернета их можно пропустить: `$env:OFFLINE=1; npm test`.
 
+Тесты «Моей земли» (чужой код на странице, изоляция, ссылки) можно прогнать ещё в Firefox и WebKit, движке Safari. Браузеры ставятся один раз, а в обычный прогон и в публикацию они не входят:
+
+```powershell
+npx playwright install firefox webkit
+$env:CROSS_BROWSER=1; $env:OFFLINE=1; npx playwright test --project=firefox --project=webkit --workers=2
+```
+
 Скриншоты сцен всех уровней (до и после решения) для проверки глазами — в `test-results/gallery/`:
 
 ```powershell
