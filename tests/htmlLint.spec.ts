@@ -68,3 +68,35 @@ test('проверка HTML объясняет типичные ошибки с�
     }
   });
 });
+
+/** В «Моей земле» внутри <svg> проверяются свои теги и атрибуты, а в HTML-уровнях правила прежние */
+test('проверка HTML знает рисунки svg, если её об этом попросили', async ({ page }) => {
+  await page.goto('/');
+  const svg = `<svg viewBox="0 0 100 60" width="200" height="120" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="g"><stop offset="0" stop-color="red"/><stop offset="1" stop-color="blue"/></linearGradient></defs>
+  <rect x="0" y="0" width="100" height="60" fill="url(#g)"/>
+  <circle cx="30" cy="30" r="14" fill="#ffd479" stroke-width="2"></circle>
+  <path d="M50 50 L70 20 L90 50 Z"/>
+  <text x="5" y="55">Привет</text>
+</svg>`;
+  const result = await page.evaluate<{ plain: string[]; land: string[]; typo: string[]; unclosed: string[]; strict: string[] }>(`import('/src/engine/htmlLint.ts').then(({ lintHtml }) => {
+    const svg = ${JSON.stringify(svg)};
+    const messages = (code, options) => lintHtml(code, options).map((problem) => problem.message);
+    return {
+      plain: messages(svg),
+      land: messages(svg, { svg: true }),
+      typo: messages('<svg><recct width="5"/></svg>', { svg: true }),
+      unclosed: messages('<svg><g><circle r="5"/></svg>', { svg: true }),
+      // Вне рисунка правила прежние: <rect> там не тег HTML, а лишний атрибут у <p> по-прежнему замечается
+      strict: messages('<rect width="5"></rect><p viewbox="0">а</p>', { svg: true }),
+    };
+  })`);
+  // Без режима svg рисунок подчёркивается, как в HTML-уровнях
+  expect(result.plain.some((message) => message.includes('Тега <rect> в HTML нет'))).toBe(true);
+  // В земле честный рисунок чист
+  expect(result.land).toEqual([]);
+  expect(result.typo.some((message) => message.includes('Такого тега в рисунке <svg> нет: <recct>. Может, <rect>?'))).toBe(true);
+  expect(result.unclosed.some((message) => message.includes('Тег <g> не закрыт'))).toBe(true);
+  expect(result.strict.some((message) => message.includes('Тега <rect> в HTML нет'))).toBe(true);
+  expect(result.strict.some((message) => message.includes('У <p> нет атрибута «viewbox»'))).toBe(true);
+});

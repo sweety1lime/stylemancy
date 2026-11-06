@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { parseMarkup } from '../engine/htmlCheck';
 import { lintHtml } from '../engine/htmlLint';
 import { lintCss } from '../engine/lint';
@@ -11,8 +12,9 @@ import { saveLand, useLands, type SaveResult } from '../land/lands';
 import { LAND_LIMITS, landSize, type Land } from '../land/model';
 import { renderLand } from '../land/sanitize';
 import { cleanLine } from '../land/share';
-import { CodeEditor } from './CodeEditor';
+import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { LandFrame } from './LandFrame';
+import { LandPalette } from './LandPalette';
 import { ShareDialog } from './ShareDialog';
 import '../land/land.css';
 
@@ -59,6 +61,8 @@ function LandEditor({ land }: { land: Land }) {
   const [tab, setTab] = useState<'html' | 'css'>('html');
   const [view, setView] = useState<'desk' | 'phone'>('desk');
   const [sharing, setSharing] = useState(false);
+  const htmlEditor = useRef<CodeEditorHandle>(null);
+  const cssEditor = useRef<CodeEditorHandle>(null);
   const draftRef = useRef(draft);
   const dirty = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -85,6 +89,13 @@ function LandEditor({ land }: { land: Land }) {
     timer.current = setTimeout(flush, 1200);
   }
 
+  /** Блок из панели: открыть нужную вкладку и вставить код туда, где стоит курсор */
+  function insert(file: 'html' | 'css', code: string, gap = false) {
+    // Скрытый редактор не принимает фокус: вкладка должна открыться до вставки
+    flushSync(() => setTab(file));
+    (file === 'html' ? htmlEditor : cssEditor).current?.insertBlock(code, gap);
+  }
+
   // Что не успело сохраниться — сохраняем при уходе с экрана и когда вкладку прячут или закрывают
   useEffect(() => {
     const onHide = () => {
@@ -109,7 +120,7 @@ function LandEditor({ land }: { land: Land }) {
 
   // CSS проверяется по той же странице, что видит игрок: селектор, который ничего не находит, подчёркивается
   const pageDoc = useMemo(() => parseMarkup(live.html), [live.html]);
-  const lintMarkup = useCallback((text: string) => lintHtml(text), []);
+  const lintMarkup = useCallback((text: string) => lintHtml(text, { svg: true }), []);
   const lintStyles = useCallback((text: string) => lintCss(text, { sceneDoc: pageDoc }).problems, [pageDoc]);
 
   const size = landSize(draft);
@@ -151,12 +162,13 @@ function LandEditor({ land }: { land: Land }) {
           </div>
           {/* Оба редактора живут всегда: так у каждого остаётся своя история правок («отменить») */}
           <div role="tabpanel" id="land-panel-html" aria-labelledby="land-tab-html" hidden={tab !== 'html'}>
-            <CodeEditor language="html" initialValue={land.html} onChange={(html) => change({ html })} lint={lintMarkup} onSubmit={flush} label="Редактор HTML" autoFocus />
+            <CodeEditor ref={htmlEditor} language="html" initialValue={land.html} onChange={(html) => change({ html })} lint={lintMarkup} onSubmit={flush} label="Редактор HTML" autoFocus />
           </div>
           <div role="tabpanel" id="land-panel-css" aria-labelledby="land-tab-css" hidden={tab !== 'css'}>
-            <CodeEditor language="css" initialValue={land.css} onChange={(css) => change({ css })} lint={lintStyles} onSubmit={flush} label="Редактор CSS" />
+            <CodeEditor ref={cssEditor} language="css" initialValue={land.css} onChange={(css) => change({ css })} lint={lintStyles} onSubmit={flush} label="Редактор CSS" />
           </div>
         </div>
+        <LandPalette images={images} onInsert={insert} />
       </section>
 
       <section className="land-editor__stage" aria-label="Страница земли">

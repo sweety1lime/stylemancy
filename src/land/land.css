@@ -215,6 +215,100 @@
   }
 }
 
+/* ===== Панель «Блоки и картинки» ===== */
+
+.land-palette {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px 14px;
+}
+
+.land-palette__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.land-palette__lead {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.land-palette__pictures,
+.land-palette__blocks {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.land-palette__pictures {
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+}
+
+.land-palette__blocks {
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+}
+
+.land-picture,
+.land-block {
+  width: 100%;
+  border: 3px solid var(--ink);
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.land-picture:hover,
+.land-block:hover {
+  background: var(--panel-3);
+}
+
+.land-picture {
+  display: grid;
+  align-content: end;
+  justify-items: center;
+  gap: 4px;
+  min-height: 112px;
+  padding: 8px 6px;
+  font: 13px/1.2 var(--font-ui);
+}
+
+.land-picture img {
+  width: auto;
+  height: auto;
+  max-width: 64px;
+  max-height: 56px;
+  object-fit: contain;
+}
+
+.land-picture code {
+  color: var(--muted);
+  font: 11px var(--font-mono);
+}
+
+.land-block {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.land-block strong {
+  color: var(--gold-strong);
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.land-block span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 /* ===== Окно «Поделиться» ===== */
 
 .land-share__body {
@@ -293,6 +387,25 @@
 }
 
 /* ===== «Сумрак» ===== */
+
+.look-noir .land-picture,
+.look-noir .land-block {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+}
+
+.look-noir .land-picture:hover,
+.look-noir .land-block:hover {
+  border-color: var(--gold);
+  background: rgba(224, 160, 96, 0.08);
+}
+
+.look-noir .land-block strong {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
 
 .look-noir .land-card--empty {
   border-width: 1px;

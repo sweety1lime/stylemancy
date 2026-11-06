@@ -353,11 +353,11 @@ export const PAGE_SCENES: Record<string, string> = {
 /* Картинки для <img>: те же имена и размеры, что у пиксельных, рисунки — «Сумрака» */
 
 /** Ширина и высота пиксельной картинки: страница не должна прыгать при смене вида */
-function sizeOf(sprite: Sprite, scale = 4): [number, number] {
+export function sizeOf(sprite: Sprite, scale = 4): [number, number] {
   return [Math.max(...sprite.rows.map((row) => row.length)) * scale, sprite.rows.length * scale];
 }
 
-function sized(svg: string, [width, height]: [number, number]): string {
+export function sized(svg: string, [width, height]: [number, number]): string {
   const sizedSvg = svg.replace('<svg ', `<svg width="${width}" height="${height}" `);
   return `data:image/svg+xml,${encodeURIComponent(sizedSvg)}`;
 }

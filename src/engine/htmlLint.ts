@@ -8,6 +8,7 @@ import {
   KNOWN_TAGS,
   OBSOLETE_TAGS,
   REQUIRED_PARENTS,
+  SVG_ELEMENTS,
   TAG_ATTRIBUTES,
   TAG_SYNONYMS,
   VOID_TAGS,
@@ -18,6 +19,8 @@ import type { Problem, ProblemKind, Severity } from './lint';
 export interface HtmlLintOptions {
   /** Студент пишет документ целиком: <!doctype>, <html>, <head>, <body> */
   document?: boolean;
+  /** Внутри <svg> свои теги и атрибуты (viewBox, stroke-width, linearGradient): проверять их по правилам SVG, а не HTML */
+  svg?: boolean;
 }
 
 interface OpenTag {
@@ -162,6 +165,17 @@ export function lintHtml(source: string, options: HtmlLintOptions = {}): Problem
 
     const known = KNOWN_TAGS.includes(name);
     const at = { from: lt, to: nameTo };
+    // Рисунок <svg>: сам тег проверяется как обычный, а всё, что внутри него, — по словарю SVG
+    const svgRoot = Boolean(options.svg) && name === 'svg';
+    if (options.svg && inside('svg') && name !== 'svg') {
+      if (!SVG_ELEMENTS.has(name)) {
+        const guess = nearest(name, [...SVG_ELEMENTS]);
+        report('error', at.from, at.to, `Такого тега в рисунке <svg> нет: <${raw}>.${guess ? ` Может, <${guess}>?` : ''}`, 'tag');
+      }
+      checkAttributes(name, attrs, { from: lt, to }, true);
+      if (!selfClosing) stack.push({ name, from: lt, to: nameTo });
+      return to;
+    }
     if (!known) {
       if (OBSOLETE_TAGS[name]) {
         report('warning', at.from, at.to, OBSOLETE_TAGS[name], 'tag');
@@ -174,7 +188,7 @@ export function lintHtml(source: string, options: HtmlLintOptions = {}): Problem
     } else {
       if (raw !== name) report('warning', at.from, at.to, `Теги принято писать маленькими буквами: <${name}>.`, 'tag');
       checkPlace(name, at);
-      checkAttributes(name, attrs, { from: lt, to });
+      checkAttributes(name, attrs, { from: lt, to }, svgRoot);
       if (selfClosing && !VOID_TAGS.has(name)) {
         report('error', lt, to, `<${name} /> так не закрывается: у <${name}> должен быть закрывающий тег </${name}>.`, 'nesting');
       }
@@ -306,7 +320,8 @@ export function lintHtml(source: string, options: HtmlLintOptions = {}): Problem
     }
   }
 
-  function checkAttributes(name: string, attrs: Attribute[], tag: { from: number; to: number }) {
+  /** svg — атрибуты рисунка: их много (viewBox, fill, stroke-width…), поэтому «такого атрибута нет» не говорим */
+  function checkAttributes(name: string, attrs: Attribute[], tag: { from: number; to: number }, svg = false) {
     const allowedAttrs = [...GLOBAL_ATTRIBUTES, ...(TAG_ATTRIBUTES[name] ?? [])];
     const seen = new Map<string, Attribute>();
     attrs.forEach((attr, index) => {
@@ -335,7 +350,7 @@ export function lintHtml(source: string, options: HtmlLintOptions = {}): Problem
         report('warning', attr.from, attr.to, `Скрипты в тренажёре не запускаются: ${attr.raw} ничего не сделает.`, 'attribute');
         return;
       }
-      if (!allowedAttrs.includes(attr.name)) {
+      if (!svg && !allowedAttrs.includes(attr.name)) {
         const guess = nearest(attr.name, allowedAttrs);
         report('warning', attr.from, attr.to, `У <${name}> нет атрибута «${attr.raw}».${guess ? ` Может, ${guess}?` : ''}`, 'attribute');
       }

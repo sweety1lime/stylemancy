@@ -28,6 +28,11 @@ import type { Problem } from '../engine/lint';
 export interface CodeEditorHandle {
   setValue(text: string): void;
   focus(): void;
+  /**
+   * Вставить готовый кусок кода отдельными строками: на место пустой строки курсора или под строкой, где он стоит.
+   * Пока курсор не трогали (он в самом начале), блок встаёт в конец текста. gap — отделить блок пустой строкой (между правилами CSS).
+   */
+  insertBlock(text: string, gap?: boolean): void;
 }
 
 /** На каком языке пишет студент */
@@ -230,6 +235,22 @@ export function CodeEditor({ language = 'css', initialValue, onChange, lint, onS
       },
       focus() {
         viewRef.current?.focus();
+      },
+      insertBlock(text, gap = false) {
+        const view = viewRef.current;
+        if (!view) return;
+        const { doc, selection } = view.state;
+        const untouched = selection.main.from === 0 && selection.main.to === 0;
+        const line = doc.lineAt(untouched ? doc.length : selection.main.head);
+        const blank = line.text.trim() === '';
+        const insert = blank ? text : `${gap ? '\n\n' : '\n'}${text}`;
+        const from = blank ? line.from : line.to;
+        view.dispatch({
+          changes: { from, to: line.to, insert },
+          selection: { anchor: from + insert.length },
+          scrollIntoView: true,
+        });
+        view.focus();
       },
     }),
     [],

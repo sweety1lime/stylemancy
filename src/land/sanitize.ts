@@ -1,4 +1,3 @@
-import { BASE_PAGE_CSS } from '../engine/htmlCheck';
 import { LAND_LIMITS } from './model';
 
 /*
@@ -490,6 +489,13 @@ export function sanitizeLand(source: { html: string; css: string }, images: Land
   return { html, css, notes: summarize(ctx.notes) };
 }
 
+/**
+ * Стиль страницы, пока игрок ничего не написал: как у Лорда Дефолта, Times New Roman на сером листе. Фон задан у body, а не у html:
+ * тогда любой фон, который игрок положит на body, растекается на всю страницу, как в настоящем браузере.
+ */
+const BASE_LAND_CSS = `body { margin: 16px 20px; background: #e8e6df; color: #1c1c24; font: 16px/1.5 "Times New Roman", Times, serif; overflow-wrap: anywhere; }
+img { max-width: 100%; }`;
+
 /** Политика, при которой страница ничего не загрузит и никуда не сходит. Картинки — только data: (библиотека игры) */
 export const LAND_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; form-action 'none'; base-uri 'none'";
 
@@ -523,7 +529,7 @@ export function landDocument(safe: Pick<SafeLand, 'html' | 'css'>, images: LandI
     '<!doctype html><html lang="ru"><head><meta charset="utf-8">' +
     `<meta http-equiv="Content-Security-Policy" content="${LAND_CSP}">` +
     (name ? `<title>${name}</title>` : '') +
-    `<style>${BASE_PAGE_CSS}</style><style>${cssWithPictures(safe.css, images)}</style>` +
+    `<style>${BASE_LAND_CSS}</style><style>${cssWithPictures(safe.css, images)}</style>` +
     `</head><body>${withPictures(safe.html, images)}</body></html>`
   );
 }

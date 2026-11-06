@@ -11,6 +11,17 @@ export const KNOWN_TAGS = [
   'video', 'wbr',
 ];
 
+/** Теги внутри рисунка <svg>, строчными буквами: линтер приводит имена к нижнему регистру, а SVG пишет linearGradient. */
+export const SVG_ELEMENTS = new Set(
+  (
+    'a animate animatemotion animatetransform circle clippath defs desc ellipse feblend fecolormatrix fecomponenttransfer ' +
+    'fecomposite feconvolvematrix fediffuselighting fedisplacementmap fedropshadow feflood fegaussianblur feimage femerge ' +
+    'femergenode femorphology feoffset fespecularlighting fetile feturbulence filter foreignobject g image line lineargradient ' +
+    'marker mask metadata path pattern polygon polyline radialgradient rect set stop style switch symbol text textpath title ' +
+    'tspan use view'
+  ).split(' '),
+);
+
 /** Устаревшие теги: браузер их ещё понимает, но так больше не пишут. */
 export const OBSOLETE_TAGS: Record<string, string> = {
   center: 'Тег <center> устарел: выравнивают через CSS — text-align: center.',

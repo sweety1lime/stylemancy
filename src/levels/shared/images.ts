@@ -2,7 +2,7 @@ import { spriteSvg, type Sprite } from '../../pixel/pixelArt';
 import { BOOK, GEMS, MAP, MOON, PORTRAITS, POTION } from '../../pixel/sprites';
 
 /** Картинка из спрайта со своим размером: без него браузер растянул бы её на 300 пикселей. */
-function picture(sprite: Sprite, scale = 4): string {
+export function picture(sprite: Sprite, scale = 4): string {
   const width = Math.max(...sprite.rows.map((row) => row.length)) * scale;
   const height = sprite.rows.length * scale;
   const svg = spriteSvg(sprite).replace('<svg ', `<svg width="${width}" height="${height}" `);
