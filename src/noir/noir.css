@@ -371,6 +371,57 @@
   background: rgba(228, 220, 205, 0.06);
 }
 
+/*
+  Поля ввода без пиксельного фиолета (#120b2e): тонкая линия и тёмное поле, при фокусе линия янтарная.
+  Те же поля — в гримуаре (заметки, примеры кода), на карточке класса учителя и в карточке повторения.
+*/
+.look-noir .field input:not([type="checkbox"]),
+.look-noir .spell-card__notes textarea {
+  border: 1px solid var(--line-strong);
+  background: #07090e;
+}
+
+.look-noir .field input:focus,
+.look-noir .spell-card__notes textarea:focus {
+  border-color: var(--gold);
+}
+
+.look-noir .example__code {
+  background: #07090e;
+}
+
+.look-noir .class-card {
+  background: var(--panel-2);
+}
+
+.look-noir .class-code {
+  border: 1px solid var(--line-strong);
+  background: #07090e;
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+.look-noir .review__option:not(:disabled):hover {
+  background: rgba(224, 160, 96, 0.12);
+}
+
+/*
+  Кольцо фокуса с клавиатуры: тонкое, янтарное. Глобальное в index.css — 3 px с отступом 2 px,
+  и в окне сценки оно обрезалось у кнопки «Дальше»; у кнопок линия внутри, там её обрезать нечем.
+  На залитой янтарной «Сотворить» светлая линия не видна, поэтому на ней контур тёмный.
+*/
+.look-noir :is(a, button, summary):focus-visible {
+  outline: 1px solid var(--gold-strong);
+  outline-offset: 3px;
+}
+
+.look-noir .button:focus-visible {
+  outline-offset: -5px;
+}
+
+.look-noir .button--cast:focus-visible {
+  outline-color: #1c1207;
+}
+
 .look-noir .chip,
 .look-noir .tabs,
 .look-noir .rank__bar,
