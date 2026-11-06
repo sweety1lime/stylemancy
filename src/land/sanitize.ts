@@ -517,10 +517,12 @@ function cssWithPictures(css: string, images: LandImages): string {
  * Документ земли для iframe с пустым sandbox. Стиль страницы по умолчанию — «Лорд Дефолт»:
  * пока игрок ничего не написал, земля выглядит как страница без стилей.
  */
-export function landDocument(safe: Pick<SafeLand, 'html' | 'css'>, images: LandImages): string {
+export function landDocument(safe: Pick<SafeLand, 'html' | 'css'>, images: LandImages, title = ''): string {
+  const name = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return (
     '<!doctype html><html lang="ru"><head><meta charset="utf-8">' +
     `<meta http-equiv="Content-Security-Policy" content="${LAND_CSP}">` +
+    (name ? `<title>${name}</title>` : '') +
     `<style>${BASE_PAGE_CSS}</style><style>${cssWithPictures(safe.css, images)}</style>` +
     `</head><body>${withPictures(safe.html, images)}</body></html>`
   );

@@ -17,6 +17,10 @@ export type Route =
   | { name: 'teacher' }
   | { name: 'chronicle' }
   | { name: 'daily' }
+  /** «Моя земля»: без номера — три ячейки, с номером — редактор земли в этой ячейке */
+  | { name: 'myland'; slot?: number }
+  /** Чужая земля по ссылке: вся земля зашита в токен (land/share.ts) */
+  | { name: 'shared'; code: string }
   | { name: 'certificate'; id: string };
 
 export function parseHash(hash: string): Route {
@@ -30,6 +34,12 @@ export function parseHash(hash: string): Route {
   if (kind === 'teacher') return { name: 'teacher' };
   if (kind === 'chronicle') return { name: 'chronicle' };
   if (kind === 'daily') return { name: 'daily' };
+  if (kind === 'my-land') {
+    const slot = id === undefined || id === '' ? NaN : Number(id);
+    return Number.isInteger(slot) ? { name: 'myland', slot } : { name: 'myland' };
+  }
+  // Токен ссылки — латиница, цифры, «-» и «_»: в нём нечего раскодировать
+  if (kind === 'shared' && id) return { name: 'shared', code: id };
   if (kind === 'certificate' && id) return { name: 'certificate', id: decodeURIComponent(id) };
   return { name: 'map' };
 }
@@ -56,6 +66,10 @@ export function hrefFor(route: Route): string {
       return '#/chronicle';
     case 'daily':
       return '#/daily';
+    case 'myland':
+      return route.slot === undefined ? '#/my-land' : `#/my-land/${route.slot}`;
+    case 'shared':
+      return `#/shared/${route.code}`;
     case 'certificate':
       return `#/certificate/${encodeURIComponent(route.id)}`;
   }

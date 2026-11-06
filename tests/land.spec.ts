@@ -186,3 +186,80 @@ test('второй слой: даже необезвреженная стран�
   expect(messages).toEqual([]);
   expect(beacons).toEqual([]);
 });
+
+test('ссылка: земля целиком в адресе, кириллица и спецзнаки доходят без потерь', async ({ page }) => {
+  await page.goto('/');
+  const land = {
+    title: 'Земля «Ёжик» 🌲',
+    html: '<h1>Привет, путник!</h1>\n<p class="a">строка "в кавычках" & <b>жирный</b></p>',
+    css: 'p::before { content: "</style>"; }\nh1 { color: red }\n'.repeat(40),
+    nick: 'Маша_7',
+  };
+  const result = await page.evaluate<{ token: string; back: unknown; json: number }>(`import('/src/land/share.ts').then(async ({ encodeLand, decodeLand }) => {
+    const land = ${JSON.stringify(land)};
+    const token = await encodeLand(land);
+    return { token, back: await decodeLand(token), json: JSON.stringify(land).length };
+  })`);
+  expect(result.token).toMatch(/^z[A-Za-z0-9_-]+$/);
+  expect(result.back).toEqual(land);
+  // Повторяющийся код сжимается: ссылка заметно короче самой земли
+  expect(result.token.length).toBeLessThan(result.json * 0.4);
+});
+
+test('ссылка: без ника в ссылке ника нет, а типичная земля влезает в сообщение мессенджера', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate<{ back: { nick: string }; long: boolean; short: boolean }>(`import('/src/land/share.ts').then(async ({ encodeLand, decodeLand, isLongLink }) => {
+    const words = Array.from({ length: 300 }, (_, i) => 'слово' + ((i * 7919) % 997)).join(' ');
+    const typical = await encodeLand({ title: 'Земля', html: '<p>' + words.slice(0, 1400) + '</p>', css: 'body { margin: 0 }', nick: '' });
+    // Знаки из генератора случайных чисел почти не сжимаются: худший случай, когда заполнены оба поля
+    let seed = 12345;
+    const random = (n) => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; };
+    const huge = await encodeLand({ title: 'Земля', html: Array.from({ length: 3000 }, () => String.fromCharCode(1040 + random(32))).join(''), css: Array.from({ length: 3000 }, () => String.fromCharCode(33 + random(90))).join(''), nick: '' });
+    return { back: await decodeLand(typical), long: isLongLink(huge), short: isLongLink(typical) };
+  })`);
+  expect(result.back.nick).toBe('');
+  expect(result.short).toBe(false);
+  // Земля из случайных знаков почти не сжимается: ей игра честно предложит файл вместо ссылки
+  expect(result.long).toBe(true);
+});
+
+test('ссылка: битые, подделанные и «бомбовые» токены дают отказ, а не сбой', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate<{ bad: (unknown | null)[]; bombMs: number; bomb: unknown }>(`import('/src/land/share.ts').then(async ({ encodeLand, decodeLand }) => {
+    const base64url = (text) => btoa(unescape(encodeURIComponent(text))).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+    const tokens = [
+      '', 'z', 'zAAAA', 'x123', 'z!!!', 'p', 'a'.repeat(20000), 'z' + 'A'.repeat(5000),
+      'p' + base64url('не json'), 'p' + base64url('{"a":1}'), 'p' + base64url('[1,2]'), 'p' + base64url('null'),
+      'p' + base64url(JSON.stringify({ t: 'x', h: 5, c: '' })),
+      'p' + base64url(JSON.stringify({ t: 'x', h: 'a'.repeat(7000), c: '' })),
+    ];
+    const bad = [];
+    for (const token of tokens) bad.push(await decodeLand(token));
+    // Токен в несколько КБ, который развернётся в пять мегабайт
+    const bombToken = await encodeLand({ title: 'x', html: 'a'.repeat(5000000), css: '', nick: '' });
+    const started = performance.now();
+    const bomb = await decodeLand(bombToken);
+    return { bad, bombMs: performance.now() - started, bomb };
+  })`);
+  for (const entry of result.bad) expect(entry).toBeNull();
+  expect(result.bomb).toBeNull();
+  expect(result.bombMs).toBeLessThan(2000);
+});
+
+test('ссылка: адреса #/my-land и #/shared разбираются', async ({ page }) => {
+  await page.goto('/');
+  const routes = await page.evaluate<unknown[]>(`import('/src/game/router.ts').then(({ parseHash, hrefFor }) => [
+    parseHash('#/my-land'), parseHash('#/my-land/2'), parseHash('#/my-land/abc'), parseHash('#/shared/zAbC-_9'), parseHash('#/shared'),
+    hrefFor({ name: 'myland' }), hrefFor({ name: 'myland', slot: 1 }), hrefFor({ name: 'shared', code: 'zAbC' }),
+  ])`);
+  expect(routes).toEqual([
+    { name: 'myland' },
+    { name: 'myland', slot: 2 },
+    { name: 'myland' },
+    { name: 'shared', code: 'zAbC-_9' },
+    { name: 'map' },
+    '#/my-land',
+    '#/my-land/1',
+    '#/shared/zAbC',
+  ]);
+});
