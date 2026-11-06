@@ -1,4 +1,5 @@
 import { defineLevel } from '../../engine/define';
+import { FIVE_CRYSTALS, STORM_LINE } from './storms';
 
 export default defineLevel({
   id: 'flex-05',
@@ -6,6 +7,7 @@ export default defineLevel({
   dialog: [
     'В самой середине острова бьётся его магическое сердце.',
     'Собери кристаллы вокруг него — точно в центре поля.',
+    STORM_LINE,
   ],
   task: 'Поставь кристаллы точно в центр острова: и по горизонтали, и по вертикали.',
   html: `<div class="island">
@@ -23,7 +25,7 @@ export default defineLevel({
   align-items: center;
 }
 `,
-  check: { items: '.crystal', groupName: 'кристаллы' },
+  check: { items: '.crystal', groupName: 'кристаллы', storm: [FIVE_CRYSTALS] },
   hints: [
     'Центрировать нужно по обеим осям сразу — значит, понадобятся два свойства.',
     '`justify-content` работает вдоль главной оси, `align-items` — поперёк неё.',

@@ -285,7 +285,9 @@ export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, 
   // Зеркала в ряд — в одном масштабе, чтобы была видна настоящая разница ширин
   const total = views.reduce((sum, view) => sum + view.width, 0);
   const rowScale = Math.min(1, (boxWidth - MIRROR_GAP * (views.length - 1)) / total);
-  const inRow = !multi || rowScale >= MIN_ROW_SCALE;
+  // Штормы Хаос-теста стоят под основной сценой в полный размер: рядом они были бы мельче чем в половину
+  const stormy = views.some((view) => view.html !== undefined);
+  const inRow = !multi || (!stormy && rowScale >= MIN_ROW_SCALE);
   const scaleOf = (width: number) => (inRow ? rowScale : Math.min(1, boxWidth / width));
 
   const mirrors = views.map((view, i) => (
@@ -296,6 +298,7 @@ export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, 
       scale={scaleOf(view.width)}
       srcDoc={srcDoc}
       label={view.label}
+      storm={view.html !== undefined}
       targets={targets[i] ?? []}
       statuses={statuses[i] ?? []}
       lens={lens}
@@ -324,6 +327,8 @@ interface MirrorProps {
   scale: number;
   srcDoc: string;
   label?: string;
+  /** Это шторм Хаос-теста: подпись и рамка у него свои */
+  storm: boolean;
   targets: ItemBox[];
   statuses: ItemStatus[];
   /** Лупа включена: поверх сцены лежит слой, ловящий мышь; pick и hover — рамки выбранного предмета и предмета под мышью */
@@ -339,7 +344,7 @@ interface MirrorProps {
 }
 
 /** Одно зеркало: сцена заданной ширины, контуры целей и скрытый эталон. */
-function Mirror({ width, height, scale, srcDoc, label, targets, statuses, lens, pick, hover, onLens, onLensLeave, fxRef, onPlayerLoad, onTargetLoad }: MirrorProps) {
+function Mirror({ width, height, scale, srcDoc, label, storm, targets, statuses, lens, pick, hover, onLens, onLensLeave, fxRef, onPlayerLoad, onTargetLoad }: MirrorProps) {
   const loaded = (handler: (doc: Document) => void) => (event: SyntheticEvent<HTMLIFrameElement>) => {
     const doc = event.currentTarget.contentDocument;
     if (doc) handler(doc);
@@ -408,7 +413,7 @@ function Mirror({ width, height, scale, srcDoc, label, targets, statuses, lens, 
     );
   }
   return (
-    <figure className="mirror">
+    <figure className={storm ? 'mirror mirror--storm' : 'mirror'}>
       {frame}
       <figcaption className="mirror__label">{label}</figcaption>
       {reference}

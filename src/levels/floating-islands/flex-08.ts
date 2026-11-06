@@ -1,4 +1,5 @@
 import { defineLevel } from '../../engine/define';
+import { FIVE_CRYSTALS, STORM_LINE } from './storms';
 
 export default defineLevel({
   id: 'flex-08',
@@ -6,6 +7,7 @@ export default defineLevel({
   dialog: [
     'Кристаллы слиплись и мешают друг другу светить.',
     'Пусть между соседями будет по 24 пикселя пустоты, а вся группа останется в центре.',
+    STORM_LINE,
   ],
   task: 'Сделай промежутки между кристаллами по 24px, не сдвигая группу с центра острова.',
   html: `<div class="island">
@@ -26,7 +28,7 @@ export default defineLevel({
   gap: 24px;
 }
 `,
-  check: { items: '.crystal', groupName: 'кристаллы' },
+  check: { items: '.crystal', groupName: 'кристаллы', storm: [FIVE_CRYSTALS] },
   hints: [
     'Промежутки между флекс-элементами задаются одним свойством контейнера — отступы самим кристаллам не нужны.',
     'Это свойство называется `gap`.',

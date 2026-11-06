@@ -40,6 +40,8 @@ export function sceneDocument(level: CssLevel, lookCss = ''): string {
  */
 export interface SceneView {
   width: number;
+  /** «Хаос-тест»: разметка шторма вместо разметки уровня; у обычных зеркал её нет */
+  html?: string;
   /** Уровни про :hover: true — элементы из check.hover наведены мышью, false — не наведён никто */
   hover?: boolean;
   /** Подпись над зеркалом: «Узкое зеркало · 360px», «Под мышкой» */
@@ -60,6 +62,13 @@ export function viewsOf(level: CssLevel): SceneView[] {
     ];
   }
   const widths = level.check.viewports ?? [width];
+  // Хаос-тест: основная сцена и под ней штормы — та же сцена с другим содержимым
+  if (level.check.storm?.length) {
+    return [
+      { width, label: 'Обычная сцена', prefix: 'Сцена', tag: 'сцена' },
+      ...level.check.storm.map((storm) => ({ width, html: storm.html, label: `Шторм · ${storm.label}`, prefix: `Шторм «${storm.label}»`, tag: 'шторм' })),
+    ];
+  }
   if (widths.length === 1) return [{ width: widths[0] }];
   return widths.map((w, i) => ({ width: w, label: mirrorLabel(widths, i), prefix: `Зеркало ${w}px`, tag: `${w}px` }));
 }
@@ -72,6 +81,8 @@ export function mirrorLabel(widths: number[], index: number): string {
 
 /** Зеркало «под мышкой»: наведение мышью изображает атрибут data-hover — его ставим нужным элементам. */
 export function prepareView(doc: Document, level: CssLevel, view: SceneView): void {
+  // Шторм: вместо разметки уровня — разметка шторма, и в сцене, и в эталоне
+  if (view.html !== undefined) doc.body.innerHTML = view.html;
   if (!view.hover || !level.check.hover) return;
   doc.querySelectorAll(level.check.hover).forEach((el) => el.setAttribute('data-hover', ''));
 }

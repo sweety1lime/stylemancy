@@ -1,4 +1,5 @@
 import { defineLevel } from '../../engine/define';
+import { FIVE_CRYSTALS, STORM_LINE } from './storms';
 
 export default defineLevel({
   id: 'flex-03',
@@ -6,6 +7,7 @@ export default defineLevel({
   dialog: [
     'Остров кренится — все кристаллы сбились в одну кучу.',
     'Чтобы удержать равновесие, крайние кристаллы должны встать у самых краёв, а средний — ровно посередине.',
+    STORM_LINE,
   ],
   task: 'Распредели кристаллы: крайние — вплотную к краям острова, а свободное место — поровну между кристаллами.',
   html: `<div class="island">
@@ -22,7 +24,7 @@ export default defineLevel({
   justify-content: space-between;
 }
 `,
-  check: { items: '.crystal', groupName: 'кристаллы' },
+  check: { items: '.crystal', groupName: 'кристаллы', storm: [FIVE_CRYSTALS] },
   hints: [
     'Снова распределяем кристаллы вдоль главной оси — свойство тебе уже знакомо.',
     'У `justify-content` есть значения, которые делят свободное место между элементами. Их названия начинаются на `space-`.',
