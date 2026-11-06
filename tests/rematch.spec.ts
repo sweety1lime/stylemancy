@@ -69,3 +69,22 @@ test('реванш Лорда Дефолта: после испытания ба
   await expect(page.getByRole('heading', { name: 'Лорд Дефолт повержен!' })).toBeVisible();
   await expect(page.getByText('+30 XP')).toHaveCount(0);
 });
+
+test('самопроверка реванша ловит натиск, который ничего не ломает, эталон, который его не проходит, и пустые подсказки', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate<Record<string, string[]>>(`Promise.all([import('/src/engine/selfCheck.ts'), import('/src/levels/index.ts')]).then(async ([check, levels]) => {
+    const level = levels.allLevels.find((item) => item.id === 'pos-06');
+    const broken = (patch) => ({ ...level, rematch: { ...level.rematch, stages: level.rematch.stages.map((stage, i) => (i === 0 ? { ...stage, ...patch } : stage)) } });
+    return {
+      honest: await check.checkRematch(level),
+      noCurse: await check.checkRematch(broken({ lockedCss: '' })),
+      wrongAnswer: await check.checkRematch(broken({ solutionCss: '.tower { position: relative; }' })),
+      fewHints: await check.checkRematch(broken({ hints: ['одна'] })),
+    };
+  })`);
+  expect(result.honest).toEqual([]);
+  expect(result.noCurse.join('|')).toContain('Натиск 1 реванша: решение прошлого шага его уже проходит, натиск ничего не ломает');
+  // Эталон всегда совпадает со своей сценой, поэтому подводит его только проверка кода: здесь пропал обязательный приём уровня
+  expect(result.wrongAnswer.join('|')).toContain('Натиск 1 реванша: Фонарь должен держаться за окно');
+  expect(result.fewHints.join('|')).toContain('Натиск 1 реванша: меньше двух подсказок');
+});

@@ -5,6 +5,8 @@ import { evaluateHtml } from './htmlCheck';
 import { dungeonProblems } from './dungeon';
 import { codeLines, evaluateJs, targetRuns } from './jsCheck';
 import { evaluatePage, stepsOf, targetPage } from './pageCheck';
+import { stageLevel } from './rematch';
+import type { ItemStatus } from './scene';
 import { isHtmlLevel, isJsLevel, type CssLevel, type HtmlLevel, type JsLevel, type Level } from './types';
 
 export interface LevelReport {
@@ -15,6 +17,47 @@ export interface LevelReport {
   solutionIssues: string[];
 }
 
+/** Цели, которые выходят за край сцены: такой предмет не поставить, даже зная ответ */
+function outsideSceneIssues(level: CssLevel, items: ItemStatus[]): string[] {
+  const issues: string[] = [];
+  for (const { name, target, view } of items) {
+    const width = view?.width ?? level.scene.width;
+    const visible = target.w > 0 || target.h > 0;
+    const outside = target.x < -0.5 || target.y < -0.5 || target.x + target.w > width + 0.5 || target.y + target.h > level.scene.height + 0.5;
+    if (visible && outside) issues.push(`Цель «${name}» выходит за край сцены${view?.prefix ? ` (${view.prefix})` : ''}.`);
+  }
+  return issues;
+}
+
+/**
+ * Реванш Лорда Дефолта: у каждого натиска свой эталон, и он обязан проходить именно этот натиск. А решение прошлого шага
+ * (у первого натиска это эталон самого уровня) его проходить не должно: иначе натиск ничего не ломает и чинить нечего.
+ */
+export async function checkRematch(level: CssLevel): Promise<string[]> {
+  const rematch = level.rematch;
+  if (!rematch) return [];
+  const issues: string[] = [];
+  if (rematch.stages.length === 0) issues.push('У реванша нет ни одного натиска.');
+  let before = level.solutionCss;
+  for (const [index, stage] of rematch.stages.entries()) {
+    const name = `Натиск ${index + 1} реванша`;
+    const active = stageLevel(level, stage);
+    const answer = await checkLevelCss(active, stage.solutionCss);
+    const previous = await checkLevelCss(active, before);
+    issues.push(
+      ...answer.errors.map((p) => `${name}: ${p.message}`),
+      ...answer.warnings.map((p) => `${name}: ${p.message}`),
+      ...answer.items.filter((item) => !item.inPlace).map((item) => `${name}: эталон не проходит — ${item.message ?? item.name}`),
+      ...outsideSceneIssues(active, answer.items).map((message) => `${name}: ${message}`),
+    );
+    if (previous.passed) issues.push(`${name}: решение прошлого шага его уже проходит, натиск ничего не ломает.`);
+    if (stage.hints.length < 2) issues.push(`${name}: меньше двух подсказок.`);
+    if (!stage.say.trim() || !stage.task.trim() || !stage.defeated.trim()) issues.push(`${name}: не заполнены реплики или задача.`);
+    before = stage.solutionCss;
+  }
+  return issues;
+}
+
 async function checkCss(level: CssLevel) {
   const solution = await checkLevelCss(level, level.solutionCss);
   const starter = await checkLevelCss(level, level.starterCss);
@@ -22,13 +65,9 @@ async function checkCss(level: CssLevel) {
     ...solution.errors.map((p) => p.message),
     ...solution.warnings.map((p) => p.message),
     ...solution.items.filter((item) => !item.inPlace).map((item) => item.message ?? item.name),
+    ...outsideSceneIssues(level, solution.items),
+    ...(await checkRematch(level)),
   ];
-  for (const { name, target, view } of solution.items) {
-    const width = view?.width ?? level.scene.width;
-    const visible = target.w > 0 || target.h > 0;
-    const outside = target.x < -0.5 || target.y < -0.5 || target.x + target.w > width + 0.5 || target.y + target.h > level.scene.height + 0.5;
-    if (visible && outside) issues.push(`Цель «${name}» выходит за край сцены${view?.prefix ? ` (${view.prefix})` : ''}.`);
-  }
   // Уровень про селекторы, где ни одна цель не светится, — проверять нечего
   if (level.check.style && solution.items.every((item) => item.target.value === item.target.base)) {
     issues.push('Эталон не меняет цвет ни одного предмета.');
