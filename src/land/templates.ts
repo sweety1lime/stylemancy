@@ -240,15 +240,28 @@ function lineDifference(a: string, b: string): number {
   return sum;
 }
 
+type Source = { html: string; css: string };
+
+/** На сколько знаков земля ушла от другой: сколько знаков в строках, которых у той нет, и наоборот */
+export function changeFrom(base: Source, source: Source): number {
+  return lineDifference(base.html, source.html) + lineDifference(base.css, source.css);
+}
+
 /** На сколько знаков земля ушла от самой похожей заготовки */
-export function changeFromTemplates(source: { html: string; css: string }): number {
-  return Math.min(...LAND_TEMPLATES.map((template) => lineDifference(template.html, source.html) + lineDifference(template.css, source.css)));
+export function changeFromTemplates(source: Source): number {
+  return Math.min(...LAND_TEMPLATES.map((template) => changeFrom(template, source)));
+}
+
+/** От чего земля ещё не ушла: от заготовки, от чужой земли, взятой за основу (base), или уже ни от чего */
+export function nearStart(source: Source, base?: Source): 'template' | 'base' | null {
+  if (changeFromTemplates(source) < MIN_CHANGE) return 'template';
+  return base && changeFrom(base, source) < MIN_CHANGE ? 'base' : null;
 }
 
 /**
- * Земля, которая почти не отличается от заготовки. За такую награду не даём, иначе опыт собирался бы одним щелчком:
- * выбрал «Деревню», дописал строку, получил задание. Нужно добавить или поменять хотя бы пару своих строк.
+ * Земля, которая почти не отличается от заготовки (или от чужой земли, взятой за основу). За такую награду не даём, иначе опыт
+ * собирался бы одним щелчком: выбрал «Деревню», дописал строку, получил задание. Нужно добавить или поменять хотя бы пару своих строк.
  */
-export function isNearTemplate(source: { html: string; css: string }): boolean {
-  return changeFromTemplates(source) < MIN_CHANGE;
+export function isNearTemplate(source: Source, base?: Source): boolean {
+  return nearStart(source, base) !== null;
 }

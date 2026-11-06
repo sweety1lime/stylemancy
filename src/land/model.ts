@@ -21,8 +21,19 @@ export interface Land {
   signed: boolean;
   /** Когда земля сохранена в последний раз (ISO). По нему сливаются версии с разных компьютеров */
   savedAt: string;
+  /**
+   * Чужая земля, которую игрок взял за основу, в том виде, в каком взял. Пока своего в земле почти нет, задания на ней не
+   * засчитываются, как и на заготовке. Когда игрок поменял достаточно, поле убирается (lands.ts), чтобы не занимать место
+   */
+  base?: LandSource;
   /** Земля удалена. Запись остаётся, чтобы удаление дошло до других компьютеров, а не воскресило землю при слиянии */
   gone?: true;
+}
+
+/** Код земли: то, что игрок пишет */
+export interface LandSource {
+  html: string;
+  css: string;
 }
 
 export function emptyLand(slot: number, now: string = new Date().toISOString()): Land {
@@ -31,6 +42,13 @@ export function emptyLand(slot: number, now: string = new Date().toISOString()):
 
 function text(value: unknown, max: number): string {
   return typeof value === 'string' ? value.slice(0, max) : '';
+}
+
+function cleanBase(value: unknown): LandSource | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.html !== 'string' || typeof raw.css !== 'string') return undefined;
+  return { html: raw.html.slice(0, LAND_LIMITS.html), css: raw.css.slice(0, LAND_LIMITS.css) };
 }
 
 /** Земля из недоверенного места (сервер, чужой браузер): типы и размеры проверяются, лишнее отбрасывается */
@@ -47,7 +65,9 @@ export function cleanLand(value: unknown): Land | null {
     signed: raw.signed === true,
     savedAt: text(raw.savedAt, 40),
   };
-  return raw.gone === true ? { ...land, html: '', css: '', title: '', gone: true } : land;
+  if (raw.gone === true) return { ...land, html: '', css: '', title: '', gone: true };
+  const base = cleanBase(raw.base);
+  return base ? { ...land, base } : land;
 }
 
 /** Список земель из недоверенного места: по одной на ячейку, по порядку ячеек */

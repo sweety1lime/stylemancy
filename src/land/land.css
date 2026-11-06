@@ -496,6 +496,25 @@
   gap: 12px;
 }
 
+.shared-land__hint,
+.shared-land__problem {
+  max-width: 70ch;
+  font-size: 14px;
+}
+
+.shared-land__hint {
+  color: var(--muted);
+}
+
+.shared-land__problem {
+  color: var(--danger);
+}
+
+.shared-land__problem a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .shared-land__code {
   display: grid;
   gap: 10px;

@@ -76,6 +76,52 @@ test('земли: сохранить, удалить, не переполнит�
   });
 });
 
+test('земли: основа чужой земли помнится, пока своего мало, и забывается, когда земля стала своей', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(`Promise.all([import('/src/land/model.ts'), import('/src/land/lands.ts'), import('/src/land/templates.ts')]).then(([model, lands, templates]) => {
+    const nl = String.fromCharCode(10);
+    const base = { html: ['<h1>Чужая земля</h1>', '<p>Первая строка.</p>', '<p>Вторая строка.</p>'].join(nl), css: 'h1 { color: red; }' };
+    const draft = (html) => ({ slot: 0, title: 'Копия', html, css: base.css, signed: false });
+    const stored = () => lands.getLands()[0].base !== undefined;
+    const out = {};
+    out.adopted = lands.saveLand({ ...draft(base.html), base }).ok;
+    out.keptAtStart = stored();
+    // Обычная правка записи (без основы в черновике): коротенькая приписка основу не стирает
+    lands.saveLand(draft(base.html + nl + '<p>Мало.</p>'));
+    out.keptAfterTinyEdit = stored();
+    lands.saveLand(draft(base.html + nl + '<p>Здесь гораздо больше своего текста, чем сорок знаков.</p>'));
+    out.droppedAfterBigEdit = !stored();
+    // Вернул всё как было, а основа не воскресает: земля уже стала своей
+    lands.saveLand(draft(base.html));
+    out.stayedGone = !stored();
+    out.near = [
+      templates.nearStart(base, base),
+      templates.nearStart(base),
+      templates.nearStart({ html: base.html + nl + '<p>Здесь гораздо больше своего текста, чем сорок знаков.</p>', css: base.css }, base),
+    ];
+    // Основа из недоверенного места: типы и размеры проверяются, у удалённой земли основы нет
+    const raw = (slot, extra) => ({ slot, title: 'x', html: '', css: '', signed: false, savedAt: 'a', ...extra });
+    const cleaned = model.cleanLands([
+      raw(0, { base: { html: 'h'.repeat(9000), css: 'c' } }),
+      raw(1, { base: { html: 'a', css: 5 } }),
+      raw(2, { base: 'не объект', gone: true }),
+    ]);
+    out.cleaned = cleaned.map((item) => (item.base ? item.base.html.length + ':' + item.base.css.length : 'без основы'));
+    out.goneHasNoBase = !cleaned[2].base;
+    return out;
+  })`);
+  expect(result).toEqual({
+    adopted: true,
+    keptAtStart: true,
+    keptAfterTinyEdit: true,
+    droppedAfterBigEdit: true,
+    stayedGone: true,
+    near: ['base', null, null],
+    cleaned: ['3000:1', 'без основы', 'без основы'],
+    goneHasNoBase: true,
+  });
+});
+
 const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' };
 const json = (route: Route, body: unknown, status = 200) =>
   route.fulfill({ status, contentType: 'application/json', headers: CORS, body: JSON.stringify(body) });

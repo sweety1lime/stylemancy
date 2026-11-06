@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { notesStore } from '../game/notes';
 import { stats, useStats } from '../game/stats';
-import { aliveLands, cleanLands, LAND_LIMITS, MAX_LANDS, type Land } from './model';
+import { aliveLands, cleanLands, LAND_LIMITS, MAX_LANDS, type Land, type LandSource } from './model';
+import { changeFrom, MIN_CHANGE } from './templates';
 
 /*
   Хранение «Моих земель». Земли лежат в статистике аккаунта и ходят за ним на другие компьютеры тем же путём,
@@ -37,10 +38,15 @@ function withSlot(lands: Land[], land: Land): Land[] {
   return [...cleanLands(lands).filter((item) => item.slot !== land.slot), land].sort((a, b) => a.slot - b.slot);
 }
 
-/** Сохранить землю в ячейку. Отказ, если земля длиннее предела или в документе аккаунта не осталось места */
-export function saveLand(draft: Pick<Land, 'slot' | 'title' | 'html' | 'css' | 'signed'>): SaveResult {
+/**
+ * Сохранить землю в ячейку. Отказ, если земля длиннее предела или в документе аккаунта не осталось места.
+ * base — чужая земля, взятая за основу: её помнит только что взятая земля. Правка обычной записи основу не теряет,
+ * пока своего в земле меньше MIN_CHANGE знаков; дальше земля считается своей, и основа не нужна.
+ */
+export function saveLand(draft: Pick<Land, 'slot' | 'title' | 'html' | 'css' | 'signed'> & { base?: LandSource }): SaveResult {
   if (!Number.isInteger(draft.slot) || draft.slot < 0 || draft.slot >= MAX_LANDS) return { ok: false, reason: 'slot' };
   if (draft.html.length > LAND_LIMITS.html || draft.css.length > LAND_LIMITS.css) return { ok: false, reason: 'long' };
+  const kept = draft.base ?? getLands().find((item) => item.slot === draft.slot)?.base;
   const land: Land = {
     slot: draft.slot,
     title: draft.title.slice(0, LAND_LIMITS.title),
@@ -48,6 +54,7 @@ export function saveLand(draft: Pick<Land, 'slot' | 'title' | 'html' | 'css' | '
     css: draft.css,
     signed: draft.signed,
     savedAt: new Date().toISOString(),
+    ...(kept && changeFrom(kept, draft) < MIN_CHANGE ? { base: kept } : {}),
   };
   const lands = withSlot(stats.get().lands, land);
   if (accountBytes(lands) > ACCOUNT_BUDGET) return { ok: false, reason: 'space' };

@@ -167,6 +167,97 @@ test('битая ссылка: понятное сообщение вместо 
   await expect(page.getByRole('heading', { name: 'Эта ссылка не открывается' })).toBeVisible();
 });
 
+/** Адрес страницы чужой земли, собранный так же, как это делает окно «Поделиться» */
+const sharedAddress = (page: Page, land: { title: string; html: string; css: string; nick?: string }) =>
+  page.evaluate<string>(`import('/src/land/share.ts').then(async (share) => '/#/shared/' + (await share.encodeLand(${JSON.stringify({ nick: '', ...land })})))`);
+
+const TAVERN = '<h1>Таверна «Лунный кот»</h1>\n<p>Горячий суп и свежий хлеб.</p>\n<ul><li>Суп</li><li>Пирог</li><li>Эль</li></ul>';
+
+test('взять за основу: копия ложится в свободную ячейку, а задание на нетронутой копии не засчитывается', async ({ page }) => {
+  await openedWorld(page);
+  await page.goto('/');
+  const address = await sharedAddress(page, { title: 'Таверна друга', html: TAVERN, css: 'h1 { color: gold; }', nick: 'Лёша' });
+  await page.goto(address);
+  await expect(page.getByRole('heading', { name: 'Таверна друга', level: 1 })).toBeVisible();
+  await page.getByRole('button', { name: 'Взять за основу' }).click();
+
+  // Копия лежит в первой свободной ячейке, без подписи автора, и игрок сразу в редакторе
+  await expect(page).toHaveURL(/#\/my-land\/0$/);
+  await expect(page.getByLabel('Название земли')).toHaveValue('Копия: Таверна друга');
+  await expect(landPage(page).getByRole('heading', { name: 'Таверна «Лунный кот»' })).toBeVisible();
+  const stored = () =>
+    page.evaluate<[number, boolean, string, string | null][]>(
+      `import('/src/land/lands.ts').then((lands) => lands.getLands().map((item) => [item.slot, item.signed, item.html, item.base?.html ?? null]))`,
+    );
+  expect(await stored()).toEqual([[0, false, TAVERN, TAVERN]]);
+
+  // Копия сама выполняет первое задание, но это чужая работа: опыта нет, и игре видно почему
+  const tasks = page.getByRole('region', { name: 'Творческие задания' });
+  await expect(tasks.getByText('3 из 3')).toBeVisible();
+  await expect(tasks.getByText('Это почти та земля, которую ты взял за основу')).toBeVisible();
+  await page.waitForTimeout(600);
+  expect(await page.evaluate(`import('/src/game/stats.ts').then((m) => m.stats.get().landTasks)`)).toEqual([]);
+
+  // Пара своих строк, и земля стала своей: задание засчитано, а основа больше не хранится
+  const html = page.locator('.cm-content[aria-label="Редактор HTML"]');
+  await html.click();
+  await page.keyboard.press('ControlOrMeta+End');
+  await page.keyboard.insertText('\n<p>А ещё у нас по вечерам поют.</p>\n<p>И пекут пирожки с грибами.</p>');
+  await expect(tasks.getByText('Задание выполнено, опыт получен.')).toBeVisible();
+  expect(await page.evaluate(`import('/src/game/stats.ts').then((m) => m.stats.get().landTasks)`)).toEqual(['tavern']);
+  await expect.poll(async () => (await stored())[0]?.[3]).toBeNull();
+});
+
+test('взять за основу: занятые ячейки не затираются, копия ложится в первую освободившуюся', async ({ page }) => {
+  await openedWorld(page);
+  await page.goto('/');
+  await page.evaluate(`import('/src/land/lands.ts').then((lands) => {
+    for (const slot of [0, 1, 2]) lands.saveLand({ slot, title: 'Своя ' + slot, html: '<p>моя ' + slot + '</p>', css: '', signed: false });
+  })`);
+  const titles = () => page.evaluate(`import('/src/land/lands.ts').then((lands) => lands.getLands().map((item) => item.slot + ':' + item.title))`);
+  const address = await sharedAddress(page, { title: 'Чужая', html: '<h1>Чужая</h1>', css: '' });
+  await page.goto(address);
+  await page.getByRole('button', { name: 'Взять за основу' }).click();
+
+  // Три ячейки заняты: игра говорит об этом, ничего не пишет и не стирает, а ссылка на список под рукой
+  await expect(page.getByRole('alert')).toContainText('Все 3 ячейки «Моей земли» заняты');
+  await expect(page).toHaveURL(/#\/shared\//);
+  expect(await titles()).toEqual(['0:Своя 0', '1:Своя 1', '2:Своя 2']);
+  await page.getByRole('alert').getByRole('link', { name: 'списке твоих земель' }).click();
+  await expect(page).toHaveURL(/#\/my-land$/);
+
+  // Освободил среднюю и вернулся по той же ссылке: копия встала именно туда
+  await page.getByLabel('Ячейка 2: Своя 1').getByRole('button', { name: 'Удалить' }).click();
+  await page.getByLabel('Ячейка 2: Своя 1').getByRole('button', { name: 'Да, удалить' }).click();
+  await page.goto(address);
+  await page.getByRole('button', { name: 'Взять за основу' }).click();
+  await expect(page).toHaveURL(/#\/my-land\/1$/);
+  expect(await titles()).toEqual(['0:Своя 0', '1:Копия: Чужая', '2:Своя 2']);
+});
+
+test('взять за основу: пока Долина Тегов не спасена, кнопки нет, а причина названа', async ({ page }) => {
+  await openedWorld(page, {});
+  await page.goto('/');
+  const address = await sharedAddress(page, { title: 'Чужая', html: '<h1>Чужая</h1>', css: '' });
+  await page.goto(address);
+  await expect(page.getByRole('heading', { name: 'Чужая', level: 1 })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Взять за основу' })).toHaveCount(0);
+  await expect(page.getByText('Взять эту землю за основу и переделать по-своему можно будет, когда ты спасёшь землю «Долина Тегов»')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Построить свою землю' })).toBeVisible();
+});
+
+test('взять за основу: земля длиннее предела не берётся, и игрок узнаёт почему', async ({ page }) => {
+  await openedWorld(page);
+  await page.goto('/');
+  // Ссылку можно сделать руками и с запасом по длине, а в ячейку больше трёх тысяч знаков не поместится
+  const address = await sharedAddress(page, { title: 'Огромная', html: `<p>${'я'.repeat(3500)}</p>`, css: '' });
+  await page.goto(address);
+  await page.getByRole('button', { name: 'Взять за основу' }).click();
+  await expect(page.getByRole('alert')).toContainText('длиннее предела');
+  await expect(page).toHaveURL(/#\/shared\//);
+  expect(await page.evaluate(`import('/src/land/lands.ts').then((lands) => lands.getLands().length)`)).toBe(0);
+});
+
 test('пиксельный вид: список и редактор открываются и работают', async ({ page }) => {
   await openedWorld(page, VALLEY_SAVED, 'pixel');
   await page.goto('/#/my-land');

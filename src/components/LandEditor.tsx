@@ -12,7 +12,7 @@ import { saveLand, useLands, type SaveResult } from '../land/lands';
 import { LAND_LIMITS, landSize, type Land } from '../land/model';
 import { renderLand } from '../land/sanitize';
 import { cleanLine } from '../land/share';
-import { isNearTemplate } from '../land/templates';
+import { nearStart } from '../land/templates';
 import { CodeEditor, type CodeEditorHandle } from './CodeEditor';
 import { LandFrame } from './LandFrame';
 import { LandPalette } from './LandPalette';
@@ -120,7 +120,7 @@ function LandEditor({ land }: { land: Land }) {
     return () => clearTimeout(wait);
   }, [draft.html, draft.css]);
   const rendered = useMemo(() => renderLand(live, images), [live, images]);
-  const taskResults = useLandTasks(rendered.document, live.html, live.css);
+  const taskResults = useLandTasks(rendered.document, live.html, live.css, land.base);
 
   // CSS проверяется по той же странице, что видит игрок: селектор, который ничего не находит, подчёркивается
   const pageDoc = useMemo(() => parseMarkup(live.html), [live.html]);
@@ -195,7 +195,7 @@ function LandEditor({ land }: { land: Land }) {
             </ul>
           </section>
         )}
-        <LandTasks results={taskResults} nearTemplate={isNearTemplate(live)} />
+        <LandTasks results={taskResults} near={nearStart(live, land.base)} />
       </section>
 
       {sharing && <ShareDialog land={shared} images={images} onClose={() => setSharing(false)} />}

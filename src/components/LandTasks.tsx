@@ -6,12 +6,12 @@ import { GoalList } from './GoalList';
 
 interface LandTasksProps {
   results: Record<string, CheckResult[]> | null;
-  /** Земля почти не отличается от заготовки (меньше MIN_CHANGE знаков своего): задание на ней не засчитывается */
-  nearTemplate: boolean;
+  /** Земля почти не отличается от заготовки или от чужой земли, взятой за основу (меньше MIN_CHANGE знаков своего): задание на ней не засчитывается */
+  near: 'template' | 'base' | null;
 }
 
 /** Творческие задания «Моей земли»: условия загораются, пока игрок строит страницу. Необязательные, награда — опыт и свет посоха */
-export function LandTasks({ results, nearTemplate }: LandTasksProps) {
+export function LandTasks({ results, near }: LandTasksProps) {
   const { landTasks } = useStats();
   // Показывается первое невыполненное задание, а дальше выбор не прыгает: выполненное задание остаётся на виду вместе с отметкой «опыт получен»
   const [picked, setPicked] = useState(() => (LAND_TASKS.find((task) => !landTasks.includes(task.id)) ?? LAND_TASKS[0]).id);
@@ -51,9 +51,9 @@ export function LandTasks({ results, nearTemplate }: LandTasksProps) {
           Задание выполнено, опыт получен.
         </p>
       )}
-      {!rewarded && finished && nearTemplate && (
+      {!rewarded && finished && near && (
         <p className="land-tasks__hint" role="status">
-          Это почти заготовка. Добавь или поменяй хотя бы пару своих строк, и задание засчитается.
+          {near === 'template' ? 'Это почти заготовка.' : 'Это почти та земля, которую ты взял за основу.'} Добавь или поменяй хотя бы пару своих строк, и задание засчитается.
         </p>
       )}
       {!finished && next?.hint && <p className="land-tasks__hint">Подсказка: {next.hint}</p>}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { LandSource } from '../land/model';
 import { evaluateTasks } from '../land/probe';
 import { awardTask, finishedTasks } from '../land/rewards';
 import type { CheckResult } from '../land/tasks';
@@ -13,9 +14,10 @@ interface Evaluated {
 
 /**
  * Проверка творческих заданий на странице игрока: идёт после каждой правки (страница к этому моменту уже успокоилась),
- * а выполненное задание тут же приносит награду. Заготовка без единой правки не считается: опыт даётся за свою работу.
+ * а выполненное задание тут же приносит награду. Заготовка без единой правки не считается, как и чужая земля, взятая за основу
+ * (base) и почти не тронутая: опыт даётся за свою работу.
  */
-export function useLandTasks(page: string, html: string, css: string): Record<string, CheckResult[]> | null {
+export function useLandTasks(page: string, html: string, css: string, base?: LandSource): Record<string, CheckResult[]> | null {
   const [evaluated, setEvaluated] = useState<Evaluated | null>(null);
 
   useEffect(() => {
@@ -32,9 +34,9 @@ export function useLandTasks(page: string, html: string, css: string): Record<st
   }, [page, html, css]);
 
   useEffect(() => {
-    if (!evaluated || isNearTemplate(evaluated)) return;
+    if (!evaluated || isNearTemplate(evaluated, base)) return;
     for (const task of finishedTasks(evaluated.results)) awardTask(task);
-  }, [evaluated]);
+  }, [evaluated, base]);
 
   return evaluated?.results ?? null;
 }
