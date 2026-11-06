@@ -88,3 +88,49 @@ test('самопроверка реванша ловит натиск, кото�
   expect(result.wrongAnswer.join('|')).toContain('Натиск 1 реванша: Фонарь должен держаться за окно');
   expect(result.fewHints.join('|')).toContain('Натиск 1 реванша: меньше двух подсказок');
 });
+
+/** Реванши остальных испытаний: проходятся в интерфейсе целиком, а на каждом натиске прежний код сначала ломается */
+for (const { id, title } of [
+  { id: 'sel-10', title: 'Испытание: Ночная тропа' },
+  { id: 'flex-13', title: 'Испытание: Звёздная корона' },
+  { id: 'grid-09', title: 'Испытание: Большая розетка' },
+]) {
+  test(`реванш Лорда Дефолта в испытании ${id}: три натиска, победа даёт опыт`, async ({ page }) => {
+    await page.addInitScript(() => {
+      if (localStorage.getItem('cascadia.progress.v1')) return;
+      localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light', look: 'noir' }));
+      // Победные сценки районов закрыли бы экран
+      const seen = Object.fromEntries(['prologue:game', 'outro:forest-edge', 'outro:floating-islands', 'outro:stained-abbey'].map((key) => [key, true]));
+      localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen }));
+      // Сетка открывается после Парящих островов
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'flex-13': { completed: true, stars: 3, attempts: 1, hintsUsed: 0 } }));
+    });
+    await page.goto(`/#/level/${id}`);
+    await expect(page.getByRole('heading', { name: title })).toBeVisible();
+    const data = await page.evaluate<{ base: string; stages: string[]; button: string; xp: number }>(
+      `import('/src/levels/index.ts').then((m) => { const level = m.allLevels.find((item) => item.id === '${id}'); return { base: level.solutionCss, stages: level.rematch.stages.map((stage) => stage.solutionCss), button: level.rematch.title, xp: level.rematch.xp }; })`,
+    );
+
+    // Пока испытание не пройдено, реванша нет; прошёл — кнопка появилась
+    await expect(page.getByRole('button', { name: data.button })).toHaveCount(0);
+    await typeCode(page, data.base);
+    await cast(page);
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    await page.getByRole('button', { name: data.button }).click();
+
+    for (const [index, solution] of data.stages.entries()) {
+      await expect(page.getByRole('group', { name: `Лорд Дефолт: натиск ${index + 1} из 3` })).toBeVisible();
+      // Прежний код чары ломают: заклинание не срабатывает
+      await cast(page);
+      await expect(page.getByText('Заклинание не сработало')).toBeVisible();
+      await typeCode(page, solution);
+      await cast(page);
+      if (index < data.stages.length - 1) {
+        await expect(page.getByRole('heading', { name: 'Натиск отбит!' })).toBeVisible();
+        await page.getByRole('button', { name: 'Дальше: новый удар' }).click();
+      }
+    }
+    await expect(page.getByRole('heading', { name: 'Лорд Дефолт повержен!' })).toBeVisible();
+    await expect(page.getByText(`+${data.xp} XP`)).toBeVisible();
+  });
+}
