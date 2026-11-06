@@ -3,7 +3,7 @@ import type { Problem } from './lint';
 import type { HtmlGoal, HtmlLevel } from './types';
 
 /** Базовые стили страницы-сцены: пока теги не расставлены, всё выглядит как у Лорда Дефолта. */
-const BASE_PAGE_CSS = `
+export const BASE_PAGE_CSS = `
 html { background: #e8e6df; }
 body { margin: 16px 20px; color: #1c1c24; font: 16px/1.5 "Times New Roman", Times, serif; overflow-wrap: anywhere; }
 img { max-width: 100%; }
