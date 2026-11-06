@@ -5,7 +5,7 @@ import type { AchievementCategory } from '../game/achievements';
   полученная звезда, медаль, кристалл в названии игры. Рамка 24 × 24.
 */
 
-export type NoirIconName = 'gem' | 'book' | 'sound' | 'mute' | 'effects' | 'effects-off' | 'moon';
+export type NoirIconName = 'gem' | 'book' | 'sound' | 'mute' | 'effects' | 'effects-off' | 'moon' | 'flame';
 
 const PATHS: Record<NoirIconName, string> = {
   gem: 'M12 2.5 L18 8.5 L18 15.5 L12 21.5 L6 15.5 L6 8.5 Z M12 2.5 L9.5 8.5 L9.5 15.5 L12 21.5 M12 2.5 L14.5 8.5 L14.5 15.5 L12 21.5 M6 8.5 H18',
@@ -15,10 +15,11 @@ const PATHS: Record<NoirIconName, string> = {
   effects: 'M12 3 Q12.8 10.2 20 12 Q12.8 13.8 12 21 Q11.2 13.8 4 12 Q11.2 10.2 12 3 Z M18.5 3.5 V7.5 M16.5 5.5 H20.5',
   'effects-off': 'M12 6 Q12.6 11.2 17.5 12 Q12.6 12.8 12 18 Q11.4 12.8 6.5 12 Q11.4 11.2 12 6 Z',
   moon: 'M14.5 3.5 A8.5 8.5 0 1 0 20.5 15.5 A6.8 6.8 0 1 1 14.5 3.5 Z',
+  flame: 'M12 2.5 C12.8 6 17.5 8.2 17.5 13.8 A5.5 5.5 0 0 1 6.5 13.8 C6.5 11 8.2 9.8 9.2 7.6 C10.4 8.6 10.6 9.8 10.6 10.8 C11.8 9 12.6 5.8 12 2.5 Z M12 21 C10.4 21 9.2 19.8 9.2 18.2 C9.2 16.8 10.6 15.8 12 14 C13.4 15.8 14.8 16.8 14.8 18.2 C14.8 19.8 13.6 21 12 21 Z',
 };
 
 /** Что светится: кристалл названия — аметистом, эффекты — золотом */
-const GLOW: Partial<Record<NoirIconName, string>> = { gem: '#c9a2ff', effects: '#f0c890' };
+const GLOW: Partial<Record<NoirIconName, string>> = { gem: '#c9a2ff', effects: '#f0c890', flame: '#ffb067' };
 
 export function NoirIcon({ name, size = 22 }: { name: NoirIconName; size?: number }) {
   const glow = GLOW[name];

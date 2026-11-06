@@ -324,6 +324,9 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
                   Продолжить: {resume.level.title}
                 </a>
               )}
+              <a className="button button--ghost" href={hrefFor({ name: 'daily' })}>
+                Свиток дня
+              </a>
               <a className="button button--ghost" href={hrefFor({ name: 'chronicle' })}>
                 Летопись героя
               </a>

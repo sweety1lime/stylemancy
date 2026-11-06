@@ -1,6 +1,33 @@
 import { useSyncExternalStore } from 'react';
 import { onScopeChange, read, scopedKey, write } from './storage';
 
+/** «Свиток дня» (game/daily.ts): вопросы дня, ответы и серия дней подряд */
+export interface DailyState {
+  /** День, для которого выбраны вопросы: '2026-11-06' */
+  day: string;
+  /** id вопросов этого дня */
+  picks: string[];
+  /** Сколько вопросов уже отвечено */
+  answered: number;
+  /** Последний день, когда свиток дочитан до конца */
+  last: string;
+  /** Дней подряд, считая последний дочитанный */
+  streak: number;
+  /** Самая длинная серия */
+  best: number;
+}
+
+export const NO_DAILY: DailyState = { day: '', picks: [], answered: 0, last: '', streak: 0, best: 0 };
+
+/** Слияние двух версий свитка (своей и пришедшей с сервера): побеждает та, что дальше по дням и по ответам */
+function mergeDaily(a: Partial<DailyState> | undefined, b: Partial<DailyState> | undefined): DailyState {
+  const x = { ...NO_DAILY, ...a };
+  const y = { ...NO_DAILY, ...b };
+  const newer = x.last >= y.last ? x : y;
+  const current = x.day > y.day || (x.day === y.day && x.answered >= y.answered) ? x : y;
+  return { ...current, last: newer.last, streak: newer.streak, best: Math.max(x.best, y.best) };
+}
+
 /** Всё, что считается помимо прохождения уровней: достижения, счётчики, повторение, просмотренные сценки. */
 export interface Stats {
   /** id достижения → когда получено */
@@ -21,8 +48,9 @@ export interface Stats {
   experiments: string[];
   /** Просмотренные сценки: 'intro:floating-islands' */
   seen: Record<string, boolean>;
-  /** Цвет света на посохе героя (id из noir/staffLight.tsx) */
+  /** Цвет света на посохе героя (id из noir/staffLights.ts) */
   staff: string;
+  daily: DailyState;
 }
 
 // Ключи хранят рабочее название проекта: не переименовывать — у всех сбросится прогресс
@@ -39,6 +67,7 @@ const INITIAL: Stats = {
   experiments: [],
   seen: {},
   staff: 'ice',
+  daily: NO_DAILY,
 };
 
 const load = (): Stats => ({ ...INITIAL, ...read<Partial<Stats>>(scopedKey(STATS_KEY), {}) });
@@ -80,6 +109,7 @@ export function mergeStats(a: Partial<Stats>, b: Partial<Stats>): Stats {
     seen: { ...y.seen, ...x.seen },
     // Выбранный цвет: свой, если он не по умолчанию, иначе тот, что пришёл с сервера
     staff: x.staff !== INITIAL.staff ? x.staff : y.staff,
+    daily: mergeDaily(x.daily, y.daily),
   };
 }
 

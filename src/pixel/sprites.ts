@@ -204,6 +204,21 @@ export const BOOK: Sprite = {
   palette: { k: '#6d3fe0', p: '#e9e4ff', l: '#7e74ad' },
 };
 
+/** Огонёк серии «Свитка дня» */
+export const FLAME: Sprite = {
+  rows: [
+    '...o....',
+    '..oo....',
+    '..ooo...',
+    '.oorro..',
+    '.orrro..',
+    'orryyro.',
+    'orryyro.',
+    '.orrrro.',
+  ],
+  palette: { o: '#ff8a3c', r: '#ff5a2a', y: '#ffe27a' },
+};
+
 /* Портреты */
 
 export const PORTRAITS: Record<string, Sprite> = {

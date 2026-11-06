@@ -5529,3 +5529,76 @@ a.land--door .land__door {
   animation-duration: 0s !important;
   animation-iteration-count: 1 !important;
 }
+
+/* Свиток дня и огонёк серии */
+
+.daily {
+  display: grid;
+  gap: 18px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 24px 48px;
+}
+
+.daily__head {
+  display: grid;
+  gap: 6px;
+}
+
+.daily__lead {
+  max-width: 60ch;
+  color: var(--muted);
+}
+
+.daily__panel {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 20px 22px 22px;
+}
+
+.daily__flame {
+  color: var(--gold);
+  line-height: 0;
+}
+
+.daily__flame--lit {
+  filter: drop-shadow(0 0 12px rgba(255, 176, 103, 0.6));
+}
+
+.daily__streak {
+  color: var(--gold-strong);
+  font-weight: 500;
+}
+
+.topbar__flame {
+  gap: 4px;
+  color: var(--gold-strong);
+}
+
+/* Пока сегодняшний свиток не прочитан, огонёк тускнеет и тихо дышит: напоминание без крика */
+.topbar__flame--due {
+  animation: flame-due 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes flame-due {
+  from {
+    opacity: 0.55;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.effects-light .topbar__flame--due {
+  animation: none;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar__flame--due {
+    animation: none;
+    opacity: 0.7;
+  }
+}

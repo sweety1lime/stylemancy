@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ACHIEVEMENTS } from '../game/achievements';
 import { signOut, useAuth, type Account } from '../game/auth';
+import { activeStreak, dayKey } from '../game/daily';
 import { useProgress } from '../game/progress';
 import { rankFor, totalXp } from '../game/ranks';
 import { settings, useSettings } from '../game/settings';
@@ -9,6 +10,7 @@ import { useStats } from '../game/stats';
 import { useCountUp } from '../game/useCountUp';
 import { BOOK, EFFECTS_OFF, EFFECTS_ON, GEMS, MEDALS, MOON, SPEAKER_OFF, SPEAKER_ON } from '../pixel/sprites';
 import { AccountDialog } from './AccountDialog';
+import { FlameIcon } from './FlameIcon';
 import { NoirIcon, NoirMedal } from '../noir/icons';
 import { useNoir } from '../noir/look';
 import { PixelArt } from './PixelArt';
@@ -30,6 +32,10 @@ export function TopBar({ back }: TopBarProps) {
   const { next } = rankFor(xp);
   const hint = next ? `До ранга «${next.title}» — ${next.xp - xp} XP` : 'Высший ранг';
   const achievementsGot = ACHIEVEMENTS.filter((item) => stats.achievements[item.id]).length;
+  // Огонёк «Свитка дня»: серия дней подряд; тускнеет, пока сегодняшний свиток не прочитан
+  const today = dayKey();
+  const streak = activeStreak(stats.daily, today);
+  const scrollDue = stats.daily.last !== today;
   // Окно держит аккаунт, с которым открылось: после удаления оно ещё показывает итог
   const [accountDialog, setAccountDialog] = useState<Account | null>(null);
 
@@ -52,6 +58,15 @@ export function TopBar({ back }: TopBarProps) {
         <a className="topbar__link" href="#/achievements" aria-label={`Достижения: ${achievementsGot} из ${ACHIEVEMENTS.length}`}>
           {noir ? <NoirMedal category="clean" size={24} /> : <PixelArt sprite={MEDALS.clean} scale={2} />}
           {achievementsGot}/{ACHIEVEMENTS.length}
+        </a>
+        <a
+          className={scrollDue ? 'topbar__link topbar__flame topbar__flame--due' : 'topbar__link topbar__flame'}
+          href="#/daily"
+          aria-label={`Свиток дня: серия ${streak} дн., ${scrollDue ? 'сегодняшний свиток ждёт' : 'сегодня прочитан'}`}
+          title={scrollDue ? 'Свиток дня ждёт: три вопроса из выученного' : 'Свиток дня прочитан'}
+        >
+          <FlameIcon size={24} />
+          {streak > 0 && streak}
         </a>
       </nav>
       <Toggles />

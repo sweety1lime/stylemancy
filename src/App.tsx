@@ -28,6 +28,7 @@ const JsLevelScreen = lazy(() => loadJsLevelScreen().then((m) => ({ default: m.J
 const GrimoireScreen = lazy(() => import('./components/GrimoireScreen').then((m) => ({ default: m.GrimoireScreen })));
 const AchievementsScreen = lazy(() => import('./components/AchievementsScreen').then((m) => ({ default: m.AchievementsScreen })));
 const ChronicleScreen = lazy(() => import('./components/ChronicleScreen').then((m) => ({ default: m.ChronicleScreen })));
+const DailyScreen = lazy(() => import('./components/DailyScreen').then((m) => ({ default: m.DailyScreen })));
 const CertificateScreen = lazy(() => import('./components/CertificateScreen').then((m) => ({ default: m.CertificateScreen })));
 const TeacherScreen = lazy(() => import('./components/TeacherScreen').then((m) => ({ default: m.TeacherScreen })));
 
@@ -179,6 +180,14 @@ export default function App() {
     return (
       <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
         <ChronicleScreen />
+      </Screen>
+    );
+  }
+
+  if (route.name === 'daily') {
+    return (
+      <Screen back={{ href: hrefFor({ name: 'map' }), label: 'Карта' }}>
+        <DailyScreen />
       </Screen>
     );
   }
