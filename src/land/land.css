@@ -348,6 +348,91 @@
   margin-top: 0;
 }
 
+/* ===== Панель учителя: земли студентов ===== */
+
+.class-lands {
+  display: grid;
+  gap: 12px;
+  padding: 14px 18px 18px;
+}
+
+.class-lands__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+}
+
+.class-lands__summary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.class-lands__list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.class-lands__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.class-lands__name span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.class-lands__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.class-lands__thumb {
+  display: grid;
+  gap: 6px;
+  max-width: 288px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.class-lands__thumb:hover .class-lands__title {
+  color: var(--gold);
+}
+
+.class-lands__title {
+  font-size: 14px;
+}
+
+.class-lands__modal {
+  width: min(900px, 100%);
+}
+
+.class-lands__code summary {
+  color: var(--gold-strong);
+  cursor: pointer;
+}
+
+.class-lands__code h4 {
+  margin: 10px 0 4px;
+  color: var(--muted);
+  font: 13px var(--font-mono);
+}
+
 /* ===== Окно «Поделиться» ===== */
 
 .land-share__body {

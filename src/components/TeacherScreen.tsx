@@ -19,6 +19,7 @@ import {
 } from '../game/teacher';
 import { allLevels, lands, regions, scriptLands } from '../levels';
 import { ClassBeacons } from './ClassBeacons';
+import { ClassLands } from './ClassLands';
 import { ClassCard } from './ClassCard';
 import { FeedbackList } from './FeedbackList';
 import { Modal } from './Modal';
@@ -380,6 +381,8 @@ function ClassView({ klass, onClassChange }: { klass: ClassRow; onClassChange: (
       ) : (
         <>
           <ClassBeacons students={roster.students.length} progress={roster.progress} />
+
+          <ClassLands students={roster.students} lands={roster.lands} tasks={roster.landTasks} />
 
           {roster.feedback.length > 0 && (
             <FeedbackList

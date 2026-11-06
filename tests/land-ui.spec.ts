@@ -212,6 +212,8 @@ test('подпись ником: только если игрок сам пос�
   });
 
   await page.goto('/#/my-land');
+  // Студенту класса прямо сказано, что учитель видит его земли
+  await expect(page.getByText('Учитель класса видит твои земли в своей панели, подписаны они ником или нет.')).toBeVisible();
   await page.getByLabel('Ячейка 1: пусто').getByRole('button', { name: 'Чистый лист' }).click();
   const sign = page.getByLabel('Подписать землю моим ником: Маша');
   await expect(sign).not.toBeChecked();

@@ -1,3 +1,4 @@
+import { aliveLands, cleanLands, type Land } from '../land/model';
 import { supabase } from '../lib/supabase';
 import type { FeedbackKind } from './feedback';
 
@@ -43,6 +44,10 @@ export interface Roster {
   progress: ProgressRow[];
   /** student_id → опыт за вопросы на повторение */
   reviewXp: Record<string, number>;
+  /** student_id → земли студента («Моя земля»), без удалённых */
+  lands: Record<string, Land[]>;
+  /** student_id → какие творческие задания «Моей земли» выполнены */
+  landTasks: Record<string, string[]>;
   /** Сообщения о проблемах: сначала новые */
   feedback: FeedbackRow[];
 }
@@ -83,7 +88,7 @@ export async function loadRoster(classId: string): Promise<Roster> {
     .order('nickname');
   if (error) fail(error);
   const ids = (students as StudentRow[]).map((student) => student.id);
-  if (!ids.length) return { students: [], progress: [], reviewXp: {}, feedback: [] };
+  if (!ids.length) return { students: [], progress: [], reviewXp: {}, lands: {}, landTasks: {}, feedback: [] };
 
   const [progress, stats, feedback] = await Promise.all([
     supabase.from('level_progress').select('*').in('student_id', ids),
@@ -98,13 +103,21 @@ export async function loadRoster(classId: string): Promise<Roster> {
   if (progress.error) fail(progress.error);
   if (stats.error) fail(stats.error);
   const reviewXp: Record<string, number> = {};
-  for (const row of stats.data as { student_id: string; data: { stats?: { reviewXp?: number } } }[]) {
+  const lands: Record<string, Land[]> = {};
+  const landTasks: Record<string, string[]> = {};
+  for (const row of stats.data as { student_id: string; data: { stats?: { reviewXp?: number; lands?: unknown; landTasks?: unknown } } }[]) {
     reviewXp[row.student_id] = row.data?.stats?.reviewXp ?? 0;
+    // Чужие данные: землю и список заданий разбирает проверка, а не доверие
+    lands[row.student_id] = aliveLands(cleanLands(row.data?.stats?.lands));
+    const done = row.data?.stats?.landTasks;
+    landTasks[row.student_id] = Array.isArray(done) ? done.filter((id): id is string => typeof id === 'string') : [];
   }
   return {
     students: students as StudentRow[],
     progress: progress.data as ProgressRow[],
     reviewXp,
+    lands,
+    landTasks,
     // Если таблицы сообщений ещё нет в базе, панель работает и без них
     feedback: feedback.error ? [] : (feedback.data as FeedbackRow[]),
   };
