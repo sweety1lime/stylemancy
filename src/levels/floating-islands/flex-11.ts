@@ -1,4 +1,5 @@
 import { defineLevel } from '../../engine/define';
+import { FIVE_CRYSTALS, STORM_LINE } from './storms';
 
 export default defineLevel({
   id: 'flex-11',
@@ -6,6 +7,7 @@ export default defineLevel({
   dialog: [
     'Все кристаллы любят парить под самым небом. Все, кроме Рубина: он тяжёлый и тянется к земле.',
     'Опусти его, но только его одного.',
+    STORM_LINE,
   ],
   task: 'Опусти к нижнему краю острова только Рубин — остальные кристаллы пусть остаются наверху.',
   html: `<div class="island">
@@ -27,7 +29,7 @@ export default defineLevel({
   align-self: flex-end;
 }
 `,
-  check: { items: '.crystal', groupName: 'кристаллы' },
+  check: { items: '.crystal', groupName: 'кристаллы', storm: [FIVE_CRYSTALS] },
   hints: [
     '`align-items` двигает сразу все элементы. Нужно свойство, которое меняет выравнивание одного элемента.',
     'Это `align-self` — его пишут самому элементу, а не контейнеру.',

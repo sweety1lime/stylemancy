@@ -1,4 +1,5 @@
 import { defineLevel } from '../../engine/define';
+import { FIVE_CRYSTALS, STORM_LINE } from './storms';
 
 export default defineLevel({
   id: 'flex-02',
@@ -6,6 +7,7 @@ export default defineLevel({
   dialog: [
     'Получилось! Кристаллы снова парят. Но ветер прибил их к левому краю острова.',
     'Отправь их к правому краю — контуры уже ждут.',
+    STORM_LINE,
   ],
   task: 'Прижми кристаллы к правому краю острова.',
   html: `<div class="island">
@@ -22,7 +24,7 @@ export default defineLevel({
   justify-content: flex-end;
 }
 `,
-  check: { items: '.crystal', groupName: 'кристаллы' },
+  check: { items: '.crystal', groupName: 'кристаллы', storm: [FIVE_CRYSTALS] },
   hints: [
     'Кристаллы стоят вдоль главной оси — в ряду это горизонталь. Нужно свойство, которое распределяет элементы вдоль неё.',
     'Это свойство называется `justify-content`.',

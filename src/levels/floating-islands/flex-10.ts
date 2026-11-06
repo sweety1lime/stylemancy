@@ -1,4 +1,5 @@
 import { defineLevel } from '../../engine/define';
+import { FIVE_CRYSTALS, STORM_LINE } from './storms';
 
 export default defineLevel({
   id: 'flex-10',
@@ -6,6 +7,7 @@ export default defineLevel({
   dialog: [
     'По древнему закону островов первым в строю стоит Рубин, за ним Изумруд, а Аметист замыкает строй.',
     'Но переставлять кристаллы в разметке нельзя — только магией.',
+    STORM_LINE,
   ],
   task: 'Перестрой кристаллы: Рубин — первым, Изумруд — вторым, Аметист — последним. HTML не меняется.',
   html: `<div class="island">
@@ -33,7 +35,7 @@ export default defineLevel({
   order: 1;
 }
 `,
-  check: { items: '.crystal', groupName: 'кристаллы' },
+  check: { items: '.crystal', groupName: 'кристаллы', storm: [FIVE_CRYSTALS] },
   // Иначе уровень обходится разворотом ряда, а он про order
   forbid: ['flex-direction', 'flex-flow'],
   hints: [

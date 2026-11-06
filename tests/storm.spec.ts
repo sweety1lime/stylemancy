@@ -42,3 +42,34 @@ test('хаос-тест: раскладка «на глаз» держит ос�
   await page.getByRole('button', { name: /Сотворить/ }).click();
   await expect(page.getByText('Заклинание сработало!')).toBeVisible();
 });
+
+/** Решение, подогнанное под обычную сцену, шторм ломает; настоящее решение держит обе сцены */
+test('хаос-тест на новых уровнях: подгонка под три предмета проходит обычную сцену и проваливает шторм', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate<Record<string, { scene: boolean; storm: boolean }>>(`Promise.all([import('/src/engine/evaluate.ts'), import('/src/levels/index.ts')]).then(async ([evaluate, levels]) => {
+    const level = (id) => levels.allLevels.find((item) => item.id === id);
+    const run = async (id, css) => {
+      const outcome = await evaluate.checkLevelCss(level(id), css);
+      const inPlace = (storm) => outcome.items.filter((item) => (item.view?.tag === 'шторм') === storm).every((item) => item.inPlace);
+      return { scene: inPlace(false), storm: inPlace(true) };
+    };
+    return {
+      // «К правому краю» отступом: на всё свободное место, что остаётся от трёх кристаллов (456 минус три по 64)
+      marginRight: await run('flex-02', '.island { display: flex; } .amethyst { margin-left: 264px; }'),
+      rightReference: await run('flex-02', level('flex-02').solutionCss),
+      // Порядок «по номерам»: у остальных кристаллов order остаётся нулевым, и они встают впереди Рубина
+      orderByNumbers: await run('flex-10', '.island { display: flex; justify-content: center; align-items: center; } .ruby { order: 1; } .emerald { order: 2; } .amethyst { order: 3; }'),
+      orderReference: await run('flex-10', level('flex-10').solutionCss),
+      // Строки в пикселях под шесть стёкол (216 в долях 2 : 1): третьей строке не остаётся места
+      rowsInPixels: await run('grid-03', '.window { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 144px 72px; }'),
+      rowsReference: await run('grid-03', level('grid-03').solutionCss),
+    };
+  })`);
+  for (const naive of ['marginRight', 'orderByNumbers', 'rowsInPixels']) {
+    expect.soft(result[naive], `${naive}: обычную сцену держит`).toMatchObject({ scene: true });
+    expect.soft(result[naive], `${naive}: шторм ломает`).toMatchObject({ storm: false });
+  }
+  for (const honest of ['rightReference', 'orderReference', 'rowsReference']) {
+    expect.soft(result[honest], `${honest}: держит обе сцены`).toEqual({ scene: true, storm: true });
+  }
+});

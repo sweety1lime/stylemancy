@@ -1,4 +1,5 @@
 import { defineLevel } from '../../engine/define';
+import { NINE_PANES, STORM_LINE } from './storms';
 
 export default defineLevel({
   id: 'grid-03',
@@ -6,6 +7,7 @@ export default defineLevel({
   dialog: [
     'У сетки есть не только колонки, но и строки. Сейчас окно делит высоту поровну, а по старому чертежу верхние стёкла вдвое выше нижних.',
     'Высоты строк задаются так же, как ширины колонок, и `fr` здесь тоже работает.',
+    STORM_LINE,
   ],
   task: 'Задай строки окна через `grid-template-rows`: верхняя строка вдвое выше нижней.',
   html: `<div class="window">
@@ -27,7 +29,7 @@ export default defineLevel({
   grid-template-rows: 2fr 1fr;
 }
 `,
-  check: { items: '.pane', groupName: 'стёкла' },
+  check: { items: '.pane', groupName: 'стёкла', storm: [NINE_PANES] },
   hints: [
     'Колонки уже есть. Не хватает второго чертежа — для строк.',
     '`grid-template-rows` перечисляет высоты строк сверху вниз. Две доли сверху, одна снизу.',
