@@ -141,6 +141,8 @@ export function useLevelFlow(level: Level, region: RegionStats, starter: string)
       skipReview();
       setReview(null);
     },
+    /** Показать или убрать итог попытки, не засчитывая её уровню: так отчитывается реванш Лорда Дефолта */
+    report: (next: Outcome | null) => setOutcome(next),
     story: stories[0] ?? null,
     showStory: (next: OpenStory | null) => setStories(next ? [next] : []),
     closeStory: () => {

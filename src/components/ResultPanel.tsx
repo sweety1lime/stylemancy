@@ -34,6 +34,8 @@ interface ResultPanelProps {
   onNext?: () => void;
   /** Район пройден — показать победную сцену */
   onFinale?: () => void;
+  /** Реванш Лорда Дефолта: необязательный бой после победы */
+  rematch?: { label: string; onStart: () => void };
 }
 
 /**
@@ -49,7 +51,7 @@ function useScrollIntoView(ref: RefObject<HTMLElement | null>, delay: number) {
   }, [ref, delay]);
 }
 
-export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, onFinale }: ResultPanelProps) {
+export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, onFinale, rematch }: ResultPanelProps) {
   // В «Сумраке» победа — рассвет над экраном: проклятие отступает
   const dawn = useNoir() && fullEffects();
   const panel = useRef<HTMLElement>(null);
@@ -86,9 +88,16 @@ export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, o
           </div>
         )}
         {onNext ? (
-          <button type="button" className="button button--cast" onClick={onNext}>
-            Дальше →
-          </button>
+          <div className="result__buttons">
+            <button type="button" className="button button--cast" onClick={onNext}>
+              Дальше →
+            </button>
+            {rematch && (
+              <button type="button" className="button button--ghost" onClick={rematch.onStart}>
+                {rematch.label}
+              </button>
+            )}
+          </div>
         ) : (
           <>
             <p className="result__final">
@@ -104,6 +113,11 @@ export function ResultPanel({ outcome, code, spell, region, trailHref, onNext, o
               {onFinale && (
                 <button type="button" className="button button--ghost" onClick={onFinale}>
                   Смотреть финал
+                </button>
+              )}
+              {rematch && (
+                <button type="button" className="button button--ghost" onClick={rematch.onStart}>
+                  {rematch.label}
                 </button>
               )}
             </div>

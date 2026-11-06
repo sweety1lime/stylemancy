@@ -107,10 +107,12 @@ interface LevelResultProps {
   region: RegionStats;
   trailHref: string;
   onNext?: () => void;
+  /** Реванш Лорда Дефолта: кнопка в итоге победы, если у уровня он есть */
+  onRematch?: () => void;
 }
 
 /** Итог попытки: ставится в конец колонки со сценой, после статуса и целей — игрок видит его рядом с картинкой. */
-export function LevelResult({ flow, level, region, trailHref, onNext }: LevelResultProps) {
+export function LevelResult({ flow, level, region, trailHref, onNext, onRematch }: LevelResultProps) {
   if (!flow.outcome) return null;
   return (
     <ResultPanel
@@ -121,6 +123,7 @@ export function LevelResult({ flow, level, region, trailHref, onNext }: LevelRes
       trailHref={trailHref}
       onNext={onNext}
       onFinale={flow.outro ? () => flow.showStory(flow.outro) : undefined}
+      rematch={onRematch && level.kind !== 'html' && level.kind !== 'js' && level.rematch ? { label: level.rematch.title, onStart: onRematch } : undefined}
     />
   );
 }

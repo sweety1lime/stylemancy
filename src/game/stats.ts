@@ -51,6 +51,8 @@ export interface Stats {
   /** Цвет света на посохе героя (id из noir/staffLights.ts) */
   staff: string;
   daily: DailyState;
+  /** Уровни, где побеждён реванш Лорда Дефолта: опыт за победу — один раз */
+  rematches: string[];
 }
 
 // Ключи хранят рабочее название проекта: не переименовывать — у всех сбросится прогресс
@@ -68,6 +70,7 @@ const INITIAL: Stats = {
   seen: {},
   staff: 'ice',
   daily: NO_DAILY,
+  rematches: [],
 };
 
 const load = (): Stats => ({ ...INITIAL, ...read<Partial<Stats>>(scopedKey(STATS_KEY), {}) });
@@ -110,6 +113,7 @@ export function mergeStats(a: Partial<Stats>, b: Partial<Stats>): Stats {
     // Выбранный цвет: свой, если он не по умолчанию, иначе тот, что пришёл с сервера
     staff: x.staff !== INITIAL.staff ? x.staff : y.staff,
     daily: mergeDaily(x.daily, y.daily),
+    rematches: [...new Set([...x.rematches, ...y.rematches])],
   };
 }
 

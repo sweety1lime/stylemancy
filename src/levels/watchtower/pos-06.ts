@@ -107,4 +107,136 @@ export default defineLevel({
     'Башне — `relative` без сдвигов, дозорному — `relative` со сдвигом, флагу — `absolute`, фонарю — `fixed`. Луна сейчас перекрывает флаг: поможет `z-index`.',
     'Башне: `position: relative;` Дозорному: `position: relative; top: -24px;` Флагу: `position: absolute; top: -48px; right: 16px; z-index: 1;` Фонарю: `position: fixed; right: 16px; bottom: 16px;`',
   ],
+  /*
+    Реванш Лорда Дефолта: после победы он трижды ломает башню чарами, которые записаны ниже кода студента.
+    Код остаётся прежним, а чинить его надо силой селектора, а не порядком и не одним лишь !important.
+    Чары каждого натиска включают прежние, поэтому прошлые поломки никуда не деваются.
+  */
+  rematch: {
+    title: 'Реванш: Дефолт ломает башню',
+    xp: 30,
+    victory: 'Башня стоит, флаг над луной, фонарь у окна. Ты читаешь каскад лучше меня… Пока что!',
+    stages: [
+      {
+        say: 'Ха! Один `position: static` — и твой флаг лежит на земле. Для него `top` и `right` теперь пустой звук. А мои чары записаны ниже твоих!',
+        task: 'Лорд Дефолт сбросил флагу `position`, и тот упал. Верни `.flag` на место: `48px` над верхним краем башни, `16px` от правого, впереди луны. Чары Лорда Дефолта записаны ниже твоего кода, так что порядком их не обойти.',
+        hints: [
+          'Твоё правило `.flag` и чары Лорда Дефолта равны по силе селектора, а при равенстве побеждает тот, кто ниже. Открой «Лупу» и нажми на флаг: она покажет, кто победил.',
+          'Сделай селектор сильнее: флаг лежит внутри башни, значит подойдёт `.tower .flag`.',
+          '`.tower .flag { position: absolute; top: -48px; right: 16px; z-index: 1; }`',
+        ],
+        lockedCss: `.flag {
+  position: static;
+}
+`,
+        solutionCss: `.tower {
+  position: relative;
+}
+
+.lookout {
+  position: relative;
+  top: -24px;
+}
+
+.tower .flag {
+  position: absolute;
+  top: -48px;
+  right: 16px;
+  z-index: 1;
+}
+
+.lantern {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+}
+`,
+        defeated: 'Хм… Перебил силой селектора, а не порядком. Ладно, но фонарь тебе не удержать!',
+      },
+      {
+        say: 'Фонарь не прибьёшь! Я приказал ему `position: absolute !important` — теперь он висит на башне, а не на окне.',
+        task: 'Лорд Дефолт приказал фонарю `position: absolute !important`, и тот съехал с окна. Верни `.lantern` к окну: `16px` от правого и нижнего края окна. Флаг должен остаться на месте.',
+        hints: [
+          '`!important` в твоём правиле не спасёт, если оно слабее по селектору: между двумя `!important` решает сила селектора. «Лупа» покажет оба.',
+          'Возьми селектор сильнее чар Дефолта и тоже добавь `!important`: подойдёт `.tower .lantern`.',
+          '`.tower .lantern { position: fixed !important; right: 16px; bottom: 16px; }`',
+        ],
+        lockedCss: `.flag {
+  position: static;
+}
+
+.lantern {
+  position: absolute !important;
+}
+`,
+        solutionCss: `.tower {
+  position: relative;
+}
+
+.lookout {
+  position: relative;
+  top: -24px;
+}
+
+.tower .flag {
+  position: absolute;
+  top: -48px;
+  right: 16px;
+  z-index: 1;
+}
+
+.tower .lantern {
+  position: fixed !important;
+  right: 16px;
+  bottom: 16px;
+}
+`,
+        defeated: '`!important` против `!important`, и решила сила селектора… Но луну я так просто не отдам!',
+      },
+      {
+        say: 'Луна — моя! У неё `z-index: 5`, и твой флаг снова под ней. Пересчитай-ка слои!',
+        task: 'Лорд Дефолт поднял луну: у неё `z-index: 5`, и она закрыла флаг. Подними `.flag` над луной, а всё остальное оставь как есть.',
+        hints: [
+          'Слои сравниваются по числам: у кого `z-index` больше, тот сверху. Нажми «Лупой» на флаг и на луну и сравни их числа.',
+          'У флага `z-index: 1`, и записан он в правиле `.tower .flag`, которое ты писал в первом натиске. Нужно число больше пяти.',
+          '`.tower .flag { position: absolute; top: -48px; right: 16px; z-index: 6; }`',
+        ],
+        lockedCss: `.flag {
+  position: static;
+}
+
+.lantern {
+  position: absolute !important;
+}
+
+.moon {
+  z-index: 5;
+}
+`,
+        solutionCss: `.tower {
+  position: relative;
+}
+
+.lookout {
+  position: relative;
+  top: -24px;
+}
+
+.tower .flag {
+  position: absolute;
+  top: -48px;
+  right: 16px;
+  z-index: 6;
+}
+
+.tower .lantern {
+  position: fixed !important;
+  right: 16px;
+  bottom: 16px;
+}
+`,
+        defeated: 'Нет… флаг над луной, фонарь у окна, а чары мои повержены.',
+      },
+    ],
+  },
 });
