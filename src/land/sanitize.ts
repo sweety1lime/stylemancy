@@ -366,6 +366,8 @@ function copyAttributes(from: Element, to: Element, ctx: Context) {
       note(ctx, `Атрибут ${name} убран: в землях нет JavaScript.`);
       continue;
     }
+    // data-picture ставит сама игра, чтобы задания узнавали картинки; свой он был бы подделкой
+    if (name === 'data-picture') continue;
     if (!allowedAttribute(tag, name, svg)) {
       if (name !== 'xmlns' && !name.startsWith('xmlns:')) note(ctx, `Атрибут ${name} у ${where} не пропущен.`);
       continue;

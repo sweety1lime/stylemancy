@@ -145,6 +145,21 @@ svg { filter: url(#blur) }`;
   expect(safe.css).toMatch(/color: blue/);
 });
 
+test('санитайзер: метку data-picture ставит только игра, подделать её нельзя', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate<{ fake: string; real: string }>(`import('/src/land/sanitize.ts').then(({ renderLand }) => {
+    const images = ${JSON.stringify(IMAGES)};
+    const marks = (html) => [...new DOMParser().parseFromString(renderLand({ html, css: '' }, images).document, 'text/html').querySelectorAll('img')].map((img) => img.getAttribute('data-picture')).join(',');
+    return {
+      fake: marks('<img data-picture="moon.png" alt="а"><img data-picture="moon.png" src="https://evil.example/a.png"><img data-picture="moon.png" src="house.png" alt="б"><span data-picture="moon.png"></span>'),
+      real: marks('<img src="img/House.PNG" alt="дом">'),
+    };
+  })`);
+  // Метка остаётся только у настоящей картинки из библиотеки, и называет она её настоящее имя
+  expect(result.fake).toBe(',,house.png');
+  expect(result.real).toBe('house.png');
+});
+
 test('санитайзер: лимиты на число и глубину тегов', async ({ page }) => {
   await page.goto('/');
   const result = await page.evaluate<{ many: string; deep: string; notes: string[] }>(`import('/src/land/sanitize.ts').then(({ sanitizeLand }) => {
