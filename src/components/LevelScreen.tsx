@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { evaluate, lintOptionsFor, scoreSolution, solutionDeclCount } from '../engine/evaluate';
 import type { Inspection } from '../engine/inspect';
 import { lintCss } from '../engine/lint';
@@ -32,6 +32,8 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
   // «Лупа мага»: включена ли и что показывает про выбранный предмет
   const [lens, setLens] = useState(false);
   const [inspection, setInspection] = useState<Inspection | null>(null);
+  // Предметы, которые можно выбрать кнопкой: список обновляется, когда сцена загрузилась или код сдвинул предметы
+  const [lensItems, setLensItems] = useState<string[]>([]);
   // Реванш Лорда Дефолта: fight — 0 у обычного уровня и номер натиска в бою, cleared — натиск отбит, ждём «Дальше»
   const [fight, setFight] = useState(0);
   const [cleared, setCleared] = useState(false);
@@ -125,6 +127,9 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
     : flow;
 
   const placed = statuses.filter((s) => s.inPlace).length;
+  useEffect(() => {
+    if (lens) setLensItems(sceneRef.current?.itemNames() ?? []);
+  }, [lens, statuses]);
 
   return (
     <main className={viewsOf(active).length > 1 ? 'level level--mirrors' : 'level'}>
@@ -170,7 +175,7 @@ export function LevelScreen({ level, number, region, trailHref, onNext }: LevelS
         {isOrder && statuses.length > 0 && (
           <GoalList title="Заказчик хочет" goals={statuses.map((status) => ({ label: status.name, done: status.inPlace, detail: status.message }))} />
         )}
-        {lens && <LensPanel inspection={inspection} />}
+        {lens && <LensPanel inspection={inspection} items={lensItems} onPick={(index) => sceneRef.current?.pick(index)} />}
         {stage && rematch && cleared && <RematchPanel rematch={rematch} stage={fight} award={award} trailHref={trailHref} onNext={nextStage} />}
         <LevelResult flow={flow} level={level} region={region} trailHref={trailHref} onNext={onNext} onRematch={!fight && level.rematch ? startFight : undefined} />
       </section>

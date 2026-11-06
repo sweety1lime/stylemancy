@@ -5671,6 +5671,13 @@ a.land--door .land__door {
   text-transform: uppercase;
 }
 
+/* Кнопки предметов: выбор без мыши, а на узком экране и там, где в мелкий предмет трудно попасть пальцем */
+.lens__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .lens__title {
   font-size: 18px;
   font-weight: 600;

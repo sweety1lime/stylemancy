@@ -37,6 +37,10 @@ export interface SceneHandle {
   apply(css: string): ItemStatus[];
   /** Эффект «Сотворить»: магический круг и искры — или заклинание пшикнуло. */
   cast(passed: boolean): void;
+  /** «Лупа мага» без мыши: выбрать предмет по номеру, как если бы на него нажали */
+  pick(index: number): void;
+  /** Как называются предметы, которые умеет выбирать лупа: те же, что проверяет сцена, по порядку разметки */
+  itemNames(): string[];
 }
 
 interface SceneProps {
@@ -168,6 +172,32 @@ export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, 
     });
   };
 
+  /** Предметы основной сцены, которые проверяются и которые лупа умеет выбирать */
+  const lensItems = useCallback((): HTMLElement[] => {
+    const doc = docsRef.current[0];
+    if (!doc) return [];
+    try {
+      return Array.from(doc.querySelectorAll<HTMLElement>(level.check.items));
+    } catch {
+      return [];
+    }
+  }, [level]);
+
+  const itemNames = useCallback(
+    () => lensItems().map((el, i) => el.dataset.name ?? `${level.check.itemLabel ?? 'Предмет'} ${i + 1}`),
+    [level, lensItems],
+  );
+
+  const pick = useCallback(
+    (index: number) => {
+      const el = lensItems()[index];
+      if (!el) return;
+      pickRef.current = { index: 0, el };
+      inspectPicked();
+    },
+    [lensItems, inspectPicked],
+  );
+
   const apply = useCallback(
     (css: string): ItemStatus[] => {
       cssRef.current = css;
@@ -261,7 +291,7 @@ export function Scene({ level, initialCss, celebrate, onStatuses, lens = false, 
     [views, level],
   );
 
-  useImperativeHandle(ref, () => ({ apply, cast }), [apply, cast]);
+  useImperativeHandle(ref, () => ({ apply, cast, pick, itemNames }), [apply, cast, pick, itemNames]);
 
   function handlePlayerLoad(index: number, doc: Document) {
     prepareView(doc, level, views[index]);

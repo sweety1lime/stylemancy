@@ -41,20 +41,50 @@ function BoxDiagram({ inspection }: { inspection: Inspection }) {
   );
 }
 
-/** «Лупа мага»: разбор выбранного предмета сцены. Пересчитывается, пока студент печатает код. */
-export function LensPanel({ inspection }: { inspection: Inspection | null }) {
-  if (!inspection) {
-    return (
-      <section className="lens px-panel" aria-live="polite">
-        <p className="lens__label">Лупа мага</p>
-        <p className="lens__hint">Нажми на предмет в сцене: лупа покажет его размеры и какие правила на него действуют.</p>
-      </section>
-    );
-  }
-  const { name, label, width, height, display, position, verdicts } = inspection;
+interface LensPanelProps {
+  inspection: Inspection | null;
+  /** Как называются предметы, которые можно выбрать кнопкой: так лупа работает и без мыши */
+  items?: string[];
+  onPick?: (index: number) => void;
+}
+
+/** Ряд кнопок по числу предметов сцены: выбор для тех, кто работает с клавиатуры или не попадает мышью в мелкий предмет */
+function ItemButtons({ items, picked, onPick }: { items: string[]; picked?: string; onPick: (index: number) => void }) {
+  if (!items.length) return null;
+  return (
+    <div className="lens__items" role="group" aria-label="Выбрать предмет">
+      {items.map((item, i) => (
+        <button key={`${item}-${i}`} type="button" className={picked === item ? 'chip chip--on' : 'chip'} aria-pressed={picked === item} onClick={() => onPick(i)}>
+          {item}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * «Лупа мага»: разбор выбранного предмета сцены. Пересчитывается, пока студент печатает код.
+ * Ряд кнопок стоит на одном месте и до выбора, и после: иначе при выборе он пересоздавался бы, и с нажатой кнопки пропадал бы фокус.
+ */
+export function LensPanel({ inspection, items = [], onPick = () => undefined }: LensPanelProps) {
   return (
     <section className="lens px-panel" aria-live="polite">
       <p className="lens__label">Лупа мага</p>
+      <ItemButtons items={items} picked={inspection?.name} onPick={onPick} />
+      {inspection ? (
+        <Inspected inspection={inspection} />
+      ) : (
+        <p className="lens__hint">Нажми на предмет в сцене (или выбери его кнопкой): лупа покажет его размеры и какие правила на него действуют.</p>
+      )}
+    </section>
+  );
+}
+
+/** Разбор предмета: название, размеры, коробка и правила, которые сработали */
+function Inspected({ inspection }: { inspection: Inspection }) {
+  const { name, label, width, height, display, position, verdicts } = inspection;
+  return (
+    <>
       <h2 className="lens__title">
         {name ?? label} {name && <code>{label}</code>}
       </h2>
@@ -102,6 +132,6 @@ export function LensPanel({ inspection }: { inspection: Inspection | null }) {
           )}
         </div>
       </div>
-    </section>
+    </>
   );
 }

@@ -36,3 +36,56 @@ test('лупа мага: нажать на предмет — размеры, к
   await page.getByRole('button', { name: 'Лупа' }).click();
   await expect(page.locator('.lens')).toHaveCount(0);
 });
+
+test('лупа мага работает без мыши: предметы выбираются кнопками, а Tab и Enter достаточно', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light', look: 'noir' }));
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true } }));
+  });
+  await page.goto('/#/level/sel-01');
+  await expect(page.getByRole('heading', { name: 'Указатель на опушке' })).toBeVisible();
+
+  // Лупа включается с клавиатуры, а следующая по Tab кнопка — первый предмет сцены
+  await page.getByRole('button', { name: 'Лупа' }).focus();
+  await page.keyboard.press('Enter');
+  const items = page.getByRole('group', { name: 'Выбрать предмет' });
+  await expect(items.getByRole('button')).toHaveCount(4);
+  // В этом уровне предметы идут так: «Заголовок 1», «Строка 1», «Заголовок 2», «Строка 2»
+  await page.keyboard.press('Tab');
+  await expect(items.getByRole('button', { name: 'Заголовок 1' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(items.getByRole('button', { name: 'Строка 1' })).toBeFocused();
+  await page.keyboard.press('Enter');
+
+  // То же, что нажатие мышью: разбор предмета, правило из кода, рамка на сцене и отметка на кнопке
+  const panel = page.locator('.lens');
+  await expect(panel.getByRole('heading', { name: /Строка 1/ })).toBeVisible();
+  await expect(panel.locator('.lens__win')).toContainText('color: gold');
+  await expect(items.getByRole('button', { name: 'Строка 1' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.scene__mark--pick')).toBeVisible();
+
+  // Дальше по Tab: «Заголовок 2», потом «Строка 2»
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(items.getByRole('button', { name: 'Строка 2' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(panel.getByRole('heading', { name: /Строка 2/ })).toBeVisible();
+  await expect(items.getByRole('button', { name: 'Строка 2' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(items.getByRole('button', { name: 'Строка 1' })).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('лупа мага: в заказе жителя кнопки называют части заказа, а выбранная часть разбирается', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light', look: 'noir' }));
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true, 'intro:market': true } }));
+    const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(['flex-13', 'grid-09', 'mq-04'].map((id) => [id, done]))));
+  });
+  await page.goto('/#/level/order-04');
+  await expect(page.getByRole('heading', { name: 'Заказ: Шапка лавки' })).toBeVisible();
+  await page.getByRole('button', { name: 'Лупа' }).click();
+  const items = page.getByRole('group', { name: 'Выбрать предмет' });
+  await expect(items.getByRole('button')).toHaveText(['Логотип', 'Меню', 'Корзина']);
+  await items.getByRole('button', { name: 'Меню' }).click();
+  await expect(page.locator('.lens').getByRole('heading', { name: /Меню/ })).toBeVisible();
+});
