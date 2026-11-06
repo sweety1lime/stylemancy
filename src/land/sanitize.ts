@@ -260,6 +260,38 @@ const AT_RULE_REASONS: Record<string, string> = {
   '@counter-style': 'такие правила землям не нужны',
 };
 
+/**
+ * Селекторы по src: адрес картинки в документе подменён рисунком из библиотеки, а имя файла осталось в data-picture.
+ * Поэтому [src$=".png"] читается как [data-picture$=".png"] и находит то, что игрок имел в виду.
+ * Строки в кавычках не трогаются: «[src]» внутри значения атрибута — просто текст.
+ */
+function pictureSelector(selector: string): string {
+  let out = '';
+  let quote = '';
+  for (let i = 0; i < selector.length; i++) {
+    const char = selector[i];
+    if (quote) {
+      out += char;
+      if (char === '\\') out += selector[++i] ?? '';
+      else if (char === quote) quote = '';
+    } else if (char === '"' || char === "'") {
+      quote = char;
+      out += char;
+    } else if (char === '[') {
+      const match = /^\[\s*src(?=[\s\]~|^$*=])/i.exec(selector.slice(i));
+      if (match) {
+        out += '[data-picture';
+        i += match[0].length - 1;
+      } else {
+        out += char;
+      }
+    } else {
+      out += char;
+    }
+  }
+  return out;
+}
+
 /** Первая строка правила («@media (min-width: 600px)») — так, как записал её браузер */
 function ruleHeader(rule: CSSRule): string {
   const text = rule.cssText;
@@ -286,7 +318,7 @@ function ruleText(rule: CSSRule, ctx: Context, depth: number): string {
       const own = declarations(styled.style.cssText, ctx);
       const nested = childRules(styled.cssRules, ctx, depth + 1);
       if (!own.length && !nested) return '';
-      return `${styled.selectorText} {\n${own.map((item) => `  ${item};\n`).join('')}${nested}}\n`;
+      return `${pictureSelector(styled.selectorText)} {\n${own.map((item) => `  ${item};\n`).join('')}${nested}}\n`;
     }
     case 'CSSNestedDeclarations': {
       const own = declarations((rule as CSSStyleRule).style.cssText, ctx);

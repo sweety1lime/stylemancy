@@ -278,3 +278,32 @@ test('ссылка: адреса #/my-land и #/shared разбираются', 
     '#/shared/zAbC',
   ]);
 });
+
+test('селекторы по src читаются по имени файла: картинка из библиотеки их находит', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate<{ a: string; b: string; c: string; text: string; css: string }>(`import('/src/land/sanitize.ts').then(async ({ renderLand, sanitizeLand }) => {
+    const images = ${JSON.stringify(IMAGES)};
+    const source = {
+      html: '<img src="house.png" alt="а" id="a"><img src="img/House.PNG" alt="б" id="b"><img src="https://evil.example/x.png" alt="в" id="c"><p title="[src]">текст</p>',
+      css: 'img[src$=".png"] { width: 31px } img[ SRC ^= "house" ] { height: 17px } img[src="house.png"] { border: 3px solid red } p[title="[src]"] { color: red } img:not([src]) { border: 5px solid blue }',
+    };
+    const frame = document.createElement('iframe');
+    frame.setAttribute('sandbox', 'allow-same-origin');
+    frame.style.cssText = 'position:fixed;left:-9999px;width:600px;height:400px';
+    frame.srcdoc = renderLand(source, images).document;
+    document.body.append(frame);
+    await new Promise((resolve) => (frame.onload = resolve));
+    const doc = frame.contentDocument;
+    const read = (id) => { const style = frame.contentWindow.getComputedStyle(doc.getElementById(id)); return [style.width, style.height, style.borderTopWidth].join(' '); };
+    return { a: read('a'), b: read('b'), c: read('c'), text: frame.contentWindow.getComputedStyle(doc.querySelector('p')).color, css: sanitizeLand(source, images).css };
+  })`);
+  // Имя файла, а не путь и не регистр: «img/House.PNG» — та же картинка, что «house.png»
+  expect(result.a).toBe('31px 17px 3px');
+  expect(result.b).toBe('31px 17px 3px');
+  // Чужой адрес картинкой не стал, и у него нет src: так его и находит :not([src]). Рамка, потому что картинка без файла рисуется строкой, и ширина на неё не действует
+  expect(result.c.split(' ')[2]).toBe('5px');
+  // «[src]» в кавычках осталось текстом, и правило по title сработало как написано
+  expect(result.text).toBe('rgb(255, 0, 0)');
+  expect(result.css).toContain('[data-picture$=".png"]');
+  expect(result.css).toContain('[title="[src]"]');
+});
