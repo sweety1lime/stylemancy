@@ -105,7 +105,7 @@ export function ChronicleScreen() {
         </div>
       </header>
 
-      {noir && <StaffPicker />}
+      <StaffPicker />
 
       <ol className="chronicle__chapters">
         <li className="chronicle__chapter px-panel">

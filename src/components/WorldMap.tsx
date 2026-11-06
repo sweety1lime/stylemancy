@@ -20,6 +20,7 @@ import {
 } from '../game/story';
 import { canBuildLands, unlockLandTitle } from '../land/access';
 import { findLevel, isScriptLand, lands, scriptLands, type Land } from '../levels';
+import type { Sprite } from '../pixel/pixelArt';
 import { spriteAnimElement } from '../pixel/sheet';
 import {
   CLOUD,
@@ -27,7 +28,6 @@ import {
   EMBLEMS,
   FOG,
   GEAR_FRAMES,
-  HERO_ANIMATIONS,
   LAND_ROCKS,
   SCRIPT_DOOR,
   SCRIPT_DOOR_OPEN,
@@ -42,6 +42,7 @@ import { PixelArt } from './PixelArt';
 import { Portrait } from './Portrait';
 import { SpriteAnim } from './SpriteAnim';
 import { StoryScene } from './StoryScene';
+import { useHeroFrames } from './useHeroFrames';
 
 export type WorldId = 'cascadia' | 'scriptoria';
 
@@ -79,11 +80,11 @@ function markFlight(tile: HTMLElement) {
 }
 
 /** Герой идёт от одной земли к другой: шагает в четыре кадра, а настоящий герой ждёт на месте. onArrive — когда дошёл. */
-function walk(map: HTMLElement, from: Element, hero: HTMLElement, onArrive: () => void): () => void {
+function walk(map: HTMLElement, from: Element, hero: HTMLElement, frames: Sprite[], onArrive: () => void): () => void {
   const start = from.getBoundingClientRect();
   const end = hero.getBoundingClientRect();
   const base = map.getBoundingClientRect();
-  const walker = spriteAnimElement(HERO_ANIMATIONS.walk, 8, HERO_SCALE);
+  const walker = spriteAnimElement(frames, 8, HERO_SCALE);
   walker.classList.add('land__walker');
   Object.assign(walker.style, { left: `${end.left - base.left}px`, top: `${end.top - base.top}px` });
   hero.style.visibility = 'hidden';
@@ -156,6 +157,8 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
     (world === 'cascadia' ? (resumeElsewhere || (allDone && doorOpen) ? DOOR : (nextLand ?? lands[0].id)) : (nextLand ?? DOOR));
   const mapRef = useRef<HTMLDivElement>(null);
   const noir = useNoir();
+  // Камень на посохе пиксельного героя: цвет, который игрок выбрал в Летописи
+  const heroFrames = useHeroFrames();
   // Земли, чей свет игрок ещё не видел зажжённым: над ними столб света поднимается в первый раз
   const litKey = scopedKey(LIT_KEY);
   const [dawn] = useState(() => {
@@ -182,7 +185,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
       arrive();
       return;
     }
-    if (!noir) return walk(map, from, hero, arrive);
+    if (!noir) return walk(map, from, hero, heroFrames.walk, arrive);
 
     // «Сумрак»: по тропе, через центры земель. Не идёт на узком экране, при «уменьшить движение» и в автотестах
     const ids = (world === 'cascadia' ? lands : scriptLands).map((land) => land.id);
@@ -210,7 +213,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
       hero.style.visibility = '';
       setJourney(null);
     };
-  }, [heroLand, world, noir]);
+  }, [heroLand, world, noir, heroFrames.walk]);
 
   function landStats(list: Land[]) {
     const levels = list.flatMap((land) => land.regions.flatMap((region) => region.levels));
@@ -223,7 +226,7 @@ export function WorldMap({ world = 'cascadia' }: { world?: WorldId }) {
 
   const heroHere = (id: string) =>
     id === heroLand &&
-    (noir ? <NoirMapHero /> : <SpriteAnim className="land__hero" frames={HERO_ANIMATIONS.idle} fps={2} scale={HERO_SCALE} />);
+    (noir ? <NoirMapHero /> : <SpriteAnim className="land__hero" frames={heroFrames.idle} fps={2} scale={HERO_SCALE} />);
 
   const landTiles: Tile[] = worldLands.map((land, i) => {
     const stats = landStats([land]);

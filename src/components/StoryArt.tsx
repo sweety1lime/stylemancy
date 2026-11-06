@@ -11,7 +11,6 @@ import {
   GEMS,
   GHOST,
   GLASS,
-  HERO_ANIMATIONS,
   ISLAND_ROCK,
   JESTER,
   LANTERN_FRAMES,
@@ -31,6 +30,7 @@ import { DungeonView } from './DungeonView';
 import { PixelArt } from './PixelArt';
 import { Face } from './Portrait';
 import { SpriteAnim } from './SpriteAnim';
+import { useHeroFrames } from './useHeroFrames';
 
 const ROW = [GEMS.amethyst, GEMS.emerald, GEMS.ruby];
 const CROWN = [GEMS.amethyst, GEMS.emerald, GEMS.sapphire, GEMS.ruby, GEMS.topaz];
@@ -127,6 +127,7 @@ function snapToPixels(root: HTMLElement) {
  */
 export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFrame['art']; speaker?: string; talking?: boolean; text?: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  const heroFrames = useHeroFrames();
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root) return;
@@ -415,7 +416,7 @@ export function StoryArt({ art, speaker, talking = false, text }: { art: StoryFr
           {/* Дверь <script> приоткрыта, из неё льётся свет, а герой идёт к порогу */}
           <span className="sa-gate-glow" />
           <PixelArt className="sa-gate" sprite={SCRIPT_DOOR_OPEN} />
-          <SpriteAnim className="sa-walker" frames={HERO_ANIMATIONS.walk} fps={8} fluid />
+          <SpriteAnim className="sa-walker" frames={heroFrames.walk} fps={8} fluid />
           <PixelArt className="sa-rock" sprite={ISLAND_ROCK} />
         </>
       )}

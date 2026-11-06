@@ -532,3 +532,65 @@ test('свет посоха: цвет открывается за спасённ
   const glow = page.locator('.hero--noir .rig-glow').first();
   await expect(glow).toHaveAttribute('fill', 'url(#sil-light-amber)');
 });
+
+test('свет посоха в пиксельном виде: камень героя меняет цвет у кнопки и на карте, а у цвета по умолчанию остаётся родным', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light', look: 'pixel' }));
+    // Только при первой загрузке: после перезагрузки выбранный цвет не должен затираться
+    if (localStorage.getItem('cascadia.stats.v1')) return;
+    localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true } }));
+    localStorage.setItem('cascadia.progress.v1', JSON.stringify({ 'form-06': { completed: true, stars: 3, attempts: 1, hintsUsed: 0 } }));
+  });
+  /** Рисунок героя целиком записан в адресе картинки: цвета камня видно прямо в нём */
+  const picture = (selector: string) => page.locator(`${selector} img`).first().evaluate((img) => decodeURIComponent((img as HTMLImageElement).src));
+  const NATIVE = 'fill="#22d3ee"';
+  const AMBER = 'fill="#f59e0b"';
+
+  await page.goto('/#/level/flex-01');
+  await expect.poll(() => picture('.hero')).toContain(NATIVE);
+
+  // Выбор в Летописи: в пиксельном виде он тоже есть, и текст не обещает следа от шагов, которого здесь нет
+  await page.goto('/#/chronicle');
+  const picker = page.getByRole('region', { name: 'Свет посоха' });
+  await expect(picker).toContainText('Выбранный цвет у камня на посохе героя виден везде');
+  await expect(picker).not.toContainText('красит след');
+  await expect(picker.getByRole('button', { name: /Лунный/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(picker.getByRole('button', { name: /Изумрудный/ })).toBeDisabled();
+  await picker.getByRole('button', { name: /Янтарный/ }).click();
+  await expect(picker.getByRole('button', { name: /Янтарный/ })).toHaveAttribute('aria-pressed', 'true');
+
+  // Камень у героя у кнопки «Сотворить» стал янтарным, и после перезагрузки тоже
+  await page.goto('/#/level/flex-01');
+  await page.reload();
+  await expect.poll(() => picture('.hero')).toContain(AMBER);
+  expect(await picture('.hero')).not.toContain(NATIVE);
+
+  // И на карте: герой ждёт у следующей земли с тем же камнем
+  await page.goto('/');
+  await expect.poll(() => picture('.land__hero')).toContain(AMBER);
+});
+
+for (const look of ['noir', 'pixel'] as const) {
+  test(`спасённая земля открывает свет посоха, и об этом сообщает уведомление (${look})`, async ({ page }) => {
+    await page.addInitScript((view) => {
+      localStorage.setItem('cascadia.settings.v1', JSON.stringify({ sound: false, effects: 'light', look: view }));
+      if (localStorage.getItem('cascadia.stats.v1')) return;
+      localStorage.setItem('cascadia.stats.v1', JSON.stringify({ seen: { 'prologue:game': true, 'intro:form-forge': true, 'outro:form-forge': true } }));
+      // Кузница Форм открыта: пройдены испытания трёх районов перед ней и все уровни кузницы, кроме последнего
+      const done = { completed: true, stars: 3, attempts: 1, hintsUsed: 0 };
+      const passed = ['tag-07', 'fair-08', 'sem-07', 'form-01', 'form-02', 'form-03', 'form-04', 'form-05'];
+      localStorage.setItem('cascadia.progress.v1', JSON.stringify(Object.fromEntries(passed.map((id) => [id, done]))));
+    }, look);
+    // Последнее испытание Долины Тегов: пройдёшь его, и земля спасена
+    await page.goto('/#/level/form-06');
+    const solution = await page.evaluate<string>(`import('/src/levels/form-forge/form-06.ts').then((m) => m.default.solutionHtml)`);
+    await page.locator('.cm-content').click();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.insertText(solution);
+    await page.getByRole('button', { name: /Сотворить/ }).click();
+    await expect(page.getByText('Заклинание сработало!')).toBeVisible();
+    const notice = page.locator('.toast--notice').filter({ hasText: 'Новый свет посоха' });
+    await expect(notice).toContainText('Янтарный');
+    await expect(notice).toHaveCount(1);
+  });
+}

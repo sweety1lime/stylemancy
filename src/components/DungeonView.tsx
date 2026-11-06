@@ -13,7 +13,6 @@ import {
   DUNGEON_TORCH_FRAMES,
   DUNGEON_WALL,
   GEMS,
-  HERO_ANIMATIONS,
   type HeroAnimation,
 } from '../pixel/sprites';
 import { useNoir } from '../noir/look';
@@ -21,6 +20,7 @@ import { NoirBug, NoirDungeonGem, NoirDungeonHero, NoirExit, NoirTorch } from '.
 import { NOIR_TILES } from '../noir/scenes/dungeon';
 import { PixelArt } from './PixelArt';
 import { SpriteAnim } from './SpriteAnim';
+import { useHeroFrames } from './useHeroFrames';
 
 const TILES = {
   '--wall': spriteCssUrl(DUNGEON_WALL),
@@ -139,6 +139,7 @@ export function DungeonView({ dungeon, report, success = false, compact = false,
   const move: HeroAnimation = !finished ? 'walk' : failure ? 'oops' : report && success ? 'joy' : 'idle';
   const place = (x: number, y: number) => ({ '--x': x, '--y': y }) as CSSProperties;
   const noir = useNoir();
+  const heroFrames = useHeroFrames();
 
   return (
     <>
@@ -178,7 +179,7 @@ export function DungeonView({ dungeon, report, success = false, compact = false,
           ) : (
           <SpriteAnim
             key={move}
-            frames={HERO_ANIMATIONS[move]}
+            frames={heroFrames[move]}
             fps={move === 'walk' ? 8 : move === 'idle' ? 2 : 6}
             repeat={move === 'joy' || move === 'oops' ? 2 : undefined}
             fluid

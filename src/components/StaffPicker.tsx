@@ -2,10 +2,16 @@ import { useProgress } from '../game/progress';
 import { useStats } from '../game/stats';
 import { allLands } from '../levels';
 import { plural } from '../lib/plural';
+import { useNoir } from '../noir/look';
 import { chooseStaffLight, STAFF_LIGHTS, unlockedStaffLights, useStaffLight } from '../noir/staffLights';
+import { HERO_GEM } from '../pixel/sprites';
 
-/** «Свет посоха»: выбор цвета огонька на посохе героя. Цвета открываются за спасённые земли и за задания «Моей земли». */
+/**
+ * «Свет посоха»: выбор цвета огонька на посохе героя («Сумрак») или камня на нём (пиксельный вид).
+ * Цвета открываются за спасённые земли и за задания «Моей земли».
+ */
 export function StaffPicker() {
+  const noir = useNoir();
   const progress = useProgress();
   const current = useStaffLight();
   const { landTasks } = useStats();
@@ -15,7 +21,10 @@ export function StaffPicker() {
       <h2 id="staff-title" className="pixel-subtitle">
         Свет посоха
       </h2>
-      <p className="staff-picker__lead">Каждая спасённая земля открывает свой цвет, а ещё один даёт «Моя земля» за творческие задания. Выбранный светит на посохе героя везде, а на карте красит след от шагов.</p>
+      <p className="staff-picker__lead">
+        Каждая спасённая земля открывает свой цвет, а ещё один даёт «Моя земля» за творческие задания.{' '}
+        {noir ? 'Выбранный светит на посохе героя везде, а на карте красит след от шагов.' : 'Выбранный цвет у камня на посохе героя виден везде.'}
+      </p>
       <ul className="staff-picker__list">
         {STAFF_LIGHTS.map((option) => {
           const unlocked = open.has(option.id);
@@ -28,7 +37,7 @@ export function StaffPicker() {
                 aria-pressed={current.id === option.id}
                 disabled={!unlocked}
                 onClick={() => chooseStaffLight(option.id)}
-                style={{ '--swatch': option.burst } as React.CSSProperties}
+                style={{ '--swatch': noir ? option.burst : (option.pixel?.g ?? HERO_GEM) } as React.CSSProperties}
               >
                 <span className="staff-swatch__dot" aria-hidden="true" />
                 <span className="staff-swatch__name">{option.name}</span>

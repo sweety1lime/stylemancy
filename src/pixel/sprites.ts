@@ -1829,6 +1829,26 @@ export const HERO_ANIMATIONS = Object.fromEntries(
   Object.entries(HERO_FRAMES).map(([name, list]) => [name, list.map((rows): Sprite => ({ rows, palette: HERO_PALETTE }))]),
 ) as Record<HeroAnimation, Sprite[]>;
 
+/** Цвет камня на посохе героя, пока игрок не выбрал другой свет */
+export const HERO_GEM = HERO_PALETTE.g;
+
+const recoloredHeroes = new Map<string, Record<HeroAnimation, Sprite[]>>();
+
+/**
+ * Анимации героя с камнем на посохе другого цвета (свет посоха, noir/staffLights.ts): g — сам камень, G — блик на нём.
+ * Без цвета остаётся родной бирюзовый камень. Для одного цвета набор всегда тот же: ленты кадров запоминаются по массиву (sheet.ts)
+ */
+export function heroAnimations(gem?: { g: string; G: string }): Record<HeroAnimation, Sprite[]> {
+  if (!gem) return HERO_ANIMATIONS;
+  const key = `${gem.g}/${gem.G}`;
+  let set = recoloredHeroes.get(key);
+  if (!set) {
+    set = Object.fromEntries(Object.entries(HERO_ANIMATIONS).map(([name, frames]) => [name, frames.map((frame) => recolor(frame, gem))])) as Record<HeroAnimation, Sprite[]>;
+    recoloredHeroes.set(key, set);
+  }
+  return set;
+}
+
 /**
  * Лорд Дефолт во весь рост: цилиндр с синей лентой, монокль, усы и трость.
  * Ухмыляется, хохочет, злится и топает, а в финале убегает. Кадр 20 × 24.

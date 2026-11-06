@@ -2292,6 +2292,22 @@
   box-shadow: none;
 }
 
+/* В пиксельном виде у цвета нет ни сияния, ни скруглений: камень — квадрат с бликом, как на посохе героя */
+html:not(.look-noir) .staff-swatch__dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  background: var(--swatch);
+  box-shadow:
+    inset 4px 4px 0 rgba(255, 255, 255, 0.5),
+    inset -4px -4px 0 rgba(0, 0, 0, 0.25);
+}
+
+html:not(.look-noir) .staff-swatch:disabled .staff-swatch__dot {
+  background: #2a2f3a;
+  box-shadow: none;
+}
+
 /* Слепая магия: поле предсказания в «Сумраке» — тонкая линия и тёмное поле, как у остальных */
 .look-noir .predict__guess textarea {
   border: 1px solid var(--line-strong);

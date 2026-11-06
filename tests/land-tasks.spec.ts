@@ -153,29 +153,31 @@ test('задание выполнено: условия загораются, о
   expect(await page.evaluate(`import('/src/game/stats.ts').then((m) => [m.stats.get().reviewXp, m.stats.get().landTasks])`)).toEqual([40, ['tavern', 'street', 'sky']]);
 });
 
-test('за три задания открывается новый свет посоха', async ({ page }) => {
-  await openedWorld(page);
-  await page.goto('/#/chronicle');
-  const swatch = page.getByRole('button', { name: /Рассветный/ });
-  await expect(swatch).toBeDisabled();
-  await expect(swatch).toContainText('выполни 3 задания в «Моей земле»');
+for (const look of ['noir', 'pixel'] as const) {
+  test(`за три задания открывается новый свет посоха (${look})`, async ({ page }) => {
+    await openedWorld(page, look);
+    await page.goto('/#/chronicle');
+    const swatch = page.getByRole('button', { name: /Рассветный/ });
+    await expect(swatch).toBeDisabled();
+    await expect(swatch).toContainText('выполни 3 задания в «Моей земле»');
 
-  // Задания выполнены на странице земли: уведомление приходит на третьем
-  await page.goto('/#/my-land');
-  await page.getByLabel('Ячейка 1: пусто').getByRole('button', { name: 'Чистый лист' }).click();
-  const awarded = await page.evaluate(`Promise.all([import('/src/land/rewards.ts'), import('/src/land/tasks.ts')]).then(([rewards, tasks]) =>
-    tasks.LAND_TASKS.slice(0, 3).map((task) => rewards.awardTask(task)))`);
-  expect(awarded).toEqual([10, 15, 15]);
-  const notice = page.locator('.toast--notice').filter({ hasText: 'Новый свет посоха' });
-  await expect(notice).toContainText('Рассветный');
-  // Повторно за то же награды нет
-  expect(await page.evaluate(`import('/src/land/rewards.ts').then((rewards) => import('/src/land/tasks.ts').then((tasks) => rewards.awardTask(tasks.LAND_TASKS[0])))`)).toBe(0);
+    // Задания выполнены на странице земли: уведомление приходит на третьем
+    await page.goto('/#/my-land');
+    await page.getByLabel('Ячейка 1: пусто').getByRole('button', { name: 'Чистый лист' }).click();
+    const awarded = await page.evaluate(`Promise.all([import('/src/land/rewards.ts'), import('/src/land/tasks.ts')]).then(([rewards, tasks]) =>
+      tasks.LAND_TASKS.slice(0, 3).map((task) => rewards.awardTask(task)))`);
+    expect(awarded).toEqual([10, 15, 15]);
+    const notice = page.locator('.toast--notice').filter({ hasText: 'Новый свет посоха' });
+    await expect(notice).toContainText('Рассветный');
+    // Повторно за то же награды нет
+    expect(await page.evaluate(`import('/src/land/rewards.ts').then((rewards) => import('/src/land/tasks.ts').then((tasks) => rewards.awardTask(tasks.LAND_TASKS[0])))`)).toBe(0);
 
-  await page.goto('/#/chronicle');
-  await expect(swatch).toBeEnabled();
-  await swatch.click();
-  await expect(swatch).toHaveAttribute('aria-pressed', 'true');
-});
+    await page.goto('/#/chronicle');
+    await expect(swatch).toBeEnabled();
+    await swatch.click();
+    await expect(swatch).toHaveAttribute('aria-pressed', 'true');
+  });
+}
 
 test('на телефоне панель заданий не шире экрана', async ({ page }) => {
   await openedWorld(page);

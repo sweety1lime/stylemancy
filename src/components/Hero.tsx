@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { HERO_ANIMATIONS, type HeroAnimation } from '../pixel/sprites';
+import type { HeroAnimation } from '../pixel/sprites';
 import { HeroNoir } from '../noir/HeroNoir';
 import { useNoir } from '../noir/look';
 import { SpriteAnim } from './SpriteAnim';
+import { useHeroFrames } from './useHeroFrames';
 
 /** Как играется каждое движение героя: скорость и сколько раз */
 const MOVES: Record<HeroAnimation, { fps: number; repeat?: number }> = {
@@ -27,6 +28,7 @@ export function Hero({ cue, scale = 3 }: { cue?: HeroCue | null; scale?: number 
 }
 
 function PixelHero({ cue, scale }: { cue?: HeroCue | null; scale: number }) {
+  const frames = useHeroFrames();
   const [move, setMove] = useState<HeroAnimation>('idle');
   const [seen, setSeen] = useState(cue);
   const [run, setRun] = useState(0);
@@ -49,7 +51,7 @@ function PixelHero({ cue, scale }: { cue?: HeroCue | null; scale: number }) {
     <span className={`hero hero--${move}`}>
       <SpriteAnim
         key={`${move}-${run}`}
-        frames={HERO_ANIMATIONS[move]}
+        frames={frames[move]}
         fps={fps}
         repeat={repeat}
         scale={scale}
